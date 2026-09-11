@@ -14,6 +14,7 @@ This document provides a technical survey and implementation reference for the o
 | **Star Battle / Queens** | [IBM/chuk-puzzles-gym](https://github.com/IBM/chuk-puzzles-gym) | **Apache 2.0** | Python (OR-Tools CP-SAT) | 1-Star (Queens style) vs 2-Star (classic Star Battle). Grid sizes 6x6 to 10x10, region shapes. |
 | **Jumble** | Native Apache 2.0 Module (`server/app/generators/jumble_gen.py`) | **Apache 2.0** | Python (Standard Library) | `easy` (4–5 letters), `medium` (5–6 letters), `hard` (6–7 letters). Punny riddle solutions. |
 | **Binary** | [IBM/chuk-puzzles-gym](https://github.com/IBM/chuk-puzzles-gym) *(Classic #4 / Takuzu)* | **Apache 2.0** | Python / Native C++ | `easy` (6x6), `medium` (8x8), `hard` (8x8). Trio avoidance, line capacity, and line uniqueness guarantees. |
+| **Mines** | Simon Tatham Portable Puzzle Collection (`mines.c`) / Native Module | **Apache 2.0 / MIT** | Python / Native C++ | `easy` (8 mines, 28 clues), `medium` (12 mines, 22 clues), `hard` (15 mines, 17 clues). 100% deductive solvability (zero guessing). |
 
 ---
 
@@ -73,6 +74,19 @@ This document provides a technical survey and implementation reference for the o
     *   `medium`: 8x8 grid (~28 clues, solved via 1-step lookahead and line capacity).
     *   `hard`: 8x8 grid (~22 clues, requires Rule 4 row/column uniqueness comparison against completed lines).
 *   **Thermal Receipt Layout**: $6\times 6$ ($53\text{px}$ cells) or $8\times 8$ ($40\text{px}$ cells) framed by a Tier 1 perimeter border ($3.5\text{px}$) with centered Space Mono digits and generous handwriting space.
+
+### G. Mines / Solitaire Minesweeper (`mines_gen.py` & `MinesGen.cpp`)
+*   **Upstream Reference**: Simon Tatham's Portable Puzzle Collection (`mines.c`) / `puzzle-magazine.com` Analog Paper Minesweeper
+*   **Deductive Logic Rules (Zero Guessing Guarantee)**:
+    1. **Direct Saturation**: If remaining unrevealed neighbors equal remaining mines needed, all remaining unrevealed cells are mines.
+    2. **Direct Clearing**: If a clue's mine requirement is satisfied, all other unrevealed neighbors are guaranteed safe (empty).
+    3. **Subset Difference**: If clue $A$'s unknown neighbors form a strict subset of clue $B$'s unknown neighbors, the set difference contains exactly $mines(B) - mines(A)$ mines.
+    4. **Global Mine Capacity**: If the total count of discovered mines equals the total grid quota, all remaining unrevealed cells are safe (and vice versa).
+*   **Difficulty Scaling**:
+    *   `easy`: 8x8 grid, 8 mines, ~28 clues (direct saturation and clearing).
+    *   `medium`: 8x8 grid, 12 mines, ~22 clues (2-cell subset overlap difference logic).
+    *   `hard`: 8x8 grid, 15 mines, ~17 clues (global capacity counting and multi-clue subset chains).
+*   **Thermal Receipt Layout**: $8\times 8$ grid ($40\text{px}$ cells) framed by a Tier 1 perimeter border ($3.5\text{px}$) with centered Space Mono clue digits ($0..8$), total mine count context header (`TOTAL MINES: [COUNT]`), and empty white cells for pencil marking.
 
 ---
 

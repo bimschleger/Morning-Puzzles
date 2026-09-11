@@ -40,6 +40,8 @@ All existing games—and any future games added to Morning Puzzles—must strict
   --- SEARCH ---
   --- NONOGRAM ---
   --- JUMBLE ---
+  --- BINARY ---
+  --- MINES ---
   ```
 * **Difficulty Format**: Centered, uppercase, prefixed by `DIFFICULTY: `:
   ```text
@@ -62,6 +64,7 @@ All existing games—and any future games added to Morning Puzzles—must strict
 | **Nonogram** | `--- NONOGRAM ---` | **Yes** | `EASY` (5x5), `MEDIUM` (8x8), `HARD` (10x10), `EXPERT` (15x15) | Board with row/column clues follows difficulty. Single-word name replaces "Nonogram / Picross". |
 | **Jumble** | `--- JUMBLE ---` | **Yes** | `EASY`, `MEDIUM`, `HARD` | Clue boxes start directly below header. Single-word name replaces "Daily Jumble". |
 | **Binary** | `--- BINARY ---` | **Yes** | `EASY` (6x6), `MEDIUM` (8x8), `HARD` (8x8) | Pure grid with 0 and 1 clues follows difficulty. |
+| **Mines** | `--- MINES ---` | **Yes** | `EASY` (8 Mines), `MEDIUM` (12 Mines), `HARD` (15 Mines) | Solitaire paper Minesweeper on 8x8 grid. `TOTAL MINES: [N]` placed directly above drawing. 100% deductive solvability guarantee (zero guessing). |
 
 ---
 

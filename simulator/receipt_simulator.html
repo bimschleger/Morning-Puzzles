@@ -315,6 +315,32 @@
             </select>
           </div>
         </div>
+
+        <!-- 7. Mines Toggle -->
+        <div class="bg-slate-900 border border-slate-800/80 rounded-xl p-3.5 flex flex-col gap-2.5 transition hover:border-slate-700">
+          <div class="flex items-center justify-between">
+            <label class="flex items-center gap-2.5 cursor-pointer select-none">
+              <input type="checkbox" id="toggle-mines" checked class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
+              <span class="font-semibold text-sm text-slate-200">Mines</span>
+            </label>
+            <span class="text-[11px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded">Solitaire / Logic</span>
+          </div>
+          <div class="flex items-center justify-between pl-6 text-xs text-slate-400">
+            <span>Difficulty:</span>
+            <select id="diff-mines" class="bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2 py-1 text-xs outline-none focus:border-amber-500">
+              <option value="easy">Easy (8 Mines)</option>
+              <option value="medium" selected>Medium (12 Mines)</option>
+              <option value="hard">Hard (15 Mines)</option>
+            </select>
+          </div>
+          <div class="flex items-center justify-between pl-6 text-xs text-slate-400">
+            <span class="text-amber-300 font-medium">Render Style:</span>
+            <select id="style-mines" class="bg-slate-800 border border-amber-500/50 text-amber-400 font-semibold rounded-lg px-2 py-1 text-xs outline-none focus:border-amber-500">
+              <option value="graphic" selected>🖼️ Crisp Thermal Grid (3.5px Border)</option>
+              <option value="ascii">🔤 Legacy Monospaced ASCII</option>
+            </select>
+          </div>
+        </div>
       </div>
 
       <!-- Receipt Visual Customizations -->
@@ -2127,6 +2153,281 @@
       ctx.strokeRect(offsetX, offsetY, actualGridSize, actualGridSize);
     }
 
+    class MinesSimulator {
+      getNeighbors(r, c, rows, cols) {
+        const neighbors = [];
+        for (let dr = -1; dr <= 1; dr++) {
+          for (let dc = -1; dc <= 1; dc++) {
+            if (dr === 0 && dc === 0) continue;
+            const nr = r + dr, nc = c + dc;
+            if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
+              neighbors.push([nr, nc]);
+            }
+          }
+        }
+        return neighbors;
+      }
+
+      solveDeductive(rows, cols, clues, totalMines) {
+        // state: -1 = unknown, 0 = safe, 1 = mine
+        const state = Array.from({ length: rows }, () => Array(cols).fill(-1));
+        for (const key of Object.keys(clues)) {
+          const [r, c] = key.split(',').map(Number);
+          state[r][c] = 0; // Clue cells are known safe
+        }
+
+        let changed = true;
+        while (changed) {
+          changed = false;
+
+          // Rules 1 & 2: Local clue saturation & clearing
+          for (const [key, val] of Object.entries(clues)) {
+            const [r, c] = key.split(',').map(Number);
+            const neighs = this.getNeighbors(r, c, rows, cols);
+            const unknowns = neighs.filter(([nr, nc]) => state[nr][nc] === -1);
+            const mines = neighs.filter(([nr, nc]) => state[nr][nc] === 1);
+            const rem = val - mines.length;
+
+            if (rem < 0 || unknowns.length + mines.length < val) {
+              return { isSolved: false, state }; // Contradiction
+            }
+
+            if (rem === 0 && unknowns.length > 0) {
+              for (const [ur, uc] of unknowns) {
+                state[ur][uc] = 0;
+                changed = true;
+              }
+            } else if (rem === unknowns.length && unknowns.length > 0) {
+              for (const [ur, uc] of unknowns) {
+                state[ur][uc] = 1;
+                changed = true;
+              }
+            }
+          }
+
+          if (changed) continue;
+
+          // Rule 3: Subset difference logic between clue pairs
+          const clueEntries = Object.entries(clues).map(([k, v]) => {
+            const [r, c] = k.split(',').map(Number);
+            return { r, c, val: v };
+          });
+
+          for (let i = 0; i < clueEntries.length; i++) {
+            const c1 = clueEntries[i];
+            const n1 = this.getNeighbors(c1.r, c1.c, rows, cols);
+            const u1 = n1.filter(([nr, nc]) => state[nr][nc] === -1);
+            const m1 = n1.filter(([nr, nc]) => state[nr][nc] === 1).length;
+            const rem1 = c1.val - m1;
+            if (u1.length === 0) continue;
+
+            const u1Set = new Set(u1.map(([ur, uc]) => `${ur},${uc}`));
+
+            for (let j = 0; j < clueEntries.length; j++) {
+              if (i === j) continue;
+              const c2 = clueEntries[j];
+              const n2 = this.getNeighbors(c2.r, c2.c, rows, cols);
+              const u2 = n2.filter(([nr, nc]) => state[nr][nc] === -1);
+              const m2 = n2.filter(([nr, nc]) => state[nr][nc] === 1).length;
+              const rem2 = c2.val - m2;
+              if (u2.length === 0) continue;
+
+              const u2Set = new Set(u2.map(([ur, uc]) => `${ur},${uc}`));
+
+              let isSub = true;
+              for (const pt of u1Set) {
+                if (!u2Set.has(pt)) { isSub = false; break; }
+              }
+
+              if (isSub) {
+                const diff = u2.filter(([ur, uc]) => !u1Set.has(`${ur},${uc}`));
+                const remDiff = rem2 - rem1;
+                if (remDiff < 0) return { isSolved: false, state };
+                if (remDiff === 0 && diff.length > 0) {
+                  for (const [dr, dc] of diff) {
+                    state[dr][dc] = 0;
+                    changed = true;
+                  }
+                } else if (diff.length === remDiff && diff.length > 0) {
+                  for (const [dr, dc] of diff) {
+                    state[dr][dc] = 1;
+                    changed = true;
+                  }
+                }
+              }
+            }
+            if (changed) break;
+          }
+
+          if (changed) continue;
+
+          // Rule 4: Global mine capacity
+          let foundMines = 0;
+          const allUnknowns = [];
+          for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+              if (state[r][c] === 1) foundMines++;
+              else if (state[r][c] === -1) allUnknowns.push([r, c]);
+            }
+          }
+          const remGlobal = totalMines - foundMines;
+          if (remGlobal === 0 && allUnknowns.length > 0) {
+            for (const [ur, uc] of allUnknowns) {
+              state[ur][uc] = 0;
+              changed = true;
+            }
+          } else if (allUnknowns.length === remGlobal && allUnknowns.length > 0) {
+            for (const [ur, uc] of allUnknowns) {
+              state[ur][uc] = 1;
+              changed = true;
+            }
+          }
+        }
+
+        const isSolved = !state.some(row => row.includes(-1));
+        return { isSolved, state };
+      }
+
+      generate(diff = 'medium') {
+        const rows = 8, cols = 8;
+        let numMines = 12, targetClues = 22;
+        if (diff === 'easy') {
+          numMines = 8; targetClues = 28;
+        } else if (diff === 'hard') {
+          numMines = 15; targetClues = 17;
+        }
+
+        const allCells = [];
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            allCells.push([r, c]);
+          }
+        }
+
+        for (let attempt = 0; attempt < 50; attempt++) {
+          const shuffled = allCells.slice().sort(() => Math.random() - 0.5);
+          const mineCoords = shuffled.slice(0, numMines);
+          const mineSet = new Set(mineCoords.map(([r, c]) => `${r},${c}`));
+
+          const fullClues = {};
+          for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+              if (!mineSet.has(`${r},${c}`)) {
+                const neighs = this.getNeighbors(r, c, rows, cols);
+                const count = neighs.filter(([nr, nc]) => mineSet.has(`${nr},${nc}`)).length;
+                fullClues[`${r},${c}`] = count;
+              }
+            }
+          }
+
+          const { isSolved } = this.solveDeductive(rows, cols, fullClues, numMines);
+          if (!isSolved) continue;
+
+          const prunedClues = { ...fullClues };
+          const clueKeys = Object.keys(fullClues).sort(() => Math.random() - 0.5);
+
+          for (const k of clueKeys) {
+            if (Object.keys(prunedClues).length <= targetClues) break;
+            const val = prunedClues[k];
+            delete prunedClues[k];
+            const check = this.solveDeductive(rows, cols, prunedClues, numMines);
+            if (!check.isSolved) {
+              prunedClues[k] = val; // Restore
+            }
+          }
+
+          const puzzleGrid = Array.from({ length: rows }, () => Array(cols).fill(-1));
+          for (const [k, v] of Object.entries(prunedClues)) {
+            const [r, c] = k.split(',').map(Number);
+            puzzleGrid[r][c] = v;
+          }
+
+          const solutionGrid = Array.from({ length: rows }, () => Array(cols).fill(0));
+          for (const [r, c] of mineCoords) {
+            solutionGrid[r][c] = 1;
+          }
+
+          return {
+            size: 8,
+            rows,
+            cols,
+            diff: diff.toUpperCase(),
+            minesCount: numMines,
+            cluesCount: Object.keys(prunedClues).length,
+            puzzle: puzzleGrid,
+            solution: solutionGrid,
+            mineCoords
+          };
+        }
+
+        return this.generate('easy');
+      }
+    }
+
+    /**
+     * Renders a high-contrast 1-bit thermal Mines puzzle grid
+     * with 3.5px perimeter, 1.0px cell dividers, centered Space Mono clue digits,
+     * and clean whitespace for pencil solving.
+     */
+    function drawMinesCanvas(canvas, mData) {
+      const size = 8;
+      const padding = 12;
+      const totalWidth = 345;
+      const innerWidth = totalWidth - padding * 2; // 321px
+      const cellSize = Math.floor(innerWidth / size); // 40px
+      const actualGridSize = cellSize * size; // 320px
+      const offsetX = padding + Math.floor((innerWidth - actualGridSize) / 2); // 12px
+      const offsetY = padding;
+
+      canvas.width = totalWidth;
+      canvas.height = actualGridSize + padding * 2; // 344px
+      const ctx = canvas.getContext('2d');
+
+      // 1. Paper Background
+      ctx.fillStyle = '#fafaf7';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // 2. Interior Cell Dividers (Tier 4: 1.0px)
+      ctx.lineWidth = 1.0;
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.22)';
+      for (let i = 1; i < size; i++) {
+        // Horizontal
+        ctx.beginPath();
+        ctx.moveTo(offsetX, offsetY + i * cellSize);
+        ctx.lineTo(offsetX + actualGridSize, offsetY + i * cellSize);
+        ctx.stroke();
+
+        // Vertical
+        ctx.beginPath();
+        ctx.moveTo(offsetX + i * cellSize, offsetY);
+        ctx.lineTo(offsetX + i * cellSize, offsetY + actualGridSize);
+        ctx.stroke();
+      }
+
+      // 3. Clue Digits (0 to 8)
+      ctx.fillStyle = '#111111';
+      ctx.font = 'bold 21px "Space Mono", monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      for (let r = 0; r < size; r++) {
+        for (let c = 0; c < size; c++) {
+          const val = mData.puzzle[r][c];
+          if (val >= 0 && val <= 8) {
+            const cx = offsetX + c * cellSize + cellSize / 2;
+            const cy = offsetY + r * cellSize + cellSize / 2;
+            ctx.fillText(val.toString(), cx, cy);
+          }
+        }
+      }
+
+      // 4. Heavy Outer Perimeter (Tier 1: 3.5px solid #111111, lineCap = 'square')
+      ctx.lineWidth = 3.5;
+      ctx.lineCap = 'square';
+      ctx.strokeStyle = '#111111';
+      ctx.strokeRect(offsetX, offsetY, actualGridSize, actualGridSize);
+    }
+
     // =========================================================================
     // 3. RECEIPT COMPOSER & RENDERER (Mixed Text + Dithered Canvas)
     // =========================================================================
@@ -2137,6 +2438,7 @@
     const queensSim = new QueensSimulator();
     const jumbleSim = new JumbleSimulator();
     const binarySim = new BinarySimulator();
+    const minesSim = new MinesSimulator();
 
     let rawReceiptLines = [];
 
@@ -2449,6 +2751,50 @@
         });
       }
 
+      // 7. MINES
+      if (document.getElementById('toggle-mines') && document.getElementById('toggle-mines').checked) {
+        const diff = document.getElementById('diff-mines').value;
+        const mStyle = document.getElementById('style-mines').value;
+        const mData = minesSim.generate(diff);
+
+        addStandardPuzzleHeader(items, 'MINES', diff);
+        items.push({ type: 'text', text: centerLine(`TOTAL MINES: ${mData.minesCount}`, COLS) });
+        items.push({ type: 'blank', text: '' });
+
+        if (mStyle === 'graphic') {
+          items.push({
+            type: 'canvas',
+            render: (canvas) => drawMinesCanvas(canvas, mData)
+          });
+        } else {
+          // Monospaced ASCII Grid
+          const size = mData.size;
+          let sep = '      +';
+          for (let c = 0; c < size; c++) sep += '---+';
+          items.push({ type: 'text', text: sep });
+
+          for (let r = 0; r < size; r++) {
+            let line = '      |';
+            for (let c = 0; c < size; c++) {
+              const val = mData.puzzle[r][c];
+              line += val === -1 ? '   |' : ` ${val} |`;
+            }
+            items.push({ type: 'text', text: line });
+            items.push({ type: 'text', text: sep });
+          }
+        }
+
+        items.push({ type: 'blank', text: '' });
+        items.push({ type: 'rule', text: '-'.repeat(COLS) });
+
+        solutionsContent.push({
+          name: 'Mines',
+          grid: mData.solution,
+          size: mData.size,
+          minesCount: mData.minesCount
+        });
+      }
+
       // Optional Solutions Key
       if (document.getElementById('toggle-solutions').checked && solutionsContent.length > 0) {
         items.push({ type: 'rule', text: '-'.repeat(COLS) });
@@ -2470,6 +2816,15 @@
               let rowStr = '      ';
               for (let c = 0; c < item.size; c++) {
                 rowStr += item.grid[r][c] + ' ';
+              }
+              items.push({ type: 'text', text: rowStr });
+            }
+          } else if (item.name === 'Mines') {
+            items.push({ type: 'text', text: `  ${item.size}x${item.size} Minefield (${item.minesCount} Mines, *=Mine, .=Safe):` });
+            for (let r = 0; r < item.size; r++) {
+              let rowStr = '      ';
+              for (let c = 0; c < item.size; c++) {
+                rowStr += (item.grid[r][c] === 1 ? '*' : '.') + ' ';
               }
               items.push({ type: 'text', text: rowStr });
             }
@@ -2584,6 +2939,7 @@
       'toggle-nonogram', 'size-nonogram', 'style-nonogram',
       'toggle-jumble', 'diff-jumble', 'style-jumble',
       'toggle-binary', 'diff-binary', 'style-binary',
+      'toggle-mines', 'diff-mines', 'style-mines',
       'toggle-ruler', 'toggle-solutions', 'toggle-burn'
     ];
     inputs.forEach(id => {

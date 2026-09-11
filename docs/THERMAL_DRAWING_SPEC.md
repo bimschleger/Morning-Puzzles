@@ -60,7 +60,7 @@ To establish consistent visual weight across games of differing sizes (e.g. 5x5 
 * **Stroke Width**: `3.5px`
 * **Stroke Color**: `#111111`
 * **Line Cap / Join**: `lineCap = 'square'`, `lineJoin = 'miter'`
-* **Usage**: The solid bounding box around the puzzle grid (Sudoku 9x9 outer box, Stars outer boundary, Search outer grid, Nonogram composite frame).
+* **Usage**: The solid bounding box around the puzzle grid (Sudoku 9x9 outer box, Stars outer boundary, Search outer grid, Nonogram composite frame, Binary & Mines grids).
 
 ### Tier 2: Major Subdivisions & Territory Boundaries (`2.5px` – `3.5px`)
 * **Stroke Width**:
@@ -153,7 +153,7 @@ $$W_{\text{cell}} = \left\lfloor \frac{W_{\text{inner}}}{N_{\text{cols}}} \right
 Where $W_{\text{inner}} = 321\text{px}$ (or $576\text{ dots}$ natively).
 
 * **6 Columns** (Binary Easy): $\lfloor 321 / 6 \rfloor = \mathbf{53\text{px}}$ per cell ($S_{\text{font}} \approx \mathbf{28\text{px}}$ bold).
-* **8 Columns** (Binary Medium/Hard, Search): $\lfloor 321 / 8 \rfloor = \mathbf{40\text{px}}$ per cell (Exact match to Jumble clue boxes, $S_{\text{font}} \approx \mathbf{21\text{px}}$ bold).
+* **8 Columns** (Mines, Binary Medium/Hard, Search): $\lfloor 321 / 8 \rfloor = \mathbf{40\text{px}}$ per cell (Exact match to Jumble clue boxes, $S_{\text{font}} \approx \mathbf{21\text{px}}$ bold).
 * **9 Columns** (Sudoku): $\lfloor 321 / 9 \rfloor = \mathbf{35\text{px}}$ per cell.
 * **10 Columns** (Stars 10x10): $\lfloor 321 / 10 \rfloor = \mathbf{32\text{px}}$ per cell.
 

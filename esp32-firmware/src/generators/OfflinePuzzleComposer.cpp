@@ -56,8 +56,14 @@ bool OfflinePuzzleComposer::generateAndPrintReceipt(EscPosPrinter& printer, cons
     Serial.println("[COMPOSER] Generating Binary...");
     _binary.generate(BINARY_MEDIUM);
     _binary.printToReceipt(printer, BINARY_MEDIUM);
+    printer.printHorizontalLine('-');
 
-    // 8. Footer
+    // 8. Generate and print Mines
+    Serial.println("[COMPOSER] Generating Mines...");
+    _mines.generate(MINES_MEDIUM);
+    _mines.printToReceipt(printer, MINES_MEDIUM);
+
+    // 9. Footer
     printer.printDoubleLine();
     printer.setAlign(ALIGN_CENTER);
     printer.println("Printed on ESP32 80mm Thermal Receipt");
