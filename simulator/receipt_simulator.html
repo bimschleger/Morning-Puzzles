@@ -158,8 +158,8 @@
           <div class="flex items-center justify-between pl-6 text-xs text-slate-400">
             <span class="text-amber-300 font-medium">Territory Style:</span>
             <select id="style-queens" class="bg-slate-800 border border-amber-500/50 text-amber-400 font-semibold rounded-lg px-2 py-1 text-xs outline-none focus:border-amber-500">
-              <option value="dithered_bayer" selected>🖼️ 1-Bit Bayer Halftone (Grayscale)</option>
-              <option value="dithered_hatch">📐 1-Bit Geometric Hatches</option>
+              <option value="dithered_bayer">🖼️ 1-Bit Bayer Halftone (Grayscale)</option>
+              <option value="dithered_hatch" selected>📐 1-Bit Geometric Hatches</option>
               <option value="ascii_text">🔤 Legacy ASCII Text (Letters A-H)</option>
             </select>
           </div>
@@ -929,7 +929,7 @@
      * Renders a crisp Queens / Star Battle puzzle using 1-bit dithering
      * and bold boundaries for territories.
      */
-    function drawQueensCanvas(canvas, qData, style = 'dithered_bayer', showStars = false) {
+    function drawQueensCanvas(canvas, qData, style = 'dithered_hatch', showStars = false) {
       const size = qData.size;
       const padding = 22; // space for coordinate numbers
       const totalWidth = 345; // Fits 80mm receipt width nicely
