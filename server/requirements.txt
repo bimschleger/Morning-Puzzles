@@ -1,0 +1,11 @@
+# Web service framework
+fastapi>=0.110.0
+uvicorn>=0.28.0
+pydantic>=2.6.0
+
+# Image rasterization for 576px wide 1-bit thermal graphics
+Pillow>=10.2.0
+
+# Open-source constraint programming puzzle benchmark suite (Apache 2.0)
+# https://github.com/IBM/chuk-puzzles-gym
+ortools>=9.8.3296

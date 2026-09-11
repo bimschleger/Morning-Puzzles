@@ -1,0 +1,1561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>80mm Receipt Thermal Simulator - Morning Puzzles</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap');
+
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* Thermal receipt font: monospaced and sharp */
+    .receipt-mono {
+      font-family: 'Space Mono', 'Courier New', Courier, monospace;
+      font-size: 12px;
+      line-height: 1.35;
+      letter-spacing: -0.2px;
+    }
+
+    /* 80mm thermal receipt simulation */
+    .receipt-paper {
+      width: 395px; /* Proportional to 80mm roll at standard screen DPI */
+      background: #fafaf7;
+      color: #1a1a1a;
+      box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(0, 0, 0, 0.08);
+      position: relative;
+    }
+
+    /* Jagged top tear edge */
+    .receipt-tear-top {
+      height: 12px;
+      background: linear-gradient(135deg, #fafaf7 5px, transparent 0), linear-gradient(-135deg, #fafaf7 5px, transparent 0);
+      background-size: 14px 14px;
+      background-position: 0 0;
+      position: absolute;
+      top: -12px;
+      left: 0;
+      right: 0;
+    }
+
+    /* Jagged bottom tear edge */
+    .receipt-tear-bottom {
+      height: 12px;
+      background: linear-gradient(45deg, #fafaf7 5px, transparent 0), linear-gradient(-45deg, #fafaf7 5px, transparent 0);
+      background-size: 14px 14px;
+      background-position: 0 100%;
+      position: absolute;
+      bottom: -12px;
+      left: 0;
+      right: 0;
+    }
+
+    /* Paper feeding animation on refresh */
+    @keyframes paperFeed {
+      0% {
+        transform: translateY(-25px);
+        opacity: 0.6;
+      }
+      100% {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .animate-feed {
+      animation: paperFeed 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Canvas styling */
+    canvas.thermal-canvas {
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen antialiased flex flex-col">
+
+  <!-- Top Navigation Header -->
+  <header class="border-b border-slate-800 bg-slate-950/80 backdrop-blur sticky top-0 z-30 px-6 py-3.5 flex items-center justify-between">
+    <div class="flex items-center space-x-3">
+      <div class="bg-amber-500 text-slate-950 p-2 rounded-lg font-bold text-lg leading-none shadow-md shadow-amber-500/20">
+        📰
+      </div>
+      <div>
+        <h1 class="font-bold text-lg leading-tight flex items-center gap-2">
+          Morning Puzzles
+          <span class="text-xs bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-full font-medium">
+            80mm Thermal Simulator
+          </span>
+        </h1>
+        <p class="text-xs text-slate-400">1-Bit Thermal Dithering & ESC/POS Receipt Preview</p>
+      </div>
+    </div>
+
+    <!-- Quick Action: Big Randomize Button -->
+    <button id="btn-randomize-top" class="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 active:scale-95 text-slate-950 font-bold px-5 py-2 rounded-xl transition-all shadow-lg shadow-amber-500/25">
+      <svg class="w-5 h-5 transition-transform" id="dice-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+      </svg>
+      <span>Randomize & Regenerate</span>
+    </button>
+  </header>
+
+  <!-- Main Content: Controls on Left, Receipt on Right -->
+  <main class="flex-1 flex flex-col lg:flex-row max-w-7xl w-full mx-auto p-4 lg:p-6 gap-6 items-start">
+    
+    <!-- LEFT PANEL: Puzzle Toggles, Difficulties, and Configurations -->
+    <aside class="w-full lg:w-[430px] bg-slate-950 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col gap-5 shrink-0">
+      
+      <!-- Action Buttons -->
+      <div class="flex flex-col gap-2.5">
+        <button id="btn-randomize-panel" class="w-full flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-400 active:scale-[0.98] text-slate-950 font-bold py-3 px-4 rounded-xl transition-all shadow-md shadow-amber-500/20">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+          </svg>
+          Randomize All Puzzles
+        </button>
+        <button id="btn-copy-raw" class="w-full flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold py-2 px-4 rounded-xl border border-slate-700 transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path>
+          </svg>
+          <span id="copy-btn-text">Copy Receipt Monospace Text</span>
+        </button>
+      </div>
+
+      <!-- Puzzle Selection Toggles -->
+      <div class="border-t border-slate-800/80 pt-4 flex flex-col gap-3">
+        <h2 class="text-xs uppercase tracking-wider font-bold text-slate-400">Included Games & Options</h2>
+        
+        <!-- 1. Queens / Star Battle Toggle (Highlighted Feature) -->
+        <div class="bg-slate-900 border-2 border-amber-500/40 rounded-xl p-3.5 flex flex-col gap-2.5 transition hover:border-amber-500/70">
+          <div class="flex items-center justify-between">
+            <label class="flex items-center gap-2.5 cursor-pointer select-none">
+              <input type="checkbox" id="toggle-queens" checked class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
+              <span class="font-semibold text-sm text-slate-100 flex items-center gap-1.5">
+                👑 Queens / Star Battle
+                <span class="text-[10px] bg-amber-500 text-slate-950 font-bold px-1.5 py-0.2 rounded">Dithered</span>
+              </span>
+            </label>
+            <span class="text-[11px] text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded">Territories</span>
+          </div>
+          
+          <!-- Variant -->
+          <div class="flex items-center justify-between pl-6 text-xs text-slate-400">
+            <span>Variant:</span>
+            <select id="variant-queens" class="bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2 py-1 text-xs outline-none focus:border-amber-500">
+              <option value="6x6_1star">6x6 (1-Star / Queens)</option>
+              <option value="8x8_1star" selected>8x8 (1-Star / Queens)</option>
+              <option value="9x9_2star">9x9 (2-Star Battle)</option>
+            </select>
+          </div>
+
+          <!-- Dithering & Graphic Style Option -->
+          <div class="flex items-center justify-between pl-6 text-xs text-slate-400">
+            <span class="text-amber-300 font-medium">Territory Style:</span>
+            <select id="style-queens" class="bg-slate-800 border border-amber-500/50 text-amber-400 font-semibold rounded-lg px-2 py-1 text-xs outline-none focus:border-amber-500">
+              <option value="dithered_bayer" selected>🖼️ 1-Bit Bayer Halftone (Grayscale)</option>
+              <option value="dithered_hatch">📐 1-Bit Geometric Hatches</option>
+              <option value="ascii_text">🔤 Legacy ASCII Text (Letters A-H)</option>
+            </select>
+          </div>
+
+          <!-- Solution Stars Overlay Checkbox -->
+          <div class="flex items-center justify-between pl-6 text-xs text-slate-400">
+            <span>Overlay Solution Stars:</span>
+            <label class="flex items-center gap-1.5 cursor-pointer">
+              <input type="checkbox" id="toggle-queens-solution" class="w-3.5 h-3.5 accent-amber-500 rounded cursor-pointer">
+              <span class="text-[11px] text-slate-300">Show ★</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 2. Sudoku Toggle -->
+        <div class="bg-slate-900 border border-slate-800/80 rounded-xl p-3.5 flex flex-col gap-2.5 transition hover:border-slate-700">
+          <div class="flex items-center justify-between">
+            <label class="flex items-center gap-2.5 cursor-pointer select-none">
+              <input type="checkbox" id="toggle-sudoku" checked class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
+              <span class="font-semibold text-sm text-slate-200">Sudoku</span>
+            </label>
+            <span class="text-[11px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded">9x9 Grid</span>
+          </div>
+          <div class="flex items-center justify-between pl-6 text-xs text-slate-400">
+            <span>Difficulty:</span>
+            <select id="diff-sudoku" class="bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2 py-1 text-xs outline-none focus:border-amber-500">
+              <option value="easy">Easy (38 Clues)</option>
+              <option value="medium" selected>Medium (30 Clues)</option>
+              <option value="hard">Hard (25 Clues)</option>
+            </select>
+          </div>
+          <div class="flex items-center justify-between pl-6 text-xs text-slate-400">
+            <span>Render Style:</span>
+            <select id="style-sudoku" class="bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2 py-1 text-xs outline-none focus:border-amber-500">
+              <option value="graphic" selected>🖼️ Crisp Graphic Grid (Bold 3x3)</option>
+              <option value="ascii">🔤 Monospaced ASCII Text</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 3. Word Search Toggle -->
+        <div class="bg-slate-900 border border-slate-800/80 rounded-xl p-3.5 flex flex-col gap-2.5 transition hover:border-slate-700">
+          <div class="flex items-center justify-between">
+            <label class="flex items-center gap-2.5 cursor-pointer select-none">
+              <input type="checkbox" id="toggle-wordsearch" checked class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
+              <span class="font-semibold text-sm text-slate-200">Word Search</span>
+            </label>
+            <span class="text-[11px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded">12x12 Matrix</span>
+          </div>
+          <div class="flex items-center justify-between pl-6 text-xs text-slate-400">
+            <span>Theme:</span>
+            <select id="theme-wordsearch" class="bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2 py-1 text-xs outline-none focus:border-amber-500">
+              <option value="random" selected>🎲 Random Theme</option>
+              <option value="Morning Routine">Morning Routine</option>
+              <option value="Great Outdoors">Great Outdoors</option>
+              <option value="Space & Cosmos">Space & Cosmos</option>
+              <option value="Wildlife">Wildlife</option>
+              <option value="Technology">Technology</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 4. Nonogram / Picross Toggle -->
+        <div class="bg-slate-900 border border-slate-800/80 rounded-xl p-3.5 flex flex-col gap-2.5 transition hover:border-slate-700">
+          <div class="flex items-center justify-between">
+            <label class="flex items-center gap-2.5 cursor-pointer select-none">
+              <input type="checkbox" id="toggle-nonogram" checked class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
+              <span class="font-semibold text-sm text-slate-200">Nonogram / Picross</span>
+            </label>
+            <span class="text-[11px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded">RLE Logic</span>
+          </div>
+          <div class="flex items-center justify-between pl-6 text-xs text-slate-400">
+            <span>Size:</span>
+            <select id="size-nonogram" class="bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2 py-1 text-xs outline-none focus:border-amber-500">
+              <option value="5" selected>5x5 (Quick Solver)</option>
+              <option value="8">8x8 (Standard)</option>
+              <option value="10">10x10 (Challenge)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 5. Daily Jumble Toggle -->
+        <div class="bg-slate-900 border border-slate-800/80 rounded-xl p-3.5 flex flex-col gap-2.5 transition hover:border-slate-700">
+          <div class="flex items-center justify-between">
+            <label class="flex items-center gap-2.5 cursor-pointer select-none">
+              <input type="checkbox" id="toggle-jumble" checked class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
+              <span class="font-semibold text-sm text-slate-200">Daily Jumble</span>
+            </label>
+            <span class="text-[11px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded">Anagrams + Riddle</span>
+          </div>
+          <div class="flex items-center justify-between pl-6 text-xs text-slate-400">
+            <span>Difficulty:</span>
+            <select id="diff-jumble" class="bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2 py-1 text-xs outline-none focus:border-amber-500">
+              <option value="easy">Easy (4-5 letters)</option>
+              <option value="medium" selected>Medium (5-6 letters)</option>
+              <option value="hard">Hard (6-7 letters)</option>
+            </select>
+          </div>
+          <div class="flex items-center justify-between pl-6 text-xs text-slate-400">
+            <span class="text-amber-300 font-medium">Render Style:</span>
+            <select id="style-jumble" class="bg-slate-800 border border-amber-500/50 text-amber-400 font-semibold rounded-lg px-2 py-1 text-xs outline-none focus:border-amber-500">
+              <option value="graphic" selected>🖼️ Newspaper Graphic (Boxes & Circles)</option>
+              <option value="ascii">🔤 Legacy Monospaced ASCII</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Receipt Visual Customizations -->
+      <div class="border-t border-slate-800/80 pt-4 flex flex-col gap-3">
+        <h2 class="text-xs uppercase tracking-wider font-bold text-slate-400">Simulator Settings</h2>
+        
+        <label class="flex items-center justify-between text-xs text-slate-300 cursor-pointer">
+          <span>Show 48-Column Ruler Guide</span>
+          <input type="checkbox" id="toggle-ruler" class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
+        </label>
+
+        <label class="flex items-center justify-between text-xs text-slate-300 cursor-pointer">
+          <span>Show Solution Answer Key</span>
+          <input type="checkbox" id="toggle-solutions" class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
+        </label>
+
+        <label class="flex items-center justify-between text-xs text-slate-300 cursor-pointer">
+          <span>Thermal Head Burn Texture</span>
+          <input type="checkbox" id="toggle-burn" checked class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
+        </label>
+      </div>
+
+      <!-- Receipt Stats Metric Box -->
+      <div class="bg-slate-900/90 rounded-xl p-3 border border-slate-800 text-xs text-slate-400 flex flex-col gap-1.5">
+        <div class="flex justify-between">
+          <span>Paper Width:</span>
+          <span class="font-mono text-slate-200">80 mm (72mm printable)</span>
+        </div>
+        <div class="flex justify-between">
+          <span>Column Capacity:</span>
+          <span class="font-mono text-slate-200">48 chars / line (Font A)</span>
+        </div>
+        <div class="flex justify-between">
+          <span>Est. Receipt Height:</span>
+          <span class="font-mono text-amber-400 font-semibold" id="stat-height">~30 cm</span>
+        </div>
+        <div class="flex justify-between">
+          <span>Thermal Raster Mode:</span>
+          <span class="font-mono text-emerald-400 font-semibold">1-Bit 203 DPI Active</span>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- RIGHT PANEL: The 80mm Thermal Receipt Simulation -->
+    <section class="flex-1 w-full flex flex-col items-center justify-center overflow-x-auto pb-16">
+      
+      <div class="text-center mb-3">
+        <span class="text-xs font-semibold uppercase tracking-widest text-slate-400">
+          80mm Thermal Receipt Preview (Vertical Strip)
+        </span>
+      </div>
+
+      <!-- The Physical Receipt Paper Box -->
+      <div class="relative pt-3 pb-3">
+        
+        <!-- Jagged Top Cut -->
+        <div class="receipt-tear-top"></div>
+
+        <!-- Receipt Container -->
+        <div id="receipt-box" class="receipt-paper rounded-sm p-6 receipt-mono select-text transition-all duration-300">
+          <!-- Populated dynamically via JavaScript -->
+        </div>
+
+        <!-- Jagged Bottom Cut -->
+        <div class="receipt-tear-bottom"></div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Simulation, Puzzle & Dithering JavaScript Engine -->
+  <script>
+    // =========================================================================
+    // 1. PUZZLE GENERATION LOGIC (Native Client-side Port of C++ Algorithms)
+    // =========================================================================
+
+    // --- SUDOKU ENGINE ---
+    class SudokuSimulator {
+      generate(cluesCount = 30) {
+        const board = Array.from({ length: 9 }, () => Array(9).fill(0));
+        this.fillBoard(board);
+        const solution = board.map(r => [...r]);
+
+        const puzzle = board.map(r => [...r]);
+        const cells = [];
+        for (let r = 0; r < 9; r++) {
+          for (let c = 0; c < 9; c++) cells.push([r, c]);
+        }
+        cells.sort(() => Math.random() - 0.5);
+
+        let remaining = 81;
+        for (const [r, c] of cells) {
+          if (remaining <= cluesCount) break;
+          const backup = puzzle[r][c];
+          puzzle[r][c] = 0;
+          if (this.countSolutions(puzzle, 2) !== 1) {
+            puzzle[r][c] = backup;
+          } else {
+            remaining--;
+          }
+        }
+        return { puzzle, solution, cluesCount: remaining };
+      }
+
+      isValid(board, r, c, num) {
+        for (let i = 0; i < 9; i++) {
+          if (board[r][i] === num || board[i][c] === num) return false;
+        }
+        const boxR = Math.floor(r / 3) * 3;
+        const boxC = Math.floor(c / 3) * 3;
+        for (let i = 0; i < 3; i++) {
+          for (let j = 0; j < 3; j++) {
+            if (board[boxR + i][boxC + j] === num) return false;
+          }
+        }
+        return true;
+      }
+
+      fillBoard(board) {
+        for (let r = 0; r < 9; r++) {
+          for (let c = 0; c < 9; c++) {
+            if (board[r][c] === 0) {
+              const nums = [1, 2, 3, 4, 5, 6, 7, 8, 9].sort(() => Math.random() - 0.5);
+              for (const num of nums) {
+                if (this.isValid(board, r, c, num)) {
+                  board[r][c] = num;
+                  if (this.fillBoard(board)) return true;
+                  board[r][c] = 0;
+                }
+              }
+              return false;
+            }
+          }
+        }
+        return true;
+      }
+
+      countSolutions(board, maxCount = 2) {
+        for (let r = 0; r < 9; r++) {
+          for (let c = 0; c < 9; c++) {
+            if (board[r][c] === 0) {
+              let count = 0;
+              for (let num = 1; num <= 9; num++) {
+                if (this.isValid(board, r, c, num)) {
+                  board[r][c] = num;
+                  count += this.countSolutions(board, maxCount);
+                  board[r][c] = 0;
+                  if (count >= maxCount) return count;
+                }
+              }
+              return count;
+            }
+          }
+        }
+        return 1;
+      }
+    }
+
+    // --- WORD SEARCH ENGINE ---
+    const WORD_SEARCH_THEMES = {
+      "Morning Routine": ["COFFEE", "SUNRISE", "PANCAKE", "WAFFLE", "TOAST", "OATMEAL", "SHOWER", "ALARM", "PAPER", "JOGGING", "TEAPOT", "KITCHEN"],
+      "Great Outdoors": ["FOREST", "CANYON", "RIVER", "SUMMIT", "VALLEY", "STREAM", "MEADOW", "GLACIER", "BOULDER", "ISLAND", "DESERT", "TRAIL"],
+      "Space & Cosmos": ["PLANET", "GALAXY", "METEOR", "ORBIT", "NEBULA", "COMET", "ECLIPSE", "PULSAR", "ROCKET", "GRAVITY", "STELLAR", "SOLAR"],
+      "Wildlife": ["FALCON", "DOLPHIN", "BADGER", "JAGUAR", "OTTER", "COUGAR", "PENGUIN", "CHEETAH", "GIRAFFE", "BEAVER", "OSPREY", "PANTHER"],
+      "Technology": ["SYSTEM", "SERVER", "ROUTER", "MEMORY", "SOCKET", "SENSOR", "CIRCUIT", "BINARY", "BUFFER", "KERNEL", "PYTHON", "DEVICE"]
+    };
+
+    class WordSearchSimulator {
+      generate(theme = "Morning Routine", size = 12) {
+        if (!WORD_SEARCH_THEMES[theme]) {
+          const keys = Object.keys(WORD_SEARCH_THEMES);
+          theme = keys[Math.floor(Math.random() * keys.length)];
+        }
+        const wordsPool = [...WORD_SEARCH_THEMES[theme]].sort(() => Math.random() - 0.5);
+        const grid = Array.from({ length: size }, () => Array(size).fill(' '));
+        const placed = [];
+
+        const dirs = [
+          [0, 1], [1, 0], [1, 1], [-1, 1],
+          [0, -1], [-1, 0], [1, -1], [-1, -1]
+        ];
+
+        for (const word of wordsPool) {
+          if (placed.length >= 8) break;
+          let placedWord = false;
+          for (let attempt = 0; attempt < 100 && !placedWord; attempt++) {
+            const [dr, dc] = dirs[Math.floor(Math.random() * dirs.length)];
+            const rStart = Math.floor(Math.random() * size);
+            const cStart = Math.floor(Math.random() * size);
+            const rEnd = rStart + dr * (word.length - 1);
+            const cEnd = cStart + dc * (word.length - 1);
+
+            if (rEnd >= 0 && rEnd < size && cEnd >= 0 && cEnd < size) {
+              let canPlace = true;
+              for (let i = 0; i < word.length; i++) {
+                const cell = grid[rStart + dr * i][cStart + dc * i];
+                if (cell !== ' ' && cell !== word[i]) {
+                  canPlace = false;
+                  break;
+                }
+              }
+              if (canPlace) {
+                for (let i = 0; i < word.length; i++) {
+                  grid[rStart + dr * i][cStart + dc * i] = word[i];
+                }
+                placed.push(word);
+                placedWord = true;
+              }
+            }
+          }
+        }
+
+        // Fill blanks
+        const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        for (let r = 0; r < size; r++) {
+          for (let c = 0; c < size; c++) {
+            if (grid[r][c] === ' ') {
+              grid[r][c] = letters[Math.floor(Math.random() * letters.length)];
+            }
+          }
+        }
+
+        return { grid, words: placed.sort(), theme, size };
+      }
+    }
+
+    // --- NONOGRAM ENGINE ---
+    class NonogramSimulator {
+      generate(size = 5) {
+        const grid = Array.from({ length: size }, () =>
+          Array.from({ length: size }, () => (Math.random() < 0.55 ? 1 : 0))
+        );
+
+        // Row clues
+        const rowClues = [];
+        for (let r = 0; r < size; r++) {
+          const clues = [];
+          let count = 0;
+          for (let c = 0; c < size; c++) {
+            if (grid[r][c] === 1) count++;
+            else if (count > 0) { clues.push(count); count = 0; }
+          }
+          if (count > 0) clues.push(count);
+          rowClues.push(clues.length ? clues : [0]);
+        }
+
+        // Column clues
+        const colClues = [];
+        for (let c = 0; c < size; c++) {
+          const clues = [];
+          let count = 0;
+          for (let r = 0; r < size; r++) {
+            if (grid[r][c] === 1) count++;
+            else if (count > 0) { clues.push(count); count = 0; }
+          }
+          if (count > 0) clues.push(count);
+          colClues.push(clues.length ? clues : [0]);
+        }
+
+        return { size, grid, rowClues, colClues };
+      }
+    }
+
+    // --- QUEENS / STAR BATTLE ENGINE ---
+    class QueensSimulator {
+      generate(size = 8, starsPerUnit = 1) {
+        const stars = [];
+        const colCounts = Array(size).fill(0);
+
+        function canPlace(r, c) {
+          if (colCounts[c] >= starsPerUnit) return false;
+          for (let dr = -1; dr <= 1; dr++) {
+            for (let dc = -1; dc <= 1; dc++) {
+              const nr = r + dr, nc = c + dc;
+              if (stars.some(s => s.r === nr && s.c === nc)) return false;
+            }
+          }
+          return true;
+        }
+
+        function backtrack(r, placedInRow) {
+          if (r === size) {
+            return colCounts.every(cnt => cnt === starsPerUnit);
+          }
+          if (placedInRow === starsPerUnit) return backtrack(r + 1, 0);
+
+          const cols = Array.from({ length: size }, (_, i) => i).sort(() => Math.random() - 0.5);
+          for (const c of cols) {
+            if (canPlace(r, c)) {
+              stars.push({ r, c });
+              colCounts[c]++;
+              if (backtrack(r, placedInRow + 1)) return true;
+              stars.pop();
+              colCounts[c]--;
+            }
+          }
+          return false;
+        }
+
+        let solved = false;
+        for (let att = 0; att < 50 && !solved; att++) {
+          stars.length = 0;
+          colCounts.fill(0);
+          solved = backtrack(0, 0);
+        }
+
+        // Partition into contiguous regions
+        const regions = Array.from({ length: size }, () => Array(size).fill(-1));
+        stars.forEach((s, idx) => {
+          regions[s.r][s.c] = (starsPerUnit === 1) ? idx : (idx % size);
+        });
+
+        let unassigned = size * size - stars.length;
+        let iter = 0;
+        while (unassigned > 0 && iter < size * size * 8) {
+          iter++;
+          const r = Math.floor(Math.random() * size);
+          const c = Math.floor(Math.random() * size);
+          if (regions[r][c] !== -1) {
+            const dirs = [[0, 1], [0, -1], [1, 0], [-1, 0]];
+            const [dr, dc] = dirs[Math.floor(Math.random() * 4)];
+            const nr = r + dr, nc = c + dc;
+            if (nr >= 0 && nr < size && nc >= 0 && nc < size && regions[nr][nc] === -1) {
+              regions[nr][nc] = regions[r][c];
+              unassigned--;
+            }
+          }
+        }
+        for (let r = 0; r < size; r++) {
+          for (let c = 0; c < size; c++) {
+            if (regions[r][c] === -1) regions[r][c] = 0;
+          }
+        }
+
+        return { size, starsPerUnit, stars, regions };
+      }
+    }
+
+    // --- DAILY JUMBLE ENGINE ---
+    const JUMBLE_RIDDLES = [
+      {
+        diff: "easy",
+        words: ["ROAST", "PLANT", "LIGHT", "CROWN"],
+        circles: [[0, 2], [1], [0, 4], [2]],
+        riddle: "Why did the coffee file a police report?",
+        answer: "IT GOT MUGGED"
+      },
+      {
+        diff: "medium",
+        words: ["GLANCE", "SPHERE", "BREEZE", "SUMMIT"],
+        circles: [[1, 3], [0, 4], [2, 5], [1]],
+        riddle: "What do you call a sleeping dinosaur?",
+        answer: "A DINO SNORE"
+      },
+      {
+        diff: "hard",
+        words: ["JOURNEY", "WHISPER", "LANTERN", "THUNDER"],
+        circles: [[0, 4], [2, 5], [1, 3], [0, 3]],
+        riddle: "Why couldn't the bicycle stand up by itself?",
+        answer: "IT WAS TWO TIRED"
+      },
+      {
+        diff: "easy",
+        words: ["BREAD", "SPOON", "CLOCK", "TABLE"],
+        circles: [[0, 1], [2], [0, 4], [1, 3]],
+        riddle: "What did the ocean say to the sailboat?",
+        answer: "NOTHING IT JUST WAVED"
+      },
+      {
+        diff: "medium",
+        words: ["SHADOW", "FLAVOR", "CASTLE", "GUITAR"],
+        circles: [[0, 3], [1, 4], [0, 2], [1, 5]],
+        riddle: "Why did the scarecrow win an award?",
+        answer: "OUTSTANDING IN HIS FIELD"
+      },
+      {
+        diff: "easy",
+        words: ["STAGE", "ACTOR", "SCENE", "VOICE"],
+        circles: [[0, 2], [1, 3], [0, 4], [2]],
+        riddle: "Why do we tell actors to 'break a leg'?",
+        answer: "EVERY PLAY HAS A CAST"
+      }
+    ];
+
+    class JumbleSimulator {
+      generate(diff = "medium") {
+        const pool = JUMBLE_RIDDLES.filter(r => r.diff === diff);
+        const item = pool.length ? pool[Math.floor(Math.random() * pool.length)] : JUMBLE_RIDDLES[0];
+        
+        const scrambled = item.words.map(w => {
+          let s = w.split('').sort(() => Math.random() - 0.5).join('');
+          while (s === w) s = w.split('').sort(() => Math.random() - 0.5).join('');
+          return s;
+        });
+
+        return { ...item, scrambled };
+      }
+    }
+
+
+    // =========================================================================
+    // 2. 1-BIT THERMAL DITHERING & CANVAS GRAPHICS GENERATORS
+    // =========================================================================
+
+    // 8x8 Bayer Ordered Dithering Matrix (Standard for 1-bit thermal imaging)
+    const BAYER_8X8 = [
+      [ 0, 32,  8, 40,  2, 34, 10, 42],
+      [48, 16, 56, 24, 50, 18, 58, 26],
+      [12, 44,  4, 36, 14, 46,  6, 38],
+      [60, 28, 52, 20, 62, 30, 54, 22],
+      [ 3, 35, 11, 43,  1, 33,  9, 41],
+      [51, 19, 59, 27, 49, 17, 57, 25],
+      [15, 47,  7, 39, 13, 45,  5, 37],
+      [63, 31, 55, 23, 61, 29, 53, 21]
+    ];
+
+    // Grayscale tone presets for region shading
+    const REGION_TONES = [
+      255, // Region 0: 0% dither (white)
+      230, // Region 1: ~10% dither (fine stipple)
+      205, // Region 2: ~20% dither (light gray)
+      175, // Region 3: ~32% dither (medium light)
+      145, // Region 4: ~45% dither (medium gray)
+      115, // Region 5: ~58% dither (medium dark)
+      85,  // Region 6: ~70% dither (dark gray)
+      55,  // Region 7: ~82% dither (charcoal)
+      25   // Region 8: ~92% dither (heavy dots)
+    ];
+
+    /**
+     * Renders a crisp Queens / Star Battle puzzle using 1-bit dithering
+     * and bold boundaries for territories.
+     */
+    function drawQueensCanvas(canvas, qData, style = 'dithered_bayer', showStars = false) {
+      const size = qData.size;
+      const padding = 22; // space for coordinate numbers
+      const totalWidth = 345; // Fits 80mm receipt width nicely
+      const boardSize = totalWidth - padding;
+      const cellSize = boardSize / size;
+
+      canvas.width = totalWidth;
+      canvas.height = totalWidth;
+      const ctx = canvas.getContext('2d');
+
+      // Paper background
+      ctx.fillStyle = '#fafaf7';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Coordinate numbers
+      ctx.fillStyle = '#111111';
+      ctx.font = 'bold 11px "Space Mono", monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      for (let c = 0; c < size; c++) {
+        const x = padding + c * cellSize + cellSize / 2;
+        ctx.fillText(c + 1, x, padding / 2);
+      }
+      for (let r = 0; r < size; r++) {
+        const y = padding + r * cellSize + cellSize / 2;
+        ctx.fillText(r + 1, padding / 2, y);
+      }
+
+      // 1. Shading regions using 1-bit thermal dithering
+      const imgData = ctx.createImageData(Math.floor(boardSize), Math.floor(boardSize));
+      const bW = imgData.width;
+      const bH = imgData.height;
+
+      for (let py = 0; py < bH; py++) {
+        const r = Math.min(size - 1, Math.floor(py / cellSize));
+        for (let px = 0; px < bW; px++) {
+          const c = Math.min(size - 1, Math.floor(px / cellSize));
+          const regId = qData.regions[r][c];
+
+          let isBurn = false;
+          if (style === 'dithered_hatch') {
+            // Geometric thermal hatch patterns
+            const pat = regId % 8;
+            if (pat === 0) isBurn = false; // white
+            else if (pat === 1) isBurn = ((px + py) % 6 === 0); // 45 deg diagonal
+            else if (pat === 2) isBurn = ((px - py + 1000) % 6 === 0); // -45 deg diagonal
+            else if (pat === 3) isBurn = (px % 4 === 0 || py % 4 === 0); // crosshatch grid
+            else if (pat === 4) isBurn = ((px + py) % 4 === 0); // dense diagonal
+            else if (pat === 5) isBurn = (px % 3 === 0 && py % 3 === 0); // dot stipple
+            else if (pat === 6) isBurn = ((px + py) % 3 === 0 || (px - py + 1000) % 3 === 0); // diamond cross
+            else if (pat === 7) isBurn = (py % 3 === 0); // horizontal pinstripes
+          } else {
+            // Bayer 8x8 matrix dithering (smooth halftone)
+            const tone = REGION_TONES[regId % REGION_TONES.length];
+            const threshold = (BAYER_8X8[py % 8][px % 8] + 0.5) * (255 / 64);
+            isBurn = (tone < threshold);
+          }
+
+          const idx = (py * bW + px) * 4;
+          if (isBurn) {
+            imgData.data[idx]     = 18;  // R
+            imgData.data[idx + 1] = 18;  // G
+            imgData.data[idx + 2] = 18;  // B
+            imgData.data[idx + 3] = 255; // A
+          } else {
+            imgData.data[idx]     = 250;
+            imgData.data[idx + 1] = 250;
+            imgData.data[idx + 2] = 247;
+            imgData.data[idx + 3] = 255;
+          }
+        }
+      }
+      ctx.putImageData(imgData, padding, padding);
+
+      // 2. Draw Territory Boundaries & Grid Lines
+      ctx.lineCap = 'square';
+      for (let r = 0; r < size; r++) {
+        for (let c = 0; c < size; c++) {
+          const x0 = padding + c * cellSize;
+          const y0 = padding + r * cellSize;
+          const x1 = x0 + cellSize;
+          const y1 = y0 + cellSize;
+          const reg = qData.regions[r][c];
+
+          // Bottom border of cell (r, c)
+          const isBottomBoundary = (r === size - 1) || (qData.regions[r + 1][c] !== reg);
+          ctx.beginPath();
+          ctx.lineWidth = isBottomBoundary ? 3.5 : 1;
+          ctx.strokeStyle = isBottomBoundary ? '#111111' : 'rgba(0,0,0,0.22)';
+          ctx.setLineDash(isBottomBoundary ? [] : [2, 2]); // Dotted guide line inside same region!
+          ctx.moveTo(x0, y1);
+          ctx.lineTo(x1, y1);
+          ctx.stroke();
+
+          // Right border of cell (r, c)
+          const isRightBoundary = (c === size - 1) || (qData.regions[r][c + 1] !== reg);
+          ctx.beginPath();
+          ctx.lineWidth = isRightBoundary ? 3.5 : 1;
+          ctx.strokeStyle = isRightBoundary ? '#111111' : 'rgba(0,0,0,0.22)';
+          ctx.setLineDash(isRightBoundary ? [] : [2, 2]);
+          ctx.moveTo(x1, y0);
+          ctx.lineTo(x1, y1);
+          ctx.stroke();
+        }
+      }
+
+      // Reset dashed lines
+      ctx.setLineDash([]);
+
+      // Outer border frame: thick solid black (3.5px)
+      ctx.lineWidth = 3.5;
+      ctx.strokeStyle = '#111111';
+      ctx.strokeRect(padding, padding, boardSize, boardSize);
+
+      // 3. Optional Solution Stars Overlay
+      if (showStars && qData.stars) {
+        ctx.fillStyle = '#d97706'; // Amber star
+        ctx.font = 'bold 20px "Space Mono", monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        for (const s of qData.stars) {
+          const x = padding + s.c * cellSize + cellSize / 2;
+          const y = padding + s.r * cellSize + cellSize / 2;
+          ctx.fillText('★', x, y);
+        }
+      }
+    }
+
+    /**
+     * Renders a high-contrast Sudoku graphic with bold 3x3 borders.
+     */
+    function drawSudokuCanvas(canvas, sData) {
+      const padding = 12;
+      const totalWidth = 345;
+      const boardSize = totalWidth - padding * 2;
+      const cellSize = boardSize / 9;
+
+      canvas.width = totalWidth;
+      canvas.height = totalWidth;
+      const ctx = canvas.getContext('2d');
+
+      // Paper background
+      ctx.fillStyle = '#fafaf7';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Grid lines
+      for (let i = 0; i <= 9; i++) {
+        const isMajor = (i % 3 === 0);
+        ctx.lineWidth = isMajor ? 3.5 : 1;
+        ctx.strokeStyle = isMajor ? '#111111' : 'rgba(0,0,0,0.35)';
+
+        // Horizontal
+        ctx.beginPath();
+        ctx.moveTo(padding, padding + i * cellSize);
+        ctx.lineTo(padding + boardSize, padding + i * cellSize);
+        ctx.stroke();
+
+        // Vertical
+        ctx.beginPath();
+        ctx.moveTo(padding + i * cellSize, padding);
+        ctx.lineTo(padding + i * cellSize, padding + boardSize);
+        ctx.stroke();
+      }
+
+      // Centered digits
+      ctx.fillStyle = '#111111';
+      ctx.font = 'bold 18px "Space Mono", monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      for (let r = 0; r < 9; r++) {
+        for (let c = 0; c < 9; c++) {
+          const val = sData.puzzle[r][c];
+          if (val !== 0) {
+            const x = padding + c * cellSize + cellSize / 2;
+            const y = padding + r * cellSize + cellSize / 2;
+            ctx.fillText(val, x, y);
+          }
+        }
+      }
+    }
+
+    function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+      const words = text.split(' ');
+      let line = '';
+      for (let n = 0; n < words.length; n++) {
+        const testLine = line + words[n] + ' ';
+        const metrics = ctx.measureText(testLine);
+        if (metrics.width > maxWidth && n > 0) {
+          ctx.fillText(line.trim(), x, y);
+          line = words[n] + ' ';
+          y += lineHeight;
+        } else {
+          line = testLine;
+        }
+      }
+      ctx.fillText(line.trim(), x, y);
+      return y + lineHeight;
+    }
+
+    /**
+     * Helper to break text into lines based on maximum pixel width
+     */
+    function getCanvasWrappedLines(ctx, text, maxWidth) {
+      const words = text.split(' ');
+      const lines = [];
+      let currentLine = '';
+      for (let n = 0; n < words.length; n++) {
+        const testLine = currentLine ? currentLine + ' ' + words[n] : words[n];
+        const metrics = ctx.measureText(testLine);
+        if (metrics.width > maxWidth && currentLine) {
+          lines.push(currentLine);
+          currentLine = words[n];
+        } else {
+          currentLine = testLine;
+        }
+      }
+      if (currentLine) lines.push(currentLine);
+      return lines;
+    }
+
+    /**
+     * Renders a syndicated newspaper-style Jumble puzzle with:
+     * - Top "JUMBLE: THAT SCRAMBLED WORD GAME" headline banner
+     * - Scrambled letter clue boxes directly above circle and square answer slots
+     * - Vertical stack of 4 word combos spanning the FULL WIDTH of the receipt
+     * - Riddle clue / question
+     * - Ruled scratchpad lines for working out discovered circled letters
+     * - Large final answer circle boxes matching riddle word lengths
+     */
+    function drawJumbleCanvas(canvas, jData) {
+      const totalWidth = 345;
+      const padding = 12;
+      const innerWidth = totalWidth - padding * 2;
+
+      // Dummy context for text measurement & dynamic height computation
+      const dummyCanvas = document.createElement('canvas');
+      const dummyCtx = dummyCanvas.getContext('2d');
+
+      const instrText = "Unscramble these four Jumbles, one letter to each square, to form four ordinary words.";
+      dummyCtx.font = 'normal 10px "Space Mono", monospace';
+      const instrLines = getCanvasWrappedLines(dummyCtx, instrText, innerWidth);
+
+      dummyCtx.font = 'bold 12px "Space Mono", monospace';
+      const riddleLines = getCanvasWrappedLines(dummyCtx, `"${jData.riddle}"`, innerWidth);
+
+      // Pre-calculate answer row wrapping and sizing
+      const ansWords = jData.answer.split(' ');
+      const wordSpacing = 14;
+
+      // Group words into lines that fit within innerWidth
+      let ansBoxSize = 28;
+      const computeAnsLines = (size) => {
+        const lines = [];
+        let curLine = [];
+        let curW = 0;
+        for (const w of ansWords) {
+          const wW = w.length * size;
+          const addW = curLine.length > 0 ? wordSpacing + wW : wW;
+          if (curW + addW > innerWidth && curLine.length > 0) {
+            lines.push(curLine);
+            curLine = [w];
+            curW = wW;
+          } else {
+            curLine.push(w);
+            curW += addW;
+          }
+        }
+        if (curLine.length > 0) lines.push(curLine);
+        return lines;
+      };
+
+      let ansLines = computeAnsLines(ansBoxSize);
+      if (ansLines.some(l => l.length === 1 && l[0].length * ansBoxSize > innerWidth)) {
+        ansBoxSize = 24;
+        ansLines = computeAnsLines(ansBoxSize);
+      }
+
+      // Word combos dimensions (Full Width)
+      const clueHeight = 28;
+      const cellHeight = 40;
+      const wordGap = 13;
+      const wordsTotalHeight = 4 * (clueHeight + cellHeight + wordGap);
+
+      let calcHeight = padding;
+      calcHeight += 34; // Header title & sub
+      calcHeight += instrLines.length * 14 + 10; // Instructions
+      calcHeight += wordsTotalHeight; // 4 word combos
+      calcHeight += 12; // Divider line
+      calcHeight += 18 + riddleLines.length * 17 + 8; // Riddle Clue Question
+      calcHeight += 16 + 8; // Solve prompt
+      calcHeight += 18 + 2 * 24 + 10; // Scratchpad (heading + 2 ruled lines)
+      calcHeight += 20 + ansLines.length * (ansBoxSize + 10) + 14; // Answer boxes & margin
+      calcHeight += padding;
+
+      canvas.width = totalWidth;
+      canvas.height = Math.ceil(calcHeight);
+      const ctx = canvas.getContext('2d');
+
+      // Paper background
+      ctx.fillStyle = '#fafaf7';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Header: J U M B L E Title Banner
+      ctx.fillStyle = '#111111';
+      ctx.font = '900 24px "Space Mono", sans-serif';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'top';
+      ctx.fillText('J U M B L E', padding, padding);
+
+      ctx.font = 'bold 9.5px "Space Mono", monospace';
+      ctx.fillText('THAT SCRAMBLED WORD GAME', padding + 155, padding + 3);
+      ctx.font = 'normal 8.5px "Space Mono", monospace';
+      ctx.fillStyle = '#555555';
+      ctx.fillText('Syndicated Newspaper Format', padding + 155, padding + 17);
+
+      // Instructions
+      let curY = padding + 34;
+      ctx.fillStyle = '#222222';
+      ctx.font = 'normal 10px "Space Mono", monospace';
+      for (const line of instrLines) {
+        ctx.fillText(line, padding, curY);
+        curY += 14;
+      }
+      curY += 8;
+
+      // 4 Word Combos (Full Receipt Width)
+      for (let i = 0; i < 4; i++) {
+        const scrambled = jData.scrambled[i];
+        const len = scrambled.length;
+        const circles = jData.circles[i];
+
+        // Distribute columns evenly across innerWidth
+        const colPositions = [];
+        for (let c = 0; c <= len; c++) {
+          colPositions.push(padding + Math.round((c * innerWidth) / len));
+        }
+
+        // 1. Clue Box (Scrambled Letters) - spans entire innerWidth
+        ctx.lineWidth = 1.8;
+        ctx.strokeStyle = '#111111';
+        ctx.strokeRect(padding, curY, innerWidth, clueHeight);
+
+        ctx.font = 'bold 16px "Space Mono", monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#111111';
+
+        for (let c = 0; c < len; c++) {
+          const cx0 = colPositions[c];
+          const cx1 = colPositions[c + 1];
+          const colW = cx1 - cx0;
+          const charCenterX = cx0 + colW / 2;
+
+          // Vertical divider between clue letters
+          if (c > 0) {
+            ctx.beginPath();
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.25)';
+            ctx.moveTo(cx0, curY);
+            ctx.lineTo(cx0, curY + clueHeight);
+            ctx.stroke();
+          }
+
+          ctx.fillStyle = '#111111';
+          ctx.fillText(scrambled[c], charCenterX, curY + clueHeight / 2);
+        }
+
+        const answerSquaresY = curY + clueHeight;
+
+        // 2. Row of Answer Squares - spans entire innerWidth
+        for (let c = 0; c < len; c++) {
+          const cx0 = colPositions[c];
+          const cx1 = colPositions[c + 1];
+          const colW = cx1 - cx0;
+
+          ctx.lineWidth = 1.8;
+          ctx.strokeStyle = '#111111';
+          ctx.strokeRect(cx0, answerSquaresY, colW, cellHeight);
+
+          // Inscribed circle clue if designated
+          if (circles.includes(c)) {
+            const radius = Math.min(colW, cellHeight) / 2 - 3.5;
+            ctx.beginPath();
+            ctx.lineWidth = 2.2;
+            ctx.arc(cx0 + colW / 2, answerSquaresY + cellHeight / 2, radius, 0, Math.PI * 2);
+            ctx.stroke();
+          }
+        }
+
+        curY = answerSquaresY + cellHeight + wordGap;
+      }
+
+      // Divider Line
+      ctx.lineWidth = 1.2;
+      ctx.strokeStyle = '#888888';
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath();
+      ctx.moveTo(padding, curY);
+      ctx.lineTo(padding + innerWidth, curY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      curY += 12;
+
+      // Riddle Clue Section
+      ctx.font = 'bold 11px "Space Mono", monospace';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'top';
+      ctx.fillStyle = '#111111';
+      ctx.fillText('RIDDLE QUESTION:', padding, curY);
+      curY += 17;
+
+      ctx.font = 'bold 12.5px "Space Mono", monospace';
+      for (const line of riddleLines) {
+        ctx.fillText(line, padding, curY);
+        curY += 17;
+      }
+      curY += 6;
+
+      ctx.font = 'normal 10px "Space Mono", monospace';
+      ctx.fillStyle = '#444444';
+      ctx.fillText('Now arrange the circled letters to solve the riddle:', padding, curY);
+      curY += 16;
+
+      // Scratchpad lines
+      ctx.font = 'italic 10px "Space Mono", monospace';
+      ctx.fillStyle = '#444444';
+      ctx.fillText('Discovered letters scratchpad (write letters here to brainstorm):', padding, curY);
+      curY += 18;
+
+      ctx.strokeStyle = '#999999';
+      ctx.lineWidth = 1.2;
+      ctx.setLineDash([4, 4]);
+      for (let l = 0; l < 2; l++) {
+        ctx.beginPath();
+        ctx.moveTo(padding, curY);
+        ctx.lineTo(padding + innerWidth, curY);
+        ctx.stroke();
+        curY += 24;
+      }
+      ctx.setLineDash([]);
+      curY += 8;
+
+      // "Answer here:" layout with segmented word circles
+      ctx.font = 'bold 12px "Space Mono", monospace';
+      ctx.fillStyle = '#111111';
+      ctx.fillText('Answer here:', padding, curY);
+      curY += 18;
+
+      for (const lineWords of ansLines) {
+        // Calculate total width of this line to center it across innerWidth
+        let lineW = 0;
+        for (let i = 0; i < lineWords.length; i++) {
+          lineW += lineWords[i].length * ansBoxSize;
+          if (i > 0) lineW += wordSpacing;
+        }
+
+        let curX = padding + Math.max(0, Math.floor((innerWidth - lineW) / 2));
+
+        for (const wStr of lineWords) {
+          for (let c = 0; c < wStr.length; c++) {
+            const bx = curX + c * ansBoxSize;
+            ctx.lineWidth = 1.8;
+            ctx.strokeStyle = '#111111';
+            ctx.strokeRect(bx, curY, ansBoxSize, ansBoxSize);
+
+            // Inscribe circle
+            ctx.beginPath();
+            ctx.lineWidth = 1.8;
+            ctx.arc(bx + ansBoxSize / 2, curY + ansBoxSize / 2, ansBoxSize / 2 - 2.5, 0, Math.PI * 2);
+            ctx.stroke();
+          }
+          curX += wStr.length * ansBoxSize + wordSpacing;
+        }
+
+        curY += ansBoxSize + 10;
+      }
+    }
+
+
+    // =========================================================================
+    // 3. RECEIPT COMPOSER & RENDERER (Mixed Text + Dithered Canvas)
+    // =========================================================================
+
+    const sudokuSim = new SudokuSimulator();
+    const wordSearchSim = new WordSearchSimulator();
+    const nonogramSim = new NonogramSimulator();
+    const queensSim = new QueensSimulator();
+    const jumbleSim = new JumbleSimulator();
+
+    let rawReceiptLines = [];
+
+    function centerLine(str, width = 48) {
+      if (str.length >= width) return str;
+      const left = Math.floor((width - str.length) / 2);
+      const right = width - str.length - left;
+      return ' '.repeat(left) + str + ' '.repeat(right);
+    }
+
+    function keyValue(key, val, width = 48) {
+      const spaces = Math.max(1, width - key.length - val.length);
+      return key + ' '.repeat(spaces) + val;
+    }
+
+    function renderReceipt() {
+      const box = document.getElementById('receipt-box');
+      box.classList.remove('animate-feed');
+      void box.offsetWidth;
+      box.classList.add('animate-feed');
+
+      const items = [];
+      const COLS = 48;
+
+      // Header
+      const today = new Date();
+      const dateStr = today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+      const timeStr = today.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+      // Ruler if enabled
+      if (document.getElementById('toggle-ruler').checked) {
+        items.push({ type: 'ruler', text: '123456789012345678901234567890123456789012345678' });
+        items.push({ type: 'ruler', text: '....|....|....|....|....|....|....|....|....|...' });
+      }
+
+      // Barcode Header decoration
+      items.push({ type: 'center', text: '||| | ||||| || |||||| | |||| ||| ||||| ||' });
+      items.push({ type: 'rule-double', text: '='.repeat(COLS) });
+      items.push({ type: 'title', text: centerLine('MORNING PUZZLES', COLS) });
+      items.push({ type: 'subtitle', text: centerLine('Daily Physical Edition - 80mm Strip', COLS) });
+      items.push({ type: 'text', text: centerLine(dateStr + ' - ' + timeStr, COLS) });
+      items.push({ type: 'rule-double', text: '='.repeat(COLS) });
+      items.push({ type: 'blank', text: '' });
+
+      let solutionsContent = [];
+
+      // 1. QUEENS / STAR BATTLE (Placed at Top for Visibility)
+      if (document.getElementById('toggle-queens').checked) {
+        const variant = document.getElementById('variant-queens').value;
+        const style = document.getElementById('style-queens').value;
+        const showStars = document.getElementById('toggle-queens-solution').checked;
+
+        let size = 8, stars = 1;
+        if (variant === '6x6_1star') { size = 6; stars = 1; }
+        else if (variant === '9x9_2star') { size = 9; stars = 2; }
+
+        const qData = queensSim.generate(size, stars);
+        const title = stars === 1 ? '--- QUEENS PUZZLE ---' : '--- STAR BATTLE (2-STAR) ---';
+        items.push({ type: 'header', text: title });
+        items.push({ type: 'text', text: `Size: ${size}x${size} | Place ${stars} per row, col, region` });
+        items.push({ type: 'text', text: 'Rule: No two Queens/Stars may touch diagonally!' });
+        items.push({ type: 'blank', text: '' });
+
+        if (style === 'ascii_text') {
+          // ASCII letters fallback
+          let colHdr = '     ';
+          for (let c = 0; c < size; c++) colHdr += (c + 1) + ' ';
+          items.push({ type: 'text', text: colHdr });
+          items.push({ type: 'text', text: '    +' + '--'.repeat(size) });
+          const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+          for (let r = 0; r < size; r++) {
+            let rowStr = `  ${r + 1} |`;
+            for (let c = 0; c < size; c++) {
+              rowStr += ' ' + letters[qData.regions[r][c] % 26];
+            }
+            items.push({ type: 'text', text: rowStr });
+          }
+        } else {
+          // 1-Bit Dithered Graphic Mode (Canvas)
+          items.push({
+            type: 'canvas',
+            render: (canvas) => drawQueensCanvas(canvas, qData, style, showStars)
+          });
+          items.push({ type: 'caption', text: centerLine('[ Shaded by 1-Bit Thermal Dithering ]', COLS) });
+        }
+
+        items.push({ type: 'blank', text: '' });
+        items.push({ type: 'rule', text: '-'.repeat(COLS) });
+
+        solutionsContent.push({ name: 'Queens Stars Solution', stars: qData.stars, size });
+      }
+
+      // 2. SUDOKU
+      if (document.getElementById('toggle-sudoku').checked) {
+        const diff = document.getElementById('diff-sudoku').value;
+        const style = document.getElementById('style-sudoku').value;
+        const clues = diff === 'easy' ? 38 : (diff === 'hard' ? 25 : 30);
+        const sData = sudokuSim.generate(clues);
+
+        items.push({ type: 'header', text: '--- SUDOKU ---' });
+        items.push({ type: 'text', text: `Difficulty: ${diff.toUpperCase()} | Clues Given: ${sData.cluesCount}` });
+        items.push({ type: 'blank', text: '' });
+
+        if (style === 'graphic') {
+          // Crisp Graphic Grid
+          items.push({
+            type: 'canvas',
+            render: (canvas) => drawSudokuCanvas(canvas, sData)
+          });
+        } else {
+          // Monospaced ASCII Grid
+          items.push({ type: 'text', text: '      +-------+-------+-------+' });
+          for (let r = 0; r < 9; r++) {
+            let line = '      | ';
+            for (let c = 0; c < 9; c++) {
+              const v = sData.puzzle[r][c];
+              line += (v === 0 ? '. ' : v + ' ');
+              if (c === 2 || c === 5) line += '| ';
+            }
+            line += '|';
+            items.push({ type: 'text', text: line });
+            if (r === 2 || r === 5) {
+              items.push({ type: 'text', text: '      +-------+-------+-------+' });
+            }
+          }
+          items.push({ type: 'text', text: '      +-------+-------+-------+' });
+        }
+
+        items.push({ type: 'blank', text: '' });
+        items.push({ type: 'rule', text: '-'.repeat(COLS) });
+
+        solutionsContent.push({ name: 'Sudoku Solution', solution: sData.solution });
+      }
+
+      // 3. WORD SEARCH
+      if (document.getElementById('toggle-wordsearch').checked) {
+        let theme = document.getElementById('theme-wordsearch').value;
+        const wsData = wordSearchSim.generate(theme, 12);
+
+        items.push({ type: 'header', text: '--- WORD SEARCH ---' });
+        items.push({ type: 'text', text: `Theme: ${wsData.theme} | Words: ${wsData.words.length}` });
+        items.push({ type: 'blank', text: '' });
+
+        for (let r = 0; r < 12; r++) {
+          const rowStr = wsData.grid[r].join(' ');
+          items.push({ type: 'text', text: centerLine(rowStr, COLS) });
+        }
+        items.push({ type: 'blank', text: '' });
+        items.push({ type: 'text', text: 'Find these words in the grid above:' });
+        
+        for (let i = 0; i < wsData.words.length; i += 2) {
+          const col1 = `[ ] ${wsData.words[i]}`;
+          const col2 = wsData.words[i + 1] ? `[ ] ${wsData.words[i + 1]}` : '';
+          items.push({ type: 'text', text: '  ' + keyValue(col1, col2, 44) });
+        }
+        items.push({ type: 'blank', text: '' });
+        items.push({ type: 'rule', text: '-'.repeat(COLS) });
+      }
+
+      // 4. NONOGRAM / PICROSS
+      if (document.getElementById('toggle-nonogram').checked) {
+        const size = parseInt(document.getElementById('size-nonogram').value, 10);
+        const nData = nonogramSim.generate(size);
+
+        items.push({ type: 'header', text: '--- NONOGRAM / PICROSS ---' });
+        items.push({ type: 'text', text: `Size: ${size}x${size} | Binary Picture Logic` });
+        items.push({ type: 'blank', text: '' });
+
+        // Column clues
+        const maxCol = Math.max(...nData.colClues.map(c => c.length));
+        for (let l = 0; l < maxCol; l++) {
+          let line = '       ';
+          for (let c = 0; c < size; c++) {
+            const clues = nData.colClues[c];
+            const pad = maxCol - clues.length;
+            if (l >= pad) {
+              const val = clues[l - pad];
+              line += (val < 10 ? ' ' : '') + val + ' ';
+            } else {
+              line += '   ';
+            }
+          }
+          items.push({ type: 'text', text: line });
+        }
+
+        let sep = '      +';
+        for (let c = 0; c < size; c++) sep += '---';
+        items.push({ type: 'text', text: sep });
+
+        // Rows
+        for (let r = 0; r < size; r++) {
+          const clueStr = nData.rowClues[r].join(' ');
+          const padded = clueStr.padStart(5, ' ') + ' | ';
+          let cells = '';
+          for (let c = 0; c < size; c++) cells += ' . ';
+          items.push({ type: 'text', text: padded + cells });
+        }
+        items.push({ type: 'blank', text: '' });
+        items.push({ type: 'rule', text: '-'.repeat(COLS) });
+
+        solutionsContent.push({ name: 'Nonogram Solution', grid: nData.grid, size });
+      }
+
+      // 5. DAILY JUMBLE
+      if (document.getElementById('toggle-jumble').checked) {
+        const diff = document.getElementById('diff-jumble').value;
+        const jStyle = document.getElementById('style-jumble').value;
+        const jData = jumbleSim.generate(diff);
+
+        if (jStyle === 'graphic') {
+          items.push({
+            type: 'canvas',
+            render: (canvas) => drawJumbleCanvas(canvas, jData)
+          });
+          items.push({ type: 'caption', text: '★ Syndicated Jumble Graphic - 80mm Thermal Strip' });
+          items.push({ type: 'blank', text: '' });
+        } else {
+          items.push({ type: 'header', text: '--- DAILY JUMBLE ---' });
+          items.push({ type: 'text', text: 'Unscramble words, then solve the riddle below:' });
+          items.push({ type: 'text', text: 'Circled letters ( ) form the punchline answer!' });
+          items.push({ type: 'blank', text: '' });
+
+          for (let i = 0; i < 4; i++) {
+            const scram = jData.scrambled[i];
+            const circles = jData.circles[i];
+            
+            let slotStr = '';
+            for (let c = 0; c < scram.length; c++) {
+              if (circles.includes(c)) slotStr += `(${scram[c]}) `;
+              else slotStr += `[${scram[c]}] `;
+            }
+            const left = `  ${scram.padEnd(10, ' ')}`;
+            items.push({ type: 'text', text: keyValue(left, slotStr + '  _______', 46) });
+          }
+
+          items.push({ type: 'blank', text: '' });
+          items.push({ type: 'text', text: 'Riddle Question:' });
+          items.push({ type: 'text', text: `Q: "${jData.riddle}"` });
+          items.push({ type: 'text', text: 'A: _________________________________________' });
+          items.push({ type: 'blank', text: '' });
+        }
+
+        solutionsContent.push({ name: 'Jumble Answer', answer: jData.answer, words: jData.words });
+      }
+
+      // Optional Solutions Key
+      if (document.getElementById('toggle-solutions').checked && solutionsContent.length > 0) {
+        items.push({ type: 'rule', text: '-'.repeat(COLS) });
+        items.push({ type: 'header', text: centerLine('[ SOLUTION KEY ]', COLS) });
+        for (const item of solutionsContent) {
+          items.push({ type: 'subtitle', text: `• ${item.name}:` });
+          if (item.answer) {
+            items.push({ type: 'text', text: `  Answer: ${item.answer}` });
+            items.push({ type: 'text', text: `  Words:  ${item.words.join(', ')}` });
+          } else if (item.stars) {
+            const starsStr = item.stars.map(s => `(${s.r + 1},${s.c + 1})`).join(' ');
+            items.push({ type: 'text', text: `  Stars at (row,col): ${starsStr}` });
+          }
+        }
+        items.push({ type: 'blank', text: '' });
+      }
+
+      // Footer
+      items.push({ type: 'rule-double', text: '='.repeat(COLS) });
+      items.push({ type: 'center', text: centerLine('Good luck & have a great morning!', COLS) });
+      items.push({ type: 'center', text: centerLine('morningpuzzles.local - 80mm POS Receipt', COLS) });
+      items.push({ type: 'center', text: centerLine('*** PAPER CUT ***', COLS) });
+      items.push({ type: 'rule-double', text: '='.repeat(COLS) });
+
+      // Render to DOM
+      rawReceiptLines = items.filter(i => i.text).map(i => i.text);
+      renderDomReceipt(items);
+
+      // Update statistics
+      updateStats(items.length);
+    }
+
+    function renderDomReceipt(items) {
+      const box = document.getElementById('receipt-box');
+      box.innerHTML = '';
+      const isBurn = document.getElementById('toggle-burn').checked;
+
+      for (const item of items) {
+        let classes = 'whitespace-pre leading-snug ';
+        if (isBurn) classes += 'filter drop-shadow-[0_0_0.2px_rgba(0,0,0,0.7)] ';
+
+        if (item.type === 'canvas') {
+          const wrapper = document.createElement('div');
+          wrapper.className = 'w-full flex justify-center my-2.5';
+          const canvas = document.createElement('canvas');
+          canvas.className = 'thermal-canvas rounded-sm border border-slate-400/40 shadow-sm';
+          wrapper.appendChild(canvas);
+          box.appendChild(wrapper);
+          item.render(canvas);
+        } else {
+          const el = document.createElement('div');
+          if (item.type === 'title') {
+            el.className = classes + 'font-bold text-base tracking-wider text-center';
+          } else if (item.type === 'header') {
+            el.className = classes + 'font-bold text-sm mt-1';
+          } else if (item.type === 'rule-double') {
+            el.className = classes + 'font-bold text-slate-800';
+          } else if (item.type === 'rule') {
+            el.className = classes + 'text-slate-400';
+          } else if (item.type === 'ruler') {
+            el.className = classes + 'text-blue-600 bg-blue-50 text-[11px]';
+          } else if (item.type === 'caption') {
+            el.className = classes + 'text-[10px] text-slate-500 text-center italic';
+          } else if (item.type === 'blank') {
+            el.className = 'h-2';
+          } else {
+            el.className = classes;
+          }
+          el.textContent = item.text || '';
+          box.appendChild(el);
+        }
+      }
+    }
+
+    function updateStats(itemCount) {
+      const mm = Math.round(itemCount * 3.8);
+      const inches = (mm / 25.4).toFixed(1);
+      document.getElementById('stat-height').innerText = `~${mm} mm (${inches} in)`;
+    }
+
+    // =========================================================================
+    // 4. EVENT LISTENERS & INITIALIZATION
+    // =========================================================================
+    
+    // Randomize buttons
+    document.getElementById('btn-randomize-top').addEventListener('click', () => {
+      const icon = document.getElementById('dice-icon');
+      icon.classList.add('rotate-180');
+      setTimeout(() => icon.classList.remove('rotate-180'), 300);
+      renderReceipt();
+    });
+
+    document.getElementById('btn-randomize-panel').addEventListener('click', () => {
+      renderReceipt();
+    });
+
+    // Copy raw monospace text
+    document.getElementById('btn-copy-raw').addEventListener('click', () => {
+      const fullText = rawReceiptLines.join('\n');
+      navigator.clipboard.writeText(fullText).then(() => {
+        const btnText = document.getElementById('copy-btn-text');
+        btnText.innerText = '✓ Copied to Clipboard!';
+        setTimeout(() => btnText.innerText = 'Copy Receipt Monospace Text', 2000);
+      });
+    });
+
+    // Re-render on input changes
+    const inputs = [
+      'toggle-queens', 'variant-queens', 'style-queens', 'toggle-queens-solution',
+      'toggle-sudoku', 'diff-sudoku', 'style-sudoku',
+      'toggle-wordsearch', 'theme-wordsearch',
+      'toggle-nonogram', 'size-nonogram',
+      'toggle-jumble', 'diff-jumble', 'style-jumble',
+      'toggle-ruler', 'toggle-solutions', 'toggle-burn'
+    ];
+    inputs.forEach(id => {
+      document.getElementById(id).addEventListener('change', renderReceipt);
+    });
+
+    // Initial render on page load
+    window.addEventListener('DOMContentLoaded', renderReceipt);
+  </script>
+</body>
+</html>
