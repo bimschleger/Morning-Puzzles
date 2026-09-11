@@ -241,14 +241,23 @@ def render_jumble_raster(jumble_data: Dict[str, Any], target_width: int = 576) -
     cur_y += 28
 
     answer_words = jumble_data.get("answer", "").split(" ")
-    ans_box = 44
+    ans_box = cell_height  # Exactly matches clue answer squares height (68 dots)
     word_spacing = 20
+    max_boxes = max(1, inner_width // ans_box)
+
+    word_tokens = []
+    for w in answer_words:
+        if len(w) > max_boxes:
+            for i in range(0, len(w), max_boxes):
+                word_tokens.append(w[i:i + max_boxes])
+        else:
+            word_tokens.append(w)
 
     # Group words into lines
     lines = []
     cur_line = []
     cur_w = 0
-    for w in answer_words:
+    for w in word_tokens:
         w_w = len(w) * ans_box
         add_w = word_spacing + w_w if cur_line else w_w
         if cur_w + add_w > inner_width and cur_line:
@@ -268,8 +277,11 @@ def render_jumble_raster(jumble_data: Dict[str, Any], target_width: int = 576) -
         for w_str in line:
             for c in range(len(w_str)):
                 bx = cur_x + c * ans_box
-                draw.rectangle([bx, cur_y, bx + ans_box, cur_y + ans_box], outline=0, width=3)
-                draw.ellipse([bx + 4, cur_y + 4, bx + ans_box - 4, cur_y + ans_box - 4], outline=0, width=3)
+                draw.rectangle([bx, cur_y, bx + ans_box, cur_y + ans_box], outline=0, width=4)
+                radius = ans_box // 2 - 6
+                circ_cx = bx + ans_box // 2
+                circ_cy = cur_y + ans_box // 2
+                draw.ellipse([circ_cx - radius, circ_cy - radius, circ_cx + radius, circ_cy + radius], outline=0, width=4)
             cur_x += len(w_str) * ans_box + word_spacing
 
         cur_y += ans_box + 16
