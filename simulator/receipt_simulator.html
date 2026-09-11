@@ -236,6 +236,14 @@
               <option value="5" selected>5x5 (Quick Solver)</option>
               <option value="8">8x8 (Standard)</option>
               <option value="10">10x10 (Challenge)</option>
+              <option value="15">15x15 (Master Picross)</option>
+            </select>
+          </div>
+          <div class="flex items-center justify-between pl-6 text-xs text-slate-400">
+            <span class="text-amber-300 font-medium">Render Style:</span>
+            <select id="style-nonogram" class="bg-slate-800 border border-amber-500/50 text-amber-400 font-semibold rounded-lg px-2 py-1 text-xs outline-none focus:border-amber-500">
+              <option value="graphic" selected>🖼️ Crisp Thermal Grid (Full Width)</option>
+              <option value="ascii">🔤 Legacy Monospaced ASCII</option>
             </select>
           </div>
         </div>
@@ -883,6 +891,224 @@
       }
     }
 
+    /**
+     * Renders a high-contrast 1-bit thermal Nonogram (Picross) grid
+     * with column clues, row clues, major block dividers, and full-width layout.
+     * Supports any difficulty size (5x5, 8x8, 10x10, 15x15).
+     */
+    function drawNonogramCanvas(canvas, nData, showSolution = false) {
+      const size = nData.size || 5;
+      const padding = 12;
+      const totalWidth = 345;
+      const innerWidth = totalWidth - padding * 2; // 321px
+
+      const colClues = nData.colClues;
+      const rowClues = nData.rowClues;
+
+      const maxColClues = Math.max(...colClues.map(c => c.length), 1);
+      const maxRowClues = Math.max(...rowClues.map(r => r.length), 1);
+
+      // Determine cell size and typography based on board size
+      let cellSize;
+      let colClueItemHeight;
+      let rowClueCharWidth;
+      let clueFont;
+      let labelFont;
+      let dotRadius;
+      let majorInterval; // Major line frequency (5 for 5/10/15, 4 for 8x8)
+
+      if (size <= 5) {
+        cellSize = 46;
+        colClueItemHeight = 18;
+        rowClueCharWidth = 16;
+        clueFont = 'bold 13px "Space Mono", monospace';
+        labelFont = 'bold 11px "Space Mono", monospace';
+        dotRadius = 1.5;
+        majorInterval = 5;
+      } else if (size <= 8) {
+        cellSize = 31;
+        colClueItemHeight = 16;
+        rowClueCharWidth = 14;
+        clueFont = 'bold 11px "Space Mono", monospace';
+        labelFont = 'bold 10px "Space Mono", monospace';
+        dotRadius = 1.2;
+        majorInterval = 4;
+      } else if (size <= 10) {
+        cellSize = 24;
+        colClueItemHeight = 15;
+        rowClueCharWidth = 13;
+        clueFont = 'bold 10px "Space Mono", monospace';
+        labelFont = 'bold 9px "Space Mono", monospace';
+        dotRadius = 1.0;
+        majorInterval = 5;
+      } else {
+        // 15x15 or larger
+        cellSize = 16;
+        colClueItemHeight = 13;
+        rowClueCharWidth = 11;
+        clueFont = 'bold 8.5px "Space Mono", monospace';
+        labelFont = 'bold 8px "Space Mono", monospace';
+        dotRadius = 0.8;
+        majorInterval = 5;
+      }
+
+      // Grid dimensions
+      const gridSize = cellSize * size;
+      // Row clues occupy whatever width is left to reach exactly innerWidth (321px)
+      const rowClueWidth = innerWidth - gridSize;
+
+      // Col clues height: room for numbers + padding
+      const colClueHeight = Math.max(28, maxColClues * colClueItemHeight + 8);
+
+      const totalHeight = padding + colClueHeight + gridSize + padding;
+      canvas.width = totalWidth;
+      canvas.height = Math.ceil(totalHeight);
+      const ctx = canvas.getContext('2d');
+
+      // 1. Background
+      ctx.fillStyle = '#fafaf7';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const gridX = padding + rowClueWidth;
+      const gridY = padding + colClueHeight;
+
+      // 2. Top-Left Header Tile
+      ctx.fillStyle = '#eeebe3';
+      ctx.fillRect(padding, padding, rowClueWidth, colClueHeight);
+      ctx.strokeStyle = '#111111';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(padding, padding, rowClueWidth, colClueHeight);
+
+      // Label inside top-left tile
+      ctx.fillStyle = '#555555';
+      ctx.font = labelFont;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(`${size}×${size}`, padding + rowClueWidth / 2, padding + colClueHeight / 2 - 4);
+      ctx.font = 'normal 8px "Space Mono", monospace';
+      ctx.fillStyle = '#777777';
+      ctx.fillText('PICROSS', padding + rowClueWidth / 2, padding + colClueHeight / 2 + 7);
+
+      // 3. Column Clues (Top Area)
+      ctx.fillStyle = '#fafaf7';
+      ctx.fillRect(gridX, padding, gridSize, colClueHeight);
+
+      ctx.fillStyle = '#111111';
+      ctx.font = clueFont;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      for (let c = 0; c < size; c++) {
+        const colCenterX = gridX + c * cellSize + cellSize / 2;
+        const clues = colClues[c];
+
+        // Bottom-align clue numbers right above gridY
+        for (let k = 0; k < clues.length; k++) {
+          const clueVal = clues[k];
+          const distFromBottom = (clues.length - 1 - k) * colClueItemHeight;
+          const clueY = gridY - 8 - distFromBottom;
+          ctx.fillText(clueVal, colCenterX, clueY);
+        }
+
+        // Subtle column divider lines in clue header
+        if (c > 0) {
+          const isMajor = (c % majorInterval === 0);
+          ctx.beginPath();
+          ctx.lineWidth = isMajor ? 2.2 : 0.8;
+          ctx.strokeStyle = isMajor ? '#111111' : 'rgba(0,0,0,0.18)';
+          ctx.moveTo(gridX + c * cellSize, padding);
+          ctx.lineTo(gridX + c * cellSize, gridY);
+          ctx.stroke();
+        }
+      }
+
+      // Border around column clues area
+      ctx.strokeStyle = '#111111';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(gridX, padding, gridSize, colClueHeight);
+
+      // 4. Row Clues (Left Area)
+      ctx.fillStyle = '#fafaf7';
+      ctx.fillRect(padding, gridY, rowClueWidth, gridSize);
+
+      ctx.fillStyle = '#111111';
+      ctx.font = clueFont;
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'middle';
+
+      for (let r = 0; r < size; r++) {
+        const rowCenterY = gridY + r * cellSize + cellSize / 2;
+        const clues = rowClues[r];
+
+        // Right-align clue numbers right before gridX
+        for (let k = 0; k < clues.length; k++) {
+          const clueVal = clues[k];
+          const distFromRight = (clues.length - 1 - k) * rowClueCharWidth;
+          const clueX = gridX - 8 - distFromRight;
+          ctx.fillText(clueVal, clueX, rowCenterY);
+        }
+
+        // Subtle row divider lines in clue header
+        if (r > 0) {
+          const isMajor = (r % majorInterval === 0);
+          ctx.beginPath();
+          ctx.lineWidth = isMajor ? 2.2 : 0.8;
+          ctx.strokeStyle = isMajor ? '#111111' : 'rgba(0,0,0,0.18)';
+          ctx.moveTo(padding, gridY + r * cellSize);
+          ctx.lineTo(gridX, gridY + r * cellSize);
+          ctx.stroke();
+        }
+      }
+
+      // Border around row clues area
+      ctx.strokeStyle = '#111111';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(padding, gridY, rowClueWidth, gridSize);
+
+      // 5. The Grid & Cells
+      for (let r = 0; r < size; r++) {
+        for (let c = 0; c < size; c++) {
+          const cx = gridX + c * cellSize;
+          const cy = gridY + r * cellSize;
+
+          if (showSolution && nData.grid && nData.grid[r][c] === 1) {
+            // Shaded cell for solution
+            ctx.fillStyle = '#111111';
+            ctx.fillRect(cx, cy, cellSize, cellSize);
+          } else {
+            // Unsolved cell: tactile tiny center dot guide
+            ctx.fillStyle = '#bbbbbb';
+            ctx.beginPath();
+            ctx.arc(cx + cellSize / 2, cy + cellSize / 2, dotRadius, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+      }
+
+      // 6. Grid Lines (Major & Minor)
+      for (let i = 0; i <= size; i++) {
+        const isMajor = (i % majorInterval === 0) || (i === size);
+        ctx.beginPath();
+        ctx.lineWidth = isMajor ? 2.5 : 1.0;
+        ctx.strokeStyle = isMajor ? '#111111' : 'rgba(0, 0, 0, 0.28)';
+
+        // Horizontal line
+        ctx.moveTo(gridX, gridY + i * cellSize);
+        ctx.lineTo(gridX + gridSize, gridY + i * cellSize);
+        ctx.stroke();
+
+        // Vertical line
+        ctx.moveTo(gridX + i * cellSize, gridY);
+        ctx.lineTo(gridX + i * cellSize, gridY + gridSize);
+        ctx.stroke();
+      }
+
+      // Outer heavy frame around the entire puzzle composite
+      ctx.lineWidth = 3.0;
+      ctx.strokeStyle = '#111111';
+      ctx.strokeRect(padding, padding, innerWidth, colClueHeight + gridSize);
+    }
+
     function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
       const words = text.split(' ');
       let line = '';
@@ -1362,43 +1588,53 @@
       // 4. NONOGRAM / PICROSS
       if (document.getElementById('toggle-nonogram').checked) {
         const size = parseInt(document.getElementById('size-nonogram').value, 10);
+        const nStyle = document.getElementById('style-nonogram').value;
         const nData = nonogramSim.generate(size);
 
-        items.push({ type: 'header', text: '--- NONOGRAM / PICROSS ---' });
-        items.push({ type: 'text', text: `Size: ${size}x${size} | Binary Picture Logic` });
-        items.push({ type: 'blank', text: '' });
+        if (nStyle === 'graphic') {
+          items.push({
+            type: 'canvas',
+            render: (canvas) => drawNonogramCanvas(canvas, nData)
+          });
+          items.push({ type: 'caption', text: `★ ${size}x${size} Nonogram (Picross) - Thermal 203 DPI` });
+          items.push({ type: 'blank', text: '' });
+        } else {
+          items.push({ type: 'header', text: '--- NONOGRAM / PICROSS ---' });
+          items.push({ type: 'text', text: `Size: ${size}x${size} | Binary Picture Logic` });
+          items.push({ type: 'blank', text: '' });
 
-        // Column clues
-        const maxCol = Math.max(...nData.colClues.map(c => c.length));
-        for (let l = 0; l < maxCol; l++) {
-          let line = '       ';
-          for (let c = 0; c < size; c++) {
-            const clues = nData.colClues[c];
-            const pad = maxCol - clues.length;
-            if (l >= pad) {
-              const val = clues[l - pad];
-              line += (val < 10 ? ' ' : '') + val + ' ';
-            } else {
-              line += '   ';
+          // Column clues
+          const maxCol = Math.max(...nData.colClues.map(c => c.length));
+          for (let l = 0; l < maxCol; l++) {
+            let line = '       ';
+            for (let c = 0; c < size; c++) {
+              const clues = nData.colClues[c];
+              const pad = maxCol - clues.length;
+              if (l >= pad) {
+                const val = clues[l - pad];
+                line += (val < 10 ? ' ' : '') + val + ' ';
+              } else {
+                line += '   ';
+              }
             }
+            items.push({ type: 'text', text: line });
           }
-          items.push({ type: 'text', text: line });
-        }
 
-        let sep = '      +';
-        for (let c = 0; c < size; c++) sep += '---';
-        items.push({ type: 'text', text: sep });
+          let sep = '      +';
+          for (let c = 0; c < size; c++) sep += '---';
+          items.push({ type: 'text', text: sep });
 
-        // Rows
-        for (let r = 0; r < size; r++) {
-          const clueStr = nData.rowClues[r].join(' ');
-          const padded = clueStr.padStart(5, ' ') + ' | ';
-          let cells = '';
-          for (let c = 0; c < size; c++) cells += ' . ';
-          items.push({ type: 'text', text: padded + cells });
+          // Rows
+          for (let r = 0; r < size; r++) {
+            const clueStr = nData.rowClues[r].join(' ');
+            const padded = clueStr.padStart(5, ' ') + ' | ';
+            let cells = '';
+            for (let c = 0; c < size; c++) cells += ' . ';
+            items.push({ type: 'text', text: padded + cells });
+          }
+          items.push({ type: 'blank', text: '' });
+          items.push({ type: 'rule', text: '-'.repeat(COLS) });
         }
-        items.push({ type: 'blank', text: '' });
-        items.push({ type: 'rule', text: '-'.repeat(COLS) });
 
         solutionsContent.push({ name: 'Nonogram Solution', grid: nData.grid, size });
       }
@@ -1457,6 +1693,15 @@
           } else if (item.stars) {
             const starsStr = item.stars.map(s => `(${s.r + 1},${s.c + 1})`).join(' ');
             items.push({ type: 'text', text: `  Stars at (row,col): ${starsStr}` });
+          } else if (item.grid) {
+            items.push({ type: 'text', text: `  ${item.size}x${item.size} Solved Pattern (■=Fill, ·=Blank):` });
+            for (let r = 0; r < item.size; r++) {
+              let rowStr = '  ';
+              for (let c = 0; c < item.size; c++) {
+                rowStr += item.grid[r][c] === 1 ? '■ ' : '· ';
+              }
+              items.push({ type: 'text', text: rowStr });
+            }
           }
         }
         items.push({ type: 'blank', text: '' });
@@ -1556,7 +1801,7 @@
       'toggle-queens', 'variant-queens', 'style-queens', 'toggle-queens-solution',
       'toggle-sudoku', 'diff-sudoku', 'style-sudoku',
       'toggle-wordsearch', 'theme-wordsearch',
-      'toggle-nonogram', 'size-nonogram',
+      'toggle-nonogram', 'size-nonogram', 'style-nonogram',
       'toggle-jumble', 'diff-jumble', 'style-jumble',
       'toggle-ruler', 'toggle-solutions', 'toggle-burn'
     ];

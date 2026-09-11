@@ -292,3 +292,124 @@ def render_jumble_raster(jumble_data: Dict[str, Any], target_width: int = 576) -
     final_img = img.crop((0, 0, target_width, min(cur_y, total_height)))
     return pil_to_escpos(final_img)
 
+
+def render_nonogram_raster(nonogram_data: Dict[str, Any], target_width: int = 576, show_solution: bool = False) -> bytes:
+    """
+    Renders a high-contrast 1-bit thermal Nonogram (Picross) grid as ESC/POS GS v 0 raster bytes.
+    Supports any difficulty size (5x5, 8x8, 10x10, 15x15) and stretches across the full 576-dot width.
+    """
+    try:
+        from PIL import Image, ImageDraw, ImageFont
+    except ImportError:
+        raise RuntimeError("Pillow is required for Nonogram graphical rendering. Install via: pip install Pillow")
+
+    size = nonogram_data.get("rows", nonogram_data.get("size", 5))
+    row_clues = nonogram_data.get("row_clues", [])
+    col_clues = nonogram_data.get("col_clues", [])
+    solution = nonogram_data.get("solution", nonogram_data.get("grid", []))
+
+    padding = 24
+    inner_width = target_width - padding * 2  # 528 dots
+
+    if size <= 5:
+        cell_size = 76
+        major_interval = 5
+        font_size = 24
+        label_size = 20
+    elif size <= 8:
+        cell_size = 50
+        major_interval = 4
+        font_size = 20
+        label_size = 18
+    elif size <= 10:
+        cell_size = 40
+        major_interval = 5
+        font_size = 18
+        label_size = 16
+    else:
+        cell_size = 26
+        major_interval = 5
+        font_size = 14
+        label_size = 14
+
+    grid_size = cell_size * size
+    row_clue_width = inner_width - grid_size
+
+    max_col_clues = max((len(c) for c in col_clues), default=1)
+    col_clue_item_h = max(24, int(cell_size * 0.55))
+    col_clue_height = max(50, max_col_clues * col_clue_item_h + 16)
+
+    total_height = padding + col_clue_height + grid_size + padding
+    img = Image.new("L", (target_width, total_height), 255)
+    draw = ImageDraw.Draw(img)
+
+    try:
+        font_clue = ImageFont.truetype("Courier.ttf", font_size)
+        font_label = ImageFont.truetype("Arial.ttf", label_size)
+    except IOError:
+        font_clue = ImageFont.load_default()
+        font_label = ImageFont.load_default()
+
+    grid_x = padding + row_clue_width
+    grid_y = padding + col_clue_height
+
+    # 1. Top-Left Corner Tile
+    draw.rectangle([padding, padding, grid_x, grid_y], fill=240, outline=0, width=3)
+    draw.text((padding + row_clue_width // 2 - 20, padding + col_clue_height // 2 - 12), f"{size}x{size}", fill=0, font=font_label)
+
+    # 2. Column Clues (Top Area)
+    draw.rectangle([grid_x, padding, grid_x + grid_size, grid_y], outline=0, width=3)
+    for c in range(size):
+        col_cx = grid_x + c * cell_size + cell_size // 2
+        clues = col_clues[c] if c < len(col_clues) else [0]
+        for k, val in enumerate(clues):
+            dist_from_bottom = (len(clues) - 1 - k) * col_clue_item_h
+            val_y = grid_y - 12 - dist_from_bottom
+            draw.text((col_cx - 6, val_y), str(val), fill=0, font=font_clue)
+
+        if c > 0:
+            is_major = (c % major_interval == 0)
+            draw.line([grid_x + c * cell_size, padding, grid_x + c * cell_size, grid_y], fill=0 if is_major else 180, width=3 if is_major else 1)
+
+    # 3. Row Clues (Left Area)
+    draw.rectangle([padding, grid_y, grid_x, grid_y + grid_size], outline=0, width=3)
+    row_clue_char_w = max(18, int(cell_size * 0.45))
+    for r in range(size):
+        row_cy = grid_y + r * cell_size + cell_size // 2 - font_size // 2
+        clues = row_clues[r] if r < len(row_clues) else [0]
+        for k, val in enumerate(clues):
+            dist_from_right = (len(clues) - 1 - k) * row_clue_char_w
+            val_x = grid_x - 14 - dist_from_right
+            draw.text((val_x, row_cy), str(val), fill=0, font=font_clue)
+
+        if r > 0:
+            is_major = (r % major_interval == 0)
+            draw.line([padding, grid_y + r * cell_size, grid_x, grid_y + r * cell_size], fill=0 if is_major else 180, width=3 if is_major else 1)
+
+    # 4. Grid Cells
+    for r in range(size):
+        for c in range(size):
+            cx = grid_x + c * cell_size
+            cy = grid_y + r * cell_size
+            if show_solution and solution and r < len(solution) and c < len(solution[r]) and solution[r][c] == 1:
+                draw.rectangle([cx, cy, cx + cell_size, cy + cell_size], fill=0)
+            else:
+                # Tactile center dot guide
+                dot_r = 2
+                draw.ellipse([cx + cell_size // 2 - dot_r, cy + cell_size // 2 - dot_r, cx + cell_size // 2 + dot_r, cy + cell_size // 2 + dot_r], fill=160)
+
+    # 5. Grid Lines (Major & Minor)
+    for i in range(size + 1):
+        is_major = (i % major_interval == 0) or (i == size)
+        w = 4 if is_major else 1
+        color = 0 if is_major else 160
+        # Horizontal
+        draw.line([grid_x, grid_y + i * cell_size, grid_x + grid_size, grid_y + i * cell_size], fill=color, width=w)
+        # Vertical
+        draw.line([grid_x + i * cell_size, grid_y, grid_x + i * cell_size, grid_y + grid_size], fill=color, width=w)
+
+    # Outer border
+    draw.rectangle([padding, padding, padding + inner_width, grid_y + grid_size], outline=0, width=5)
+    return pil_to_escpos(img)
+
+
