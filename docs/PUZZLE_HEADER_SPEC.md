@@ -61,6 +61,7 @@ All existing games—and any future games added to Morning Puzzles—must strict
 | **Search** | `--- SEARCH ---` | **No** *(Theme)* | *None* | Letter grid starts directly below header. Replaces legacy "Word Search". `★ THEME: [NAME]` placed with checklist words below grid. |
 | **Nonogram** | `--- NONOGRAM ---` | **Yes** | `EASY` (5x5), `MEDIUM` (8x8), `HARD` (10x10), `EXPERT` (15x15) | Board with row/column clues follows difficulty. Single-word name replaces "Nonogram / Picross". |
 | **Jumble** | `--- JUMBLE ---` | **Yes** | `EASY`, `MEDIUM`, `HARD` | Clue boxes start directly below header. Single-word name replaces "Daily Jumble". |
+| **Binary** | `--- BINARY ---` | **Yes** | `EASY` (6x6), `MEDIUM` (8x8), `HARD` (8x8) | Pure grid with 0 and 1 clues follows difficulty. |
 
 ---
 

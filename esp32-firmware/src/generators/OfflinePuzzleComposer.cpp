@@ -50,8 +50,14 @@ bool OfflinePuzzleComposer::generateAndPrintReceipt(EscPosPrinter& printer, cons
     Serial.println("[COMPOSER] Generating Daily Jumble...");
     _jumble.generate(JUMBLE_MEDIUM);
     _jumble.printToReceipt(printer);
+    printer.printHorizontalLine('-');
 
-    // 7. Footer
+    // 7. Generate and print Binary
+    Serial.println("[COMPOSER] Generating Binary...");
+    _binary.generate(BINARY_MEDIUM);
+    _binary.printToReceipt(printer, BINARY_MEDIUM);
+
+    // 8. Footer
     printer.printDoubleLine();
     printer.setAlign(ALIGN_CENTER);
     printer.println("Printed on ESP32 80mm Thermal Receipt");

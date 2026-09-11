@@ -47,6 +47,9 @@ public:
 #include "../src/generators/JumbleGen.h"
 #include "../src/generators/JumbleGen.cpp"
 
+#include "../src/generators/BinaryGen.h"
+#include "../src/generators/BinaryGen.cpp"
+
 #include "../src/generators/OfflinePuzzleComposer.h"
 #include "../src/generators/OfflinePuzzleComposer.cpp"
 
@@ -61,7 +64,7 @@ int main() {
 
     bool ok = composer.generateAndPrintReceipt(printer, "Monday, September 14, 2026");
     if (ok) {
-        std::cout << "\n>>> SUCCESS: ALL 5 C++ GENERATORS EXECUTED PERFECTLY! <<<" << std::endl;
+        std::cout << "\n>>> SUCCESS: ALL 6 C++ GENERATORS EXECUTED PERFECTLY! <<<" << std::endl;
         return 0;
     } else {
         std::cerr << "FAILURE in composer" << std::endl;

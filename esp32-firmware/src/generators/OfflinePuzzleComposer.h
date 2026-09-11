@@ -8,12 +8,13 @@ class EscPosPrinter;
 #include "NonogramGen.h"
 #include "QueensGen.h"
 #include "JumbleGen.h"
+#include "BinaryGen.h"
 
 class OfflinePuzzleComposer {
 public:
     OfflinePuzzleComposer();
 
-    // Generates a complete random bundle of all 5 puzzles on the ESP32 and prints directly
+    // Generates a complete random bundle of all 6 puzzles on the ESP32 and prints directly
     bool generateAndPrintReceipt(EscPosPrinter& printer, const String& dateStr = "");
 
 private:
@@ -22,6 +23,7 @@ private:
     NonogramGen   _nonogram;
     QueensGen     _queens;
     JumbleGen     _jumble;
+    BinaryGen     _binary;
 };
 
 #endif // OFFLINE_PUZZLE_COMPOSER_H

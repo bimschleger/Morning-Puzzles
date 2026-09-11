@@ -13,6 +13,7 @@ This document provides a technical survey and implementation reference for the o
 | **Nonogram** | [IBM/chuk-puzzles-gym](https://github.com/IBM/chuk-puzzles-gym) *(or [141512114/pixle](https://github.com/141512114/pixle))* | **Apache 2.0** | Python (OR-Tools CP-SAT) | `easy` (5x5 / 8x8), `medium` (10x10), `hard` (15x15). Verifies line deduction uniqueness. |
 | **Star Battle / Queens** | [IBM/chuk-puzzles-gym](https://github.com/IBM/chuk-puzzles-gym) | **Apache 2.0** | Python (OR-Tools CP-SAT) | 1-Star (Queens style) vs 2-Star (classic Star Battle). Grid sizes 6x6 to 10x10, region shapes. |
 | **Jumble** | Native Apache 2.0 Module (`server/app/generators/jumble_gen.py`) | **Apache 2.0** | Python (Standard Library) | `easy` (4–5 letters), `medium` (5–6 letters), `hard` (6–7 letters). Punny riddle solutions. |
+| **Binary** | [IBM/chuk-puzzles-gym](https://github.com/IBM/chuk-puzzles-gym) *(Classic #4 / Takuzu)* | **Apache 2.0** | Python / Native C++ | `easy` (6x6), `medium` (8x8), `hard` (8x8). Trio avoidance, line capacity, and line uniqueness guarantees. |
 
 ---
 
@@ -59,6 +60,19 @@ This document provides a technical survey and implementation reference for the o
 *   **Structure**: 4 scrambled words with designated circled letter positions.
 *   **Clue Riddle**: The circled letters form an anagram that answers a punchline riddle printed at the bottom of the section.
 *   **Difficulty Scaling**: Controlled by word length (4 letters = easy, 5 letters = medium, 6–7 letters = hard) and letter scramble distance.
+
+### F. Binary / Takuzu (`binary_gen.py` & `BinaryGen.cpp`)
+*   **Upstream Project**: [IBM/chuk-puzzles-gym](https://github.com/IBM/chuk-puzzles-gym) Classic Logic Puzzle #4 / Simon Tatham `unruly.c`
+*   **Rules**:
+    *   Each cell contains `0` or `1`.
+    *   No more than two identical numbers may be placed directly adjacent in any row or column (no `000` or `111`).
+    *   Each row and column contains an equal count of zeros and ones ($N/2$ zeros, $N/2$ ones).
+    *   Each row is unique, and each column is unique (no two rows or columns identical).
+*   **Difficulty Scaling**:
+    *   `easy`: 6x6 grid (~16 clues, solved via direct trio blocking and row/col capacity).
+    *   `medium`: 8x8 grid (~28 clues, solved via 1-step lookahead and line capacity).
+    *   `hard`: 8x8 grid (~22 clues, requires Rule 4 row/column uniqueness comparison against completed lines).
+*   **Thermal Receipt Layout**: $6\times 6$ ($53\text{px}$ cells) or $8\times 8$ ($40\text{px}$ cells) framed by a Tier 1 perimeter border ($3.5\text{px}$) with centered Space Mono digits and generous handwriting space.
 
 ---
 

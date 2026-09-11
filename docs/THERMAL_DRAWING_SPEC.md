@@ -152,7 +152,8 @@ To maintain proportional balance regardless of board dimensions, use determinist
 $$W_{\text{cell}} = \left\lfloor \frac{W_{\text{inner}}}{N_{\text{cols}}} \right\rfloor$$
 Where $W_{\text{inner}} = 321\text{px}$ (or $576\text{ dots}$ natively).
 
-* **8 Columns** (Search): $\lfloor 321 / 8 \rfloor = \mathbf{40\text{px}}$ per cell (Exact match to Jumble clue boxes).
+* **6 Columns** (Binary Easy): $\lfloor 321 / 6 \rfloor = \mathbf{53\text{px}}$ per cell ($S_{\text{font}} \approx \mathbf{28\text{px}}$ bold).
+* **8 Columns** (Binary Medium/Hard, Search): $\lfloor 321 / 8 \rfloor = \mathbf{40\text{px}}$ per cell (Exact match to Jumble clue boxes, $S_{\text{font}} \approx \mathbf{21\text{px}}$ bold).
 * **9 Columns** (Sudoku): $\lfloor 321 / 9 \rfloor = \mathbf{35\text{px}}$ per cell.
 * **10 Columns** (Stars 10x10): $\lfloor 321 / 10 \rfloor = \mathbf{32\text{px}}$ per cell.
 

@@ -11,7 +11,7 @@
 #include <algorithm>
 #include <sstream>
 
-
+#define PROGMEM
 class String : public std::string {
 public:
     String() : std::string() {}
@@ -40,6 +40,10 @@ inline String operator+(const String& lhs, char rhs) {
 }
 inline String operator+(char lhs, const String& rhs) {
     return String(std::string(1, lhs) + static_cast<const std::string&>(rhs));
+}
+
+inline std::ostream& operator<<(std::ostream& os, const String& s) {
+    return os << s.c_str();
 }
 
 inline long random(long max) { return (max > 0) ? (std::rand() % max) : 0; }
