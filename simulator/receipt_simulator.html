@@ -1090,13 +1090,12 @@
 
       // Dynamic canvas height calculation
       let calcHeight = padding;
-      calcHeight += 26; // Header title: W O R D   S E A R C H
       calcHeight += gridHeight; // Grid
       calcHeight += 12; // Gap to divider
       calcHeight += 12; // Gap after divider
       calcHeight += 22; // Theme header
       calcHeight += checklistHeight; // Checklist items
-      calcHeight += padding + 4;
+      calcHeight += padding;
 
       canvas.width = totalWidth;
       canvas.height = Math.ceil(calcHeight);
@@ -1106,18 +1105,8 @@
       ctx.fillStyle = '#fafaf7';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // 1. Header: W O R D   S E A R C H (Clean, centered, no size details or instructions)
-      let curY = padding;
-      ctx.fillStyle = '#111111';
-      ctx.font = '900 20px "Space Mono", sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'top';
-      ctx.fillText('W O R D   S E A R C H', totalWidth / 2, curY);
-
-      curY += 26;
-
-      // 2. The Letter Grid
-      const gridY = curY;
+      // The Letter Grid (starts directly at padding)
+      const gridY = padding;
 
       // Inner cell divider lines
       ctx.lineWidth = 1;
@@ -1343,15 +1332,13 @@
       ctx.lineWidth = 1.5;
       ctx.strokeRect(padding, padding, rowClueWidth, colClueHeight);
 
-      // Label inside top-left tile
-      ctx.fillStyle = '#555555';
-      ctx.font = labelFont;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(`${size}×${size}`, padding + rowClueWidth / 2, padding + colClueHeight / 2 - 4);
-      ctx.font = 'normal 8px "Space Mono", monospace';
-      ctx.fillStyle = '#777777';
-      ctx.fillText('PICROSS', padding + rowClueWidth / 2, padding + colClueHeight / 2 + 7);
+      // Subtle diagonal corner divider line (separating col clues and row clues)
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = '#aaaaaa';
+      ctx.beginPath();
+      ctx.moveTo(padding, padding);
+      ctx.lineTo(padding + rowClueWidth, padding + colClueHeight);
+      ctx.stroke();
 
       // 3. Column Clues (Top Area)
       ctx.fillStyle = '#fafaf7';
@@ -1530,12 +1517,6 @@
       const dummyCanvas = document.createElement('canvas');
       const dummyCtx = dummyCanvas.getContext('2d');
 
-      const wordCountWords = { 4: "four", 5: "five", 6: "six" };
-      const countWord = wordCountWords[jData.words.length] || jData.words.length;
-      const instrText = `Unscramble these ${countWord} Jumbles, one letter to each square, to form ${countWord} ordinary words.`;
-      dummyCtx.font = 'normal 10px "Space Mono", monospace';
-      const instrLines = getCanvasWrappedLines(dummyCtx, instrText, innerWidth);
-
       dummyCtx.font = 'bold 12px "Space Mono", monospace';
       const riddleLines = getCanvasWrappedLines(dummyCtx, `"${jData.riddle}"`, innerWidth);
 
@@ -1606,14 +1587,11 @@
       }
 
       let calcHeight = padding;
-      calcHeight += 34; // Header title & sub
-      calcHeight += instrLines.length * 14 + 10; // Instructions
-      calcHeight += wordsTotalHeight; // 4 word combos
+      calcHeight += wordsTotalHeight; // Word combos
       calcHeight += 12; // Divider line
       calcHeight += 18 + riddleLines.length * 17 + 8; // Riddle Clue Question
-      calcHeight += 16 + 8; // Solve prompt
       calcHeight += 18 + 2 * 24 + 10; // Scratchpad (heading + 2 ruled lines)
-      calcHeight += 22 + ansLines.length * (ansBoxSize + 12) + 14; // Answer boxes & margin
+      calcHeight += 20 + ansLines.length * (ansBoxSize + 12) + 14; // Answer boxes & margin
       calcHeight += padding;
 
       canvas.width = totalWidth;
@@ -1624,28 +1602,7 @@
       ctx.fillStyle = '#fafaf7';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Header: J U M B L E Title Banner
-      ctx.fillStyle = '#111111';
-      ctx.font = '900 24px "Space Mono", sans-serif';
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'top';
-      ctx.fillText('J U M B L E', padding, padding);
-
-      ctx.font = 'bold 9.5px "Space Mono", monospace';
-      ctx.fillText('THAT SCRAMBLED WORD GAME', padding + 155, padding + 3);
-      ctx.font = 'normal 8.5px "Space Mono", monospace';
-      ctx.fillStyle = '#555555';
-      ctx.fillText('Syndicated Newspaper Format', padding + 155, padding + 17);
-
-      // Instructions
-      let curY = padding + 34;
-      ctx.fillStyle = '#222222';
-      ctx.font = 'normal 10px "Space Mono", monospace';
-      for (const line of instrLines) {
-        ctx.fillText(line, padding, curY);
-        curY += 14;
-      }
-      curY += 8;
+      let curY = padding;
 
       // Word Combos (Full Receipt Width - 4 to 6 words)
       for (let i = 0; i < jData.words.length; i++) {
@@ -1740,15 +1697,10 @@
       }
       curY += 6;
 
-      ctx.font = 'normal 10px "Space Mono", monospace';
-      ctx.fillStyle = '#444444';
-      ctx.fillText('Now arrange the circled letters to solve the riddle:', padding, curY);
-      curY += 16;
-
       // Scratchpad lines
-      ctx.font = 'italic 10px "Space Mono", monospace';
-      ctx.fillStyle = '#444444';
-      ctx.fillText('Discovered letters scratchpad (write letters here to brainstorm):', padding, curY);
+      ctx.font = 'bold 11px "Space Mono", monospace';
+      ctx.fillStyle = '#111111';
+      ctx.fillText('SCRATCHPAD:', padding, curY);
       curY += 18;
 
       ctx.strokeStyle = '#999999';
@@ -1762,12 +1714,12 @@
         curY += 24;
       }
       ctx.setLineDash([]);
-      curY += 8;
+      curY += 10;
 
-      // "Answer here:" layout with segmented word circles
-      ctx.font = 'bold 12px "Space Mono", monospace';
+      // Answer layout with segmented word circles
+      ctx.font = 'bold 11px "Space Mono", monospace';
       ctx.fillStyle = '#111111';
-      ctx.fillText('Answer here:', padding, curY);
+      ctx.fillText('ANSWER:', padding, curY);
       curY += 18;
 
       for (const lineTokens of ansLines) {
@@ -1842,6 +1794,19 @@
       return key + ' '.repeat(spaces) + val;
     }
 
+    /**
+     * Appends the standardized Morning Puzzles header across all puzzle types.
+     * Line 1: Centered title: --- [GAME NAME] ---
+     * Line 2: Centered difficulty: DIFFICULTY: [LEVEL] (if applicable)
+     */
+    function addStandardPuzzleHeader(items, title, difficulty = null) {
+      items.push({ type: 'header', text: centerLine(`--- ${title} ---`, 48) });
+      if (difficulty) {
+        items.push({ type: 'text', text: centerLine(`DIFFICULTY: ${difficulty.toUpperCase()}`, 48) });
+      }
+      items.push({ type: 'blank', text: '' });
+    }
+
     function renderReceipt() {
       const box = document.getElementById('receipt-box');
       box.classList.remove('animate-feed');
@@ -1879,17 +1844,14 @@
         const style = document.getElementById('style-queens').value;
         const showStars = document.getElementById('toggle-queens-solution').checked;
 
-        let size = 8, stars = 1;
-        if (variant === '6x6_1star') { size = 6; stars = 1; }
-        else if (variant === '9x9_2star') { size = 9; stars = 2; }
-        else if (variant === '10x10_2star') { size = 10; stars = 2; }
+        let size = 8, stars = 1, diffStr = 'MEDIUM';
+        if (variant === '6x6_1star') { size = 6; stars = 1; diffStr = 'EASY'; }
+        else if (variant === '8x8_1star') { size = 8; stars = 1; diffStr = 'MEDIUM'; }
+        else if (variant === '9x9_2star') { size = 9; stars = 2; diffStr = 'HARD'; }
+        else if (variant === '10x10_2star') { size = 10; stars = 2; diffStr = 'MASTER'; }
 
         const qData = queensSim.generate(size, stars);
-        const title = stars === 1 ? '--- QUEENS PUZZLE ---' : '--- STAR BATTLE (2-STAR) ---';
-        items.push({ type: 'header', text: title });
-        items.push({ type: 'text', text: `Size: ${size}x${size} | Place ${stars} per row, col, region` });
-        items.push({ type: 'text', text: 'Rule: No two Queens/Stars may touch diagonally!' });
-        items.push({ type: 'blank', text: '' });
+        addStandardPuzzleHeader(items, 'QUEENS', diffStr);
 
         if (style === 'ascii_text') {
           // ASCII letters fallback
@@ -1911,7 +1873,6 @@
             type: 'canvas',
             render: (canvas) => drawQueensCanvas(canvas, qData, style, showStars)
           });
-          items.push({ type: 'caption', text: centerLine('[ Shaded by 1-Bit Thermal Dithering ]', COLS) });
         }
 
         items.push({ type: 'blank', text: '' });
@@ -1927,9 +1888,7 @@
         const clues = diff === 'easy' ? 38 : (diff === 'hard' ? 25 : 30);
         const sData = sudokuSim.generate(clues);
 
-        items.push({ type: 'header', text: '--- SUDOKU ---' });
-        items.push({ type: 'text', text: `Difficulty: ${diff.toUpperCase()} | Clues Given: ${sData.cluesCount}` });
-        items.push({ type: 'blank', text: '' });
+        addStandardPuzzleHeader(items, 'SUDOKU', diff);
 
         if (style === 'graphic') {
           // Crisp Graphic Grid
@@ -1969,17 +1928,14 @@
         const wsStyle = document.getElementById('style-wordsearch') ? document.getElementById('style-wordsearch').value : 'graphic';
         const wsData = wordSearchSim.generate(theme, sizeStr);
 
+        addStandardPuzzleHeader(items, 'WORD SEARCH');
+
         if (wsStyle === 'graphic') {
           items.push({
             type: 'canvas',
             render: (canvas) => drawWordSearchCanvas(canvas, wsData)
           });
-          items.push({ type: 'caption', text: `★ Word Search - Thermal 203 DPI` });
-          items.push({ type: 'blank', text: '' });
         } else {
-          items.push({ type: 'header', text: '--- WORD SEARCH ---' });
-          items.push({ type: 'blank', text: '' });
-
           for (let r = 0; r < wsData.rows; r++) {
             const rowStr = wsData.grid[r].join(' ');
             items.push({ type: 'text', text: centerLine(rowStr, COLS) });
@@ -1993,8 +1949,8 @@
             const col2 = wsData.words[i + 1] ? `[ ] ${wsData.words[i + 1]}` : '';
             items.push({ type: 'text', text: '  ' + keyValue(col1, col2, 44) });
           }
-          items.push({ type: 'blank', text: '' });
         }
+        items.push({ type: 'blank', text: '' });
         items.push({ type: 'rule', text: '-'.repeat(COLS) });
 
         solutionsContent.push({
@@ -2010,19 +1966,17 @@
         const size = parseInt(document.getElementById('size-nonogram').value, 10);
         const nStyle = document.getElementById('style-nonogram').value;
         const nData = nonogramSim.generate(size);
+        const diffMap = { 5: 'EASY', 8: 'MEDIUM', 10: 'HARD', 15: 'EXPERT' };
+        const diffStr = diffMap[size] || 'MEDIUM';
+
+        addStandardPuzzleHeader(items, 'NONOGRAM', diffStr);
 
         if (nStyle === 'graphic') {
           items.push({
             type: 'canvas',
             render: (canvas) => drawNonogramCanvas(canvas, nData)
           });
-          items.push({ type: 'caption', text: `★ ${size}x${size} Nonogram (Picross) - Thermal 203 DPI` });
-          items.push({ type: 'blank', text: '' });
         } else {
-          items.push({ type: 'header', text: '--- NONOGRAM / PICROSS ---' });
-          items.push({ type: 'text', text: `Size: ${size}x${size} | Binary Picture Logic` });
-          items.push({ type: 'blank', text: '' });
-
           // Column clues
           const maxCol = Math.max(...nData.colClues.map(c => c.length));
           for (let l = 0; l < maxCol; l++) {
@@ -2052,9 +2006,9 @@
             for (let c = 0; c < size; c++) cells += ' . ';
             items.push({ type: 'text', text: padded + cells });
           }
-          items.push({ type: 'blank', text: '' });
-          items.push({ type: 'rule', text: '-'.repeat(COLS) });
         }
+        items.push({ type: 'blank', text: '' });
+        items.push({ type: 'rule', text: '-'.repeat(COLS) });
 
         solutionsContent.push({ name: 'Nonogram Solution', grid: nData.grid, size });
       }
@@ -2065,19 +2019,14 @@
         const jStyle = document.getElementById('style-jumble').value;
         const jData = jumbleSim.generate(diff);
 
+        addStandardPuzzleHeader(items, 'JUMBLE', diff);
+
         if (jStyle === 'graphic') {
           items.push({
             type: 'canvas',
             render: (canvas) => drawJumbleCanvas(canvas, jData)
           });
-          items.push({ type: 'caption', text: '★ Syndicated Jumble Graphic - 80mm Thermal Strip' });
-          items.push({ type: 'blank', text: '' });
         } else {
-          items.push({ type: 'header', text: '--- DAILY JUMBLE ---' });
-          items.push({ type: 'text', text: 'Unscramble words, then solve the riddle below:' });
-          items.push({ type: 'text', text: 'Circled letters ( ) form the punchline answer!' });
-          items.push({ type: 'blank', text: '' });
-
           for (let i = 0; i < jData.words.length; i++) {
             const scram = jData.scrambled[i];
             const circles = jData.circles[i];
@@ -2092,11 +2041,11 @@
           }
 
           items.push({ type: 'blank', text: '' });
-          items.push({ type: 'text', text: 'Riddle Question:' });
           items.push({ type: 'text', text: `Q: "${jData.riddle}"` });
           items.push({ type: 'text', text: 'A: _________________________________________' });
-          items.push({ type: 'blank', text: '' });
         }
+        items.push({ type: 'blank', text: '' });
+        items.push({ type: 'rule', text: '-'.repeat(COLS) });
 
         solutionsContent.push({ name: 'Jumble Answer', answer: jData.answer, words: jData.words });
       }
