@@ -1090,11 +1090,11 @@
 
       // Dynamic canvas height calculation
       let calcHeight = padding;
-      calcHeight += 32; // Header title & theme
-      calcHeight += 18; // Instructions
+      calcHeight += 26; // Header title: W O R D   S E A R C H
       calcHeight += gridHeight; // Grid
-      calcHeight += 14; // Divider gap
-      calcHeight += 20; // Checklist title
+      calcHeight += 12; // Gap to divider
+      calcHeight += 12; // Gap after divider
+      calcHeight += 22; // Theme header
       calcHeight += checklistHeight; // Checklist items
       calcHeight += padding + 4;
 
@@ -1106,31 +1106,15 @@
       ctx.fillStyle = '#fafaf7';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // 1. Header: W O R D   S E A R C H
+      // 1. Header: W O R D   S E A R C H (Clean, centered, no size details or instructions)
       let curY = padding;
       ctx.fillStyle = '#111111';
-      ctx.font = '900 21px "Space Mono", sans-serif';
-      ctx.textAlign = 'left';
+      ctx.font = '900 20px "Space Mono", sans-serif';
+      ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
-      ctx.fillText('W O R D   S E A R C H', padding, curY);
+      ctx.fillText('W O R D   S E A R C H', totalWidth / 2, curY);
 
-      // Theme badge & info on right side
-      ctx.font = 'bold 9.5px "Space Mono", monospace';
-      ctx.textAlign = 'right';
-      ctx.fillStyle = '#444444';
-      ctx.fillText(`★ ${wsData.theme.toUpperCase()}`, totalWidth - padding, curY + 2);
-      ctx.font = 'normal 8.5px "Space Mono", monospace';
-      ctx.fillStyle = '#777777';
-      ctx.fillText(`${cols}x${rows} Grid • ${words.length} Words`, totalWidth - padding, curY + 16);
-
-      curY += 28;
-
-      // Instructions
-      ctx.font = 'normal 10px "Space Mono", monospace';
-      ctx.fillStyle = '#333333';
-      ctx.textAlign = 'left';
-      ctx.fillText('Find the words hidden horizontally, vertically, or diagonally:', padding, curY);
-      curY += 16;
+      curY += 26;
 
       // 2. The Letter Grid
       const gridY = curY;
@@ -1185,15 +1169,15 @@
       ctx.lineTo(padding + innerWidth, curY);
       ctx.stroke();
       ctx.setLineDash([]);
-      curY += 10;
+      curY += 12;
 
-      // 4. Word Checklist Below Grid
-      ctx.font = 'bold 11px "Space Mono", monospace';
+      // 4. Theme & Word Checklist Below Grid (Theme and words grouped together)
+      ctx.font = 'bold 12px "Space Mono", monospace';
       ctx.fillStyle = '#111111';
       ctx.textAlign = 'left';
       ctx.textBaseline = 'top';
-      ctx.fillText(`WORDS TO FIND (${words.length}):`, padding, curY);
-      curY += 18;
+      ctx.fillText(`★ THEME: ${wsData.theme.toUpperCase()}`, padding, curY);
+      curY += 20;
 
       const colWidth = Math.floor(innerWidth / 2);
       ctx.font = 'bold 11.5px "Space Mono", monospace';
@@ -1990,11 +1974,10 @@
             type: 'canvas',
             render: (canvas) => drawWordSearchCanvas(canvas, wsData)
           });
-          items.push({ type: 'caption', text: `★ ${wsData.size} Word Search - Thermal 203 DPI` });
+          items.push({ type: 'caption', text: `★ Word Search - Thermal 203 DPI` });
           items.push({ type: 'blank', text: '' });
         } else {
           items.push({ type: 'header', text: '--- WORD SEARCH ---' });
-          items.push({ type: 'text', text: `Theme: ${wsData.theme} | Size: ${wsData.size} | Words: ${wsData.words.length}` });
           items.push({ type: 'blank', text: '' });
 
           for (let r = 0; r < wsData.rows; r++) {
@@ -2002,7 +1985,8 @@
             items.push({ type: 'text', text: centerLine(rowStr, COLS) });
           }
           items.push({ type: 'blank', text: '' });
-          items.push({ type: 'text', text: 'Find these words in the grid above:' });
+          items.push({ type: 'text', text: centerLine(`THEME: ${wsData.theme.toUpperCase()}`, COLS) });
+          items.push({ type: 'blank', text: '' });
           
           for (let i = 0; i < wsData.words.length; i += 2) {
             const col1 = `[ ] ${wsData.words[i]}`;
