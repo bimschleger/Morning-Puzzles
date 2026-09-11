@@ -15,6 +15,7 @@ limitations under the License.
 """
 
 import random
+from collections import deque
 from typing import List, Tuple, Dict, Any, Optional, Set
 
 class QueensGenerator:
@@ -29,7 +30,8 @@ class QueensGenerator:
     DIFFICULTY_CONFIGS = {
         "easy":   {"size": 6, "stars": 1},
         "medium": {"size": 8, "stars": 1},
-        "hard":   {"size": 9, "stars": 2}
+        "hard":   {"size": 9, "stars": 2},
+        "master": {"size": 10, "stars": 2}
     }
 
     def __init__(self, seed: Optional[int] = None):
@@ -42,25 +44,29 @@ class QueensGenerator:
         n = cfg["size"]
         k_stars = cfg["stars"]
 
-        # 1. Place valid star positions on the N x N board
-        stars = self._place_stars(n, k_stars)
-        if not stars:
-            # Fallback for small random chance of failure
-            stars = self._place_stars(n, k_stars, max_attempts=500)
+        for _ in range(50):
+            # 1. Place valid non-touching star positions on the N x N board
+            stars = self._place_stars(n, k_stars)
+            if not stars:
+                continue
 
-        # 2. Partition grid into N contiguous regions
-        regions = self._generate_regions(n, stars, k_stars)
+            # 2. Partition grid into N contiguous regions
+            regions = self._generate_regions(n, stars, k_stars)
 
-        return {
-            "type": "queens",
-            "style": f"{k_stars}-Star / Queens",
-            "difficulty": difficulty,
-            "grid_size": n,
-            "stars_per_unit": k_stars,
-            "regions": regions,
-            "stars_solution": list(stars),
-            "text": self.format_text(regions, stars, n)
-        }
+            # 3. Validate correctness: exactly k_stars per region, 4-connected, no 0-star shapes
+            if self._validate_puzzle(regions, stars, n, k_stars):
+                return {
+                    "type": "queens",
+                    "style": f"{k_stars}-Star / Queens",
+                    "difficulty": difficulty,
+                    "grid_size": n,
+                    "stars_per_unit": k_stars,
+                    "regions": regions,
+                    "stars_solution": list(stars),
+                    "text": self.format_text(regions, stars, n)
+                }
+
+        raise RuntimeError(f"Failed to generate valid Queens puzzle ({difficulty}) after 50 attempts")
 
     def _place_stars(self, n: int, k_stars: int, max_attempts: int = 200) -> Set[Tuple[int, int]]:
         for _ in range(max_attempts):
@@ -100,46 +106,158 @@ class QueensGenerator:
 
     def _generate_regions(self, n: int, stars: Set[Tuple[int, int]], k_stars: int) -> List[List[int]]:
         """
-        Grows contiguous regions using randomized flood-fill expansion.
-        Ensures each region contains exactly k_stars.
+        Grows contiguous regions ensuring every single shape contains exactly k_stars.
+        In 1-star mode: uses multi-source BFS frontier growth seeded by each star.
+        In 2-star mode: pairs the 2N stars using shortest non-intersecting BFS corridors,
+        then expands the N paired seeds via multi-source BFS frontier growth.
         """
         grid = [[-1] * n for _ in range(n)]
-        
-        # In 1-star, each star gets its own seed region (0 to n-1)
-        if k_stars == 1 and len(stars) == n:
-            star_list = list(stars)
-            for idx, (r, c) in enumerate(star_list):
-                grid[r][c] = idx
-        else:
-            # For 2-stars, pair stars or place N seeds
-            seeds = list(stars)[:n]
-            for idx, (r, c) in enumerate(seeds):
-                grid[r][c] = idx % n
+        frontiers: List[List[Tuple[int, int]]] = [[] for _ in range(n)]
+        dirs = [(0, 1), (0, -1), (1, 0), (-1, 0)]
 
-        # Expand regions until all cells are filled
-        unassigned = sum(row.count(-1) for row in grid)
-        iterations = 0
-        while unassigned > 0 and iterations < n * n * 5:
-            iterations += 1
-            r = random.randint(0, n - 1)
-            c = random.randint(0, n - 1)
-            if grid[r][c] != -1:
-                # Try expanding to a neighbor
-                neighbors = [(r + 1, c), (r - 1, c), (r, c + 1), (r, c - 1)]
-                random.shuffle(neighbors)
-                for nr, nc in neighbors:
-                    if 0 <= nr < n and 0 <= nc < n and grid[nr][nc] == -1:
-                        grid[nr][nc] = grid[r][c]
-                        unassigned -= 1
+        if k_stars == 1:
+            for idx, (r, c) in enumerate(stars):
+                grid[r][c] = idx
+                frontiers[idx].append((r, c))
+        else:
+            # 2-Star mode: Pair the 2*n stars and connect each pair with a corridor
+            paired_grid = None
+            star_set = set(stars)
+
+            for _ in range(50):
+                temp_grid = [[-1] * n for _ in range(n)]
+                unpaired = list(stars)
+                random.shuffle(unpaired)
+                pairs = []
+                all_paired = True
+
+                while unpaired:
+                    s1 = unpaired.pop(0)
+                    unpaired.sort(key=lambda s: abs(s[0] - s1[0]) + abs(s[1] - s1[1]))
+
+                    found_corridor = None
+                    target_idx = -1
+                    for idx, s2 in enumerate(unpaired):
+                        q = deque([(s1[0], s1[1], [(s1[0], s1[1])])])
+                        visited = {s1}
+                        while q:
+                            cr, cc, path = q.popleft()
+                            if (cr, cc) == s2:
+                                found_corridor = path
+                                break
+                            for dr, dc in dirs:
+                                nr, nc = cr + dr, cc + dc
+                                if 0 <= nr < n and 0 <= nc < n and (nr, nc) not in visited:
+                                    if (nr, nc) == s2 or ((nr, nc) not in star_set and temp_grid[nr][nc] == -1):
+                                        visited.add((nr, nc))
+                                        q.append((nr, nc, path + [(nr, nc)]))
+                        if found_corridor:
+                            target_idx = idx
+                            break
+
+                    if found_corridor:
+                        s2 = unpaired.pop(target_idx)
+                        reg_id = len(pairs)
+                        for pr, pc in found_corridor:
+                            temp_grid[pr][pc] = reg_id
+                        pairs.append(reg_id)
+                    else:
+                        all_paired = False
                         break
 
-        # Cleanup any remaining unassigned cells
-        for r in range(n):
-            for c in range(n):
-                if grid[r][c] == -1:
-                    grid[r][c] = 0
+                if all_paired and len(pairs) == n:
+                    paired_grid = temp_grid
+                    break
+
+            if paired_grid:
+                for r in range(n):
+                    for c in range(n):
+                        grid[r][c] = paired_grid[r][c]
+                        if grid[r][c] != -1:
+                            frontiers[grid[r][c]].append((r, c))
+            else:
+                for idx, (r, c) in enumerate(stars):
+                    reg = idx % n
+                    grid[r][c] = reg
+                    frontiers[reg].append((r, c))
+
+        # Multi-source randomized BFS expansion until 100% of cells are partitioned
+        unassigned = sum(row.count(-1) for row in grid)
+        active_regions = list(range(n))
+
+        while unassigned > 0 and active_regions:
+            reg = random.choice(active_regions)
+            candidates = []
+            for fr, fc in frontiers[reg]:
+                for dr, dc in dirs:
+                    nr, nc = fr + dr, fc + dc
+                    if 0 <= nr < n and 0 <= nc < n and grid[nr][nc] == -1:
+                        candidates.append((nr, nc))
+
+            if not candidates:
+                active_regions.remove(reg)
+                continue
+
+            nr, nc = random.choice(candidates)
+            grid[nr][nc] = reg
+            frontiers[reg].append((nr, nc))
+            unassigned -= 1
+
+        # Fallback: strictly attach any remaining unassigned cells to adjacent regions
+        if unassigned > 0:
+            progress = True
+            while unassigned > 0 and progress:
+                progress = False
+                for r in range(n):
+                    for c in range(n):
+                        if grid[r][c] == -1:
+                            for dr, dc in dirs:
+                                nr, nc = r + dr, c + dc
+                                if 0 <= nr < n and 0 <= nc < n and grid[nr][nc] != -1:
+                                    grid[r][c] = grid[nr][nc]
+                                    unassigned -= 1
+                                    progress = True
+                                    break
 
         return grid
+
+    def _validate_puzzle(self, regions: List[List[int]], stars: Set[Tuple[int, int]], n: int, k_stars: int) -> bool:
+        """
+        Validates that:
+        1. All cells belong to a region in [0, n-1].
+        2. Every region contains exactly k_stars.
+        3. Every region is a single 4-connected component (no disconnected islands).
+        """
+        for r in range(n):
+            for c in range(n):
+                if regions[r][c] < 0 or regions[r][c] >= n:
+                    return False
+
+        star_counts = [0] * n
+        for sr, sc in stars:
+            star_counts[regions[sr][sc]] += 1
+        if any(cnt != k_stars for cnt in star_counts):
+            return False
+
+        dirs = [(0, 1), (0, -1), (1, 0), (-1, 0)]
+        for reg in range(n):
+            cells = [(r, c) for r in range(n) for c in range(n) if regions[r][c] == reg]
+            if not cells:
+                return False
+            visited = {cells[0]}
+            q = deque([cells[0]])
+            cell_set = set(cells)
+            while q:
+                cr, cc = q.popleft()
+                for dr, dc in dirs:
+                    nr, nc = cr + dr, cc + dc
+                    if (nr, nc) in cell_set and (nr, nc) not in visited:
+                        visited.add((nr, nc))
+                        q.append((nr, nc))
+            if len(visited) != len(cells):
+                return False
+
+        return True
 
     @staticmethod
     def format_text(regions: List[List[int]], stars: Set[Tuple[int, int]], n: int) -> str:

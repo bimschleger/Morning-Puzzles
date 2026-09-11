@@ -150,6 +150,7 @@
               <option value="6x6_1star">6x6 (1-Star / Queens)</option>
               <option value="8x8_1star" selected>8x8 (1-Star / Queens)</option>
               <option value="9x9_2star">9x9 (2-Star Battle)</option>
+              <option value="10x10_2star">10x10 (2-Star Master Battle)</option>
             </select>
           </div>
 
@@ -541,24 +542,20 @@
     // --- QUEENS / STAR BATTLE ENGINE ---
     class QueensSimulator {
       generate(size = 8, starsPerUnit = 1) {
+        // 1. Backtrack place non-touching stars
         const stars = [];
         const colCounts = Array(size).fill(0);
 
         function canPlace(r, c) {
           if (colCounts[c] >= starsPerUnit) return false;
-          for (let dr = -1; dr <= 1; dr++) {
-            for (let dc = -1; dc <= 1; dc++) {
-              const nr = r + dr, nc = c + dc;
-              if (stars.some(s => s.r === nr && s.c === nc)) return false;
-            }
+          for (const s of stars) {
+            if (Math.abs(s.r - r) <= 1 && Math.abs(s.c - c) <= 1) return false;
           }
           return true;
         }
 
         function backtrack(r, placedInRow) {
-          if (r === size) {
-            return colCounts.every(cnt => cnt === starsPerUnit);
-          }
+          if (r === size) return colCounts.every(cnt => cnt === starsPerUnit);
           if (placedInRow === starsPerUnit) return backtrack(r + 1, 0);
 
           const cols = Array.from({ length: size }, (_, i) => i).sort(() => Math.random() - 0.5);
@@ -575,37 +572,158 @@
         }
 
         let solved = false;
-        for (let att = 0; att < 50 && !solved; att++) {
+        for (let att = 0; att < 100 && !solved; att++) {
           stars.length = 0;
           colCounts.fill(0);
           solved = backtrack(0, 0);
         }
 
-        // Partition into contiguous regions
         const regions = Array.from({ length: size }, () => Array(size).fill(-1));
-        stars.forEach((s, idx) => {
-          regions[s.r][s.c] = (starsPerUnit === 1) ? idx : (idx % size);
-        });
+        const frontiers = Array.from({ length: size }, () => []);
 
-        let unassigned = size * size - stars.length;
-        let iter = 0;
-        while (unassigned > 0 && iter < size * size * 8) {
-          iter++;
-          const r = Math.floor(Math.random() * size);
-          const c = Math.floor(Math.random() * size);
-          if (regions[r][c] !== -1) {
-            const dirs = [[0, 1], [0, -1], [1, 0], [-1, 0]];
-            const [dr, dc] = dirs[Math.floor(Math.random() * 4)];
-            const nr = r + dr, nc = c + dc;
-            if (nr >= 0 && nr < size && nc >= 0 && nc < size && regions[nr][nc] === -1) {
-              regions[nr][nc] = regions[r][c];
-              unassigned--;
+        if (starsPerUnit === 1) {
+          // 1-Star: exactly 1 star seeds each region
+          stars.forEach((s, idx) => {
+            regions[s.r][s.c] = idx;
+            frontiers[idx].push({ r: s.r, c: s.c });
+          });
+        } else {
+          // 2-Star: pair the 2*size stars into size pairs and route non-overlapping corridors
+          let pairedGrid = null;
+          for (let pairAtt = 0; pairAtt < 50 && !pairedGrid; pairAtt++) {
+            const grid = Array.from({ length: size }, () => Array(size).fill(-1));
+            const starSet = new Set(stars.map(s => `${s.r},${s.c}`));
+            const unpaired = [...stars].sort(() => Math.random() - 0.5);
+            const pairs = [];
+            let allPaired = true;
+
+            while (unpaired.length > 0) {
+              const s1 = unpaired.shift();
+              unpaired.sort((a, b) => (Math.abs(a.r - s1.r) + Math.abs(a.c - s1.c)) - (Math.abs(b.r - s1.r) + Math.abs(b.c - s1.c)));
+
+              let foundCandidate = false;
+              for (let ci = 0; ci < unpaired.length; ci++) {
+                const s2 = unpaired[ci];
+                const queue = [{ r: s1.r, c: s1.c, path: [{ r: s1.r, c: s1.c }] }];
+                const visited = new Set([`${s1.r},${s1.c}`]);
+                let corridor = null;
+
+                while (queue.length > 0) {
+                  const curr = queue.shift();
+                  if (curr.r === s2.r && curr.c === s2.c) {
+                    corridor = curr.path;
+                    break;
+                  }
+                  const dirs = [[0, 1], [0, -1], [1, 0], [-1, 0]];
+                  for (const [dr, dc] of dirs) {
+                    const nr = curr.r + dr, nc = curr.c + dc;
+                    const key = `${nr},${nc}`;
+                    if (nr >= 0 && nr < size && nc >= 0 && nc < size && !visited.has(key)) {
+                      if ((nr === s2.r && nc === s2.c) || (!starSet.has(key) && grid[nr][nc] === -1)) {
+                        visited.add(key);
+                        queue.push({ r: nr, c: nc, path: [...curr.path, { r: nr, c: nc }] });
+                      }
+                    }
+                  }
+                }
+
+                if (corridor) {
+                  unpaired.splice(ci, 1);
+                  const regId = pairs.length;
+                  for (const p of corridor) {
+                    grid[p.r][p.c] = regId;
+                  }
+                  pairs.push({ s1, s2, corridor });
+                  foundCandidate = true;
+                  break;
+                }
+              }
+
+              if (!foundCandidate) {
+                allPaired = false;
+                break;
+              }
+            }
+
+            if (allPaired && pairs.length === size) {
+              pairedGrid = grid;
             }
           }
+
+          if (pairedGrid) {
+            for (let r = 0; r < size; r++) {
+              for (let c = 0; c < size; c++) {
+                regions[r][c] = pairedGrid[r][c];
+                if (regions[r][c] !== -1) {
+                  frontiers[regions[r][c]].push({ r, c });
+                }
+              }
+            }
+          } else {
+            stars.forEach((s, idx) => {
+              const reg = idx % size;
+              regions[s.r][s.c] = reg;
+              frontiers[reg].push({ r: s.r, c: s.c });
+            });
+          }
         }
+
+        // Multi-source randomized BFS expansion until all cells are partitioned
+        let unassigned = 0;
         for (let r = 0; r < size; r++) {
           for (let c = 0; c < size; c++) {
-            if (regions[r][c] === -1) regions[r][c] = 0;
+            if (regions[r][c] === -1) unassigned++;
+          }
+        }
+
+        const activeRegions = Array.from({ length: size }, (_, i) => i);
+        const dirs = [[0, 1], [0, -1], [1, 0], [-1, 0]];
+
+        while (unassigned > 0 && activeRegions.length > 0) {
+          const randIdx = Math.floor(Math.random() * activeRegions.length);
+          const reg = activeRegions[randIdx];
+
+          const candidates = [];
+          for (const cell of frontiers[reg]) {
+            for (const [dr, dc] of dirs) {
+              const nr = cell.r + dr, nc = cell.c + dc;
+              if (nr >= 0 && nr < size && nc >= 0 && nc < size && regions[nr][nc] === -1) {
+                candidates.push({ r: nr, c: nc });
+              }
+            }
+          }
+
+          if (candidates.length === 0) {
+            activeRegions.splice(randIdx, 1);
+            continue;
+          }
+
+          const chosen = candidates[Math.floor(Math.random() * candidates.length)];
+          regions[chosen.r][chosen.c] = reg;
+          frontiers[reg].push(chosen);
+          unassigned--;
+        }
+
+        // Guaranteed connectivity: attach any unassigned cells strictly to adjacent regions
+        if (unassigned > 0) {
+          let progress = true;
+          while (unassigned > 0 && progress) {
+            progress = false;
+            for (let r = 0; r < size; r++) {
+              for (let c = 0; c < size; c++) {
+                if (regions[r][c] === -1) {
+                  for (const [dr, dc] of dirs) {
+                    const nr = r + dr, nc = c + dc;
+                    if (nr >= 0 && nr < size && nc >= 0 && nc < size && regions[nr][nc] !== -1) {
+                      regions[r][c] = regions[nr][nc];
+                      unassigned--;
+                      progress = true;
+                      break;
+                    }
+                  }
+                }
+              }
+            }
           }
         }
 
@@ -725,7 +843,7 @@
 
       // Coordinate numbers
       ctx.fillStyle = '#111111';
-      ctx.font = 'bold 11px "Space Mono", monospace';
+      ctx.font = size >= 10 ? 'bold 9px "Space Mono", monospace' : 'bold 11px "Space Mono", monospace';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       for (let c = 0; c < size; c++) {
@@ -826,7 +944,8 @@
       // 3. Optional Solution Stars Overlay
       if (showStars && qData.stars) {
         ctx.fillStyle = '#d97706'; // Amber star
-        ctx.font = 'bold 20px "Space Mono", monospace';
+        const starFontSize = Math.round(cellSize * 0.58);
+        ctx.font = `bold ${starFontSize}px "Space Mono", monospace`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         for (const s of qData.stars) {
@@ -1481,6 +1600,7 @@
         let size = 8, stars = 1;
         if (variant === '6x6_1star') { size = 6; stars = 1; }
         else if (variant === '9x9_2star') { size = 9; stars = 2; }
+        else if (variant === '10x10_2star') { size = 10; stars = 2; }
 
         const qData = queensSim.generate(size, stars);
         const title = stars === 1 ? '--- QUEENS PUZZLE ---' : '--- STAR BATTLE (2-STAR) ---';
