@@ -60,19 +60,19 @@ To establish consistent visual weight across games of differing sizes (e.g. 5x5 
 * **Stroke Width**: `3.5px`
 * **Stroke Color**: `#111111`
 * **Line Cap / Join**: `lineCap = 'square'`, `lineJoin = 'miter'`
-* **Usage**: The solid bounding box around the puzzle grid (Sudoku 9x9 outer box, Queens outer boundary, Word Search outer grid, Nonogram composite frame).
+* **Usage**: The solid bounding box around the puzzle grid (Sudoku 9x9 outer box, Stars outer boundary, Search outer grid, Nonogram composite frame).
 
 ### Tier 2: Major Subdivisions & Territory Boundaries (`2.5px` – `3.5px`)
 * **Stroke Width**:
   * Sudoku $3 \times 3$ Box Boundaries: `3.5px`
-  * Queens / Star Battle Territory Borders: `3.5px`
+  * Stars Territory Borders: `3.5px`
   * Nonogram 5-Cell Major Accent Lines: `2.5px`
 * **Stroke Color**: `#111111`
 * **Usage**: Separates mathematically significant gameplay regions.
 
 ### Tier 3: Interactive Component Outlines (`1.5px` – `1.8px`)
 * **Stroke Width**:
-  * Word Search Checkboxes (`11x11px`): `1.5px` (`#222222`)
+  * Search Checkboxes (`11x11px`): `1.5px` (`#222222`)
   * Jumble Clue & Answer Letter Squares / Circles: `1.8px` (`#111111`)
   * Nonogram Clue Header Border: `1.5px` (`#111111`)
 * **Usage**: Focused interactive targets that players interact with using a pen or pencil.
@@ -80,7 +80,7 @@ To establish consistent visual weight across games of differing sizes (e.g. 5x5 
 ### Tier 4: Minor Grid Lines & Guide Separators (`1.0px` – `1.2px`)
 * **Stroke Width**:
   * Internal Cell Dividers: `1.0px` (`rgba(0, 0, 0, 0.22)`)
-  * Queens Same-Territory Guide Lines: `1.0px`, dashed `[2, 2]`
+  * Stars Same-Territory Guide Lines: `1.0px`, dashed `[2, 2]`
   * Dashed Tear Dividers: `1.2px` (`#888888`), dashed `[3, 3]`
   * Handwriting Scratchpad Lines: `1.2px` (`#999999`), dashed `[4, 4]`
 
@@ -152,9 +152,9 @@ To maintain proportional balance regardless of board dimensions, use determinist
 $$W_{\text{cell}} = \left\lfloor \frac{W_{\text{inner}}}{N_{\text{cols}}} \right\rfloor$$
 Where $W_{\text{inner}} = 321\text{px}$ (or $576\text{ dots}$ natively).
 
-* **8 Columns** (Word Search): $\lfloor 321 / 8 \rfloor = \mathbf{40\text{px}}$ per cell (Exact match to Jumble clue boxes).
+* **8 Columns** (Search): $\lfloor 321 / 8 \rfloor = \mathbf{40\text{px}}$ per cell (Exact match to Jumble clue boxes).
 * **9 Columns** (Sudoku): $\lfloor 321 / 9 \rfloor = \mathbf{35\text{px}}$ per cell.
-* **10 Columns** (Queens 10x10): $\lfloor 321 / 10 \rfloor = \mathbf{32\text{px}}$ per cell.
+* **10 Columns** (Stars 10x10): $\lfloor 321 / 10 \rfloor = \mathbf{32\text{px}}$ per cell.
 
 ### B. Font Sizing & Typography Stack
 * **Font Family**: `"Space Mono", "Courier New", monospace`
@@ -175,7 +175,7 @@ Where $W_{\text{inner}} = 321\text{px}$ (or $576\text{ dots}$ natively).
 
 Any pencil-tracking elements placed below the puzzle grid must follow these exact dimensions:
 
-### A. Word Search Checkboxes
+### A. Search Checkboxes
 * **Outer Size**: $11 \times 11\text{px}$
 * **Border Width**: `1.5px` (`#222222`)
 * **Layout**: 2 columns distributed across $W_{\text{inner}}$

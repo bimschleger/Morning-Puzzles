@@ -136,7 +136,7 @@
             <label class="flex items-center gap-2.5 cursor-pointer select-none">
               <input type="checkbox" id="toggle-queens" checked class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
               <span class="font-semibold text-sm text-slate-100 flex items-center gap-1.5">
-                👑 Queens / Star Battle
+                ⭐ Stars
                 <span class="text-[10px] bg-amber-500 text-slate-950 font-bold px-1.5 py-0.2 rounded">Dithered</span>
               </span>
             </label>
@@ -200,12 +200,12 @@
           </div>
         </div>
 
-        <!-- 3. Word Search Toggle -->
+        <!-- 3. Search Toggle -->
         <div class="bg-slate-900 border border-slate-800/80 rounded-xl p-3.5 flex flex-col gap-2.5 transition hover:border-slate-700">
           <div class="flex items-center justify-between">
             <label class="flex items-center gap-2.5 cursor-pointer select-none">
               <input type="checkbox" id="toggle-wordsearch" checked class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
-              <span class="font-semibold text-sm text-slate-200">Word Search</span>
+              <span class="font-semibold text-sm text-slate-200">Search</span>
             </label>
             <span class="text-[11px] text-amber-400 font-semibold bg-amber-950/40 border border-amber-500/30 px-2 py-0.5 rounded">80mm Graphic</span>
           </div>
@@ -237,12 +237,12 @@
           </div>
         </div>
 
-        <!-- 4. Nonogram / Picross Toggle -->
+        <!-- 4. Nonogram Toggle -->
         <div class="bg-slate-900 border border-slate-800/80 rounded-xl p-3.5 flex flex-col gap-2.5 transition hover:border-slate-700">
           <div class="flex items-center justify-between">
             <label class="flex items-center gap-2.5 cursor-pointer select-none">
               <input type="checkbox" id="toggle-nonogram" checked class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
-              <span class="font-semibold text-sm text-slate-200">Nonogram / Picross</span>
+              <span class="font-semibold text-sm text-slate-200">Nonogram</span>
             </label>
             <span class="text-[11px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded">RLE Logic</span>
           </div>
@@ -264,12 +264,12 @@
           </div>
         </div>
 
-        <!-- 5. Daily Jumble Toggle -->
+        <!-- 5. Jumble Toggle -->
         <div class="bg-slate-900 border border-slate-800/80 rounded-xl p-3.5 flex flex-col gap-2.5 transition hover:border-slate-700">
           <div class="flex items-center justify-between">
             <label class="flex items-center gap-2.5 cursor-pointer select-none">
               <input type="checkbox" id="toggle-jumble" checked class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
-              <span class="font-semibold text-sm text-slate-200">Daily Jumble</span>
+              <span class="font-semibold text-sm text-slate-200">Jumble</span>
             </label>
             <span class="text-[11px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded">Anagrams + Riddle</span>
           </div>
@@ -1851,7 +1851,7 @@
         else if (variant === '10x10_2star') { size = 10; stars = 2; diffStr = 'MASTER'; }
 
         const qData = queensSim.generate(size, stars);
-        addStandardPuzzleHeader(items, 'QUEENS', diffStr);
+        addStandardPuzzleHeader(items, 'STARS', diffStr);
 
         if (style === 'ascii_text') {
           // ASCII letters fallback
@@ -1878,7 +1878,7 @@
         items.push({ type: 'blank', text: '' });
         items.push({ type: 'rule', text: '-'.repeat(COLS) });
 
-        solutionsContent.push({ name: 'Queens Stars Solution', stars: qData.stars, size });
+        solutionsContent.push({ name: 'Stars', stars: qData.stars, size });
       }
 
       // 2. SUDOKU
@@ -1918,17 +1918,17 @@
         items.push({ type: 'blank', text: '' });
         items.push({ type: 'rule', text: '-'.repeat(COLS) });
 
-        solutionsContent.push({ name: 'Sudoku Solution', solution: sData.solution });
+        solutionsContent.push({ name: 'Sudoku', solution: sData.solution });
       }
 
-      // 3. WORD SEARCH
+      // 3. SEARCH
       if (document.getElementById('toggle-wordsearch').checked) {
         let theme = document.getElementById('theme-wordsearch').value;
         const sizeStr = document.getElementById('size-wordsearch') ? document.getElementById('size-wordsearch').value : '8x10';
         const wsStyle = document.getElementById('style-wordsearch') ? document.getElementById('style-wordsearch').value : 'graphic';
         const wsData = wordSearchSim.generate(theme, sizeStr);
 
-        addStandardPuzzleHeader(items, 'WORD SEARCH');
+        addStandardPuzzleHeader(items, 'SEARCH');
 
         if (wsStyle === 'graphic') {
           items.push({
@@ -1954,7 +1954,7 @@
         items.push({ type: 'rule', text: '-'.repeat(COLS) });
 
         solutionsContent.push({
-          name: 'Word Search',
+          name: 'Search',
           words: wsData.words,
           theme: wsData.theme,
           size: wsData.size
@@ -2010,7 +2010,7 @@
         items.push({ type: 'blank', text: '' });
         items.push({ type: 'rule', text: '-'.repeat(COLS) });
 
-        solutionsContent.push({ name: 'Nonogram Solution', grid: nData.grid, size });
+        solutionsContent.push({ name: 'Nonogram', grid: nData.grid, size });
       }
 
       // 5. DAILY JUMBLE
@@ -2047,7 +2047,7 @@
         items.push({ type: 'blank', text: '' });
         items.push({ type: 'rule', text: '-'.repeat(COLS) });
 
-        solutionsContent.push({ name: 'Jumble Answer', answer: jData.answer, words: jData.words });
+        solutionsContent.push({ name: 'Jumble', answer: jData.answer, words: jData.words });
       }
 
       // Optional Solutions Key
@@ -2059,7 +2059,7 @@
           if (item.answer) {
             items.push({ type: 'text', text: `  Answer: ${item.answer}` });
             items.push({ type: 'text', text: `  Words:  ${item.words.join(', ')}` });
-          } else if (item.name === 'Word Search') {
+          } else if (item.name === 'Search') {
             items.push({ type: 'text', text: `  Theme: ${item.theme} (${item.size})` });
             items.push({ type: 'text', text: `  Words (${item.words.length}): ${item.words.join(', ')}` });
           } else if (item.stars) {
