@@ -207,7 +207,15 @@
               <input type="checkbox" id="toggle-wordsearch" checked class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
               <span class="font-semibold text-sm text-slate-200">Word Search</span>
             </label>
-            <span class="text-[11px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded">12x12 Matrix</span>
+            <span class="text-[11px] text-amber-400 font-semibold bg-amber-950/40 border border-amber-500/30 px-2 py-0.5 rounded">80mm Graphic</span>
+          </div>
+          <div class="flex items-center justify-between pl-6 text-xs text-slate-400">
+            <span>Size:</span>
+            <select id="size-wordsearch" class="bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2 py-1 text-xs outline-none focus:border-amber-500">
+              <option value="8x8">8x8 (Compact - 5 words)</option>
+              <option value="8x10" selected>8x10 (Standard - 7 words)</option>
+              <option value="8x12">8x12 (Tall - 8 words)</option>
+            </select>
           </div>
           <div class="flex items-center justify-between pl-6 text-xs text-slate-400">
             <span>Theme:</span>
@@ -218,6 +226,13 @@
               <option value="Space & Cosmos">Space & Cosmos</option>
               <option value="Wildlife">Wildlife</option>
               <option value="Technology">Technology</option>
+            </select>
+          </div>
+          <div class="flex items-center justify-between pl-6 text-xs text-slate-400">
+            <span>Style:</span>
+            <select id="style-wordsearch" class="bg-slate-800 border border-amber-500/50 text-amber-400 font-semibold rounded-lg px-2 py-1 text-xs outline-none focus:border-amber-500">
+              <option value="graphic" selected>★ Thermal Graphic (203 DPI)</option>
+              <option value="ascii">Plain Text ASCII</option>
             </select>
           </div>
         </div>
@@ -436,39 +451,73 @@
 
     // --- WORD SEARCH ENGINE ---
     const WORD_SEARCH_THEMES = {
-      "Morning Routine": ["COFFEE", "SUNRISE", "PANCAKE", "WAFFLE", "TOAST", "OATMEAL", "SHOWER", "ALARM", "PAPER", "JOGGING", "TEAPOT", "KITCHEN"],
-      "Great Outdoors": ["FOREST", "CANYON", "RIVER", "SUMMIT", "VALLEY", "STREAM", "MEADOW", "GLACIER", "BOULDER", "ISLAND", "DESERT", "TRAIL"],
-      "Space & Cosmos": ["PLANET", "GALAXY", "METEOR", "ORBIT", "NEBULA", "COMET", "ECLIPSE", "PULSAR", "ROCKET", "GRAVITY", "STELLAR", "SOLAR"],
-      "Wildlife": ["FALCON", "DOLPHIN", "BADGER", "JAGUAR", "OTTER", "COUGAR", "PENGUIN", "CHEETAH", "GIRAFFE", "BEAVER", "OSPREY", "PANTHER"],
-      "Technology": ["SYSTEM", "SERVER", "ROUTER", "MEMORY", "SOCKET", "SENSOR", "CIRCUIT", "BINARY", "BUFFER", "KERNEL", "PYTHON", "DEVICE"]
+      "Morning Routine": ["COFFEE", "SUNRISE", "PANCAKE", "WAFFLE", "TOAST", "OATMEAL", "SHOWER", "ALARM", "PAPER", "JOGGING", "TEAPOT", "KITCHEN", "MUFFIN", "SUNNY", "BREAD"],
+      "Great Outdoors": ["FOREST", "CANYON", "RIVER", "SUMMIT", "VALLEY", "STREAM", "MEADOW", "GLACIER", "BOULDER", "ISLAND", "DESERT", "TRAIL", "CAMPING", "NATURE", "HIKING", "TIMBER"],
+      "Space & Cosmos": ["PLANET", "GALAXY", "METEOR", "ORBIT", "NEBULA", "COMET", "ECLIPSE", "PULSAR", "ROCKET", "GRAVITY", "STELLAR", "SOLAR", "COSMOS", "LUNAR", "SATURN", "STAR"],
+      "Wildlife": ["FALCON", "DOLPHIN", "BADGER", "JAGUAR", "OTTER", "COUGAR", "PENGUIN", "CHEETAH", "GIRAFFE", "BEAVER", "OSPREY", "PANTHER", "ZEBRA", "EAGLE", "TIGER", "RABBIT"],
+      "Technology": ["SYSTEM", "SERVER", "ROUTER", "MEMORY", "SOCKET", "SENSOR", "CIRCUIT", "BINARY", "BUFFER", "KERNEL", "PYTHON", "DEVICE", "ROBOT", "PIXEL", "CHIP", "CODING"]
     };
 
     class WordSearchSimulator {
-      generate(theme = "Morning Routine", size = 12) {
-        if (!WORD_SEARCH_THEMES[theme]) {
-          const keys = Object.keys(WORD_SEARCH_THEMES);
-          theme = keys[Math.floor(Math.random() * keys.length)];
+      generate(theme = "random", sizeStr = "8x10") {
+        let [cols, rows] = [8, 10];
+        if (typeof sizeStr === "string" && sizeStr.includes("x")) {
+          const parts = sizeStr.split("x").map(Number);
+          cols = parts[0] || 8;
+          rows = parts[1] || 10;
+        } else if (typeof sizeStr === "number") {
+          cols = rows = sizeStr;
         }
-        const wordsPool = [...WORD_SEARCH_THEMES[theme]].sort(() => Math.random() - 0.5);
-        const grid = Array.from({ length: size }, () => Array(size).fill(' '));
+
+        const themeKeys = Object.keys(WORD_SEARCH_THEMES);
+        if (!WORD_SEARCH_THEMES[theme] || theme === "random") {
+          theme = themeKeys[Math.floor(Math.random() * themeKeys.length)];
+        }
+
+        // Scale word count and maximum word length according to grid size
+        let targetWords = 7;
+        let maxWordLen = 8;
+        const cellCount = cols * rows;
+        if (cellCount <= 64) { // 8x8
+          targetWords = 5;
+          maxWordLen = 7;
+        } else if (cellCount <= 80) { // 8x10
+          targetWords = 7;
+          maxWordLen = 8;
+        } else { // 8x12 or larger
+          targetWords = 8;
+          maxWordLen = Math.max(cols, rows);
+        }
+
+        const wordsPool = WORD_SEARCH_THEMES[theme]
+          .filter(w => w.length >= 3 && w.length <= maxWordLen && w.length <= Math.max(cols, rows))
+          .sort(() => Math.random() - 0.5);
+
+        const grid = Array.from({ length: rows }, () => Array(cols).fill(' '));
         const placed = [];
 
         const dirs = [
-          [0, 1], [1, 0], [1, 1], [-1, 1],
-          [0, -1], [-1, 0], [1, -1], [-1, -1]
+          [0, 1],   // Horizontal Left-Right
+          [1, 0],   // Vertical Top-Down
+          [1, 1],   // Diagonal Down-Right
+          [-1, 1],  // Diagonal Up-Right
+          [0, -1],  // Horizontal Right-Left
+          [-1, 0],  // Vertical Down-Up
+          [1, -1],  // Diagonal Down-Left
+          [-1, -1]  // Diagonal Up-Left
         ];
 
         for (const word of wordsPool) {
-          if (placed.length >= 8) break;
+          if (placed.length >= targetWords) break;
           let placedWord = false;
-          for (let attempt = 0; attempt < 100 && !placedWord; attempt++) {
+          for (let attempt = 0; attempt < 120 && !placedWord; attempt++) {
             const [dr, dc] = dirs[Math.floor(Math.random() * dirs.length)];
-            const rStart = Math.floor(Math.random() * size);
-            const cStart = Math.floor(Math.random() * size);
+            const rStart = Math.floor(Math.random() * rows);
+            const cStart = Math.floor(Math.random() * cols);
             const rEnd = rStart + dr * (word.length - 1);
             const cEnd = cStart + dc * (word.length - 1);
 
-            if (rEnd >= 0 && rEnd < size && cEnd >= 0 && cEnd < size) {
+            if (rEnd >= 0 && rEnd < rows && cEnd >= 0 && cEnd < cols) {
               let canPlace = true;
               for (let i = 0; i < word.length; i++) {
                 const cell = grid[rStart + dr * i][cStart + dc * i];
@@ -490,15 +539,15 @@
 
         // Fill blanks
         const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        for (let r = 0; r < size; r++) {
-          for (let c = 0; c < size; c++) {
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
             if (grid[r][c] === ' ') {
               grid[r][c] = letters[Math.floor(Math.random() * letters.length)];
             }
           }
         }
 
-        return { grid, words: placed.sort(), theme, size };
+        return { grid, words: placed.sort(), theme, cols, rows, size: `${cols}x${rows}` };
       }
     }
 
@@ -1007,6 +1056,164 @@
           const y = padding + s.r * cellSize + cellSize / 2;
           ctx.fillText('★', x, y);
         }
+      }
+    }
+
+    /**
+     * Renders a syndicated newspaper-style Word Search puzzle with:
+     * - Top "W O R D   S E A R C H" headline banner and theme badge
+     * - High-contrast letter grid with thick outer border (3.5px) matching Sudoku/Queens/Jumble
+     * - Subtle internal cell dividers for easy visual scanning
+     * - Centered, large monospace letters perfectly scaled to cell size
+     * - Dashed divider separating grid from checklist
+     * - Two-column checklist below with checkboxes [ ] for pencil tracking
+     */
+    function drawWordSearchCanvas(canvas, wsData) {
+      const totalWidth = 345;
+      const padding = 12;
+      const innerWidth = totalWidth - padding * 2; // 321px
+
+      const cols = wsData.cols || (wsData.grid[0] ? wsData.grid[0].length : 8);
+      const rows = wsData.rows || (wsData.grid ? wsData.grid.length : 10);
+
+      // Cell size: for 8 cols -> 40px (exact match to Jumble clue boxes!)
+      const cellSize = Math.floor(innerWidth / cols);
+      const gridWidth = cols * cellSize;
+      const gridHeight = rows * cellSize;
+      const gridX = padding + Math.floor((innerWidth - gridWidth) / 2);
+
+      // Checklist layout: 2 columns
+      const words = wsData.words;
+      const numRowsChecklist = Math.ceil(words.length / 2);
+      const checklistRowHeight = 22;
+      const checklistHeight = numRowsChecklist * checklistRowHeight;
+
+      // Dynamic canvas height calculation
+      let calcHeight = padding;
+      calcHeight += 32; // Header title & theme
+      calcHeight += 18; // Instructions
+      calcHeight += gridHeight; // Grid
+      calcHeight += 14; // Divider gap
+      calcHeight += 20; // Checklist title
+      calcHeight += checklistHeight; // Checklist items
+      calcHeight += padding + 4;
+
+      canvas.width = totalWidth;
+      canvas.height = Math.ceil(calcHeight);
+      const ctx = canvas.getContext('2d');
+
+      // Paper background
+      ctx.fillStyle = '#fafaf7';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // 1. Header: W O R D   S E A R C H
+      let curY = padding;
+      ctx.fillStyle = '#111111';
+      ctx.font = '900 21px "Space Mono", sans-serif';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'top';
+      ctx.fillText('W O R D   S E A R C H', padding, curY);
+
+      // Theme badge & info on right side
+      ctx.font = 'bold 9.5px "Space Mono", monospace';
+      ctx.textAlign = 'right';
+      ctx.fillStyle = '#444444';
+      ctx.fillText(`★ ${wsData.theme.toUpperCase()}`, totalWidth - padding, curY + 2);
+      ctx.font = 'normal 8.5px "Space Mono", monospace';
+      ctx.fillStyle = '#777777';
+      ctx.fillText(`${cols}x${rows} Grid • ${words.length} Words`, totalWidth - padding, curY + 16);
+
+      curY += 28;
+
+      // Instructions
+      ctx.font = 'normal 10px "Space Mono", monospace';
+      ctx.fillStyle = '#333333';
+      ctx.textAlign = 'left';
+      ctx.fillText('Find the words hidden horizontally, vertically, or diagonally:', padding, curY);
+      curY += 16;
+
+      // 2. The Letter Grid
+      const gridY = curY;
+
+      // Inner cell divider lines
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.22)';
+      for (let c = 1; c < cols; c++) {
+        const x = gridX + c * cellSize;
+        ctx.beginPath();
+        ctx.moveTo(x, gridY);
+        ctx.lineTo(x, gridY + gridHeight);
+        ctx.stroke();
+      }
+      for (let r = 1; r < rows; r++) {
+        const y = gridY + r * cellSize;
+        ctx.beginPath();
+        ctx.moveTo(gridX, y);
+        ctx.lineTo(gridX + gridWidth, y);
+        ctx.stroke();
+      }
+
+      // Thick outer border (3.5px, matching Sudoku, Star Battle, and Jumble!)
+      ctx.lineWidth = 3.5;
+      ctx.strokeStyle = '#111111';
+      ctx.strokeRect(gridX, gridY, gridWidth, gridHeight);
+
+      // Letters inside cells
+      const fontSize = Math.round(cellSize * 0.52); // e.g. 21px for 40px cell
+      ctx.font = `bold ${fontSize}px "Space Mono", monospace`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#111111';
+
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const letter = wsData.grid[r][c];
+          const cx = gridX + c * cellSize + cellSize / 2;
+          const cy = gridY + r * cellSize + cellSize / 2;
+          ctx.fillText(letter, cx, cy);
+        }
+      }
+
+      curY = gridY + gridHeight + 12;
+
+      // 3. Divider Line
+      ctx.lineWidth = 1.2;
+      ctx.strokeStyle = '#888888';
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath();
+      ctx.moveTo(padding, curY);
+      ctx.lineTo(padding + innerWidth, curY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      curY += 10;
+
+      // 4. Word Checklist Below Grid
+      ctx.font = 'bold 11px "Space Mono", monospace';
+      ctx.fillStyle = '#111111';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'top';
+      ctx.fillText(`WORDS TO FIND (${words.length}):`, padding, curY);
+      curY += 18;
+
+      const colWidth = Math.floor(innerWidth / 2);
+      ctx.font = 'bold 11.5px "Space Mono", monospace';
+
+      for (let i = 0; i < words.length; i++) {
+        const colIdx = i % 2;
+        const rowIdx = Math.floor(i / 2);
+        const itemX = padding + colIdx * colWidth;
+        const itemY = curY + rowIdx * checklistRowHeight;
+
+        // Checkbox box: 11x11px
+        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = '#222222';
+        ctx.strokeRect(itemX, itemY + 2, 11, 11);
+
+        // Word text
+        ctx.fillStyle = '#111111';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(words[i], itemX + 17, itemY + 8);
       }
     }
 
@@ -1774,26 +1981,44 @@
       // 3. WORD SEARCH
       if (document.getElementById('toggle-wordsearch').checked) {
         let theme = document.getElementById('theme-wordsearch').value;
-        const wsData = wordSearchSim.generate(theme, 12);
+        const sizeStr = document.getElementById('size-wordsearch') ? document.getElementById('size-wordsearch').value : '8x10';
+        const wsStyle = document.getElementById('style-wordsearch') ? document.getElementById('style-wordsearch').value : 'graphic';
+        const wsData = wordSearchSim.generate(theme, sizeStr);
 
-        items.push({ type: 'header', text: '--- WORD SEARCH ---' });
-        items.push({ type: 'text', text: `Theme: ${wsData.theme} | Words: ${wsData.words.length}` });
-        items.push({ type: 'blank', text: '' });
+        if (wsStyle === 'graphic') {
+          items.push({
+            type: 'canvas',
+            render: (canvas) => drawWordSearchCanvas(canvas, wsData)
+          });
+          items.push({ type: 'caption', text: `★ ${wsData.size} Word Search - Thermal 203 DPI` });
+          items.push({ type: 'blank', text: '' });
+        } else {
+          items.push({ type: 'header', text: '--- WORD SEARCH ---' });
+          items.push({ type: 'text', text: `Theme: ${wsData.theme} | Size: ${wsData.size} | Words: ${wsData.words.length}` });
+          items.push({ type: 'blank', text: '' });
 
-        for (let r = 0; r < 12; r++) {
-          const rowStr = wsData.grid[r].join(' ');
-          items.push({ type: 'text', text: centerLine(rowStr, COLS) });
+          for (let r = 0; r < wsData.rows; r++) {
+            const rowStr = wsData.grid[r].join(' ');
+            items.push({ type: 'text', text: centerLine(rowStr, COLS) });
+          }
+          items.push({ type: 'blank', text: '' });
+          items.push({ type: 'text', text: 'Find these words in the grid above:' });
+          
+          for (let i = 0; i < wsData.words.length; i += 2) {
+            const col1 = `[ ] ${wsData.words[i]}`;
+            const col2 = wsData.words[i + 1] ? `[ ] ${wsData.words[i + 1]}` : '';
+            items.push({ type: 'text', text: '  ' + keyValue(col1, col2, 44) });
+          }
+          items.push({ type: 'blank', text: '' });
         }
-        items.push({ type: 'blank', text: '' });
-        items.push({ type: 'text', text: 'Find these words in the grid above:' });
-        
-        for (let i = 0; i < wsData.words.length; i += 2) {
-          const col1 = `[ ] ${wsData.words[i]}`;
-          const col2 = wsData.words[i + 1] ? `[ ] ${wsData.words[i + 1]}` : '';
-          items.push({ type: 'text', text: '  ' + keyValue(col1, col2, 44) });
-        }
-        items.push({ type: 'blank', text: '' });
         items.push({ type: 'rule', text: '-'.repeat(COLS) });
+
+        solutionsContent.push({
+          name: 'Word Search',
+          words: wsData.words,
+          theme: wsData.theme,
+          size: wsData.size
+        });
       }
 
       // 4. NONOGRAM / PICROSS
@@ -1901,6 +2126,9 @@
           if (item.answer) {
             items.push({ type: 'text', text: `  Answer: ${item.answer}` });
             items.push({ type: 'text', text: `  Words:  ${item.words.join(', ')}` });
+          } else if (item.name === 'Word Search') {
+            items.push({ type: 'text', text: `  Theme: ${item.theme} (${item.size})` });
+            items.push({ type: 'text', text: `  Words (${item.words.length}): ${item.words.join(', ')}` });
           } else if (item.stars) {
             const starsStr = item.stars.map(s => `(${s.r + 1},${s.c + 1})`).join(' ');
             items.push({ type: 'text', text: `  Stars at (row,col): ${starsStr}` });
@@ -2011,7 +2239,7 @@
     const inputs = [
       'toggle-queens', 'variant-queens', 'style-queens', 'toggle-queens-solution',
       'toggle-sudoku', 'diff-sudoku', 'style-sudoku',
-      'toggle-wordsearch', 'theme-wordsearch',
+      'toggle-wordsearch', 'size-wordsearch', 'theme-wordsearch', 'style-wordsearch',
       'toggle-nonogram', 'size-nonogram', 'style-nonogram',
       'toggle-jumble', 'diff-jumble', 'style-jumble',
       'toggle-ruler', 'toggle-solutions', 'toggle-burn'
