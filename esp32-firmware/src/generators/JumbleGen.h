@@ -25,9 +25,14 @@ public:
     void printToReceipt(EscPosPrinter& printer);
 
     const char* getRiddle() const { return _riddle; }
+    const char* getAnswer() const { return _answer; }
+    uint8_t getNumWords() const { return _numWords; }
+    const JumbleItem& getWord(uint8_t idx) const { return _words[idx]; }
 
 private:
-    JumbleItem _words[4];
+    static const uint8_t MAX_WORDS = 6;
+    JumbleItem _words[MAX_WORDS];
+    uint8_t _numWords;
     const char* _riddle;
     const char* _answer;
 

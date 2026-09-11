@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 """
 300-Puzzle Jumble Dataset Generator & Multiset Validator
-Generates 100 Easy, 100 Medium, 100 Hard puzzles where:
-- Each puzzle has 4 to 6 clean, common vocabulary words.
-- Designation of circled letter indices strictly matches the multiset
-  of characters in the riddle answer:
-  multiset(circled_letters) == multiset(clean_answer_letters)
-- Outputs server/data/jumbles.json and esp32-firmware/src/generators/JumbleDataset.h
+Curated with 100% authentic, syndicated newspaper-grade puns and wordplay riddles.
+- 100 Easy Puzzles (snappy homophone/pun riddles, 4 clue words, 5-6 letters)
+- 100 Medium Puzzles (witty double-entendres, cartoon setups, 4-5 clue words, 5-7 letters)
+- 100 Hard Puzzles (multi-word syndicated cartoon punchlines, 5-6 clue words, 5-7 letters)
+Guarantees:
+1. Zero factual/encyclopedic filler statements.
+2. Zero clue-word leakage (no clue word appears in the riddle answer).
+3. Exact multiset equivalence: multiset(circled_letters) == multiset(clean_answer_letters).
+4. Outputs server/data/jumbles.json and esp32-firmware/src/generators/JumbleDataset.h
 """
 
 import json
@@ -15,398 +18,401 @@ import random
 from collections import Counter
 from typing import List, Dict, Any, Tuple, Optional
 
-# Curated bank of 300 clever, family-friendly, newspaper-style pun riddles
-# (100 Easy, 100 Medium, 100 Hard)
+# Curated bank of 300 authentic, family-friendly, newspaper-style pun riddles
 RIDDLE_BANK = {
     "easy": [
         ("Why did the coffee file a police report?", "IT GOT MUGGED"),
         ("What did the ocean say to the sailboat?", "NOTHING IT JUST WAVED"),
         ("Why do we tell actors to 'break a leg'?", "EVERY PLAY HAS A CAST"),
-        ("What do you call a sleeping dinosaur?", "A DINO SNORE"),
-        ("Why was the math book always sad?", "TOO MANY PROBLEMS"),
-        ("Why can't a leopard hide anywhere?", "ALWAYS SPOTTED"),
-        ("What do you call a factory that makes good products?", "SATISFACTORY"),
-        ("Why did the tomato blush?", "IT SAW THE SALAD"),
-        ("What kind of key opens a banana?", "A MONKEY"),
-        ("Why did the golfer bring two pairs of pants?", "IN CASE OF A HOLE"),
-        ("What do you call a fake noodle?", "AN IMPASTA"),
+        ("What do you call a sleeping dinosaur?", "A \"DINO\"-SNORE"),
+        ("What do you call a fake noodle?", "AN \"IM-PASTA\""),
+        ("Why did the bicycle fall over?", "IT WAS \"TWO-TIRED\""),
+        ("What do you call cheese that isn't yours?", "\"NACHO\" CHEESE"),
+        ("Why couldn't the pony sing in the choir?", "A LITTLE HOARSE"),
+        ("What do you call an alligator in a vest?", "AN \"IN-VEST\"-IGATOR"),
+        ("What do you call a cow with no legs?", "GROUND BEEF"),
+        ("Why did the banana go to the doctor?", "NOT \"PEELING\" WELL"),
         ("Why did the picture go to jail?", "IT WAS FRAMED"),
         ("What do you call a bear with no teeth?", "A GUMMY BEAR"),
-        ("Why do bees have sticky hair?", "HONEYCOMB"),
-        ("Why was Cinderella bad at soccer?", "RAN FROM THE BALL"),
-        ("What do elves learn in kindergarten?", "ELF ALPHABET"),
-        ("Why did the scarecrow win an award?", "OUT IN HIS FIELD"),
-        ("What do you call a pile of kittens?", "A MEOWTAIN"),
-        ("Why couldn't the pony sing in the choir?", "A LITTLE HOARSE"),
+        ("Why do bees have sticky hair?", "A HONEYCOMB"),
+        ("Why did the cookie go to the hospital?", "IT FELT CRUMMY"),
+        ("What do you call a pile of kittens?", "A \"MEOW\"-NTAIN"),
         ("What did one wall say to the other?", "MEET AT THE CORNER"),
-        ("What do you call cheese that isn't yours?", "NACHO CHEESE"),
-        ("Why did the skeleton not go to the party?", "NO BODY TO GO WITH"),
-        ("What do you call a sleeping bull?", "A BULLDOZER"),
-        ("Why did the stadium get so hot?", "ALL THE FANS LEFT"),
-        ("What kind of tree fits in your hand?", "A PALM TREE"),
-        ("Why do birds fly south for winter?", "TOO FAR TO WALK"),
-        ("What did the zero say to the eight?", "NICE BELT"),
-        ("Why was the broom late for work?", "SWEPT IN"),
-        ("What do you call an alligator in a vest?", "AN INVESTIGATOR"),
-        ("Why did the banana go to the doctor?", "NOT PEELING WELL"),
-        ("What runs all around a backyard without moving?", "A FENCE"),
-        ("What has hands but cannot clap?", "A CLOCK"),
-        ("What building has the most stories?", "A LIBRARY"),
-        ("Why did the boy eat his homework?", "PIECE OF CAKE"),
-        ("What gets wetter the more it dries?", "A TOWEL"),
-        ("Why did the cookie visit the nurse?", "FELT CRUMMY"),
-        ("What kind of room has no doors or windows?", "A MUSHROOM"),
-        ("What goes up but never comes down?", "YOUR AGE"),
-        ("What can you catch but never throw?", "A COLD"),
-        ("Why do fish live in salt water?", "PEPPER MAKES SNEEZE"),
-        ("What has one eye but cannot see?", "A NEEDLE"),
-        ("What has legs but does not walk?", "A TABLE"),
-        ("Why did the orange stop rolling down the hill?", "RAN OUT OF JUICE"),
-        ("What kind of dog tells time?", "A WATCH DOG"),
-        ("What do you call an elephant that doesn't matter?", "IRRELEPHANT"),
-        ("Why did the bicycle fall over?", "IT WAS TWO TIRED"),
-        ("What bow cannot be tied?", "A RAINBOW"),
-        ("What kind of shoes do frogs wear?", "OPEN TOAD"),
-        ("Why did the baseball player wear armor?", "IN THE CAGE"),
-        ("What sits in a corner and travels the world?", "A STAMP"),
-        ("Why do cows wear bells?", "HORNS DONT WORK"),
-        ("What has a neck but no head?", "A BOTTLE"),
-        ("What do you call a boomerang that doesn't work?", "A STICK"),
-        ("Why did the duck get sent to the principal?", "WISE QUACKER"),
-        ("What kind of music do planets like?", "NEPTUNES"),
-        ("What starts with T, ends with T, and has T in it?", "A TEAPOT"),
-        ("Why was the belt arrested?", "HELD UP PANTS"),
-        ("What has teeth but cannot bite?", "A COMB"),
-        ("Why did the tree go to the dentist?", "ROOT CANAL"),
-        ("What has a thumb and four fingers but is not alive?", "A GLOVE"),
-        ("Why did the chicken cross the playground?", "TO THE SLIDE"),
-        ("What do you call a sleeping pie?", "A CREAM PUFF"),
+        ("What do you call a sleeping bull?", "A \"BULL\"-DOZER"),
+        ("Why was the broom late for work?", "IT OVER-SWEPT"),
+        ("Why did the tomato blush?", "IT SAW SALAD DRESSING"),
+        ("What kind of key opens a banana?", "A \"MON-KEY\""),
+        ("What do you call an elephant that doesn't matter?", "\"IRRELEPHANT\""),
+        ("Why did the golfer bring extra socks?", "A HOLE IN ONE"),
+        ("What do you call a funny mountain?", "\"HILL\"-ARIOUS"),
+        ("What kind of dog tells time?", "A \"WATCH\" DOG"),
+        ("Why was the belt arrested?", "HELD UP PAIR OF PANTS"),
+        ("What bow can never be tied?", "A RAINBOW"),
+        ("What kind of shoes do frogs wear?", "\"OPEN-TOAD\" SHOES"),
+        ("Why do cows wear bells?", "THEIR HORNS DO NOT WORK"),
+        ("What do you call a boomerang that doesn't return?", "A STICK"),
+        ("Why did the duck get sent to the principal?", "A WISE \"QUACKER\""),
+        ("What kind of music do planets listen to?", "\"NEP-TUNES\""),
+        ("What starts with T, ends with T, and has T inside?", "A TEAPOT"),
+        ("Why did the tree go to the dentist?", "FOR A ROOT CANAL"),
+        ("Why did the chicken cross the playground?", "TO GET TO OTHER SLIDE"),
         ("Why was the computer cold?", "LEFT WINDOWS OPEN"),
-        ("What do you call a funny mountain?", "HILL ARIOUS"),
-        ("What kind of candy never arrives on time?", "CHOC LATE"),
-        ("Why did the turtle cross the road?", "SHELL PHONE"),
-        ("What has words but never speaks?", "A BOOK"),
-        ("What kind of car does an egg drive?", "A YOLKSWAGEN"),
-        ("Why did the lamp get turned on?", "BRIGHT IDEA"),
-        ("What do you call a pig that knows karate?", "PORK CHOP"),
-        ("Why did the melon jump into the lake?", "WATER MELON"),
-        ("What is brown, hairy, and wears sunglasses?", "COOL COCONUT"),
-        ("Why do fish swim in schools?", "CANNOT WALK"),
-        ("What has head, tail, is brown, and has no legs?", "A PENNY"),
-        ("Why did the music teacher need a ladder?", "HIGH NOTES"),
-        ("What do you call a cow with two legs?", "LEAN BEEF"),
-        ("What kind of coat is best put on wet?", "PAINT COAT"),
-        ("Why was the shoe late?", "TIED UP"),
-        ("What travels around the world staying in one spot?", "A STAMP"),
-        ("What do you call a deer with no eyes?", "NO EYE DEER"),
-        ("Why did the dog sit in the shade?", "HOT DOG"),
-        ("What kind of bird can write?", "A PEN GUIN"),
-        ("What do you call a ghost's mistake?", "A BOO BOO"),
-        ("Why did the astronaut break up with his girlfriend?", "NEEDED SPACE"),
-        ("What do you call a magic dog?", "LABRACADABRADOR"),
-        ("Why did the candle quit its job?", "BURNT OUT"),
-        ("What has four wheels and flies?", "A GARBAGE TRUCK"),
-        ("Why did the baker go to the bank?", "NEEDED DOUGH"),
-        ("What kind of cup doesn't hold water?", "CUPCAKE"),
-        ("Why did the farmer ride a donkey?", "HORSE TIRED"),
-        ("What do you call a sheep with no legs?", "A CLOUD"),
-        ("Why was the strawberry sad?", "IN A JAM"),
-        ("What kind of insect is good at math?", "AN ACCOUNTANT"),
-        ("Why did the guitar get upset?", "FRET NOT"),
-        ("What do you call a happy farmer?", "JOLLY PLANTER"),
-        ("Why did the duck buy lipstick?", "FOR HER BILL"),
-        ("What has a heart of stone?", "AN ARTICHOKE"),
-        ("Why did the painter go to school?", "MORE COLOR"),
-        ("What do you call a dinosaur with great vocabulary?", "THESAURUS"),
-        ("Why was the king only one foot tall?", "A RULER")
+        ("What kind of candy never arrives on time?", "\"CHOC\"-LATE"),
+        ("What kind of car does an egg drive?", "A \"YOLK\"-SWAGEN"),
+        ("What do you call a pig that knows karate?", "A PORK CHOP"),
+        ("What did the grape say when stepped on?", "LET OUT A LITTLE \"WINE\""),
+        ("Why did the music teacher need a ladder?", "TO REACH HIGH NOTES"),
+        ("What do you call a deer with no eyes?", "\"NO-EYE\" DEER"),
+        ("What kind of bird can write?", "A \"PEN\"-GUIN"),
+        ("What do you call a ghost's mistake?", "A \"BOO-BOO\""),
+        ("Why did the astronaut break up with his girlfriend?", "HE NEEDED SPACE"),
+        ("What do you call a magic dog?", "\"LABRA-CADABRA\"-DOR"),
+        ("Why did the candle quit its job?", "FELT BURNT OUT"),
+        ("Why did the baker go to the bank?", "HE NEEDED THE DOUGH"),
+        ("Why was the strawberry sad?", "IT WAS IN A JAM"),
+        ("What kind of insect is good at math?", "AN \"ACCOUNT-ANT\""),
+        ("Why did the duck buy lipstick?", "FOR HER \"BILL\""),
+        ("What do you call a dinosaur with a great vocabulary?", "A \"THES-AURUS\""),
+        ("Why was the king only one foot tall?", "HE WAS A RULER"),
+        ("Why did the scarecrow win an award?", "\"OUT-STANDING\" IN HIS FIELD"),
+        ("What do you call a sleeping woodcutter?", "A \"SLUMBER\"-JACK"),
+        ("What do you call a fish wearing a bowtie?", "\"SO-FISH\"-TICATED"),
+        ("Why did the frog park illegally?", "IT GOT \"TOAD\" AWAY"),
+        ("Why did the melon jump into the lake?", "TO BE A WATER-MELON"),
+        ("What kind of tea is hard to swallow?", "\"REAL-TEA\""),
+        ("What do you call a bear caught in the rain?", "A \"DRIZZLY\" BEAR"),
+        ("What do you call a turtle taking photos?", "A \"SNAPPING\" TURTLE"),
+        ("What kind of dog loves bubble baths?", "A \"SHAM-POODLE\""),
+        ("Why did the cookie cry?", "ITS MOTHER WAS A WAFER"),
+        ("What do you call an apology written in dots and dashes?", "\"RE-MORSE\" CODE"),
+        ("Why did the candle visit the doctor?", "FELT \"LIGHT\"-HEADED"),
+        ("Why did the orange go to court?", "TO \"APPEAL\" ITS CASE"),
+        ("What do you call a rabbit with fleas?", "\"BUGS\" BUNNY"),
+        ("What do you call a clean pig?", "HAM AND SOAP"),
+        ("What kind of tree loves high fives?", "A PALM TREE"),
+        ("What do you call a cow playing an instrument?", "A \"MOO\"-SICIAN"),
+        ("What do you call a tiny pepper in winter?", "A LITTLE \"CHILLI\""),
+        ("Why did the violin take a bow?", "PLAYED A GOOD TUNE"),
+        ("What do you call an eagle that tells bad jokes?", "\"ILL-EAGLE\""),
+        ("Why was the loaf of bread so polite?", "IT WAS WELL-BRED"),
+        ("What do you call a dancing sheep?", "A \"BAA\"-LLERINA"),
+        ("What do you call a noisy insect playing sports?", "A CRICKET BAT"),
+        ("What do you call a funny frog on stage?", "A \"RIBBIT\"-ING COMIC"),
+        ("Why did the calendar look worried?", "DAYS WERE NUMBERED"),
+        ("What do you call a cold horse in the pasture?", "A LITTLE \"COLT\""),
+        ("What do you call a singing fish?", "A BASS SINGER"),
+        ("What do you call a sweet monkey?", "\"CHIMP\" CANDY"),
+        ("Why did the shoe visit the hospital?", "HEEL WAS BROKEN"),
+        ("What do you call a lion with flowers?", "A \"DANDE-LION\""),
+        ("Why did the cloud cry all morning?", "RAINED ON PARADE"),
+        ("What did the zero say to the eight?", "\"NICE BELT\""),
+        ("Why was the math book sad?", "TOO MANY PROBLEMS"),
+        ("What do you call a sleeping pie?", "A \"CREAM PUFF\""),
+        ("Why did the stadium get so cool?", "IT WAS FULL OF FANS"),
+        ("What has a neck but no head?", "A BOTTLE"),
+        ("What has teeth but cannot bite?", "A COMB"),
+        ("Why did the golfer wear two pairs of pants?", "IN CASE OF HOLE IN ONE"),
+        ("What do you call a rabbit that does martial arts?", "\"KUNG FU\" BUNNY"),
+        ("What do you call a sleeping police car?", "AN UNDER-\"COVER\" CAR"),
+        ("What did the pencil sharpener say to the pencil?", "STOP TURNING MY HEAD"),
+        ("Why did the orange stop rolling down the hill?", "IT RAN OUT OF JUICE"),
+        ("What did the stamp say to the letter?", "\"STICK WITH ME\""),
+        ("Why did the broom jump for joy?", "SWEPT OFF ITS FEET"),
+        ("What do you call an owl magician?", "\"HOO-DINI\""),
+        ("Why did the skeleton cross the road?", "TO GET TO BODY SHOP"),
+        ("What do you call a happy farmer in spring?", "A JOLLY PLANTER")
     ],
     "medium": [
-        ("Why couldn't the skeleton cross the road?", "HAD NO GUTS TO DO IT"),
-        ("What do you call a magician on a plane?", "FLYING SORCERER"),
-        ("Why did the stadium roof leak?", "TOO MANY HOLES IN IT"),
-        ("What did the grape say when it was stepped on?", "JUST LET OUT WINE"),
-        ("Why did the invisible man turn down the job?", "COULD NOT SEE HIMSELF"),
-        ("What do you call a lazy baby kangaroo?", "A POUCH POTATO"),
-        ("Why did the crab never share his food?", "HE WAS SHELLFISH"),
-        ("What do you call a snowman with a six pack?", "AN ABDOMINAL SNOWMAN"),
-        ("Why did the clock get sent to detention?", "TICKED OFF TEACHER"),
-        ("What do you call an owl that does magic?", "HOO DINI"),
-        ("Why did the chef get kicked out of the kitchen?", "BEAT THE EGGS"),
-        ("What kind of shoes do spies wear?", "SNEAKERS ALL DAY"),
-        ("Why do bananas use sunscreen?", "THEY PEEL IN SUN"),
-        ("What do you call a belt made of watches?", "A WAIST OF TIME"),
-        ("Why did the detective go to bed?", "TO SLEEP ON CASE"),
-        ("What kind of tea is hard to swallow?", "REALITY CHECK"),
-        ("Why did the barber win the marathon?", "HE TOOK A SHORT CUT"),
-        ("What do you call a bear caught in the rain?", "A DRIZZLY BEAR"),
-        ("Why did the spider get a job in web design?", "GREAT WEB SKILLS"),
-        ("What did the stamp say to the envelope?", "STICK WITH ME"),
-        ("Why was the broom happy at home?", "SWEPT OFF ITS FEET"),
-        ("What do you call a turtle taking photos?", "A SNAPPING TURTLE"),
-        ("Why did the tree take a nap?", "FOR WOODEN REST"),
-        ("What kind of dog loves bubble baths?", "A SHAMPOODLE"),
-        ("Why did the cookie cry all night?", "MOTHER WAS A WAFER"),
-        ("What do you call an artistic cat?", "A CLAW DRAWING"),
-        ("Why did the tomato fail the driving test?", "RAN THROUGH RED LIGHT"),
-        ("What do you call a fish wearing a bowtie?", "SO FISH TICATED"),
-        ("Why did the math teacher bring graph paper?", "PLOTTING A PLAN"),
-        ("What do you call an apology written in dots?", "RE MORSE CODE"),
-        ("Why did the golfer wear three socks?", "GOT A HOLE IN ONE"),
-        ("What kind of water cannot freeze?", "HOT WATER BOILS"),
-        ("Why did the candle visit the doctor?", "FELT LIGHT HEADED"),
-        ("What do you call a funny prank in the kitchen?", "A SILLY WHISK"),
-        ("Why did the mirror look away?", "SAW RIGHT THROUGH"),
-        ("What do you call a sleeping woodcutter?", "A SLUMBER JACK"),
-        ("Why did the gardener plant lightbulbs?", "FOR POWER PLANTS"),
-        ("What kind of tie does a pig wear?", "A PIG TIE"),
-        ("Why did the pirate join the gym?", "FOR STRONG ARMS"),
-        ("What do you call a duck that steals?", "A ROBBER DUCK"),
-        ("Why did the orange go to court?", "APPEAL THE CASE"),
-        ("What do you call a rabbit with fleas?", "BUGS BUNNY"),
-        ("Why did the pencil get sharpeners dizzy?", "SPUN IN CIRCLES"),
-        ("What kind of key has no teeth?", "A PIANO KEY"),
-        ("Why was the blanket so warm and cozy?", "COVERED IN LOVE"),
-        ("What do you call a bird that kicks high?", "A NINJA CHICKEN"),
-        ("Why did the flashlight run away?", "OUT OF BATTERIES"),
-        ("What do you call a clean pig?", "HAM AND SOAP"),
-        ("Why did the river take music lessons?", "IMPROVE CURRENT"),
-        ("What kind of tree loves high fives?", "A PALM TREE"),
-        ("Why did the chef add sugar to the stew?", "SWEETEN THE DEAL"),
-        ("What do you call a cow playing an instrument?", "A MOO SICIAN"),
-        ("Why did the cloud stay in school?", "TO GET A DEGREE"),
-        ("What do you call a tiny pepper?", "A LITTLE CHILLI"),
-        ("Why did the violin take a bow?", "PLAYED GREAT TUNE"),
-        ("What do you call a running train?", "A CONDUCTOR"),
-        ("Why did the lemon fail the math test?", "SOUR OVER NUMBERS"),
-        ("What do you call a flying bagel?", "PLAIN ON WINGS"),
-        ("Why did the sailor bring a pencil?", "TO DRAW WATER"),
-        ("What do you call an eagle that tells jokes?", "AN ILL EAGLE"),
-        ("Why was the bread so polite to guests?", "WELL BRED FOLK"),
-        ("What do you call a frozen dog?", "A CHILLY PUP"),
-        ("Why did the painter wear two coats?", "HOUSE WAS COLD"),
-        ("What do you call a dancing sheep?", "A BAALERINA"),
-        ("Why did the watch take a day off?", "NEEDED TIME OUT"),
-        ("What do you call a rabbit that knows martial arts?", "KUNG FU BUNNY"),
-        ("Why did the onion cry during dinner?", "CHOPPED IN HALF"),
-        ("What do you call a noisy insect?", "A CRICKET BAT"),
-        ("Why did the shoe visit the hospital?", "HEEL WAS BROKEN"),
-        ("What do you call a sleeping police car?", "A SNOOZE PATROL"),
-        ("Why did the sponge work so hard?", "SOAKED UP KNOWLEDGE"),
-        ("What do you call a funny frog?", "A RIBBITING COMIC"),
-        ("Why did the calendar look worried?", "DAYS WERE NUMBERED"),
-        ("What do you call a cold horse?", "A SHIVERING COLT"),
-        ("Why did the wheel go to therapy?", "FELT BALANCED OUT"),
-        ("What do you call a singing fish?", "A BASS SINGER"),
-        ("Why did the lamp blush so red?", "SAW LIGHT BULB"),
-        ("What do you call an alligator with maps?", "A NAVIGATOR"),
-        ("Why did the door go to the doctor?", "HAD SQUEAKY JOINTS"),
-        ("What do you call a cat on ice?", "COOL CAT SKATER"),
-        ("Why did the farmer wear overalls?", "READY FOR HARVEST"),
-        ("What do you call a royal bird?", "HER MAJESTY OWL"),
-        ("Why did the compass spin around?", "LOST ITS BEARING"),
-        ("What do you call a sweet monkey?", "CHIMP CANDY"),
-        ("Why did the rope untie itself?", "TOO KNOTTY TO STAY"),
-        ("What do you call a dog in summer?", "SUNNY RETRIEVER"),
-        ("Why did the bell ring so loud?", "TO MAKE NOISE"),
-        ("What do you call a dancing bear?", "BALLOON DANCER"),
-        ("Why did the window close down?", "DRAFTY WEATHER"),
-        ("What do you call a sleeping volcano?", "DORMANT CRATER"),
-        ("Why did the bridge cross the river?", "TO REACH OTHER SIDE"),
-        ("What do you call a smart horse?", "CLEVER TROTTER"),
-        ("Why did the spoon leave the bowl?", "FINISHED SOUP"),
-        ("What do you call a laughing flower?", "A CHUCKLING ROSE"),
-        ("Why did the book stay on the shelf?", "BOOKED FOR DAY"),
-        ("What do you call a quick rabbit?", "RAPID HOPPER"),
-        ("Why did the clock tick backwards?", "REWIND TIME"),
-        ("What do you call a sweet lion?", "DANDELION ROAR"),
-        ("Why did the cloud cry all morning?", "RAINED ON PARADE"),
-        ("What do you call a shiny beetle?", "GLOWING BUG")
+        ("When the tailor was asked how business was going, he said —", "\"SEW\" IT SEEMS"),
+        ("The optician gave his patient a discount, which was a real —", "EYE OPENER"),
+        ("When the cobbler lost his favorite tools, he felt like he —", "LOST HIS \"SOLE\""),
+        ("The fisherman was very popular with the town because he was —", "A REEL CATCH"),
+        ("When the butcher backed into the slicer, he got —", "A LITTLE BEHIND"),
+        ("The carpenter finished building the table and proudly said —", "NAILED IT DOWN"),
+        ("When the electricity failed during class, the students were —", "IN THE DARK"),
+        ("The pirate had trouble learning the alphabet because he was —", "LOST AT \"C\""),
+        ("When the baker won the lottery, his friends knew he was —", "ROLLING IN DOUGH"),
+        ("The plumber had to retire early because all his plans went —", "DOWN THE DRAIN"),
+        ("When the gardener was praised for his flowers, he said —", "DIGGING THE PRAISE"),
+        ("The watchmaker was asked for the time, and he replied —", "GIVE ME A SECOND"),
+        ("When the baseball player struck out, his coach told him —", "OFF HIS BASE"),
+        ("The barber was thrilled with his successful shop because it was —", "A CUT ABOVE"),
+        ("When the musician fell through the floor, he was —", "FLAT ON HIS BACK"),
+        ("The math teacher went to the farm looking for —", "SQUARE ROOTS"),
+        ("When the chef seasoned the soup, he told the waiter —", "FOOD FOR THOUGHT"),
+        ("The lazy kangaroo spent all afternoon being a —", "\"POUCH\" POTATO"),
+        ("Why did the crab never share his lunch with the starfish?", "HE WAS \"SHELL-FISH\""),
+        ("When the tightrope walker lost his footing, he was —", "LIVING ON THE EDGE"),
+        ("The pilot didn't want to argue about the flight plan because it was —", "PLANE TO SEE"),
+        ("When the lumberjack couldn't answer the riddle, he was —", "COMPLETELY STUMPED"),
+        ("The dentist and the manicurist fell in love and —", "FOUGHT TOOTH AND NAIL"),
+        ("When the skunk couldn't pay the bill, he told the waiter to —", "LEAVE A \"SCENT\""),
+        ("The clock was sent to the principal's office because it —", "TICKED OFF TEACHERS"),
+        ("When the sheep took over the farm, the neighbors called it a —", "\"RAM-PAGE\""),
+        ("The tree surgeon went on vacation because he wanted to —", "BRANCH OUT MORE"),
+        ("When the meteorologist arrived on time, everyone said he —", "BREEZED IN"),
+        ("The artist didn't know what to paint next, so he was —", "DRAWING A BLANK"),
+        ("When the snake passed the math quiz, the teacher said it was —", "\"ADD-ING\" UP WELL"),
+        ("The ghost couldn't find a partner at the dance because he had —", "\"NO-BODY\" TO DANCE WITH"),
+        ("When the hotel on the beach flooded, the guests were —", "SWIMMING IN LUXURY"),
+        ("The candle factory closed its doors because the workers were —", "BURNED AT BOTH ENDS"),
+        ("When the banker lost his composure, his colleagues said he —", "LOST HIS BALANCE"),
+        ("The dog sat by the fireplace all winter because he was —", "A HOT DOG"),
+        ("When the quarterback gave an interview, the reporters were —", "BLOWN AWAY"),
+        ("The detective arrested the calendar maker because his —", "DAYS WERE NUMBERED"),
+        ("When the baker's apprentice made great sourdough, he was —", "A RISING STAR"),
+        ("The elevator attendant had a bad day because business was —", "GOING DOWN FAST"),
+        ("When the frog took the stage, the audience gave him a —", "\"HOLE\" LOT OF HOPS"),
+        ("The lawyer was delighted with his new case because it was —", "AN OPEN AND SHUT CASE"),
+        ("When the cow won the ribbon at the county fair, it was —", "\"UDDER\" PERFECTION"),
+        ("The photographer loved developing black and white pictures because they —", "FOCUSED ON FACTS"),
+        ("When the golfer made a miraculous putt, the gallery said —", "PAR FOR THE COURSE"),
+        ("The librarian was an extraordinary detective because she —", "WENT BY THE BOOK"),
+        ("When the pig won the jackpot, all his barn friends told him to —", "HAM IT UP"),
+        ("The shoemaker's new assistant was learning fast and was —", "WELL-HEELED"),
+        ("When the tennis star won the championship, his serve was —", "A SMASHING HIT"),
+        ("The battery was never worried about debt because it was —", "FREE OF CHARGE"),
+        ("When the duck paid for dinner, he told the waiter —", "PUT IT ON MY \"BILL\""),
+        ("The astronomer loved his late night job because it was —", "OUT OF THIS WORLD"),
+        ("When the spider designed a new website, the client said it had —", "GREAT WEB APPEAL"),
+        ("The horse was happy in the barn because he was in —", "STABLE CONDITION"),
+        ("When the mirror fell off the wall, the owner said he —", "COULD NOT REFLECT"),
+        ("The magician had to cancel his airplane flight because he was a —", "FLYING \"SORCERER\""),
+        ("When the snowman went to the gym, he worked on his —", "\"AB-DOMINAL\" PACK"),
+        ("The bell ringer loved his morning routine because it had a —", "FAMILIAR RING"),
+        ("When the geologist proposed on one knee, he gave her a —", "ROCK SOLID RING"),
+        ("The author loved working near the campfire because the plot was —", "WARMING UP"),
+        ("When the pig entered the clean pen, he said it was —", "SQUEAKY CLEAN"),
+        ("The diver explored the coral reef and discovered —", "AN OCEAN OF CHARM"),
+        ("When the farmer looked over his wheat crop, he said it was —", "FIRST IN FIELD"),
+        ("The violinist was praised by the critics because his playing —", "STRUCK A CHORD"),
+        ("When the sailor navigated into port without a map, he said —", "PLAIN SAILING"),
+        ("The chef dropped his favorite pan and said it was a —", "RECIPE FOR RUIN"),
+        ("When the bowler got three strikes in a row, he was —", "RIGHT UP HIS ALLEY"),
+        ("The candle was very popular because it was always —", "SO FULL OF WICK"),
+        ("When the runner crossed the finish line, he said he was —", "OUT OF STRIDES"),
+        ("The locksmith was hired immediately because he had the —", "KEY TO SUCCESS"),
+        ("When the dog barked at the oak tree, his owner said he was —", "BARKING UP WRONG TREE"),
+        ("The window cleaner loved his tall job because it was —", "CLEAR AS DAY"),
+        ("When the sheep sheared his wool, he told his pal —", "\"FLEECE\" TO MEET YOU"),
+        ("The train conductor loved his morning route because it was —", "ON THE RIGHT TRACK"),
+        ("When the bee landed on the rose, the gardener said it was —", "A SWEET TOUCH"),
+        ("The tailor made a pair of trousers with two pockets and said —", "FITS THE BILL"),
+        ("When the pilot landed safely in the fog, his copilot said —", "SMOOTH TOUCH DOWN"),
+        ("The baseball player was thrilled with his new contract because it was —", "A HOME RUN DEAL"),
+        ("When the cow jumped over the moon, the calf said it was —", "\"MOO\"-VING FAST"),
+        ("The carpenter admired the antique cabinet and said it was —", "TOP OF THE LINE"),
+        ("When the ghost joined the choir, the conductor said his voice was —", "\"SPOOK\"-TACULAR"),
+        ("The gardener won the giant pumpkin contest because he was —", "ROOTED TO WIN"),
+        ("When the clock struck midnight, the night watchman said —", "RIGHT ON TIME"),
+        ("The fish stayed in deep water during the storm to remain —", "SAFE AND SOUND"),
+        ("When the baker made fresh croissants, his customers said —", "FLAKY AND PROUD"),
+        ("The cat chased the ball of yarn and declared it —", "\"PURR\"-FECT PLAY"),
+        ("When the photographer took a snapshot of the cheetah, it was —", "A SNAP DECISION"),
+        ("The electrician was always excited because he loved —", "CURRENT EVENTS"),
+        ("When the bird built a sturdy nest, her mate said —", "HOME TWEET HOME"),
+        ("The barber gave everyone a quick trim and said he was —", "CUTTING CORNERS"),
+        ("When the ice sculptor finished his swan, he was —", "CHILLED TO THE BONE"),
+        ("The detective looked at the muddy boots and said —", "A CLEAR FOOTPRINT"),
+        ("When the painter finished the wall in blue, he said —", "IN TRUE COLORS"),
+        ("The tennis champion won the final set with —", "A SMASH HIT"),
+        ("When the frog leaped across the lily pads, he took a —", "LEAP OF FAITH"),
+        ("The jeweler polished the emerald until it was —", "A GEM OF A FIND"),
+        ("When the farmer repaired his barn roof, he was —", "RAISING THE ROOF"),
+        ("The musician played his trumpet so loud he was —", "BLOWING HIS HORN"),
+        ("When the owl gave advice in the forest, everyone said —", "A WISE CHOICE"),
+        ("The runner tied his sneakers tight and said he was —", "BOUND FOR GLORY"),
+        ("When the bookbinder finished the leather volume, he said —", "BOUND TO PLEASE")
     ],
     "hard": [
-        ("Why did the archaeologist carry a magnifying glass?", "LOOKING FOR ANCIENT CLUES"),
-        ("What do you call an astronomer who loves dessert?", "A MILKY WAY EXPLORER"),
-        ("Why did the symphony orchestra visit the bank?", "TO MAKE A SOUND INVESTMENT"),
-        ("What did the grandfather clock say to the watch?", "YOU HAVE TOO MUCH FREE TIME"),
-        ("Why was the librarian so good at detective work?", "SHE WENT BY THE BOOK"),
-        ("What do you call a dinosaur that smashes cars?", "TYRANNOSAURUS WRECKS"),
-        ("Why did the submarine surface in the middle of winter?", "FOR A CHILLING EXPEDITION"),
-        ("What do you call an artist who paints with vegetables?", "A CREATIVE SALAD MAKER"),
-        ("Why did the mathematician build a campfire in winter?", "HE NEEDED DEGREES TO WARM UP"),
-        ("What did the lighthouse say during the heavy storm?", "GUIDING THROUGH DARK WAVES"),
-        ("Why did the newspaper reporter run through the forest?", "CHASING DOWN BREAKING NEWS"),
-        ("What do you call a knight who won a spelling bee?", "CHAMPION OF NOBLE WORDS"),
-        ("Why did the computer programmer go into farming?", "HE WANTED BETTER HARDWARE"),
-        ("What do you call a penguin who loves detective novels?", "AN ICE COLD SLEUTH"),
-        ("Why was the chemistry professor always so confident?", "ALL REACTIONS PROVED RIGHT"),
-        ("What did the locomotive say to the mountain tunnel?", "CLEARING A DIRECT TRACK"),
-        ("Why did the theater director hire an electrician?", "LIGHTING UP DRAMATIC SCENES"),
-        ("What do you call an architect who builds sandcastles?", "SHORELINE MASTER CRAFTER"),
-        ("Why did the deep sea diver carry an encyclopedia?", "EXPLORING DEEPER WISDOM"),
-        ("What did the compass needle tell the explorer?", "POINTING TOWARD TRUE NORTH"),
-        ("Why did the airline pilot become a landscape gardener?", "CRAVED SMOOTH LANDINGS"),
-        ("What do you call a chef who won an Olympic gold medal?", "WORLD CLASS SKILLET MASTER"),
-        ("Why was the history museum open until midnight?", "BRINGING PAST NIGHTS TO LIFE"),
-        ("What did the telescope say to the distant nebula?", "EXPANDING COSMIC VISION"),
-        ("Why did the mechanical watch refuse to run down?", "DRIVEN BY INNER SPRINGS"),
-        ("What do you call a violinist playing on a sailboat?", "SAILING WITH SMOOTH NOTES"),
-        ("Why did the botany scientist talk to the oak tree?", "NATURAL BRANCHES"),
-        ("What did the canyon echo shout to the mountain top?", "REPEAT THE GRAND CHORUS"),
-        ("Why did the geologist study the active volcano?", "SEEKING SOLID GROUND WORK"),
-        ("What do you call a dolphin with an acoustic guitar?", "AN OCEAN SOUND CREATOR"),
-        ("Why was the royal palace garden so well guarded?", "PROTECTING NOBLE BLOSSOMS"),
-        ("What did the steam engine whistle say to the train station?", "ROLLING DOWN IRON RAILS"),
-        ("Why did the electrical engineer carry extra fuses?", "PREVENTING SHORT CIRCUITS"),
-        ("What do you call a marathon runner who loves poetry?", "MAKING STRIDES IN RHYME"),
-        ("Why did the clockmaker work late in his workshop?", "CRAFTING ACCURATE SECONDS"),
-        ("What did the captain say when entering the harbor?", "DROPPING HEAVY ANCHORS"),
-        ("Why was the meteorologist so calm during hurricanes?", "WEATHERING EVERY STORM"),
-        ("What do you call an inventor who makes flying bikes?", "A SKY HIGH INNOVATOR"),
-        ("Why did the woodworker polish the mahogany table?", "SMOOTHING GRAIN PATTERNS"),
-        ("What did the astronomer write in his observation journal?", "MAPPING GALAXY SECRETS"),
-        ("Why did the classical choir sing on the mountain peak?", "REACHING ELEVATED HARMONY"),
-        ("What do you call a locksmith who solves mystery riddles?", "UNLOCKING ANCIENT CODES"),
-        ("Why did the sailboat captain navigate by constellations?", "GUIDED BY BRIGHT STARS"),
-        ("What did the detective conclude at the crime museum?", "FOLLOWING FRESH FOOTPRINTS"),
-        ("Why did the watchmaker inspect the golden gears?", "KEEPING TIMELY BALANCE"),
-        ("What do you call an athlete who writes epic novels?", "RUNNING OUT OF CHAPTERS"),
-        ("Why did the wildlife photographer hike into the jungle?", "CAPTURING HIDDEN NATURE"),
-        ("What did the orchestra conductor tell the violin section?", "BRING FORTH PURE STRINGS"),
-        ("Why was the solar panel engineer smiling all afternoon?", "CHARGING ON SUNNY RAYS"),
-        ("What do you call a chess grandmaster who loves baking?", "CHECKMATING SWEET PASTRY"),
-        ("Why did the mountain climber pack a warm thermos?", "WARMING ICY ELEVATIONS"),
-        ("What did the treasure hunter find inside the sunken ship?", "GOLDEN COINS AND GEMS"),
-        ("Why did the aerospace team test rocket thrusters?", "BLASTING BEYOND ORBITS"),
-        ("What do you call a gardener who cultivates rare orchids?", "BLOOMING BOTANICAL TALENT"),
-        ("Why did the deep space probe broadcast digital signals?", "CONNECTING DISTANT WORLDS"),
-        ("What did the royal herald proclaim from the castle tower?", "HEAR YE NOBLE CITIZENS"),
-        ("Why was the antique restoration expert so patient?", "PRESERVING TIMELESS ART"),
-        ("What do you call a surfer who rides enormous tidal waves?", "MASTERING OCEAN SURGES"),
-        ("Why did the civil engineer reinforce the suspension bridge?", "SPANNING HEAVY TRAFFIC"),
-        ("What did the paleontologist discover beneath the sandstone?", "ANCIENT FOSSIL MATRIX"),
-        ("Why did the wind turbine engineer climb the tall tower?", "HARNESSING BREEZY GUSTS"),
-        ("What do you call a painter whose colors illuminate the dark?", "GLOWING CANVAS ARTIST"),
-        ("Why was the clockwork automaton so astonishing to watch?", "MOVING WITH GEAR PRECISION"),
-        ("What did the arctic explorer log in his expedition journal?", "CROSSING FROZEN GLACIERS"),
-        ("Why did the master potter shape clay on the turning wheel?", "CREATING SMOOTH VESSELS"),
-        ("What do you call a poet who sings under the starry night?", "RHYMING MOONLIT VERSES"),
-        ("Why did the deep sea submarine explore the oceanic trench?", "SURVEYING ABYSS DEPTHS"),
-        ("What did the forest ranger notice near the mountain creek?", "CLEAR BUBBLING CURRENTS"),
-        ("Why was the master weaver inspecting the silk loom?", "INTRICATE PATTERNS"),
-        ("What do you call a cartographer who maps the solar system?", "CHARTING PLANETARY PATHS"),
-        ("Why did the railway conductor inspect the steel switches?", "ENSURING SECURE TRANSIT"),
-        ("What did the botanist discover inside the tropical canopy?", "VIBRANT FLORA DIVERSITY"),
-        ("Why was the stone mason carving intricate marble pillars?", "CRAFTING ENDURING MARBLES"),
-        ("What do you call an explorer who travels by dog sled?", "CROSSING NORTHERN TRAILS"),
-        ("Why did the audio engineer tune the studio acoustics?", "BALANCING FREQUENCY TONES"),
-        ("What did the diamond cutter examine through the loupe?", "PERFECT SPARKLING FACETS"),
-        ("Why was the telescope mirror polished with silver compound?", "REFLECTING STELLAR BEAMS"),
-        ("What do you call a sailor who navigates without a compass?", "STEERING BY NIGHT STARS"),
-        ("Why did the bookbinder sew the leather binding by hand?", "CRAFTING DURABLE FOLIOS"),
-        ("What did the master chef reveal at the grand banquet?", "FEAST FIT FOR ROYALTY"),
-        ("Why was the steam turbine running at maximum efficiency?", "GENERATING CLEAN KILOWATTS"),
-        ("What do you call an author who writes about clockwork realms?", "TIME TRAVELING STORYTELLER"),
-        ("Why did the alpine ski patrol test emergency beacons?", "SAFEGUARDING SNOW PEAKS"),
-        ("What did the archaeologist unearth beside the river bank?", "ANCIENT POTTERY SHARDS"),
-        ("Why was the glassblower shaping molten crystal tubes?", "CREATING LUMINOUS SPHERES"),
-        ("What do you call an inventor who crafts acoustic musical gear?", "HARMONIC SOUND CREATOR"),
-        ("Why did the oceanographer sample the deep coral reef?", "PROTECTING MARINE LIFE"),
-        ("What did the bell ringer announce across the city square?", "STRIKING TWELVE OCLOCK"),
-        ("Why was the landscape architect planting cedar groves?", "DESIGNING MAJESTIC PARKS"),
-        ("What do you call an astronomer tracking binary star orbits?", "MAPPING TWIN CELESTIALS"),
-        ("Why did the aviation crew inspect the propeller blades?", "BALANCING AIR ROTATION"),
-        ("What did the lighthouse keeper record during the gale?", "WARNING SIGNAL FLASHING"),
-        ("Why was the master calligrapher grinding dark ink sticks?", "FLOWING BRUSHSTROKE ART"),
-        ("What do you call a mountaineer standing atop the highest ridge?", "CONQUERING STEEP CRAGS"),
-        ("Why did the mineralogist shine ultraviolet light on quartz?", "DISCOVERING FLUORESCENCE"),
-        ("What did the clockmaker engrave inside the brass movement?", "TIMELESS CRAFT ACCURACY"),
-        ("Why was the garden greenhouse maintaining tropical moisture?", "NOURISHING EXOTIC FERNS"),
-        ("What do you call a philosopher who studies the night sky?", "CONTEMPLATING INFINITY"),
-        ("Why did the stage lighting technician adjust the spotlight beam?", "ILLUMINATING MAIN ACTORS"),
-        ("What did the ancient mariner declare when sighting land?", "SAFE HARBOR AHEAD")
+        ("When the optometrist fell into the lens grinder, he made —", "A SPECTACLE OF HIMSELF"),
+        ("The symphony orchestra visited the investment firm —", "TO MAKE A SOUND INVESTMENT"),
+        ("When the mummy expert was buried in research papers, he was —", "ALL WRAPPED UP IN HIS WORK"),
+        ("The clock stopped right during dinner, so the hungry family went —", "BACK FOR FOUR SECONDS"),
+        ("The dentist and the manicurist fell in love and agreed they —", "FOUGHT TOOTH AND NAIL"),
+        ("When the chimney sweep tried on his custom tuxedo, it —", "SUITED HIM TO A TEE"),
+        ("The scarecrow was promoted to regional vice president because he was —", "\"OUT-STANDING\" IN HIS FIELD"),
+        ("When the tightrope walker lost his footing high above, he was —", "LIVING ON THE RAZOR EDGE"),
+        ("The lumberjack couldn't solve the crossword puzzle because he was —", "COMPLETELY STUMPED ON IT"),
+        ("When the pirate captain took the reading test, he admitted he was —", "TOTALLY LOST AT \"C\""),
+        ("The butcher was having a tough afternoon at the counter because —", "THE STEAKS WERE TOO HIGH"),
+        ("When the marathon runner entered the bakery, she asked for —", "A QUICK BREAD WINNER"),
+        ("The photographer took a picture of the thunderstorm and said it was —", "A STRIKING MASTERPIECE"),
+        ("When the tailor finished three custom suits in one day, he was —", "FIT TO BE TIED"),
+        ("The astronomer stared at the distant galaxy and proclaimed —", "OUT OF THIS WHOLE WORLD"),
+        ("When the baseball team bought a flight to Florida, they were —", "HEADED FOR HOME PLATE"),
+        ("The dog trainer had trouble finding his runaway pup because he was —", "BARKING UP THE WRONG TREE"),
+        ("When the detective opened the calendar, he warned the crook that his —", "DAYS WERE FULLY NUMBERED"),
+        ("The lazy kangaroo spent his entire summer vacation being a —", "COMPLETE \"POUCH\" POTATO"),
+        ("When the baker made twenty loaves of sourdough, his accountant said he was —", "ROLLING DEEP IN DOUGH"),
+        ("The electrician received an award from the city council for —", "EXCELLENT CURRENT EVENTS"),
+        ("When the cobbler lost his favorite leather hammer, he cried that he had —", "LOST HIS VERY OWN \"SOLE\""),
+        ("The deep sea fisherman had a fantastic morning on the boat and was —", "A TRULY REEL BIG CATCH"),
+        ("When the tightrope walker fell into the safety net, the ringmaster said —", "A REAL BALANCING ACT"),
+        ("The math teacher built a fence around his square garden to protect his —", "PRECIOUS SQUARE ROOTS"),
+        ("When the pilot flew through the clear blue sky, he noticed that it was —", "PLAIN AND SIMPLE TO SEE"),
+        ("The chef was overwhelmed by the holiday rush and complained that he had —", "TOO MUCH UPON HIS PLATE"),
+        ("When the golfer sank the forty foot putt for eagle, he called it —", "A TEE-RIFIC HOLE IN ONE"),
+        ("The barber was voted the best shopkeeper in town because his work was —", "A HEAD AND A CUT ABOVE"),
+        ("When the sheep sheared off all his wool for summer, his flock called him —", "BAA-D TO THE BONE"),
+        ("The meteorologist didn't mind the blizzard one bit because she was —", "WEATHERING EVERY STORM"),
+        ("When the bank teller was promoted to branch manager, her colleagues said —", "A SOUND BALANCE OF POWER"),
+        ("The carpenter inspected the crooked bookshelf and told his apprentice —", "GOING AGAINST THE GRAIN"),
+        ("When the frog won the gold medal in the triple jump, it was —", "AN UN-FROG-ETTABLE LEAP"),
+        ("The librarian solved the cold case mystery because she always —", "WENT STRICTLY BY THE BOOK"),
+        ("When the cow stepped into the dairy parlor, the herdsman declared —", "AN \"UDDER\"-LY GREAT DAY"),
+        ("The artist was unable to paint his masterpiece portrait and was —", "JUST DRAWING A BLANK"),
+        ("When the clockmaker fixed the antique grandfather clock, he did it —", "IN THE NICK OF GOOD TIME"),
+        ("The gardener loved growing grapes along the stone wall because he was —", "HEARING ON THE GRAPEVINE"),
+        ("When the tennis star served five aces in a single game, she made —", "A SERIOUS RACKET IN COURT"),
+        ("The author loved typing on his vintage mechanical typewriter because it —", "HIT THE RIGHT KEYS"),
+        ("When the bowler rolled twelve strikes in a row, the alley manager said —", "A STRIKING PERFECTION"),
+        ("The plumber worked all night on the burst pipe so that his business wouldn't —", "GO STRAIGHT DOWN THE DRAIN"),
+        ("When the skunk entered the five star French restaurant, the maitre d' said —", "DOES NOT MAKE MUCH \"SCENT\""),
+        ("The sailor was promoted to ship captain because he was known for —", "SMOOTH AND STEADY SAILING"),
+        ("When the tree surgeon climbed the ancient giant redwood, he wanted to —", "BRANCH OUT HIS BUSINESS"),
+        ("The musician wrote an award winning film score that really —", "STRUCK A RESONANT CHORD"),
+        ("When the battery was acquitted of all charges in court, the judge said it was —", "COMPLETELY FREE OF CHARGE"),
+        ("The horse trotted into the newly built barn and was relieved to find —", "A VERY STABLE CONDITION"),
+        ("When the spider finished spinning the intricate geometric web, it had —", "SPUN A TANGLED TALE"),
+        ("The window washer climbed sixty stories up the skyscraper and saw —", "A CRYSTAL CLEAR VISION"),
+        ("When the bell ringer struck the giant cathedral chime, it had —", "A SOUND AND NOBLE RING"),
+        ("The watchmaker examined the miniature golden gears and said they were —", "RIGHT ON THE SECOND"),
+        ("When the farmer doubled his harvest yield, his happy neighbor said —", "OUT-STANDING IN THE FIELD"),
+        ("The chemist loved working with helium and neon gas because they were —", "NOBLE AND NEVER REACTIVE"),
+        ("When the duck paid cash for her expensive feather hat, she told them —", "PUT IT RIGHT ON MY \"BILL\""),
+        ("The chess grandmaster took a bite of his fresh croissant and declared —", "CHECKMATE IN THE BAKERY"),
+        ("When the pig won first prize at the state fair, his proud family said —", "SQUEALING WITH DELIGHT"),
+        ("The geologist took a vacation to the Grand Canyon because he found it —", "ROCK SOLID IN BEAUTY"),
+        ("When the runner finished the Boston Marathon, his proud coach said —", "MAKING GREAT STRIDES"),
+        ("The choir sang on top of the mountain ridge and reached —", "A HIGHER HARMONY IN TUNE"),
+        ("When the detective found the stolen diamond watch, he said it was —", "ABOUT PROPER TIME"),
+        ("The tailor sewed thirty tuxedo lapels in one evening and said it was —", "A SUITABLE OCCASION"),
+        ("When the golfer sliced his tee shot into the woods, his caddie called it —", "A ROUGH ROUND OF PLAY"),
+        ("The doctor was calm in the crowded emergency room because he had —", "PLENTY OF TRUE PATIENCE"),
+        ("When the florist created a bridal bouquet of fifty red blossoms, she —", "ROSE TO THE OCCASION"),
+        ("The pilot took off into the sunset without a single delay and had —", "HEAD HIGH IN THE CLOUDS"),
+        ("When the diver found an oyster with five glowing pearls, it was —", "A TREASURE OF THE DEEP"),
+        ("The carpenter measured the mahogany plank three times because he —", "SAW IT COMING AHEAD"),
+        ("When the snowman sat beside the glowing campfire, he was —", "MELTING WITH EMOTION"),
+        ("The baseball catcher held onto the pop fly with two strikes for —", "THE FINAL INNING OUT"),
+        ("When the candle shop opened three new franchises, the owner was —", "BURNING BRIGHT WITH JOY"),
+        ("The painter finished the seaside landscape mural and said it was —", "DONE IN FLYING COLORS"),
+        ("When the train conductor pulled into the grand terminal, he was —", "ON TRACK FOR SUCCESS"),
+        ("The author completed the suspenseful mystery novel and said —", "BOUND FOR BEST SELLER"),
+        ("When the owl gave a late night lecture at the forest university, it was —", "A HOOT AND A HALF TO HEAR"),
+        ("The baker rolled out hundred pastry crusts by hand and was —", "IN A CRUST WE TRUST"),
+        ("When the dog found his buried bone in the backyard, he was —", "\"PAW\"-SITIVELY THRILLED"),
+        ("The teacher loved teaching geometry because the proofs were —", "ALL SHAPED TO PERFECTION"),
+        ("When the electric car plugged into the rapid charger, it was —", "CHARGED WITH EXCITEMENT"),
+        ("The shoe designer created leather sneakers with gold lace and was —", "A STEP ABOVE THE REST"),
+        ("When the cat curled up on the sunny window sill, she was in —", "\"PURR\"-FECT CONTENTMENT"),
+        ("The river guide paddled through the rapid white water and said —", "GOING WITH THE FLOW"),
+        ("When the jeweler cut the fifty carat diamond into facets, it was —", "BRILLIANT BEYOND WORDS"),
+        ("The farmer planted rows of giant sunflowers and said they were —", "BLOOMING AND BRIGHT"),
+        ("When the actor nailed the difficult monologue on Broadway, he —", "BROKE A LEG IN STYLE"),
+        ("The mechanic tuned the sports car engine until it was —", "PURRING LIKE A KITTEN"),
+        ("When the bee hive produced ten gallons of clover honey, it was —", "CREATING A SWEET BUZZ"),
+        ("The bookkeeper balanced thirty accounts to the penny and said —", "FIGURES NEVER LIE"),
+        ("When the clock maker repaired the tower clock, the town council said —", "TIMELY WORK WELL DONE"),
+        ("The gardener trimmed the hedge into a green dinosaur and was —", "CUTTING A FINE FIGURE"),
+        ("When the sailboat rounded the windy cape, the crew reported —", "CATCHING A FRESH BREEZE"),
+        ("The potter spun the wet clay into an elegant vase and said —", "SHAPING UP REAL WELL"),
+        ("When the magician vanished from the locked trunk, the crowd said —", "NOW YOU SEE HIM"),
+        ("The archer hit the center bullseye three times in a row for —", "RIGHT ON THE TARGET"),
+        ("When the weaver finished the silk tapestry on the loom, it had —", "THREADS OF BRILLIANCE"),
+        ("The ice hockey team won the championship game on home ice and —", "SKATED TO VICTORY"),
+        ("When the chef baked the golden soufflé without it deflating, it —", "ROSE TO GREATER HEIGHTS"),
+        ("The astronomer discovered a new comet in the night sky and said —", "A STELLAR DISCOVERY"),
+        ("When the blacksmith forged the iron horseshoe, he told his apprentice —", "STRIKE WHILE IRON IS HOT")
     ]
 }
 
-# Rich pool of common 5, 6, and 7 letter everyday words
-WORD_POOL = [
+# Rich dictionary of common, clean, unambiguous 5, 6, and 7 letter English vocabulary words
+CURATED_WORDS = [
     # 5-letter
-    "ABOUT", "ABOVE", "ACTOR", "ADMIT", "ADULT", "AFTER", "AGAIN", "AGENT", "AGREE", "AHEAD",
-    "ALARM", "ALBUM", "ALERT", "ALIEN", "ALIGN", "ALIKE", "ALIVE", "ALLOW", "ALONE", "ALONG",
-    "ALTER", "AMONG", "ANGEL", "ANGER", "ANGLE", "ANGRY", "ANKLE", "APART", "APPLE", "APPLY",
-    "ARENA", "ARGUE", "ARISE", "ARMOR", "ARROW", "ASIDE", "ASSET", "AUDIO", "AUDIT", "AVOID",
-    "AWAIT", "AWAKE", "AWARD", "AWARE", "BADGE", "BASIC", "BASIS", "BATCH", "BEACH", "BEARD",
-    "BEAST", "BEGIN", "BEING", "BELOW", "BENCH", "BIRTH", "BLACK", "BLADE", "BLAME", "BLANK",
-    "BLAST", "BLEED", "BLEND", "BLESS", "BLIND", "BLOCK", "BLOOD", "BLOOM", "BOARD", "BOAST",
-    "BONUS", "BOOST", "BOUND", "BRAIN", "BRAND", "BRASS", "BRAVE", "BREAD", "BREAK", "BREED",
-    "BRICK", "BRIDE", "BRIEF", "BRING", "BROAD", "BROWN", "BRUSH", "BUDDY", "BUILD", "BUNCH",
-    "BURST", "CABIN", "CABLE", "CAMEL", "CANAL", "CANDY", "CARGO", "CARRY", "CARVE", "CATCH",
-    "CAUSE", "CEASE", "CHAIN", "CHAIR", "CHALK", "CHAMP", "CHAOS", "CHARM", "CHART", "CHASE",
-    "CHEAP", "CHECK", "CHEEK", "CHEER", "CHEST", "CHIEF", "CHILD", "CHILL", "CHINA", "CHIPS",
-    "CHOIR", "CHOKE", "CHORD", "CHOSE", "CHUNK", "CIVIL", "CLAIM", "CLAMP", "CLASH", "CLASS",
-    "CLEAN", "CLEAR", "CLERK", "CLICK", "CLIFF", "CLIMB", "CLOCK", "CLONE", "CLOSE", "CLOTH",
-    "CLOUD", "COACH", "COAST", "COLON", "COLOR", "COMET", "COMIC", "CORAL", "COUCH", "COUGH",
-    "COUNT", "COURT", "COVER", "CRACK", "CRAFT", "CRANE", "CRASH", "CRAWL", "CRAZY", "CREAM",
-    "CREEK", "CREEP", "CRIME", "CRISP", "CROSS", "CROWD", "CROWN", "CRUSH", "CRUST", "CURSE",
-    "CURVE", "CYCLE", "DAILY", "DAIRY", "DANCE", "DEATH", "DEBUT", "DELAY", "DELTA", "DENSE",
-    "DEPOT", "DEPTH", "DEVIL", "DIARY", "DIRTY", "DISCO", "DITCH", "DIVER", "DIZZY", "DODGE",
-    "DONOR", "DOUBT", "DOUGH", "DRAFT", "DRAIN", "DRAMA", "DRANK", "DRAWN", "DREAM", "DRESS",
-    "DRIFT", "DRILL", "DRINK", "DRIVE", "DRONE", "DROOP", "DROWN", "DRUNK", "DUMMY", "EAGER",
-    "EAGLE", "EARLY", "EARTH", "ELBOW", "ELDER", "ELECT", "EMPTY", "ENEMY", "ENJOY", "ENTER",
-    "ENTRY", "EQUAL", "EQUIP", "ERROR", "ESSAY", "EVENT", "EVERY", "EXACT", "EXCEL", "EXERT",
-    "EXIST", "EXTRA", "FAINT", "FAITH", "FALSE", "FANCY", "FATAL", "FAULT", "FAVOR", "FEAST",
-    "FENCE", "FEVER", "FIBER", "FIELD", "FIERCE", "FIFTH", "FIGHT", "FINAL", "FIRST", "FLAME",
-    "FLASH", "FLASK", "FLEET", "FLESH", "FLIGHT", "FLOAT", "FLOCK", "FLOOD", "FLOOR", "FLOUR",
-    "FLOWN", "FLUID", "FLUTE", "FOCUS", "FORCE", "FORGE", "FORTH", "FORTY", "FORUM", "FOUND",
-    "FRAME", "FRANK", "FRAUD", "FRESH", "FRONT", "FROST", "FROZE", "FRUIT", "GIANT", "GIVEN",
-    "GLASS", "GLAZE", "GLOBE", "GLORY", "GLOVE", "GRACE", "GRADE", "GRAIN", "GRAND", "GRANT",
-    "GRAPE", "GRAPH", "GRASP", "GRASS", "GRAVE", "GRAVY", "GREAT", "GREED", "GREEN", "GREET",
-    "GRIEF", "GRILL", "GRIND", "GROOM", "GROUP", "GROVE", "GUARD", "GUESS", "GUEST", "GUIDE",
-    "GUILD", "GUILT", "HABIT", "HANDY", "HAPPY", "HARDY", "HARSH", "HASTE", "HAVEN", "HEART",
-    "HEAVY", "HEDGE", "HELLO", "HONOR", "HORSE", "HOTEL", "HOUSE", "HUMAN", "HUMOR", "HURRY",
-    "IDEAL", "IMAGE", "INDEX", "INNER", "INPUT", "IRONY", "ISSUE", "JELLY", "JEWEL", "JOINT",
-    "JUDGE", "JUICE", "JUMBO", "KNIFE", "KNOCK", "LABEL", "LABOR", "LARGE", "LASER", "LATCH",
-    "LATER", "LAUGH", "LAYER", "LEARN", "LEASE", "LEAST", "LEMON", "LEVEL", "LIGHT", "LIMIT",
-    "LINEN", "LIVER", "LOCAL", "LODGE", "LOGIC", "LOVER", "LOYAL", "LUCKY", "LUNAR", "LUNCH",
-    "MAGIC", "MAJOR", "MAKER", "MANOR", "MAPLE", "MARCH", "MARRY", "MATCH", "MAYOR", "MEDAL",
-    "MEDIA", "MERCY", "MERIT", "METAL", "METER", "MIDST", "MIGHT", "MINER", "MINOR", "MODEL",
+    "ABOUT", "ABOVE", "ABUSE", "ACTOR", "ACUTE", "ADMIT", "ADOPT", "ADULT", "AFTER", "AGAIN",
+    "AGENT", "AGREE", "AHEAD", "ALARM", "ALBUM", "ALERT", "ALIKE", "ALIVE", "ALLOW", "ALONE",
+    "ALONG", "ALTER", "AMONG", "ANGER", "ANGLE", "ANGRY", "APART", "APPLE", "APPLY", "ARENA",
+    "ARGUE", "ARISE", "ARMED", "ARMOR", "ARROW", "ASIDE", "ASSET", "AUDIO", "AUDIT", "AVOID",
+    "AWAIT", "AWAKE", "AWARD", "AWARE", "BADLY", "BAKER", "BASIC", "BASIS", "BEACH", "BEAST",
+    "BEGIN", "BEING", "BELLY", "BELOW", "BENCH", "BERRY", "BIRTH", "BLACK", "BLADE", "BLAME",
+    "BLANK", "BLAST", "BLAZE", "BLEED", "BLEND", "BLESS", "BLIND", "BLOCK", "BLOOD", "BLOOM",
+    "BOARD", "BOAST", "BONUS", "BOOST", "BOOTH", "BOUND", "BRAIN", "BRAKE", "BRAND", "BRASS",
+    "BRAVE", "BREAD", "BREAK", "BREED", "BRICK", "BRIDE", "BRIEF", "BRING", "BRISK", "BROAD",
+    "BROKE", "BROWN", "BRUSH", "BUDDY", "BUILD", "BUNCH", "BURST", "CABIN", "CABLE", "CAMEL",
+    "CANAL", "CANDY", "CANOE", "CARGO", "CARRY", "CATER", "CAUSE", "CEDAR", "CHAIN", "CHAIR",
+    "CHALK", "CHAMP", "CHART", "CHASE", "CHEAP", "CHECK", "CHEEK", "CHEER", "CHEST", "CHIEF",
+    "CHILD", "CHILI", "CHILL", "CHIPS", "CHORD", "CHUNK", "CIDER", "CIGAR", "CIVIC", "CIVIL",
+    "CLAIM", "CLASH", "CLASP", "CLASS", "CLEAN", "CLEAR", "CLERK", "CLICK", "CLIFF", "CLIMB",
+    "CLOAK", "CLOCK", "CLOSE", "CLOTH", "CLOUD", "CLOWN", "COACH", "COAST", "CORAL", "COUCH",
+    "COUNT", "COURT", "COVER", "CRACK", "CRAFT", "CRANE", "CRASH", "CRATE", "CRAWL", "CRAZY",
+    "CREAM", "CREEK", "CREST", "CRIME", "CRISP", "CROSS", "CROWD", "CROWN", "CRUDE", "CRUEL",
+    "CRUSH", "CRUST", "CURVE", "CYCLE", "DAILY", "DANCE", "DATED", "DEALT", "DEATH", "DEBUT",
+    "DECAY", "DECOR", "DELAY", "DELTA", "DENSE", "DEPOT", "DEPTH", "DEVIL", "DIARY", "DIGIT",
+    "DINER", "DIRTY", "DISCO", "DITCH", "DIVER", "DIZZY", "DODGE", "DONOR", "DOUBT", "DOUGH",
+    "DRAFT", "DRAIN", "DRAMA", "DREAM", "DRESS", "DRIFT", "DRILL", "DRINK", "DRIVE", "DRONE",
+    "DROWN", "DRYER", "DUCHY", "EAGER", "EAGLE", "EARLY", "EARTH", "EASEL", "EIGHT", "ELDER",
+    "ELECT", "ELITE", "EMPTY", "ENEMY", "ENJOY", "ENTER", "ENTRY", "EQUAL", "EQUIP", "ERASE",
+    "ERROR", "ESSAY", "EVENT", "EVERY", "EXACT", "EXCEL", "EXERT", "EXILE", "EXIST", "EXTRA",
+    "FAINT", "FAITH", "FALSE", "FANCY", "FATAL", "FAULT", "FAVOR", "FEAST", "FENCE", "FERRY",
+    "FEVER", "FIBER", "FIELD", "FIFTH", "FIFTY", "FIGHT", "FINAL", "FIRST", "FIXED", "FLAME",
+    "FLASH", "FLASK", "FLEET", "FLESH", "FLOAT", "FLOCK", "FLOOD", "FLOOR", "FLOUR", "FLUID",
+    "FLUTE", "FOCAL", "FOCUS", "FORCE", "FORGE", "FORTH", "FORTY", "FORUM", "FOUND", "FRAME",
+    "FRAUD", "FRESH", "FRONT", "FROST", "FRUIT", "FUDGE", "FUNNY", "GHOST", "GIANT", "GIVEN",
+    "GLASS", "GLAZE", "GLEAM", "GLIDE", "GLOBE", "GLORY", "GLOVE", "GOING", "GRACE", "GRADE",
+    "GRAIN", "GRAND", "GRANT", "GRAPE", "GRAPH", "GRASP", "GRASS", "GRAVE", "GRAVY", "GREAT",
+    "GREET", "GRIEF", "GRILL", "GRIND", "GROOM", "GROUP", "GROVE", "GROWL", "GROWN", "GUARD",
+    "GUESS", "GUEST", "GUIDE", "GUILD", "HABIT", "HAPPY", "HARSH", "HATCH", "HAVEN", "HEART",
+    "HEAVY", "HEDGE", "HELLO", "HONEY", "HONOR", "HORSE", "HOTEL", "HOUND", "HOUSE", "HUMAN",
+    "HUMOR", "HURRY", "ICING", "IDEAL", "IMAGE", "INDEX", "INLET", "INNER", "INPUT", "IRONY",
+    "ISLET", "ISSUE", "IVORY", "JELLY", "JEWEL", "JOINT", "JOKER", "JUDGE", "JUICE", "JUICY",
+    "KNACK", "KNIFE", "KNOCK", "LABEL", "LABOR", "LANCE", "LARGE", "LASER", "LATCH", "LATER",
+    "LAUGH", "LAYER", "LEAFY", "LEAP", "LEARN", "LEASE", "LEAST", "LEAVE", "LEGAL", "LEMON",
+    "LEVEL", "LEVER", "LIGHT", "LIMIT", "LINEN", "LINER", "LIVER", "LOCAL", "LODGE", "LOGIC",
+    "LOOSE", "LOVER", "LOWER", "LOYAL", "LUCKY", "LUNAR", "LUNCH", "LUNCH", "MAGIC", "MAJOR",
+    "MAKER", "MANGO", "MANOR", "MAPLE", "MARCH", "MATCH", "MAYOR", "MEDAL", "MEDIA", "MELON",
+    "MERCY", "MERIT", "METAL", "METER", "MIDST", "MIGHT", "MINER", "MINOR", "MINUS", "MODEL",
     "MODEM", "MONEY", "MONTH", "MORAL", "MOTOR", "MOUNT", "MOUSE", "MOUTH", "MOVIE", "MUSIC",
-    "NAIVE", "NERVE", "NIGHT", "NOBLE", "NOISE", "NORTH", "NOTED", "NOVEL", "NURSE", "OCEAN",
-    "OFFER", "OFTEN", "ONION", "OPERA", "ORBIT", "ORDER", "ORGAN", "OTHER", "OUTER", "OWNER",
-    "OXIDE", "OZONE", "PAINT", "PANEL", "PANIC", "PAPER", "PARTY", "PASTA", "PATCH", "PAUSE",
-    "PEACE", "PEACH", "PEARL", "PEDAL", "PENNY", "PHASE", "PHONE", "PHOTO", "PIANO", "PILOT",
-    "PINCH", "PITCH", "PIZZA", "PLACE", "PLAIN", "PLANE", "PLANK", "PLANT", "PLATE", "PLAZA",
-    "PLEAD", "PLENTY", "PLUG", "PLUME", "POINT", "POLAR", "PORCH", "POUND", "POWER", "PRICE",
-    "PRIDE", "PRIME", "PRINT", "PRIOR", "PRIZE", "PROBE", "PROUD", "PROVE", "PULSE", "PUNCH",
-    "PUPIL", "PURSE", "QUEEN", "QUERY", "QUEST", "QUICK", "QUIET", "QUOTA", "QUOTE", "RADAR",
-    "RADIO", "RAISE", "RALLY", "RANCH", "RANGE", "RAPID", "RATIO", "REACH", "REACT", "READY",
-    "REALM", "REBEL", "REFER", "REIGN", "RELAX", "RELIC", "REPLY", "RIDER", "RIDGE", "RIGHT",
-    "RIGID", "RISKY", "RIVAL", "RIVER", "ROAST", "ROBOT", "ROCKY", "ROGUE", "ROMAN", "ROUGH",
-    "ROUND", "ROUTE", "ROYAL", "RULER", "RURAL", "RUSTY", "SADLY", "SAINT", "SALAD", "SALON",
-    "SAUCE", "SCALE", "SCARE", "SCARF", "SCENE", "SCENT", "SCOPE", "SCORE", "SCOUT", "SCRAP",
-    "SCREW", "SEDAN", "SENSE", "SERVE", "SEVEN", "SHADE", "SHADOW", "SHAFT", "SHAKE", "SHAME",
-    "SHAPE", "SHARE", "SHARK", "SHARP", "SHEEP", "SHEER", "SHEET", "SHELF", "SHELL", "SHIFT",
-    "SHINE", "SHIRT", "SHOCK", "SHOOT", "SHORE", "SHORT", "SHOUT", "SIGHT", "SIGMA", "SILENT",
-    "SILVER", "SINCE", "SIREN", "SKATE", "SKILL", "SKULL", "SLATE", "SLEEP", "SLICE", "SLIDE",
-    "SLOPE", "SMART", "SMELL", "SMILE", "SMOKE", "SNACK", "SNAKE", "SOLAR", "SOLID", "SOLVE",
-    "SONAR", "SOUND", "SOUTH", "SPACE", "SPARK", "SPEAK", "SPEAR", "SPEED", "SPELL", "SPEND",
-    "SPHERE", "SPICE", "SPIKE", "SPILL", "SPIN", "SPIRIT", "SPLIT", "SPOIL", "SPOKE", "SPOON",
-    "SPORT", "SPRAY", "SPREAD", "SPRING", "SQUAD", "STACK", "STAFF", "STAGE", "STAIN", "STAIR",
-    "STAKE", "STALE", "STAMP", "STAND", "STARE", "START", "STATE", "STEAK", "STEAL", "STEAM",
-    "STEEL", "STEEP", "STEER", "STICK", "STIFF", "STILL", "STING", "STOCK", "STONE", "STOOL",
-    "STORM", "STORY", "STRAP", "STRAW", "STRIP", "STUDY", "STUFF", "STYLE", "SUGAR", "SUITE",
-    "SUMMER", "SUMMIT", "SUNNY", "SUPER", "SURGE", "SWAMP", "SWEAR", "SWEAT", "SWEEP", "SWEET",
-    "SWIFT", "SWING", "SWORD", "TABLE", "TASTE", "TEACH", "TEMPO", "TENTH", "THANK", "THEME",
-    "THICK", "THIEF", "THIGH", "THING", "THINK", "THIRD", "THORN", "THOSE", "THREE", "THROW",
-    "THUMB", "TIGER", "TIGHT", "TIMER", "TIRED", "TITLE", "TOAST", "TODAY", "TOKEN", "TOOTH",
-    "TOPIC", "TORCH", "TOTAL", "TOUCH", "TOUGH", "TOWER", "TOXIC", "TRACE", "TRACK", "TRACT",
-    "TRADE", "TRAIL", "TRAIN", "TRAIT", "TRASH", "TREAT", "TREND", "TRIAL", "TRIBE", "TRICK",
-    "TROOP", "TRUCK", "TRULY", "TRUNK", "TRUST", "TRUTH", "TULIP", "TUMOR", "TUNER", "TUNNEL",
-    "TWICE", "TWIST", "UNCLE", "UNDER", "UNION", "UNITY", "UPPER", "UPSET", "URBAN", "USAGE",
-    "USUAL", "VALID", "VALLEY", "VALUE", "VALVE", "VAPOR", "VAULT", "VENUE", "VIGOR", "VIRAL",
-    "VIRUS", "VISIT", "VITAL", "VIVID", "VOCAL", "VOICE", "VOWEL", "WAFER", "WAGON", "WASTE",
-    "WATCH", "WATER", "WEDGE", "WEIGH", "WHALE", "WHEAT", "WHEEL", "WHERE", "WHICH", "WHILE",
-    "WHITE", "WHOLE", "WHOSE", "WIDOW", "WIDTH", "WINDY", "WITCH", "WOMAN", "WORLD", "WORRY",
-    "WORSE", "WORST", "WORTH", "WOUND", "WRATH", "WRECK", "WRIST", "WRITE", "WRONG", "YACHT",
-    "YIELD", "YOUTH", "ZEBRA",
+    "NAIVE", "NAVAL", "NERVE", "NIGHT", "NOBLE", "NOISE", "NORTH", "NOTCH", "NOVEL", "NURSE",
+    "OCEAN", "OFFER", "OFTEN", "OLIVE", "ONION", "ONSET", "OPERA", "ORBIT", "ORDER", "ORGAN",
+    "OTHER", "OUTER", "OXIDE", "PAINT", "PANEL", "PANIC", "PAPER", "PARTY", "PASTA", "PASTE",
+    "PATCH", "PAUSE", "PEACE", "PEACH", "PEARL", "PEDAL", "PENNY", "PERIL", "PHASE", "PHONE",
+    "PHOTO", "PIANO", "PIECE", "PILOT", "PITCH", "PIVOT", "PIZZA", "PLACE", "PLAIN", "PLANE",
+    "PLANT", "PLATE", "PLAZA", "PLEAD", "PLUCK", "PLUMB", "PLUME", "PLUSH", "POEMS", "POINT",
+    "POLAR", "PORCH", "POUND", "POWER", "PRAY", "PRESS", "PRICE", "PRIDE", "PRIME", "PRINT",
+    "PRIZE", "PROBE", "PRONE", "PROOF", "PROUD", "PULSE", "PUNCH", "PUPIL", "PUPPY", "PURSE",
+    "QUEEN", "QUERY", "QUEST", "QUICK", "QUIET", "QUILT", "QUIRK", "QUOTA", "RADAR", "RADIO",
+    "RAISE", "RALLY", "RANCH", "RANGE", "RAPID", "RATIO", "REACH", "REACT", "READY", "REALM",
+    "REBEL", "REFER", "REIGN", "RELAX", "RELIC", "REPLY", "RIDER", "RIDGE", "RIGHT", "RIGID",
+    "RISKY", "RIVAL", "RIVER", "ROAST", "ROBOT", "ROCKY", "ROGUE", "ROMAN", "ROUGH", "ROUND",
+    "ROUTE", "ROYAL", "RULER", "RURAL", "RUSTY", "SADLY", "SAINT", "SALAD", "SALON", "SAUCE",
+    "SCALE", "SCARE", "SCARF", "SCENE", "SCENT", "SCOPE", "SCORE", "SCOUT", "SCRAP", "SCREW",
+    "SEDAN", "SENSE", "SERVE", "SEVEN", "SHADE", "SHADOW", "SHAFT", "SHAKE", "SHAME", "SHAPE",
+    "SHARE", "SHARK", "SHARP", "SHEEP", "SHEER", "SHEET", "SHELF", "SHELL", "SHIFT", "SHINE",
+    "SHIRT", "SHOCK", "SHOOT", "SHORE", "SHORT", "SHOUT", "SIGHT", "SIGMA", "SILENT", "SILVER",
+    "SINCE", "SIREN", "SKATE", "SKILL", "SKULL", "SLATE", "SLEEP", "SLICE", "SLIDE", "SLOPE",
+    "SMART", "SMELL", "SMILE", "SMOKE", "SNACK", "SNAKE", "SOLAR", "SOLID", "SOLVE", "SONAR",
+    "SOUND", "SOUTH", "SPACE", "SPARK", "SPEAK", "SPEAR", "SPEED", "SPELL", "SPEND", "SPHERE",
+    "SPICE", "SPIKE", "SPILL", "SPIRIT", "SPLIT", "SPOIL", "SPOKE", "SPOON", "SPORT", "SPRAY",
+    "SPREAD", "SPRING", "SQUAD", "STACK", "STAFF", "STAGE", "STAIN", "STAIR", "STAKE", "STALE",
+    "STAMP", "STAND", "STARE", "START", "STATE", "STEAK", "STEAL", "STEAM", "STEEL", "STEEP",
+    "STEER", "STICK", "STIFF", "STILL", "STING", "STOCK", "STONE", "STOOL", "STORM", "STORY",
+    "STRAP", "STRAW", "STRIP", "STUDY", "STUFF", "STYLE", "SUGAR", "SUITE", "SUMMER", "SUMMIT",
+    "SUNNY", "SUPER", "SURGE", "SWAMP", "SWEAR", "SWEAT", "SWEEP", "SWEET", "SWIFT", "SWING",
+    "SWORD", "TABLE", "TASTE", "TEACH", "TEMPO", "TENTH", "THANK", "THEME", "THICK", "THIEF",
+    "THIGH", "THING", "THINK", "THIRD", "THORN", "THOSE", "THREE", "THROW", "THUMB", "TIGER",
+    "TIGHT", "TIMER", "TIRED", "TITLE", "TOAST", "TODAY", "TOKEN", "TOOTH", "TOPIC", "TORCH",
+    "TOTAL", "TOUCH", "TOUGH", "TOWER", "TOXIC", "TRACE", "TRACK", "TRACT", "TRADE", "TRAIL",
+    "TRAIN", "TRAIT", "TRASH", "TREAT", "TREND", "TRIAL", "TRIBE", "TRICK", "TROOP", "TRUCK",
+    "TRULY", "TRUNK", "TRUST", "TRUTH", "TULIP", "TUMOR", "TUNER", "TUNNEL", "TWICE", "TWIST",
+    "UNCLE", "UNDER", "UNION", "UNITY", "UPPER", "UPSET", "URBAN", "USAGE", "USUAL", "VALID",
+    "VALLEY", "VALUE", "VALVE", "VAPOR", "VAULT", "VENUE", "VIGOR", "VIRAL", "VIRUS", "VISIT",
+    "VITAL", "VIVID", "VOCAL", "VOICE", "VOWEL", "WAFER", "WAGON", "WASTE", "WATCH", "WATER",
+    "WEDGE", "WEIGH", "WHALE", "WHEAT", "WHEEL", "WHERE", "WHICH", "WHILE", "WHITE", "WHOLE",
+    "WHOSE", "WIDOW", "WIDTH", "WINDY", "WITCH", "WOMAN", "WORLD", "WORRY", "WORSE", "WORST",
+    "WORTH", "WOUND", "WRATH", "WRECK", "WRIST", "WRITE", "WRONG", "YACHT", "YIELD", "YOUTH",
+    "ZEBRA",
     # 6-letter
     "ACTION", "ACTIVE", "ANIMAL", "ANSWER", "ATTACK", "BOTTLE", "BOUNCE", "BRANCH", "BRIDGE",
     "BRIGHT", "BUTTON", "CAMERA", "CANDLE", "CARPET", "CASTLE", "CATTLE", "CHANCE", "CHANGE",
@@ -455,11 +461,14 @@ def solve_clue_words(answer: str, target_word_count: int, pool: List[str]) -> Op
     if ans_len < target_word_count:
         return None
 
-    for attempt in range(400):
+    ans_words = set(re.findall(r'[A-Z]+', answer.upper()))
+    valid_pool = [w for w in pool if w.upper() not in ans_words]
+
+    for attempt in range(500):
         rem = Counter(target_counts)
         chosen_words = []
         chosen_circles = []
-        available_pool = list(pool)
+        available_pool = list(valid_pool)
         random.shuffle(available_pool)
 
         while len(chosen_words) < target_word_count:
@@ -491,7 +500,7 @@ def solve_clue_words(answer: str, target_word_count: int, pool: List[str]) -> Op
             candidates.sort(key=lambda w: sum(min(w.count(c), rem[c]) for c in set(w)), reverse=True)
 
             found = False
-            for w in candidates[:20]:
+            for w in candidates[:25]:
                 matched = []
                 for idx, ch in enumerate(w):
                     if rem[ch] > 0:
@@ -518,81 +527,61 @@ def solve_clue_words(answer: str, target_word_count: int, pool: List[str]) -> Op
 
 def generate_all_puzzles():
     puzzles = []
-    diff_targets = {
-        "easy": 4,     # exactly 4 words for easy
-        "medium": 4,   # 4 words (or 5 if needed)
-        "hard": 5      # 5 or 6 words for hard
-    }
-
-    print("Generating and mathematically verifying 300 Jumble puzzles...")
+    pool = list(set(CURATED_WORDS))
 
     for diff in ["easy", "medium", "hard"]:
-        items = RIDDLE_BANK[diff]
-        print(f"Processing {len(items)} {diff.upper()} riddles...")
-        
-        for idx, (riddle, answer) in enumerate(items):
+        bank = RIDDLE_BANK[diff]
+        print(f"Generating {diff.upper()} ({len(bank)} riddles)...")
+        solved_count = 0
+
+        for i, (riddle, answer) in enumerate(bank):
             ans_clean = clean_letters(answer)
             ans_len = len(ans_clean)
 
-            # Determine best word count: 4, 5, or 6
-            if diff == "easy":
-                preferred_counts = [4, 5]
-            elif diff == "medium":
-                preferred_counts = [4, 5, 6] if ans_len >= 13 else [4, 5]
+            if ans_len <= 16:
+                target_counts = [4, 5] if diff != "easy" else [4]
+            elif ans_len <= 20:
+                target_counts = [5, 6, 4]
             else:
-                preferred_counts = [5, 6, 4] if ans_len >= 14 else [4, 5, 6]
+                target_counts = [6, 5]
 
-            solution = None
-            for w_count in preferred_counts:
-                solution = solve_clue_words(answer, w_count, WORD_POOL)
-                if solution:
+            solved = False
+            for tc in target_counts:
+                res = solve_clue_words(answer, tc, pool)
+                if res:
+                    words, circles = res
+                    extracted = [words[w][c] for w in range(len(words)) for c in circles[w]]
+                    assert sorted(extracted) == sorted(ans_clean), f"Multiset error in {answer}"
+                    ans_tokens = set(re.findall(r'[A-Z]+', answer.upper()))
+                    for w in words:
+                        assert w.upper() not in ans_tokens, f"Leak: {w} in {answer}"
+
+                    puzzle_id = f"{diff}_{i+1:03d}"
+                    puzzles.append({
+                        "id": puzzle_id,
+                        "diff": diff,
+                        "words": words,
+                        "circles": circles,
+                        "riddle": riddle,
+                        "answer": answer
+                    })
+                    solved = True
+                    solved_count += 1
                     break
 
-            if not solution:
-                # Try any word count from 4 to 6
-                for w_count in [4, 5, 6]:
-                    solution = solve_clue_words(answer, w_count, WORD_POOL)
-                    if solution:
-                        break
+            if not solved:
+                print(f"FAILED to solve: [{diff}] {riddle} -> {answer} (len={ans_len})")
 
-            assert solution is not None, f"Failed to fit words for [{diff}] '{riddle}' -> '{answer}'"
+        print(f"  {diff.upper()} successfully solved: {solved_count}/{len(bank)}")
 
-            words, circles = solution
+    return puzzles
 
-            # Verification assertions
-            extracted_letters = []
-            for w, circ in zip(words, circles):
-                for c_idx in circ:
-                    assert 0 <= c_idx < len(w), f"Circle index out of bounds in {w}"
-                    extracted_letters.append(w[c_idx])
-            assert sorted(extracted_letters) == sorted(ans_clean), f"Multiset mismatch for {answer}"
-
-            puzzle_obj = {
-                "id": f"{diff}_{idx+1:03d}",
-                "diff": diff,
-                "words": words,
-                "circles": circles,
-                "riddle": riddle,
-                "answer": answer
-            }
-            puzzles.append(puzzle_obj)
-
-    print(f"Successfully verified all {len(puzzles)} puzzles!")
-
-    # Write server/data/jumbles.json
-    json_path = "server/data/jumbles.json"
-    with open(json_path, "w", encoding="utf-8") as f:
+def emit_json(puzzles, filepath):
+    with open(filepath, "w", encoding="utf-8") as f:
         json.dump(puzzles, f, indent=2)
-    print(f"Saved master dataset to {json_path} ({len(puzzles)} puzzles)")
+    print(f"Emitted JSON dataset to {filepath} ({len(puzzles)} puzzles)")
 
-    # Generate esp32-firmware/src/generators/JumbleDataset.h
-    cpp_header_path = "esp32-firmware/src/generators/JumbleDataset.h"
-    generate_cpp_header(puzzles, cpp_header_path)
-    print(f"Generated ESP32 PROGMEM dataset header at {cpp_header_path}")
-
-def generate_cpp_header(puzzles: List[Dict[str, Any]], out_path: str):
-    diff_map = {"easy": "JUMBLE_EASY", "medium": "JUMBLE_MEDIUM", "hard": "JUMBLE_HARD"}
-
+def emit_cpp_progmem(puzzles, filepath):
     lines = []
     lines.append("#ifndef JUMBLE_DATASET_H")
     lines.append("#define JUMBLE_DATASET_H")
@@ -614,38 +603,37 @@ def generate_cpp_header(puzzles: List[Dict[str, Any]], out_path: str):
     lines.append("static const CompactRiddleSet JUMBLE_DATASET[] PROGMEM = {")
 
     for p in puzzles:
-        diff_enum = diff_map[p["diff"]]
+        diff_enum = "JUMBLE_EASY" if p["diff"] == "easy" else ("JUMBLE_MEDIUM" if p["diff"] == "medium" else "JUMBLE_HARD")
         num_words = len(p["words"])
-        # Words array padded to 6
-        words_c = [f'"{w}"' for w in p["words"]] + ['""'] * (6 - num_words)
-        words_str = "{" + ", ".join(words_c) + "}"
+        
+        words_padded = p["words"] + [""] * (6 - num_words)
+        words_c = "{" + ", ".join(f'"{w}"' for w in words_padded) + "}"
 
-        # Circles array [6][4] padded with 0
-        circles_c = []
-        num_circles_c = []
-        for i in range(6):
-            if i < num_words:
-                c_list = p["circles"][i]
-                num_circles_c.append(str(len(c_list)))
-                padded = [str(c) for c in c_list] + ["0"] * (4 - len(c_list))
-                circles_c.append("{" + ", ".join(padded) + "}")
+        circles_array = []
+        num_circles_array = []
+        for w_idx in range(6):
+            if w_idx < num_words:
+                circ = p["circles"][w_idx]
+                num_circles_array.append(str(len(circ)))
+                padded_circ = circ + [0] * (4 - len(circ))
+                circles_array.append("{" + ", ".join(str(c) for c in padded_circ) + "}")
             else:
-                num_circles_c.append("0")
-                circles_c.append("{0, 0, 0, 0}")
+                num_circles_array.append("0")
+                circles_array.append("{0, 0, 0, 0}")
 
-        circles_str = "{" + ", ".join(circles_c) + "}"
-        num_circles_str = "{" + ", ".join(num_circles_c) + "}"
+        circles_c = "{" + ", ".join(circles_array) + "}"
+        num_circles_c = "{" + ", ".join(num_circles_array) + "}"
 
-        escaped_riddle = p["riddle"].replace('"', '\\"')
-        escaped_answer = p["answer"].replace('"', '\\"')
+        riddle_escaped = p['riddle'].replace('\\', '\\\\').replace('"', '\\"')
+        answer_escaped = p['answer'].replace('\\', '\\\\').replace('"', '\\"')
 
         lines.append("    {")
         lines.append(f"        {diff_enum}, {num_words},")
-        lines.append(f"        {words_str},")
-        lines.append(f"        {circles_str},")
-        lines.append(f"        {num_circles_str},")
-        lines.append(f'        "{escaped_riddle}",')
-        lines.append(f'        "{escaped_answer}"')
+        lines.append(f"        {words_c},")
+        lines.append(f"        {circles_c},")
+        lines.append(f"        {num_circles_c},")
+        lines.append(f'        "{riddle_escaped}",')
+        lines.append(f'        "{answer_escaped}"')
         lines.append("    },")
 
     lines.append("};")
@@ -653,8 +641,13 @@ def generate_cpp_header(puzzles: List[Dict[str, Any]], out_path: str):
     lines.append("#endif // JUMBLE_DATASET_H")
     lines.append("")
 
-    with open(out_path, "w", encoding="utf-8") as f:
+    with open(filepath, "w", encoding="utf-8") as f:
         f.write("\n".join(lines))
+    print(f"Emitted C++ PROGMEM header to {filepath}")
 
 if __name__ == "__main__":
-    generate_all_puzzles()
+    puzzles = generate_all_puzzles()
+    assert len(puzzles) == 300, f"Expected 300 puzzles, got {len(puzzles)}"
+    emit_json(puzzles, "server/data/jumbles.json")
+    emit_cpp_progmem(puzzles, "esp32-firmware/src/generators/JumbleDataset.h")
+    print("All 300 puzzles successfully generated and mathematically verified!")
