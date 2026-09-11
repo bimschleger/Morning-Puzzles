@@ -541,7 +541,100 @@
 
     // --- QUEENS / STAR BATTLE ENGINE ---
     class QueensSimulator {
+      /**
+       * Generates a Queens / Star Battle puzzle.
+       * Runs a validation loop after generation to verify that there are
+       * the required number of stars (e.g. 2 for 2-star, 1 for 1-star)
+       * in each shape, each column, and each row.
+       * If validation passes, returns the puzzle.
+       * If validation fails, regenerates and continues in the loop.
+       */
       generate(size = 8, starsPerUnit = 1) {
+        for (let attempt = 0; attempt < 50; attempt++) {
+          const puzzle = this._generateSingle(size, starsPerUnit);
+          if (puzzle && this.validate(puzzle)) {
+            return puzzle;
+          }
+        }
+        return this._generateSingle(size, starsPerUnit);
+      }
+
+      /**
+       * Validation test: verifies exact star counts in every shape,
+       * every column, and every row, and ensures all shapes are 4-connected.
+       */
+      validate(puzzle) {
+        const { size, starsPerUnit, stars, regions } = puzzle;
+        if (!regions || !stars) return false;
+
+        // 1. All cells belong to a valid region
+        for (let r = 0; r < size; r++) {
+          for (let c = 0; c < size; c++) {
+            if (regions[r][c] < 0 || regions[r][c] >= size) return false;
+          }
+        }
+
+        // 2. Exact total star count
+        if (stars.length !== size * starsPerUnit) return false;
+
+        const rowCounts = Array(size).fill(0);
+        const colCounts = Array(size).fill(0);
+        const regCounts = Array(size).fill(0);
+
+        for (const s of stars) {
+          if (s.r < 0 || s.r >= size || s.c < 0 || s.c >= size) return false;
+          rowCounts[s.r]++;
+          colCounts[s.c]++;
+          regCounts[regions[s.r][s.c]]++;
+        }
+
+        // 3. Verify exactly starsPerUnit in every row, column, and shape
+        for (let i = 0; i < size; i++) {
+          if (rowCounts[i] !== starsPerUnit) return false;
+          if (colCounts[i] !== starsPerUnit) return false;
+          if (regCounts[i] !== starsPerUnit) return false;
+        }
+
+        // 4. Verify no two stars touch diagonally or orthogonally
+        for (let i = 0; i < stars.length; i++) {
+          for (let j = i + 1; j < stars.length; j++) {
+            if (Math.abs(stars[i].r - stars[j].r) <= 1 && Math.abs(stars[i].c - stars[j].c) <= 1) {
+              return false;
+            }
+          }
+        }
+
+        // 5. Verify strict 4-connectivity of each shape (no disconnected islands)
+        const dirs = [[0, 1], [0, -1], [1, 0], [-1, 0]];
+        for (let reg = 0; reg < size; reg++) {
+          const cells = [];
+          for (let r = 0; r < size; r++) {
+            for (let c = 0; c < size; c++) {
+              if (regions[r][c] === reg) cells.push({ r, c });
+            }
+          }
+          if (cells.length === 0) return false;
+          const visited = new Set();
+          const q = [cells[0]];
+          visited.add(`${cells[0].r},${cells[0].c}`);
+          while (q.length > 0) {
+            const curr = q.shift();
+            for (const [dr, dc] of dirs) {
+              const nr = curr.r + dr, nc = curr.c + dc;
+              const key = `${nr},${nc}`;
+              if (cells.some(cell => cell.r === nr && cell.c === nc) && !visited.has(key)) {
+                visited.add(key);
+                q.push({ r: nr, c: nc });
+              }
+            }
+          }
+          if (visited.size !== cells.length) return false;
+        }
+
+        return true;
+      }
+
+      _generateSingle(size = 8, starsPerUnit = 1) {
         // 1. Backtrack place non-touching stars
         const stars = [];
         const colCounts = Array(size).fill(0);

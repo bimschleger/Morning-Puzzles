@@ -259,14 +259,98 @@ void QueensGen::generate(QueensDifficulty difficulty) {
         _starsPerUnit = 1;
     }
 
-    bool solved = false;
-    for (int attempts = 0; attempts < 50 && !solved; attempts++) {
+    // Validation retry loop:
+    // Generate star placements and territory shapes, then immediately run validate().
+    // If validation passes (exact stars in each row, col, shape, 4-connected), return.
+    // If validation fails, regenerate and continue in the loop.
+    for (int attempts = 0; attempts < 50; attempts++) {
         _stars.clear();
         uint8_t colCounts[MAX_SIZE] = {0};
-        solved = placeStarsBacktrack(0, 0, colCounts);
+        bool solved = placeStarsBacktrack(0, 0, colCounts);
+        if (!solved) continue;
+
+        growRegions();
+
+        if (validate()) {
+            return; // Passed validation!
+        }
+    }
+}
+
+bool QueensGen::validate() {
+    // 1. All cells belong to valid region
+    for (uint8_t r = 0; r < _size; r++) {
+        for (uint8_t c = 0; c < _size; c++) {
+            if (_regions[r][c] < 0 || _regions[r][c] >= _size) return false;
+        }
     }
 
-    growRegions();
+    // 2. Exact total star count
+    if (_stars.size() != (size_t)(_size * _starsPerUnit)) return false;
+
+    uint8_t rowCounts[MAX_SIZE] = {0};
+    uint8_t colCounts[MAX_SIZE] = {0};
+    uint8_t regCounts[MAX_SIZE] = {0};
+
+    for (const auto& s : _stars) {
+        if (s.row >= _size || s.col >= _size) return false;
+        rowCounts[s.row]++;
+        colCounts[s.col]++;
+        regCounts[_regions[s.row][s.col]]++;
+    }
+
+    // 3. Verify exactly _starsPerUnit in every row, column, and shape
+    for (uint8_t i = 0; i < _size; i++) {
+        if (rowCounts[i] != _starsPerUnit) return false;
+        if (colCounts[i] != _starsPerUnit) return false;
+        if (regCounts[i] != _starsPerUnit) return false;
+    }
+
+    // 4. No two stars touch orthogonally or diagonally
+    for (size_t i = 0; i < _stars.size(); i++) {
+        for (size_t j = i + 1; j < _stars.size(); j++) {
+            if (abs((int)_stars[i].row - (int)_stars[j].row) <= 1 &&
+                abs((int)_stars[i].col - (int)_stars[j].col) <= 1) {
+                return false;
+            }
+        }
+    }
+
+    // 5. Strict 4-connectivity of each shape (no disconnected islands)
+    const int8_t dr[] = {0, 0, 1, -1};
+    const int8_t dc[] = {1, -1, 0, 0};
+    for (uint8_t reg = 0; reg < _size; reg++) {
+        std::vector<StarPos> cells;
+        for (uint8_t r = 0; r < _size; r++) {
+            for (uint8_t c = 0; c < _size; c++) {
+                if (_regions[r][c] == reg) cells.push_back({r, c});
+            }
+        }
+        if (cells.empty()) return false;
+        bool visited[MAX_SIZE][MAX_SIZE] = {false};
+        std::queue<StarPos> q;
+        q.push(cells[0]);
+        visited[cells[0].row][cells[0].col] = true;
+        size_t count = 0;
+        while (!q.empty()) {
+            StarPos cp = q.front();
+            q.pop();
+            count++;
+            for (int d = 0; d < 4; d++) {
+                int nr = cp.row + dr[d];
+                int nc = cp.col + dc[d];
+                if (nr >= 0 && nr < _size && nc >= 0 && nc < _size && !visited[nr][nc]) {
+                    if (_regions[nr][nc] == reg) {
+                        visited[nr][nc] = true;
+                        q.push({(uint8_t)nr, (uint8_t)nc});
+                    }
+                }
+            }
+        }
+        if (count != cells.size()) return false;
+    }
+
+    return true;
 }
 
 void QueensGen::printToReceipt(EscPosPrinter& printer) {

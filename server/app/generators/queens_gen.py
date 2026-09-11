@@ -223,21 +223,43 @@ class QueensGenerator:
 
     def _validate_puzzle(self, regions: List[List[int]], stars: Set[Tuple[int, int]], n: int, k_stars: int) -> bool:
         """
-        Validates that:
+        Validation test: verifies that:
         1. All cells belong to a region in [0, n-1].
-        2. Every region contains exactly k_stars.
-        3. Every region is a single 4-connected component (no disconnected islands).
+        2. Total star count equals n * k_stars.
+        3. Exactly k_stars in every row.
+        4. Exactly k_stars in every column.
+        5. Exactly k_stars in every shape/region.
+        6. No two stars touch orthogonally or diagonally.
+        7. Every region is a single 4-connected component (no disconnected islands).
         """
         for r in range(n):
             for c in range(n):
                 if regions[r][c] < 0 or regions[r][c] >= n:
                     return False
 
-        star_counts = [0] * n
-        for sr, sc in stars:
-            star_counts[regions[sr][sc]] += 1
-        if any(cnt != k_stars for cnt in star_counts):
+        if len(stars) != n * k_stars:
             return False
+
+        row_counts = [0] * n
+        col_counts = [0] * n
+        reg_counts = [0] * n
+        star_list = list(stars)
+
+        for sr, sc in star_list:
+            if not (0 <= sr < n and 0 <= sc < n):
+                return False
+            row_counts[sr] += 1
+            col_counts[sc] += 1
+            reg_counts[regions[sr][sc]] += 1
+
+        for i in range(n):
+            if row_counts[i] != k_stars or col_counts[i] != k_stars or reg_counts[i] != k_stars:
+                return False
+
+        for i in range(len(star_list)):
+            for j in range(i + 1, len(star_list)):
+                if abs(star_list[i][0] - star_list[j][0]) <= 1 and abs(star_list[i][1] - star_list[j][1]) <= 1:
+                    return False
 
         dirs = [(0, 1), (0, -1), (1, 0), (-1, 0)]
         for reg in range(n):

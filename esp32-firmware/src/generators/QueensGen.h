@@ -26,6 +26,8 @@ public:
     void generate(QueensDifficulty difficulty = QUEENS_MEDIUM);
     void printToReceipt(EscPosPrinter& printer);
 
+    bool validate();
+
     uint8_t getSize() const { return _size; }
     uint8_t getStarsPerUnit() const { return _starsPerUnit; }
 
