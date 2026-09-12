@@ -7156,9 +7156,14 @@
             const wrappedWords = wrapText(`Words: ${wordsStr}`, 46);
             for (const line of wrappedWords) items.push({ type: 'text', text: line });
           } else if (item.name === 'Stars') {
-            const starsStr = item.stars.map(s => `(${s.r + 1},${s.c + 1})`).join('  ');
-            const wrappedStars = wrapText(`Stars at: ${starsStr}`, 46);
-            for (const line of wrappedStars) items.push({ type: 'text', text: line });
+            const starSet = new Set(item.stars.map(s => `${s.r},${s.c}`));
+            for (let r = 0; r < item.size; r++) {
+              let rowStr = '      ';
+              for (let c = 0; c < item.size; c++) {
+                rowStr += starSet.has(`${r},${c}`) ? '* ' : '. ';
+              }
+              items.push({ type: 'text', text: rowStr });
+            }
           } else if (item.name === 'Binary') {
             for (let r = 0; r < item.size; r++) {
               let rowStr = '      ';
@@ -7186,25 +7191,15 @@
               let rowStr = '      ';
               for (let c = 0; c < item.size; c++) {
                 const cell = item.solution[r][c];
-                rowStr += (cell === 1 ? 'T ' : (cell === 2 ? '^ ' : '. '));
+                rowStr += (cell === 1 ? 'T ' : (cell === 2 ? '* ' : '. '));
               }
               items.push({ type: 'text', text: rowStr });
-            }
-            if (item.tents && item.tents.length > 0) {
-              const tentsStr = item.tents.map(t => `(${t[0] + 1},${t[1] + 1})`).join('  ');
-              const wrapped = wrapText(`Tents at: ${tentsStr}`, 46);
-              for (const line of wrapped) items.push({ type: 'text', text: line });
             }
           } else if (item.name === 'Bridges') {
             if (item.solutionText) {
               for (const line of item.solutionText.split('\n')) {
                 items.push({ type: 'text', text: line });
               }
-            }
-            if (item.solutionBridges && item.solutionBridges.length > 0) {
-              const bStr = item.solutionBridges.map(b => `(${b.r1 + 1},${b.c1 + 1})-(${b.r2 + 1},${b.c2 + 1})[${b.count}]`).join(', ');
-              const wrapped = wrapText(`Bridges: ${bStr}`, 46);
-              for (const line of wrapped) items.push({ type: 'text', text: line });
             }
           } else if (item.name === 'Killer') {
             for (let r = 0; r < item.size; r++) {
@@ -7215,12 +7210,12 @@
               items.push({ type: 'text', text: rowStr });
             }
           } else if (item.name === 'Cryptogram') {
-            if (item.author) {
-              items.push({ type: 'text', text: `Author: ${item.author}` });
-            }
             const ansLines = wrapText(`Answer: ${item.phrase}`, 46);
             for (const line of ansLines) {
               items.push({ type: 'text', text: line });
+            }
+            if (item.author) {
+              items.push({ type: 'text', text: `-- ${item.author}` });
             }
           } else if (item.name === 'Tango') {
             for (let r = 0; r < item.size; r++) {
@@ -7234,14 +7229,13 @@
             for (let r = 0; r < item.size; r++) {
               let rowStr = '      ';
               for (let c = 0; c < item.size; c++) {
-                rowStr += (item.grid[r][c] === 1 ? '■ ' : '· ');
+                rowStr += (item.grid[r][c] === 1 ? '* ' : '. ');
               }
               items.push({ type: 'text', text: rowStr });
             }
           } else if (item.name === 'Ladder') {
-            const pathLines = wrapText(item.solution.join(' -> '), 46);
-            for (const line of pathLines) {
-              items.push({ type: 'text', text: line });
+            for (const word of item.solution) {
+              items.push({ type: 'text', text: '      ' + String(word).toUpperCase() });
             }
           }
 

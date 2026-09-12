@@ -72,30 +72,37 @@ When the solution key is enabled, it is appended to the bottom of the receipt di
 ### C. NONOGRAM (`NONOGRAM`)
 * **Format**: $N \times N$ character grid where each cell is separated by a space.
 * **Glyphs**:
-  * `■ `: Shaded filled pixel (`0x25A0` in UTF-8, or `# ` in pure 7-bit ASCII).
-  * `· `: Unshaded white cell (`0x00B7` middle dot, or `. ` in pure 7-bit ASCII).
+  * `* `: Shaded filled cell (unified boolean-placement glyph).
+  * `. `: Unshaded empty cell.
 * **Indentation**: 6 spaces left padding.
 * **Example** (8x8):
   ```text
   NONOGRAM
-        · · ■ ■ ■ ■ · ·
-        · ■ ■ · · ■ ■ ·
-        ■ ■ · · · · ■ ■
-        ■ ■ · ■ ■ · ■ ■
-        ■ ■ · ■ ■ · ■ ■
-        ■ ■ · · · · ■ ■
-        · ■ ■ · · ■ ■ ·
-        · · ■ ■ ■ ■ · ·
+        * . . * * * . *
+        * * . * . * * .
+        . . . * * . . .
+        * . * . . * * .
+        . * * . * . . *
+        * . * * . * . .
+        . * . * * . * .
+        * * . . . * * *
 
   ```
 
 ### D. STARS (`STARS`)
-* **Format**: Compact 1-indexed coordinate list `(row,col)` of star locations, word-wrapped to $\le 46$ characters per line.
-* **Example**:
+* **Format**: $N \times N$ grid displaying `* ` for stars and `. ` for non-star squares.
+* **Indentation**: 6 spaces left padding.
+* **Example** (8x8):
   ```text
   STARS
-  Stars at: (1,3)  (2,7)  (3,1)  (4,5)  (5,8)
-  (6,2)  (7,6)  (8,4)
+        . . * . . . . .
+        . . . . . . * .
+        * . . . . . . .
+        . . . . * . . .
+        . . . . . . . *
+        . * . . . . . .
+        . . . . . * . .
+        . . . * . . . .
 
   ```
 
@@ -145,23 +152,21 @@ When the solution key is enabled, it is appended to the bottom of the receipt di
   ```
 
 ### H. TENTS (`TENTS`)
-* **Format**: $N \times N$ ($6\times 6$ or $8\times 8$) grid followed by explicit tent coordinate pairs.
+* **Format**: $N \times N$ ($6\times 6$ or $8\times 8$) grid showing tree, tent, and grass positions.
 * **Glyphs**:
-  * `T `: Tree
-  * `^ ` (or `▲ `): Tent
+  * `T `: Tree (fixed given)
+  * `* `: Tent (player-placed — unified boolean-placement glyph)
   * `. `: Empty grass
-* **Indentation**: 6 spaces left padding for grid.
-* **Coordinate Line**: `Tents at: (r1,c1)  (r2,c2) ...` word-wrapped to $\le 46$ characters.
+* **Indentation**: 6 spaces left padding.
 * **Example** (6x6):
   ```text
   TENTS
-        T ^ . T ^ .
+        T * . T * .
         . . . . . .
-        ^ T . . ^ T
+        * T . . * T
         . . . . . .
-        T ^ . T ^ .
+        T * . T * .
         . . . . . .
-  Tents at: (1,2)  (1,5)  (3,1)  (3,5)  (5,2)  (5,5)
 
   ```
 
@@ -174,7 +179,7 @@ When the solution key is enabled, it is appended to the bottom of the receipt di
   * `| `: Single vertical bridge
   * `" ` (or `||`): Double vertical bridge
   * `  `: Empty water
-* **Edge List**: Compact listing of connected islands: `Bridges: (r1,c1)-(r2,c2)[count] ...` word-wrapped to $\le 46$ characters.
+* **Indentation**: 6 spaces left padding for grid.
 * **Example** (6x6):
   ```text
   BRIDGES
@@ -182,9 +187,6 @@ When the solution key is enabled, it is appended to the bottom of the receipt di
         |     |     |
         |     |     |
         2 - - 3 - - 1
-  Bridges: (1,1)-(1,4)[2], (1,4)-(1,6)[1],
-  (1,1)-(4,1)[1], (1,4)-(4,4)[1], (1,6)-(4,6)[1],
-  (4,1)-(4,4)[1], (4,4)-(4,6)[1]
 
   ```
 
@@ -214,14 +216,15 @@ When the solution key is enabled, it is appended to the bottom of the receipt di
 
 ### K. CRYPTOGRAM (`CRYPTOGRAM`)
 * **Format**:
-  * Line 1: `Author: [AUTHOR NAME]` (if author attribution is present).
-  * Line 2+: `Answer: [DECRYPTED PHRASE]` word-wrapped to $\le 46$ characters per line.
+  * Line 1+: `Answer: [DECRYPTED PHRASE]` word-wrapped to $\le 46$ characters per line.
+  * Last line: `-- [AUTHOR NAME]` (if author attribution is present) — matching the in-puzzle attribution style.
 * **Example**:
   ```text
   CRYPTOGRAM
-  Author: ELEANOR ROOSEVELT
-  Answer: THE FUTURE BELONGS TO THOSE WHO BELIEVE
-  IN THE BEAUTY OF THEIR DREAMS.
+  Answer: THE FUTURE BELONGS TO THOSE WHO
+  BELIEVE IN THE BEAUTY OF THEIR DREAMS.
+  -- ELEANOR ROOSEVELT
+
 
 ### L. TANGO (`TANGO`)
 * **Format**: $N \times N$ ($6\times 6$ or $8\times 8$) grid of `0` and `1` digits separated by a space (edge clues are omitted from the solution key).
@@ -235,6 +238,20 @@ When the solution key is enabled, it is appended to the bottom of the receipt di
         1 0 1 0 1 0
         0 0 1 1 0 1
         1 1 0 0 1 0
+
+  ```
+
+### M. LADDER (`LADDER`)
+* **Format**: Vertically stacked sequence of words, with each word on its own line.
+* **Indentation**: 6 spaces left padding.
+* **Example**:
+  ```text
+  LADDER
+        COLD
+        CORD
+        CARD
+        WARD
+        WARM
 
   ```
 

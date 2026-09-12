@@ -161,10 +161,10 @@ class CryptogramPuzzle(BasePuzzle):
         author = puzzle_data.get("author", "")
         lines = []
         if phrase:
-            if author:
-                lines.append(f"Author: {author}")
             for line in textwrap.wrap(f"Answer: {phrase}", 46):
                 lines.append(line)
+            if author:
+                lines.append(f"-- {author}")
         return lines
 
     def render_raster(

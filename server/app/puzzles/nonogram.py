@@ -136,7 +136,7 @@ class NonogramPuzzle(BasePuzzle):
             return []
         lines = []
         for row in sol:
-            lines.append("      " + " ".join("# " if c == 1 else ". " for c in row))
+            lines.append("      " + " ".join("* " if c == 1 else ". " for c in row))
         return lines
 
     def render_raster(

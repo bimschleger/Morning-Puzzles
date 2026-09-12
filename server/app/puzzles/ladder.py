@@ -119,8 +119,7 @@ class LadderPuzzle(BasePuzzle):
             target_word = str(puzzle_data.get("target_word", "WARM"))
             solution = [start_word, target_word]
 
-        path_str = " -> ".join(solution)
-        return textwrap.wrap(path_str, 46)
+        return ["      " + str(word).upper() for word in solution]
 
     def render_raster(
         self,

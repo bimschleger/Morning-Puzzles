@@ -173,7 +173,6 @@ class TentsPuzzle(BasePuzzle):
 
     def format_solution_key(self, puzzle_data: Union[BasePuzzleResult, Dict[str, Any]]) -> List[str]:
         sol = puzzle_data.get("solution", [])
-        tents = puzzle_data.get("tents", [])
         lines = []
         if sol:
             for row in sol:
@@ -182,14 +181,10 @@ class TentsPuzzle(BasePuzzle):
                     if cell == 1:
                         row_str += "T "
                     elif cell == 2:
-                        row_str += "^ "
+                        row_str += "* "
                     else:
                         row_str += ". "
                 lines.append(row_str)
-        if tents:
-            tents_str = "Tents at: " + "  ".join(f"({tr+1},{tc+1})" for tr, tc in sorted(tents))
-            for line in textwrap.wrap(tents_str, 46):
-                lines.append(line)
         return lines
 
     def render_raster(

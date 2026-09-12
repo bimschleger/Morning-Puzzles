@@ -263,8 +263,8 @@ def test_solution_key_spec():
             f"Solution key line exceeds 48 characters ({len(clean)} chars): '{clean}'"
         )
 
-    # 4. Check 2D ASCII grid safe indent (6 spaces) for grid-based solutions
-    for grid_title in ["SUDOKU", "NONOGRAM", "BINARY", "MINES", "KILLER", "TANGO"]:
+    # 4. Check safe indent (6 spaces) for grid and stacked solutions
+    for grid_title in ["SUDOKU", "NONOGRAM", "BINARY", "MINES", "KILLER", "TANGO", "STARS", "LADDER", "BRIDGES", "TENTS"]:
         idx = clean_key_text.find(f"\n{grid_title}\n")
         assert idx != -1
         grid_section = clean_key_text[idx + len(grid_title) + 2 : idx + len(grid_title) + 200]

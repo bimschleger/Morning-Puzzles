@@ -205,14 +205,14 @@ class BridgesPuzzle(BasePuzzle):
 
     def format_solution_key(self, puzzle_data: Union[BasePuzzleResult, Dict[str, Any]]) -> List[str]:
         sol_text = puzzle_data.get("solution_text", "")
-        bridges = puzzle_data.get("solution_bridges", [])
+        if not sol_text:
+            size = puzzle_data.get("size", 8)
+            islands = puzzle_data.get("islands", [])
+            bridges = puzzle_data.get("solution_bridges", [])
+            sol_text = self._format_grid_ascii(size, islands, bridges, show_solution=True)
         lines = []
         if sol_text:
             for line in sol_text.split("\n"):
-                lines.append(line)
-        if bridges:
-            b_str = "Bridges: " + ", ".join(f"({x['r1']+1},{x['c1']+1})-({x['r2']+1},{x['c2']+1})[{x['count']}]" for x in bridges)
-            for line in textwrap.wrap(b_str, 46):
                 lines.append(line)
         return lines
 

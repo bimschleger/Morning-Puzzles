@@ -128,10 +128,36 @@ class StarsPuzzle(BasePuzzle):
         stars = puzzle_data.get("stars_solution") or puzzle_data.get("queens") or puzzle_data.get("stars") or []
         if not stars:
             return []
-        stars_str = "Stars at: " + "  ".join(f"({sr+1},{sc+1})" for sr, sc in sorted(stars))
+        size = puzzle_data.get("grid_size") or puzzle_data.get("size")
+        if not size:
+            regions = puzzle_data.get("regions", [])
+            if regions:
+                size = len(regions)
+            else:
+                coords = []
+                for s in stars:
+                    if isinstance(s, (list, tuple)) and len(s) >= 2:
+                        coords.extend([s[0], s[1]])
+                    elif isinstance(s, dict) and "r" in s and "c" in s:
+                        coords.extend([s["r"], s["c"]])
+                size = max(coords) + 1 if coords else 8
+
+        star_set = set()
+        for s in stars:
+            if isinstance(s, (list, tuple)) and len(s) >= 2:
+                star_set.add((s[0], s[1]))
+            elif isinstance(s, dict) and "r" in s and "c" in s:
+                star_set.add((s["r"], s["c"]))
+
         lines = []
-        for line in textwrap.wrap(stars_str, 46):
-            lines.append(line)
+        for r in range(size):
+            row_str = "      "
+            for c in range(size):
+                if (r, c) in star_set:
+                    row_str += "* "
+                else:
+                    row_str += ". "
+            lines.append(row_str)
         return lines
 
     def render_raster(
