@@ -17,6 +17,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from app.main import generate_daily_bundle
 from app.renderer.text_formatter import build_daily_receipt_bytes, EscPosTextReceipt
+from app.puzzles.base import BasePuzzle, BasePuzzleResult
+from app.puzzles.registry import DEFAULT_REGISTRY
 
 APPROVED_TITLES = [
     "SUDOKU",
@@ -196,9 +198,12 @@ def test_description_length_and_canonical_formula():
             tg_desc = "Fill each line with three 0s and three 1s without trios; = means same, x means opposite."
         else:
             tg_desc = "Fill each line with four 0s and four 1s without trios; = means same, x means opposite."
-        descriptions.append(("Tango", tg_desc))
+        # Validate each description from the bundle and from DEFAULT_REGISTRY
+        for plugin in DEFAULT_REGISTRY.get_all():
+            data = bundle[plugin.puzzle_id]
+            desc = plugin.get_instruction(data)
+            descriptions.append((plugin.title, desc))
 
-        # Validate each description
         for name, desc in descriptions:
             # Rule 1: <= 100 characters
             assert len(desc) <= 100, (
@@ -305,6 +310,49 @@ def test_simulator_consistency():
     print("  -> Passed! Simulator templates and header calls strictly match canonical specification.\n")
 
 
+def test_plugin_contract_compliance():
+    print("Test 6: Verifying BasePuzzle Contract & Auto-Discovery on DEFAULT_REGISTRY...")
+    plugins = DEFAULT_REGISTRY.get_all()
+    assert len(plugins) == 12, f"Expected 12 registered plugins, found {len(plugins)}"
+
+    for p in plugins:
+        # 1. Type validation
+        assert isinstance(p, BasePuzzle), f"{p} must inherit from BasePuzzle"
+
+        # 2. Identifier validation
+        assert p.puzzle_id and p.puzzle_id.islower(), f"Invalid puzzle_id: '{p.puzzle_id}'"
+        assert p.title and p.title.isupper() and len(p.title.split()) == 1, f"Invalid title: '{p.title}'"
+        assert p.title in APPROVED_TITLES, f"Title '{p.title}' not in APPROVED_TITLES"
+
+        # 3. Test generation & contract methods
+        res = p.generate(difficulty="medium")
+        assert isinstance(res, BasePuzzleResult), f"{p.title} generate() must return BasePuzzleResult"
+        assert isinstance(res.to_dict(), dict), f"{p.title} to_dict() must return a dict"
+
+        # 4. Instruction verification
+        instr = p.get_instruction(res)
+        assert len(instr) <= 100, f"{p.title} instruction exceeds 100 chars: '{instr}'"
+        assert instr.endswith("."), f"{p.title} instruction must end with period: '{instr}'"
+        assert instr.split()[0] in APPROVED_IMPERATIVE_VERBS, f"{p.title} instruction verb invalid: '{instr}'"
+
+        # 5. ASCII puzzle formatting
+        ascii_art = p.format_ascii_puzzle(res)
+        assert isinstance(ascii_art, str) and len(ascii_art) > 0, f"{p.title} ASCII formatting empty"
+
+        # 6. Solution key formatting
+        sol_lines = p.format_solution_key(res)
+        assert isinstance(sol_lines, list) and len(sol_lines) > 0, f"{p.title} solution lines empty"
+        for line in sol_lines:
+            assert len(line) <= 48, f"{p.title} solution line exceeds 48 chars: '{line}'"
+
+        # 7. Raster rendering
+        raster = p.render_raster(res)
+        assert isinstance(raster, (bytes, bytearray)) and len(raster) >= 8, f"{p.title} raster invalid"
+        assert raster[0:4] == bytes([0x1D, 0x76, 0x30, 0x00]), f"{p.title} raster missing GS v 0 header"
+
+    print(f"  -> Passed! All {len(plugins)} plugins strictly comply with BasePuzzle contracts and standards.\n")
+
+
 if __name__ == "__main__":
     print("==================================================================")
     print("RUNNING MORNING PUZZLES PRESENTATION & AUTHORING STANDARDS TESTS")
@@ -315,7 +363,8 @@ if __name__ == "__main__":
     test_description_length_and_canonical_formula()
     test_solution_key_spec()
     test_simulator_consistency()
+    test_plugin_contract_compliance()
 
     print("==================================================================")
-    print("ALL PRESENTATION & AUTHORING STANDARDS TESTS PASSED (5/5)!")
+    print("ALL PRESENTATION & AUTHORING STANDARDS TESTS PASSED (6/6)!")
     print("==================================================================")

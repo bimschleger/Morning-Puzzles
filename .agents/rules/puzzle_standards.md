@@ -44,3 +44,15 @@ All changes must pass the automated validation suite:
 python3 server/test_puzzle_standards.py
 python3 server/test_thermal_format.py
 ```
+
+## 6. Puzzle Plugin Architecture & Extension Standards
+All games in Morning Puzzles must be implemented as modular, self-contained plugins adhering to the `BasePuzzle` contract (`server/app/puzzles/base.py`):
+- **Single Source of Truth**: Each game resides in `server/app/puzzles/<puzzle_name>.py` and encapsulates:
+  - Procedural generation returning `BasePuzzleResult` (dict-compatible dataclass envelope)
+  - Gameplay instruction generation complying with Section 3 formula ($\le 100$ characters)
+  - ASCII text formatting for monospaced receipts
+  - Solution key formatting (6-space pre-indented for grids, wrapped to $\le 46$ columns)
+  - 576-dot thermal raster rendering via `ThermalCanvas` primitives
+- **Registry Registration**: Every puzzle must be registered in `DEFAULT_REGISTRY` (`server/app/puzzles/registry.py`).
+- **Zero Procedural Spaghetti**: Never introduce manual `elif puzzle_id == ...` branches in `main.py`, `text_formatter.py`, or `receipt_rasterizer.py`. All routing, daily bundle assembly, and receipt composition are dynamically and polymorphically driven by the registry.
+- **Thermal Drawing Safety**: Raster graphics must be 576 dots wide, height aligned to 8 dots, with an average thermal duty cycle $\le 35\%$ and no more than 16 consecutive dense rows. Use `ThermalCanvas` primitives (`draw_grid`, `draw_rect`, `draw_circle`, `draw_text`, `draw_line`, `draw_stars`) for automatic dual-backend (Pillow + pure-Python fallback) compatibility.

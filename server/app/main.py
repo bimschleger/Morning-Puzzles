@@ -9,64 +9,23 @@ import sys
 import os
 import json
 import datetime
+from typing import Optional, Dict, Any
 from urllib.parse import urlparse, parse_qs
 
 # Add parent directory to path to allow importing app modules
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from app.generators.sudoku_gen import SudokuGenerator
-from app.generators.wordsearch_gen import WordSearchGenerator
-from app.generators.nonogram_gen import NonogramGenerator
-from app.generators.queens_gen import QueensGenerator
-from app.generators.jumble_gen import JumbleGenerator
-from app.generators.binary_gen import BinaryGenerator
-from app.generators.mines_gen import MinesGenerator
-from app.generators.tents_gen import TentsGenerator
-from app.generators.bridges_gen import BridgesGenerator
-from app.generators.killer_gen import KillerSudokuGenerator
-from app.generators.cryptogram_gen import CryptogramGenerator
-from app.generators.tango_gen import TangoGenerator
+from app.puzzles.registry import DEFAULT_REGISTRY
 from app.renderer.text_formatter import (
     build_daily_receipt_bytes,
     build_hybrid_daily_receipt_bytes,
     EscPosTextReceipt,
 )
 
-# Initialize generators
-sudoku_gen = SudokuGenerator()
-wordsearch_gen = WordSearchGenerator()
-nonogram_gen = NonogramGenerator()
-queens_gen = QueensGenerator()
-jumble_gen = JumbleGenerator()
-binary_gen = BinaryGenerator()
-mines_gen = MinesGenerator()
-tents_gen = TentsGenerator()
-bridges_gen = BridgesGenerator()
-killer_gen = KillerSudokuGenerator()
-cryptogram_gen = CryptogramGenerator()
-tango_gen = TangoGenerator()
 
-
-def generate_daily_bundle(difficulty: str = "medium") -> dict:
-    today_str = datetime.date.today().strftime("%A, %B %d, %Y")
-    killer_diff = "extreme" if difficulty.lower() == "hard" else difficulty
-    return {
-        "title": "DAILY MORNING PUZZLES",
-        "date": today_str,
-        "difficulty": difficulty,
-        "sudoku": sudoku_gen.generate(difficulty=difficulty),
-        "wordsearch": wordsearch_gen.generate(difficulty=difficulty),
-        "nonogram": nonogram_gen.generate(difficulty="easy" if difficulty == "easy" else "medium"),
-        "queens": queens_gen.generate(difficulty=difficulty),
-        "jumble": jumble_gen.generate(difficulty=difficulty),
-        "binary": binary_gen.generate(difficulty=difficulty),
-        "mines": mines_gen.generate(difficulty=difficulty),
-        "tents": tents_gen.generate(difficulty=difficulty),
-        "bridges": bridges_gen.generate(difficulty=difficulty),
-        "killer": killer_gen.generate(difficulty=killer_diff),
-        "cryptogram": cryptogram_gen.generate(difficulty=difficulty),
-        "tango": tango_gen.generate(difficulty=difficulty),
-    }
+def generate_daily_bundle(difficulty: str = "medium") -> Dict[str, Any]:
+    """Generates the bundle of all 12 puzzles for the daily edition."""
+    return DEFAULT_REGISTRY.generate_bundle(difficulty=difficulty)
 
 
 # ==============================================================================
@@ -79,7 +38,7 @@ try:
     app = FastAPI(
         title="Morning Puzzles API",
         description="API generating daily puzzles for 80mm commercial thermal printers (576 dots width)",
-        version="1.1.0"
+        version="1.2.0"
     )
 
     SIMULATOR_HTML_PATH = os.path.join(
@@ -110,7 +69,6 @@ try:
         if format == "json":
             return JSONResponse(content=bundle)
 
-        # Build binary ESC/POS stream for thermal printer
         if style == "text":
             escpos_bytes = build_daily_receipt_bytes(bundle)
         else:
@@ -136,53 +94,65 @@ try:
         data = r.get_bytes()
         return Response(content=data, media_type="application/octet-stream")
 
+    # Dynamic puzzle endpoint
+    @app.get("/api/v1/puzzles/{puzzle_id}")
+    def get_puzzle(puzzle_id: str, difficulty: str = "medium", theme: Optional[str] = None):
+        plugin = DEFAULT_REGISTRY.get(puzzle_id)
+        if not plugin:
+            return JSONResponse(content={"error": f"Puzzle '{puzzle_id}' not found"}, status_code=404)
+        kwargs = {}
+        if theme:
+            kwargs["theme"] = theme
+        return plugin.generate(difficulty=difficulty, **kwargs).to_dict()
+
+    # Explicit endpoints preserved for schema documentation
     @app.get("/api/v1/puzzles/sudoku")
     def get_sudoku(difficulty: str = "medium"):
-        return sudoku_gen.generate(difficulty=difficulty)
+        return DEFAULT_REGISTRY.get("sudoku").generate(difficulty=difficulty).to_dict()
 
     @app.get("/api/v1/puzzles/wordsearch")
     def get_wordsearch(difficulty: str = "medium", theme: Optional[str] = None):
-        return wordsearch_gen.generate(difficulty=difficulty, theme=theme)
+        return DEFAULT_REGISTRY.get("wordsearch").generate(difficulty=difficulty, theme=theme).to_dict()
 
     @app.get("/api/v1/puzzles/nonogram")
     def get_nonogram(difficulty: str = "medium"):
-        return nonogram_gen.generate(difficulty=difficulty)
+        return DEFAULT_REGISTRY.get("nonogram").generate(difficulty=difficulty).to_dict()
 
     @app.get("/api/v1/puzzles/queens")
     def get_queens(difficulty: str = "medium"):
-        return queens_gen.generate(difficulty=difficulty)
+        return DEFAULT_REGISTRY.get("queens").generate(difficulty=difficulty).to_dict()
 
     @app.get("/api/v1/puzzles/jumble")
     def get_jumble(difficulty: str = "medium"):
-        return jumble_gen.generate(difficulty=difficulty)
+        return DEFAULT_REGISTRY.get("jumble").generate(difficulty=difficulty).to_dict()
 
     @app.get("/api/v1/puzzles/binary")
     def get_binary(difficulty: str = "medium"):
-        return binary_gen.generate(difficulty=difficulty)
+        return DEFAULT_REGISTRY.get("binary").generate(difficulty=difficulty).to_dict()
 
     @app.get("/api/v1/puzzles/mines")
     def get_mines(difficulty: str = "medium"):
-        return mines_gen.generate(difficulty=difficulty)
+        return DEFAULT_REGISTRY.get("mines").generate(difficulty=difficulty).to_dict()
 
     @app.get("/api/v1/puzzles/tents")
     def get_tents(difficulty: str = "medium"):
-        return tents_gen.generate(difficulty=difficulty)
+        return DEFAULT_REGISTRY.get("tents").generate(difficulty=difficulty).to_dict()
 
     @app.get("/api/v1/puzzles/bridges")
     def get_bridges(difficulty: str = "medium"):
-        return bridges_gen.generate(difficulty=difficulty)
+        return DEFAULT_REGISTRY.get("bridges").generate(difficulty=difficulty).to_dict()
 
     @app.get("/api/v1/puzzles/killer")
     def get_killer(difficulty: str = "medium"):
-        return killer_gen.generate(difficulty=difficulty)
+        return DEFAULT_REGISTRY.get("killer").generate(difficulty=difficulty).to_dict()
 
     @app.get("/api/v1/puzzles/cryptogram")
     def get_cryptogram(difficulty: str = "medium"):
-        return cryptogram_gen.generate(difficulty=difficulty)
+        return DEFAULT_REGISTRY.get("cryptogram").generate(difficulty=difficulty).to_dict()
 
     @app.get("/api/v1/puzzles/tango")
     def get_tango(difficulty: str = "medium"):
-        return tango_gen.generate(difficulty=difficulty)
+        return DEFAULT_REGISTRY.get("tango").generate(difficulty=difficulty).to_dict()
 
 except ImportError:
     app = None
@@ -251,43 +221,20 @@ def run_standalone_server(port: int = 8000, host: str = "0.0.0.0"):
                 self.send_header("Content-Length", str(len(data)))
                 self.end_headers()
                 self.wfile.write(data)
-            elif path == "/api/v1/puzzles/sudoku":
-                diff = query_params.get("difficulty", ["medium"])[0]
-                self._send_json(200, sudoku_gen.generate(difficulty=diff))
-            elif path == "/api/v1/puzzles/wordsearch":
-                diff = query_params.get("difficulty", ["medium"])[0]
-                th = query_params.get("theme", [None])[0]
-                self._send_json(200, wordsearch_gen.generate(difficulty=diff, theme=th))
-            elif path == "/api/v1/puzzles/nonogram":
-                diff = query_params.get("difficulty", ["medium"])[0]
-                self._send_json(200, nonogram_gen.generate(difficulty=diff))
-            elif path == "/api/v1/puzzles/queens":
-                diff = query_params.get("difficulty", ["medium"])[0]
-                self._send_json(200, queens_gen.generate(difficulty=diff))
-            elif path == "/api/v1/puzzles/jumble":
-                diff = query_params.get("difficulty", ["medium"])[0]
-                self._send_json(200, jumble_gen.generate(difficulty=diff))
-            elif path == "/api/v1/puzzles/binary":
-                diff = query_params.get("difficulty", ["medium"])[0]
-                self._send_json(200, binary_gen.generate(difficulty=diff))
-            elif path == "/api/v1/puzzles/mines":
-                diff = query_params.get("difficulty", ["medium"])[0]
-                self._send_json(200, mines_gen.generate(difficulty=diff))
-            elif path == "/api/v1/puzzles/tents":
-                diff = query_params.get("difficulty", ["medium"])[0]
-                self._send_json(200, tents_gen.generate(difficulty=diff))
-            elif path == "/api/v1/puzzles/bridges":
-                diff = query_params.get("difficulty", ["medium"])[0]
-                self._send_json(200, bridges_gen.generate(difficulty=diff))
-            elif path == "/api/v1/puzzles/killer":
-                diff = query_params.get("difficulty", ["medium"])[0]
-                self._send_json(200, killer_gen.generate(difficulty=diff))
-            elif path == "/api/v1/puzzles/cryptogram":
-                diff = query_params.get("difficulty", ["medium"])[0]
-                self._send_json(200, cryptogram_gen.generate(difficulty=diff))
-            elif path == "/api/v1/puzzles/tango":
-                diff = query_params.get("difficulty", ["medium"])[0]
-                self._send_json(200, tango_gen.generate(difficulty=diff))
+            elif path.startswith("/api/v1/puzzles/"):
+                puzzle_id = path[len("/api/v1/puzzles/"):].strip("/")
+                plugin = DEFAULT_REGISTRY.get(puzzle_id)
+                if plugin:
+                    diff = query_params.get("difficulty", [plugin.default_difficulty])[0]
+                    kwargs = {}
+                    if "theme" in query_params:
+                        kwargs["theme"] = query_params["theme"][0]
+                    res = plugin.generate(difficulty=diff, **kwargs)
+                    self._send_json(200, res.to_dict())
+                else:
+                    self.send_response(404)
+                    self.end_headers()
+                    self.wfile.write(b"404 Not Found")
             else:
                 self.send_response(404)
                 self.end_headers()

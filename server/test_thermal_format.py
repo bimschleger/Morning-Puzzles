@@ -15,6 +15,7 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from app.main import generate_daily_bundle
+from app.puzzles.registry import DEFAULT_REGISTRY
 from app.renderer.receipt_rasterizer import (
     calculate_duty_cycle,
     image_to_escpos_raster,
@@ -72,6 +73,10 @@ def test_raster_specifications(bundle):
     for name, fn, key in rasterizers:
         puzzle_data = bundle[key]
         raster = fn(puzzle_data)
+        plugin = DEFAULT_REGISTRY.get(key)
+        assert plugin is not None, f"Missing plugin for '{key}'"
+        plugin_raster = plugin.render_raster(puzzle_data)
+        assert len(plugin_raster) == len(raster), f"{name}: Plugin raster length mismatch"
 
         # 1. Verify minimum length
         assert len(raster) >= 8, f"{name}: Raster data too short ({len(raster)} bytes)"
@@ -166,7 +171,7 @@ def test_solution_key_spec(bundle):
     assert "[ SOLUTION KEY ]" in receipt_text, "Missing [ SOLUTION KEY ] header"
 
     # Check that each game is represented in the solution key
-    expected_subtitles = ["SUDOKU", "SEARCH", "NONOGRAM", "STARS", "JUMBLE", "BINARY", "MINES", "TENTS", "BRIDGES", "KILLER", "CRYPTOGRAM"]
+    expected_subtitles = ["SUDOKU", "SEARCH", "NONOGRAM", "STARS", "JUMBLE", "BINARY", "MINES", "TENTS", "BRIDGES", "KILLER", "CRYPTOGRAM", "TANGO"]
     for sub in expected_subtitles:
         assert sub in receipt_text, f"Missing '{sub}' in Solution Key"
 
