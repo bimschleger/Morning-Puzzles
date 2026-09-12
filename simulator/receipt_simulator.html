@@ -5169,6 +5169,37 @@
         return cages;
       }
 
+      _getConnectedComponents(cells) {
+        if (!cells || cells.length === 0) return [];
+        const cellSet = new Set(cells.map(([r, c]) => `${r},${c}`));
+        const visited = new Set();
+        const components = [];
+        for (const [r, c] of cells) {
+          const key = `${r},${c}`;
+          if (!visited.has(key)) {
+            const comp = [];
+            const queue = [[r, c]];
+            visited.add(key);
+            while (queue.length > 0) {
+              const [cr, cc] = queue.shift();
+              comp.push([cr, cc]);
+              const dirs = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+              for (const [dr, dc] of dirs) {
+                const nr = cr + dr, nc = cc + dc;
+                const nKey = `${nr},${nc}`;
+                if (cellSet.has(nKey) && !visited.has(nKey)) {
+                  visited.add(nKey);
+                  queue.push([nr, nc]);
+                }
+              }
+            }
+            comp.sort((a, b) => (a[0] === b[0] ? a[1] - b[1] : a[0] - b[0]));
+            components.push(comp);
+          }
+        }
+        return components;
+      }
+
       _findMultipleSolutions(size, boxR, boxC, cages, maxCount = 2) {
         const board = Array.from({ length: size }, () => Array(size).fill(0));
         const cellCage = new Map();
@@ -5271,26 +5302,46 @@
                   }
                 }
               }
-              let splitDone = false;
+
+              let bestCandidate = null;
               for (const [dr, dc] of diffCells) {
                 for (const cg of cages) {
                   const cellIdx = cg.cells.findIndex(([r, c]) => r === dr && c === dc);
                   if (cellIdx !== -1 && cg.cells.length > 1) {
-                    cg.cells.splice(cellIdx, 1);
-                    cg.sum -= solution[dr][dc];
-                    cages.push({
-                      id: cages.length,
-                      label: '',
-                      cells: [[dr, dc]],
-                      sum: solution[dr][dc]
-                    });
-                    splitDone = true;
-                    break;
+                    const remaining = cg.cells.filter(([r, c]) => !(r === dr && c === dc));
+                    const comps = this._getConnectedComponents(remaining);
+                    if (comps.length === 1) {
+                      bestCandidate = { dr, dc, cg, comps };
+                      break;
+                    } else if (!bestCandidate) {
+                      bestCandidate = { dr, dc, cg, comps };
+                    }
                   }
                 }
-                if (splitDone) break;
+                if (bestCandidate && bestCandidate.comps.length === 1) break;
               }
-              if (!splitDone) break;
+
+              if (bestCandidate) {
+                const { dr, dc, cg, comps } = bestCandidate;
+                cg.cells = comps[0];
+                cg.sum = comps[0].reduce((acc, [r, c]) => acc + solution[r][c], 0);
+                for (let i = 1; i < comps.length; i++) {
+                  cages.push({
+                    id: cages.length,
+                    label: '',
+                    cells: comps[i],
+                    sum: comps[i].reduce((acc, [r, c]) => acc + solution[r][c], 0)
+                  });
+                }
+                cages.push({
+                  id: cages.length,
+                  label: '',
+                  cells: [[dr, dc]],
+                  sum: solution[dr][dc]
+                });
+              } else {
+                break;
+              }
             } else {
               break;
             }
@@ -5511,7 +5562,8 @@
 
       for (const cg of cages) {
         if (!cg.cells || cg.cells.length === 0) continue;
-        const [r0, c0] = cg.cells[0];
+        const sortedCells = [...cg.cells].sort((a, b) => (a[0] === b[0] ? a[1] - b[1] : a[0] - b[0]));
+        const [r0, c0] = sortedCells[0];
         const tx = padding + c0 * cellSize + inset + 3;
         const ty = padding + r0 * cellSize + inset + 2;
         ctx.fillText(cg.sum.toString(), tx, ty);

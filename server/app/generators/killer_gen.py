@@ -158,6 +158,31 @@ class KillerSudokuGenerator:
 
         return cages
 
+    @staticmethod
+    def _get_connected_components(cells: List[Tuple[int, int]]) -> List[List[Tuple[int, int]]]:
+        """Decomposes a list of cell coordinates into orthogonally connected components."""
+        if not cells:
+            return []
+        cell_set = set(cells)
+        visited: Set[Tuple[int, int]] = set()
+        components = []
+        for c in cells:
+            if c not in visited:
+                comp = []
+                queue = [c]
+                visited.add(c)
+                while queue:
+                    curr = queue.pop(0)
+                    comp.append(curr)
+                    cr, cc = curr
+                    for dr, dc in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+                        nr, nc = cr + dr, cc + dc
+                        if (nr, nc) in cell_set and (nr, nc) not in visited:
+                            visited.add((nr, nc))
+                            queue.append((nr, nc))
+                components.append(sorted(comp))
+        return components
+
     def _find_multiple_solutions(
         self, size: int, box_r: int, box_c: int, cages: List[Dict[str, Any]], max_count: int = 2
     ) -> List[List[List[int]]]:
@@ -262,24 +287,40 @@ class KillerSudokuGenerator:
                         for c in range(size)
                         if sols[0][r][c] != sols[1][r][c]
                     ]
-                    split_done = False
+                    
+                    # Search for candidate cell to split, preferring non-articulation points
+                    best_candidate = None
                     for dr, dc in diff_cells:
                         for cg in cages:
                             if (dr, dc) in cg["cells"] and len(cg["cells"]) > 1:
-                                cg["cells"].remove((dr, dc))
-                                cg["sum"] -= solution[dr][dc]
-                                new_cg = {
-                                    "id": len(cages),
-                                    "label": "",
-                                    "cells": [(dr, dc)],
-                                    "sum": solution[dr][dc],
-                                }
-                                cages.append(new_cg)
-                                split_done = True
-                                break
-                        if split_done:
+                                remaining = [cell for cell in cg["cells"] if cell != (dr, dc)]
+                                comps = self._get_connected_components(remaining)
+                                if len(comps) == 1:
+                                    best_candidate = (dr, dc, cg, comps)
+                                    break
+                                elif best_candidate is None:
+                                    best_candidate = (dr, dc, cg, comps)
+                        if best_candidate and len(best_candidate[3]) == 1:
                             break
-                    if not split_done:
+
+                    if best_candidate:
+                        dr, dc, cg, comps = best_candidate
+                        cg["cells"] = comps[0]
+                        cg["sum"] = sum(solution[r][c] for r, c in comps[0])
+                        for comp in comps[1:]:
+                            cages.append({
+                                "id": len(cages),
+                                "label": "",
+                                "cells": comp,
+                                "sum": sum(solution[r][c] for r, c in comp),
+                            })
+                        cages.append({
+                            "id": len(cages),
+                            "label": "",
+                            "cells": [(dr, dc)],
+                            "sum": solution[dr][dc],
+                        })
+                    else:
                         break
                 else:
                     break
