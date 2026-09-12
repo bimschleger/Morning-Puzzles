@@ -1318,3 +1318,86 @@ def render_cryptogram_raster(cryptogram_data: Dict[str, Any], target_width: int 
 
     return tb.to_escpos()
 
+
+# ==============================================================================
+# 12. TANGO RASTERIZER (576 Dots Width)
+# ==============================================================================
+def render_tango_raster(tango_data: Dict[str, Any], target_width: int = THERMAL_WIDTH_DOTS) -> bytes:
+    """
+    Renders a crisp 576-dot wide Tango (Binairo+) grid.
+    Features Tier 1 outer border (4px), Tier 4 grid dividers (2px), Space Mono 0/1 digits,
+    and elegant '=' and 'x' edge relation signs centered on cell dividers.
+    """
+    size = tango_data.get("size", 6)
+    puzzle = tango_data.get("puzzle", [])
+    edges_h = tango_data.get("edges_h", [])
+    edges_v = tango_data.get("edges_v", [])
+
+    padding = 24
+    board_size = target_width - padding * 2
+    cell_size = board_size // size
+    total_h = padding + cell_size * size + padding
+
+    tb = ThermalBitmap(target_width, total_h)
+    # Tier 1 Outer Border (4px)
+    tb.draw_rect(padding, padding, cell_size * size, cell_size * size, thickness=4)
+
+    # Tier 4 Grid Lines (2px)
+    for i in range(1, size):
+        pos = padding + i * cell_size
+        tb.draw_hline(padding, pos, cell_size * size, thickness=2)
+        tb.draw_vline(pos, padding, cell_size * size, thickness=2)
+
+    # Render Horizontal Edge Clues (between (r, c) and (r, c+1) on vertical dividers)
+    for r in range(size):
+        for c in range(size - 1):
+            e = edges_h[r][c] if r < len(edges_h) and c < len(edges_h[r]) else 0
+            if e in (1, 2):
+                cx = padding + (c + 1) * cell_size
+                cy = padding + r * cell_size + cell_size // 2
+                # Clear a small 16x16 window on the grid divider
+                tb.fill_rect(cx - 8, cy - 8, 17, 17, color=0)
+                if e == 1:
+                    # '=': 2 crisp horizontal parallel bars
+                    tb.draw_hline(cx - 5, cy - 3, 11, thickness=2, color=1)
+                    tb.draw_hline(cx - 5, cy + 2, 11, thickness=2, color=1)
+                elif e == 2:
+                    # 'x': crisp diagonal cross
+                    for d in range(-4, 5):
+                        tb.set_pixel(cx + d, cy + d, 1)
+                        tb.set_pixel(cx + d, cy + d + 1, 1)
+                        tb.set_pixel(cx + d, cy - d, 1)
+                        tb.set_pixel(cx + d, cy - d + 1, 1)
+
+    # Render Vertical Edge Clues (between (r, c) and (r+1, c) on horizontal dividers)
+    for r in range(size - 1):
+        for c in range(size):
+            e = edges_v[r][c] if r < len(edges_v) and c < len(edges_v[r]) else 0
+            if e in (1, 2):
+                cx = padding + c * cell_size + cell_size // 2
+                cy = padding + (r + 1) * cell_size
+                # Clear a small 16x16 window on the grid divider
+                tb.fill_rect(cx - 8, cy - 8, 17, 17, color=0)
+                if e == 1:
+                    # '=': 2 crisp horizontal parallel bars
+                    tb.draw_hline(cx - 5, cy - 3, 11, thickness=2, color=1)
+                    tb.draw_hline(cx - 5, cy + 2, 11, thickness=2, color=1)
+                elif e == 2:
+                    # 'x': crisp diagonal cross
+                    for d in range(-4, 5):
+                        tb.set_pixel(cx + d, cy + d, 1)
+                        tb.set_pixel(cx + d, cy + d + 1, 1)
+                        tb.set_pixel(cx + d, cy - d, 1)
+                        tb.set_pixel(cx + d, cy - d + 1, 1)
+
+    # Render cell numbers (0 / 1)
+    for r in range(size):
+        for c in range(size):
+            val = puzzle[r][c] if r < len(puzzle) and c < len(puzzle[r]) else -1
+            if val in (0, 1):
+                cx = padding + c * cell_size + (cell_size - 18) // 2
+                cy = padding + r * cell_size + (cell_size - 21) // 2
+                tb.draw_char(cx, cy, str(val), scale=3)
+
+    return tb.to_escpos()
+

@@ -223,9 +223,23 @@ When the solution key is enabled, it is appended to the bottom of the receipt di
   Answer: THE FUTURE BELONGS TO THOSE WHO BELIEVE
   IN THE BEAUTY OF THEIR DREAMS.
 
+### L. TANGO (`TANGO`)
+* **Format**: $N \times N$ ($6\times 6$ or $8\times 8$) grid of `0` and `1` digits separated by a space (edge clues are omitted from the solution key).
+* **Indentation**: 6 spaces left padding.
+* **Example** (6x6):
+  ```text
+  TANGO
+        0 1 0 1 1 0
+        1 0 1 0 0 1
+        0 1 0 1 0 1
+        1 0 1 0 1 0
+        0 0 1 1 0 1
+        1 1 0 0 1 0
+
   ```
 
 ---
+
 
 ## 4. Prohibited Elements Checklist in Solution Keys
 

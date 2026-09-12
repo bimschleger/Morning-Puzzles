@@ -283,6 +283,25 @@ def build_daily_receipt_bytes(daily_data: Dict[str, Any]) -> bytes:
             r.println(line)
         r.println()
 
+    # 13. Tango
+    if "tango" in daily_data:
+        r.horizontal_rule("-")
+        t = daily_data["tango"]
+        t_diff = str(t.get("difficulty", "Medium"))
+        t_size = t.get("size", 6)
+        if t_size == 6 or t_diff.lower() in ("easy", "medium"):
+            tango_desc = "Fill each line with three 0s and three 1s without trios; = means same, x means opposite."
+        else:
+            tango_desc = "Fill each line with four 0s and four 1s without trios; = means same, x means opposite."
+        r.puzzle_header(
+            "TANGO",
+            t_diff,
+            tango_desc
+        )
+        for line in t.get("text", "").split("\n"):
+            r.println("   " + line)
+        r.println()
+
     # Optional Solution Key
     if daily_data.get("show_solutions"):
         _append_solution_key(r, daily_data)
@@ -324,6 +343,7 @@ def build_hybrid_daily_receipt_bytes(daily_data: Dict[str, Any]) -> bytes:
             render_bridges_raster,
             render_killer_raster,
             render_cryptogram_raster,
+            render_tango_raster,
         )
         has_pillow = True
     except (ImportError, RuntimeError):
@@ -551,6 +571,29 @@ def build_hybrid_daily_receipt_bytes(daily_data: Dict[str, Any]) -> bytes:
                 r.println(line)
         r.println()
 
+    # 13. Tango
+    if "tango" in daily_data:
+        r.horizontal_rule("-")
+        t = daily_data["tango"]
+        t_diff = str(t.get("difficulty", "Medium"))
+        t_size = t.get("size", 6)
+        if t_size == 6 or t_diff.lower() in ("easy", "medium"):
+            tango_desc = "Fill each line with three 0s and three 1s without trios; = means same, x means opposite."
+        else:
+            tango_desc = "Fill each line with four 0s and four 1s without trios; = means same, x means opposite."
+        r.puzzle_header(
+            "TANGO",
+            t_diff,
+            tango_desc
+        )
+        try:
+            raster = render_tango_raster(t)
+            r.write_raw(raster)
+        except Exception:
+            for line in t.get("text", "").split("\n"):
+                r.println("   " + line)
+        r.println()
+
     # Optional Solution Key
     if daily_data.get("show_solutions"):
         _append_solution_key(r, daily_data)
@@ -755,5 +798,18 @@ def _append_solution_key(r: EscPosTextReceipt, daily_data: Dict[str, Any]):
             for line in textwrap.wrap(f"Answer: {phrase}", 46):
                 r.println(line)
             r.println()
+
+    # 12. Tango
+    if "tango" in daily_data:
+        t = daily_data["tango"]
+        sol = t.get("solution", [])
+        if sol:
+            r.bold(True)
+            r.println("TANGO")
+            r.bold(False)
+            for row in sol:
+                r.println("      " + " ".join(str(c) for c in row))
+            r.println()
+
 
 

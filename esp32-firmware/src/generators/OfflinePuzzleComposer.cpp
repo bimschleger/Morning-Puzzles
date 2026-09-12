@@ -67,6 +67,7 @@ bool OfflinePuzzleComposer::generateAndPrintReceipt(EscPosPrinter& printer, cons
     MinesDifficulty      mDiff = (effectiveGrade == GRADE_EASY) ? MINES_EASY : ((effectiveGrade == GRADE_HARD) ? MINES_HARD : MINES_MEDIUM);
     TentsDifficulty      tDiff = (effectiveGrade == GRADE_EASY) ? TENTS_EASY : ((effectiveGrade == GRADE_HARD) ? TENTS_HARD : TENTS_MEDIUM);
     BridgesDifficulty    brDiff = (effectiveGrade == GRADE_EASY) ? BRIDGES_EASY : ((effectiveGrade == GRADE_HARD) ? BRIDGES_HARD : BRIDGES_MEDIUM);
+    TangoDifficulty      tgDiff = (effectiveGrade == GRADE_EASY) ? TANGO_EASY : ((effectiveGrade == GRADE_HARD) ? TANGO_HARD : TANGO_MEDIUM);
 
     // 2. Generate and print Sudoku
     Serial.println("[COMPOSER] Generating Sudoku...");
@@ -120,8 +121,14 @@ bool OfflinePuzzleComposer::generateAndPrintReceipt(EscPosPrinter& printer, cons
     Serial.println("[COMPOSER] Generating Bridges...");
     _bridges.generate(brDiff);
     _bridges.printToReceipt(printer, brDiff);
+    printer.printHorizontalLine('-');
 
-    // 9. Footer
+    // 11. Generate and print Tango
+    Serial.println("[COMPOSER] Generating Tango...");
+    _tango.generate(tgDiff);
+    _tango.printToReceipt(printer, tgDiff);
+
+    // Footer
     printer.printDoubleLine();
     printer.setAlign(ALIGN_CENTER);
     printer.println("Printed on ESP32 80mm Thermal Receipt");

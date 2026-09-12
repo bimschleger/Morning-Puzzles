@@ -25,6 +25,7 @@ from app.generators.tents_gen import TentsGenerator
 from app.generators.bridges_gen import BridgesGenerator
 from app.generators.killer_gen import KillerSudokuGenerator
 from app.generators.cryptogram_gen import CryptogramGenerator
+from app.generators.tango_gen import TangoGenerator
 from app.renderer.text_formatter import (
     build_daily_receipt_bytes,
     build_hybrid_daily_receipt_bytes,
@@ -43,6 +44,7 @@ tents_gen = TentsGenerator()
 bridges_gen = BridgesGenerator()
 killer_gen = KillerSudokuGenerator()
 cryptogram_gen = CryptogramGenerator()
+tango_gen = TangoGenerator()
 
 
 def generate_daily_bundle(difficulty: str = "medium") -> dict:
@@ -63,6 +65,7 @@ def generate_daily_bundle(difficulty: str = "medium") -> dict:
         "bridges": bridges_gen.generate(difficulty=difficulty),
         "killer": killer_gen.generate(difficulty=killer_diff),
         "cryptogram": cryptogram_gen.generate(difficulty=difficulty),
+        "tango": tango_gen.generate(difficulty=difficulty),
     }
 
 
@@ -177,6 +180,10 @@ try:
     def get_cryptogram(difficulty: str = "medium"):
         return cryptogram_gen.generate(difficulty=difficulty)
 
+    @app.get("/api/v1/puzzles/tango")
+    def get_tango(difficulty: str = "medium"):
+        return tango_gen.generate(difficulty=difficulty)
+
 except ImportError:
     app = None
 
@@ -278,6 +285,9 @@ def run_standalone_server(port: int = 8000, host: str = "0.0.0.0"):
             elif path == "/api/v1/puzzles/cryptogram":
                 diff = query_params.get("difficulty", ["medium"])[0]
                 self._send_json(200, cryptogram_gen.generate(difficulty=diff))
+            elif path == "/api/v1/puzzles/tango":
+                diff = query_params.get("difficulty", ["medium"])[0]
+                self._send_json(200, tango_gen.generate(difficulty=diff))
             else:
                 self.send_response(404)
                 self.end_headers()

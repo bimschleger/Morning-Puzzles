@@ -30,6 +30,7 @@ APPROVED_TITLES = [
     "BRIDGES",
     "KILLER",
     "CRYPTOGRAM",
+    "TANGO",
 ]
 
 FORBIDDEN_TITLE_PATTERNS = [
@@ -105,7 +106,7 @@ def test_difficulty_presentation_and_theme_rules():
             )
 
     # 2. Puzzles with difficulty must have DIFFICULTY: [LEVEL] directly below title
-    difficulty_puzzles = ["SUDOKU", "NONOGRAM", "STARS", "JUMBLE", "BINARY", "MINES", "TENTS", "BRIDGES", "KILLER", "CRYPTOGRAM"]
+    difficulty_puzzles = ["SUDOKU", "NONOGRAM", "STARS", "JUMBLE", "BINARY", "MINES", "TENTS", "BRIDGES", "KILLER", "CRYPTOGRAM", "TANGO"]
     for title in difficulty_puzzles:
         header_str = f"--- {title} ---"
         assert header_str in receipt_text, f"Missing header {header_str}"
@@ -187,6 +188,16 @@ def test_description_length_and_canonical_formula():
         c_clue_word = "1 letter clue" if c_cnt == 1 else f"{c_cnt} letter clues"
         descriptions.append(("Cryptogram", f"Deduce the hidden phrase using the {c_clue_word} and substitution logic."))
 
+        # 12. Tango
+        tg = bundle.get("tango", {})
+        tg_diff = str(tg.get("difficulty", diff))
+        tg_size = tg.get("size", 6)
+        if tg_size == 6 or tg_diff.lower() in ("easy", "medium"):
+            tg_desc = "Fill each line with three 0s and three 1s without trios; = means same, x means opposite."
+        else:
+            tg_desc = "Fill each line with four 0s and four 1s without trios; = means same, x means opposite."
+        descriptions.append(("Tango", tg_desc))
+
         # Validate each description
         for name, desc in descriptions:
             # Rule 1: <= 100 characters
@@ -247,7 +258,7 @@ def test_solution_key_spec():
         )
 
     # 4. Check 2D ASCII grid safe indent (6 spaces) for grid-based solutions
-    for grid_title in ["SUDOKU", "NONOGRAM", "BINARY", "MINES", "KILLER"]:
+    for grid_title in ["SUDOKU", "NONOGRAM", "BINARY", "MINES", "KILLER", "TANGO"]:
         idx = clean_key_text.find(f"\n{grid_title}\n")
         assert idx != -1
         grid_section = clean_key_text[idx + len(grid_title) + 2 : idx + len(grid_title) + 200]

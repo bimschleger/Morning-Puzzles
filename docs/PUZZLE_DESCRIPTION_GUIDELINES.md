@@ -44,6 +44,7 @@ If difficulty alters any quantitative property of the puzzle, the description **
   - Word Search: `Find all [N] hidden words listed below.`
 * **Dimension / Group Quotas**:
   - Binary: `Fill each row and column with three 0s and three 1s...` (6x6) vs. `four 0s and four 1s...` (8x8)
+  - Tango: `Fill each line with three 0s and three 1s...` (6x6) vs. `four 0s and four 1s...` (8x8)
 
 *Never leave the player guessing about how many targets exist in the grid.*
 

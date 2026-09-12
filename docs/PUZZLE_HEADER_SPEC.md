@@ -71,6 +71,7 @@ All existing games—and any future games added to Morning Puzzles—must strict
 | **Bridges** | `--- BRIDGES ---` | **Yes** | `EASY` (6x6), `MEDIUM` (8x8), `HARD` (8x8) | *Connect all islands into one network using 1 or 2 lines matching each island's number.* | 45% reduction. Explains single network, 1 or 2 lines, and island matching numbers. |
 | **Killer** | `--- KILLER ---` | **Yes** | `EASY` (4x4), `MEDIUM` (4x4), `EXTREME` (6x6) | *Fill every row, column, and box with digits [1-4 / 1-6], matching cage sums without repeats.* | 4x4 (2x2 boxes) on Easy/Medium, 6x6 (2x3 boxes) on Extreme. Cages have dashed borders and top-left sum clues. |
 | **Cryptogram** | `--- CRYPTOGRAM ---` | **Yes** | `EASY` (3 Clues), `MEDIUM` (2 Clues), `HARD` (1 Clue) | *Deduce the hidden phrase using the [3 letter clues / 2 letter clues / 1 letter clue] and substitution logic.* | Dynamic clue count parameterization. `CLUES: [CIPHER] = [PLAIN]` context line placed directly below instruction. |
+| **Tango** | `--- TANGO ---` | **Yes** | `EASY` (6x6), `MEDIUM` (6x6), `HARD` (8x8) | *Fill each line with [three 0s and three 1s / four 0s and four 1s] without trios; = means same, x means opposite.* | Dynamic 0/1 counts: three 0s/1s for 6x6 (Easy/Medium), four 0s/1s for 8x8 (Hard). Edge signs `=` and `x` constrain adjacent cells. |
 
 ---
 

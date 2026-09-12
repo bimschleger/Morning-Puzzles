@@ -356,6 +356,24 @@
             </select>
           </div>
         </div>
+
+        <!-- 12. Tango Toggle -->
+        <div class="bg-slate-900 border border-slate-800/80 rounded-xl p-3.5 flex flex-col gap-2.5 transition hover:border-slate-700">
+          <div class="flex items-center justify-between">
+            <label class="flex items-center gap-2.5 cursor-pointer select-none">
+              <input type="checkbox" id="toggle-tango" checked class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
+              <span class="font-semibold text-sm text-slate-200">Tango</span>
+            </label>
+          </div>
+          <div class="flex items-center justify-between pl-6 text-xs text-slate-400">
+            <span>Difficulty:</span>
+            <select id="diff-tango" class="bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2 py-1 text-xs outline-none focus:border-amber-500">
+              <option value="easy">Easy: 6x6</option>
+              <option value="medium" selected>Medium: 6x6</option>
+              <option value="hard">Hard: 8x8</option>
+            </select>
+          </div>
+        </div>
       </div>
 
       <!-- Receipt Visual Customizations -->
@@ -5706,6 +5724,485 @@
       ctx.setLineDash([]);
     }
 
+    class TangoSimulator {
+      getValidLines(n) {
+        const half = n / 2;
+        const valid = [];
+        const max = 1 << n;
+        for (let i = 0; i < max; i++) {
+          const bits = [];
+          let count1 = 0;
+          for (let k = 0; k < n; k++) {
+            const b = (i >> (n - 1 - k)) & 1;
+            bits.push(b);
+            if (b === 1) count1++;
+          }
+          if (count1 !== half) continue;
+          let hasTrio = false;
+          for (let k = 0; k < n - 2; k++) {
+            if (bits[k] === bits[k + 1] && bits[k] === bits[k + 2]) {
+              hasTrio = true;
+              break;
+            }
+          }
+          if (!hasTrio) valid.push(bits);
+        }
+        return valid;
+      }
+
+      generateFull(n) {
+        const half = n / 2;
+        const validLines = this.getValidLines(n);
+        const grid = Array.from({ length: n }, () => Array(n).fill(-1));
+
+        function canPlaceRow(r, cand) {
+          for (let c = 0; c < n; c++) {
+            const val = cand[c];
+            if (r >= 2 && grid[r - 1][c] === val && grid[r - 2][c] === val) return false;
+            let count = 1;
+            for (let pr = 0; pr < r; pr++) {
+              if (grid[pr][c] === val) count++;
+            }
+            if (count > half) return false;
+          }
+          return true;
+        }
+
+        function shuffle(arr) {
+          const a = arr.slice();
+          for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+          }
+          return a;
+        }
+
+        function backtrack(r) {
+          if (r === n) return true;
+          const cands = shuffle(validLines);
+          for (const cand of cands) {
+            if (canPlaceRow(r, cand)) {
+              grid[r] = cand.slice();
+              if (backtrack(r + 1)) return true;
+              grid[r].fill(-1);
+            }
+          }
+          return false;
+        }
+
+        backtrack(0);
+        return grid;
+      }
+
+      isCandidateValid(g, edges_h, edges_v, n, r, c, val) {
+        const half = n / 2;
+        let rCount = 0;
+        for (let j = 0; j < n; j++) if (g[r][j] === val) rCount++;
+        if (rCount + 1 > half) return false;
+
+        let cCount = 0;
+        for (let i = 0; i < n; i++) if (g[i][c] === val) cCount++;
+        if (cCount + 1 > half) return false;
+
+        // Trios row
+        if (c >= 2 && g[r][c - 2] === val && g[r][c - 1] === val) return false;
+        if (c > 0 && c < n - 1 && g[r][c - 1] === val && g[r][c + 1] === val) return false;
+        if (c <= n - 3 && g[r][c + 1] === val && g[r][c + 2] === val) return false;
+
+        // Trios col
+        if (r >= 2 && g[r - 2][c] === val && g[r - 1][c] === val) return false;
+        if (r > 0 && r < n - 1 && g[r - 1][c] === val && g[r + 1][c] === val) return false;
+        if (r <= n - 3 && g[r + 1][c] === val && g[r + 2][c] === val) return false;
+
+        // Edges
+        if (c > 0) {
+          const e = edges_h[r][c - 1];
+          if (e === 1 && g[r][c - 1] !== -1 && g[r][c - 1] !== val) return false;
+          if (e === 2 && g[r][c - 1] !== -1 && g[r][c - 1] === val) return false;
+        }
+        if (c < n - 1) {
+          const e = edges_h[r][c];
+          if (e === 1 && g[r][c + 1] !== -1 && g[r][c + 1] !== val) return false;
+          if (e === 2 && g[r][c + 1] !== -1 && g[r][c + 1] === val) return false;
+        }
+        if (r > 0) {
+          const e = edges_v[r - 1][c];
+          if (e === 1 && g[r - 1][c] !== -1 && g[r - 1][c] !== val) return false;
+          if (e === 2 && g[r - 1][c] !== -1 && g[r - 1][c] === val) return false;
+        }
+        if (r < n - 1) {
+          const e = edges_v[r][c];
+          if (e === 1 && g[r + 1][c] !== -1 && g[r + 1][c] !== val) return false;
+          if (e === 2 && g[r + 1][c] !== -1 && g[r + 1][c] === val) return false;
+        }
+        return true;
+      }
+
+      solveDeductive(grid, edges_h, edges_v, n) {
+        const g = grid.map(row => row.slice());
+        const half = n / 2;
+        let changed = true;
+
+        while (changed) {
+          changed = false;
+
+          // Pass 1: Direct edge clues
+          for (let r = 0; r < n; r++) {
+            for (let c = 0; c < n - 1; c++) {
+              const e = edges_h[r][c];
+              if (e === 1) {
+                if (g[r][c] !== -1 && g[r][c + 1] === -1) { g[r][c + 1] = g[r][c]; changed = true; }
+                else if (g[r][c + 1] !== -1 && g[r][c] === -1) { g[r][c] = g[r][c + 1]; changed = true; }
+              } else if (e === 2) {
+                if (g[r][c] !== -1 && g[r][c + 1] === -1) { g[r][c + 1] = 1 - g[r][c]; changed = true; }
+                else if (g[r][c + 1] !== -1 && g[r][c] === -1) { g[r][c] = 1 - g[r][c + 1]; changed = true; }
+              }
+            }
+          }
+          for (let r = 0; r < n - 1; r++) {
+            for (let c = 0; c < n; c++) {
+              const e = edges_v[r][c];
+              if (e === 1) {
+                if (g[r][c] !== -1 && g[r + 1][c] === -1) { g[r + 1][c] = g[r][c]; changed = true; }
+                else if (g[r + 1][c] !== -1 && g[r][c] === -1) { g[r][c] = g[r + 1][c]; changed = true; }
+              } else if (e === 2) {
+                if (g[r][c] !== -1 && g[r + 1][c] === -1) { g[r + 1][c] = 1 - g[r][c]; changed = true; }
+                else if (g[r + 1][c] !== -1 && g[r][c] === -1) { g[r][c] = 1 - g[r + 1][c]; changed = true; }
+              }
+            }
+          }
+          if (changed) continue;
+
+          // Pass 2: Trio avoidance
+          for (let r = 0; r < n; r++) {
+            for (let c = 0; c < n - 2; c++) {
+              const v0 = g[r][c], v1 = g[r][c + 1], v2 = g[r][c + 2];
+              if (v0 === v1 && v0 !== -1 && v2 === -1) { g[r][c + 2] = 1 - v0; changed = true; }
+              if (v1 === v2 && v1 !== -1 && v0 === -1) { g[r][c] = 1 - v1; changed = true; }
+              if (v0 === v2 && v0 !== -1 && v1 === -1) { g[r][c + 1] = 1 - v0; changed = true; }
+            }
+          }
+          for (let c = 0; c < n; c++) {
+            for (let r = 0; r < n - 2; r++) {
+              const v0 = g[r][c], v1 = g[r + 1][c], v2 = g[r + 2][c];
+              if (v0 === v1 && v0 !== -1 && v2 === -1) { g[r + 2][c] = 1 - v0; changed = true; }
+              if (v1 === v2 && v1 !== -1 && v0 === -1) { g[r][c] = 1 - v1; changed = true; }
+              if (v0 === v2 && v0 !== -1 && v1 === -1) { g[r + 1][c] = 1 - v0; changed = true; }
+            }
+          }
+          if (changed) continue;
+
+          // Pass 3: Edge-trio interaction
+          for (let r = 0; r < n; r++) {
+            for (let c = 0; c < n - 1; c++) {
+              if (edges_h[r][c] === 1) {
+                if (c > 0 && g[r][c - 1] !== -1) {
+                  if (g[r][c] === -1) { g[r][c] = 1 - g[r][c - 1]; changed = true; }
+                  if (g[r][c + 1] === -1) { g[r][c + 1] = 1 - g[r][c - 1]; changed = true; }
+                }
+                if (c > 0 && g[r][c] !== -1 && g[r][c - 1] === -1) {
+                  g[r][c - 1] = 1 - g[r][c]; changed = true;
+                }
+                if (c + 2 < n && g[r][c + 2] !== -1) {
+                  if (g[r][c] === -1) { g[r][c] = 1 - g[r][c + 2]; changed = true; }
+                  if (g[r][c + 1] === -1) { g[r][c + 1] = 1 - g[r][c + 2]; changed = true; }
+                }
+                if (c + 2 < n && g[r][c + 1] !== -1 && g[r][c + 2] === -1) {
+                  g[r][c + 2] = 1 - g[r][c + 1]; changed = true;
+                }
+              }
+            }
+          }
+          for (let c = 0; c < n; c++) {
+            for (let r = 0; r < n - 1; r++) {
+              if (edges_v[r][c] === 1) {
+                if (r > 0 && g[r - 1][c] !== -1) {
+                  if (g[r][c] === -1) { g[r][c] = 1 - g[r - 1][c]; changed = true; }
+                  if (g[r + 1][c] === -1) { g[r + 1][c] = 1 - g[r - 1][c]; changed = true; }
+                }
+                if (r > 0 && g[r][c] !== -1 && g[r - 1][c] === -1) {
+                  g[r - 1][c] = 1 - g[r][c]; changed = true;
+                }
+                if (r + 2 < n && g[r + 2][c] !== -1) {
+                  if (g[r][c] === -1) { g[r][c] = 1 - g[r + 2][c]; changed = true; }
+                  if (g[r + 1][c] === -1) { g[r + 1][c] = 1 - g[r + 2][c]; changed = true; }
+                }
+                if (r + 2 < n && g[r + 1][c] !== -1 && g[r + 2][c] === -1) {
+                  g[r + 2][c] = 1 - g[r + 1][c]; changed = true;
+                }
+              }
+            }
+          }
+          if (changed) continue;
+
+          // Pass 4: Line count balance
+          for (let r = 0; r < n; r++) {
+            let c0 = 0, c1 = 0;
+            for (let c = 0; c < n; c++) {
+              if (g[r][c] === 0) c0++;
+              else if (g[r][c] === 1) c1++;
+            }
+            if (c0 === half && c1 < half) {
+              for (let c = 0; c < n; c++) if (g[r][c] === -1) { g[r][c] = 1; changed = true; }
+            } else if (c1 === half && c0 < half) {
+              for (let c = 0; c < n; c++) if (g[r][c] === -1) { g[r][c] = 0; changed = true; }
+            }
+          }
+          for (let c = 0; c < n; c++) {
+            let c0 = 0, c1 = 0;
+            for (let r = 0; r < n; r++) {
+              if (g[r][c] === 0) c0++;
+              else if (g[r][c] === 1) c1++;
+            }
+            if (c0 === half && c1 < half) {
+              for (let r = 0; r < n; r++) if (g[r][c] === -1) { g[r][c] = 1; changed = true; }
+            } else if (c1 === half && c0 < half) {
+              for (let r = 0; r < n; r++) if (g[r][c] === -1) { g[r][c] = 0; changed = true; }
+            }
+          }
+          if (changed) continue;
+
+          // Pass 5: 1-step lookahead
+          for (let r = 0; r < n; r++) {
+            for (let c = 0; c < n; c++) {
+              if (g[r][c] === -1) {
+                const can0 = this.isCandidateValid(g, edges_h, edges_v, n, r, c, 0);
+                const can1 = this.isCandidateValid(g, edges_h, edges_v, n, r, c, 1);
+                if (!can0 && can1) { g[r][c] = 1; changed = true; }
+                else if (!can1 && can0) { g[r][c] = 0; changed = true; }
+              }
+            }
+          }
+        }
+
+        let isSolved = true;
+        for (let r = 0; r < n; r++) {
+          for (let c = 0; c < n; c++) {
+            if (g[r][c] === -1) { isSolved = false; break; }
+          }
+        }
+        return { isSolved, grid: g };
+      }
+
+      generate(difficulty = 'medium') {
+        const d = difficulty.toLowerCase();
+        const size = d === 'hard' ? 8 : 6;
+        const targetNumbers = d === 'easy' ? 6 : (d === 'medium' ? 4 : 10);
+        const targetEdges = d === 'easy' ? 6 : (d === 'medium' ? 8 : 14);
+
+        for (let attempt = 0; attempt < 60; attempt++) {
+          const solution = this.generateFull(size);
+          if (!solution) continue;
+
+          const allH = [];
+          for (let r = 0; r < size; r++) for (let c = 0; c < size - 1; c++) allH.push(['h', r, c]);
+          const allV = [];
+          for (let r = 0; r < size - 1; r++) for (let c = 0; c < size; c++) allV.push(['v', r, c]);
+          const allEdges = allH.concat(allV);
+          for (let i = allEdges.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [allEdges[i], allEdges[j]] = [allEdges[j], allEdges[i]];
+          }
+
+          const edges_h = Array.from({ length: size }, () => Array(size - 1).fill(0));
+          const edges_v = Array.from({ length: size - 1 }, () => Array(size).fill(0));
+
+          for (let i = 0; i < targetEdges && i < allEdges.length; i++) {
+            const [o, r, c] = allEdges[i];
+            if (o === 'h') {
+              edges_h[r][c] = solution[r][c] === solution[r][c + 1] ? 1 : 2;
+            } else {
+              edges_v[r][c] = solution[r][c] === solution[r + 1][c] ? 1 : 2;
+            }
+          }
+
+          const puzzle = solution.map(row => row.slice());
+          const coords = [];
+          for (let r = 0; r < size; r++) for (let c = 0; c < size; c++) coords.push([r, c]);
+          for (let i = coords.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [coords[i], coords[j]] = [coords[j], coords[i]];
+          }
+
+          let numbersRemaining = size * size;
+          for (const [r, c] of coords) {
+            if (numbersRemaining <= targetNumbers) break;
+            const saved = puzzle[r][c];
+            puzzle[r][c] = -1;
+            const res = this.solveDeductive(puzzle, edges_h, edges_v, size);
+            if (res.isSolved) {
+              numbersRemaining--;
+            } else {
+              puzzle[r][c] = saved;
+            }
+          }
+
+          const finalRes = this.solveDeductive(puzzle, edges_h, edges_v, size);
+          if (finalRes.isSolved && numbersRemaining <= targetNumbers + 2) {
+            return {
+              size,
+              difficulty: d.toUpperCase(),
+              puzzle,
+              edges_h,
+              edges_v,
+              solution,
+              numbersCount: numbersRemaining
+            };
+          }
+        }
+
+        const sol = this.generateFull(size);
+        return {
+          size,
+          difficulty: d.toUpperCase(),
+          puzzle: sol,
+          edges_h: Array.from({ length: size }, () => Array(size - 1).fill(0)),
+          edges_v: Array.from({ length: size - 1 }, () => Array(size).fill(0)),
+          solution: sol,
+          numbersCount: size * size
+        };
+      }
+    }
+
+    /**
+     * Renders a high-contrast 1-bit thermal Tango puzzle grid
+     * with 3.5px perimeter, 1.0px cell dividers, centered Space Mono 0/1 clues,
+     * and crisp '=' and 'x' edge badges centered on cell dividers.
+     */
+    function drawTangoCanvas(canvas, tgData) {
+      const size = tgData.size || 6;
+      const padding = 12;
+      const totalWidth = 345;
+      const innerWidth = totalWidth - padding * 2;
+      const cellSize = Math.floor(innerWidth / size);
+      const actualGridSize = cellSize * size;
+      const offsetX = padding + Math.floor((innerWidth - actualGridSize) / 2);
+      const offsetY = padding;
+
+      canvas.width = totalWidth;
+      canvas.height = actualGridSize + padding * 2;
+      const ctx = canvas.getContext('2d');
+
+      // 1. Paper Background
+      ctx.fillStyle = '#fafaf7';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // 2. Interior Cell Dividers (Tier 4: 1.0px)
+      ctx.lineWidth = 1.0;
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.22)';
+      for (let i = 1; i < size; i++) {
+        // Horizontal
+        ctx.beginPath();
+        ctx.moveTo(offsetX, offsetY + i * cellSize);
+        ctx.lineTo(offsetX + actualGridSize, offsetY + i * cellSize);
+        ctx.stroke();
+
+        // Vertical
+        ctx.beginPath();
+        ctx.moveTo(offsetX + i * cellSize, offsetY);
+        ctx.lineTo(offsetX + i * cellSize, offsetY + actualGridSize);
+        ctx.stroke();
+      }
+
+      // 3. Render Horizontal Edge Badges (on vertical dividers)
+      const edges_h = tgData.edges_h || [];
+      for (let r = 0; r < size; r++) {
+        for (let c = 0; c < size - 1; c++) {
+          const e = (edges_h[r] && edges_h[r][c]) || 0;
+          if (e === 1 || e === 2) {
+            const cx = offsetX + (c + 1) * cellSize;
+            const cy = offsetY + r * cellSize + cellSize / 2;
+
+            // Clear small paper window
+            ctx.fillStyle = '#fafaf7';
+            ctx.fillRect(cx - 7, cy - 7, 14, 14);
+
+            ctx.lineWidth = 1.8;
+            ctx.strokeStyle = '#111111';
+            ctx.lineCap = 'butt';
+            if (e === 1) {
+              // '=': 2 horizontal parallel bars
+              ctx.beginPath();
+              ctx.moveTo(cx - 4.5, cy - 2.5);
+              ctx.lineTo(cx + 4.5, cy - 2.5);
+              ctx.moveTo(cx - 4.5, cy + 2.5);
+              ctx.lineTo(cx + 4.5, cy + 2.5);
+              ctx.stroke();
+            } else if (e === 2) {
+              // 'x': diagonal cross
+              ctx.beginPath();
+              ctx.moveTo(cx - 3.5, cy - 3.5);
+              ctx.lineTo(cx + 3.5, cy + 3.5);
+              ctx.moveTo(cx - 3.5, cy + 3.5);
+              ctx.lineTo(cx + 3.5, cy - 3.5);
+              ctx.stroke();
+            }
+          }
+        }
+      }
+
+      // 4. Render Vertical Edge Badges (on horizontal dividers)
+      const edges_v = tgData.edges_v || [];
+      for (let r = 0; r < size - 1; r++) {
+        for (let c = 0; c < size; c++) {
+          const e = (edges_v[r] && edges_v[r][c]) || 0;
+          if (e === 1 || e === 2) {
+            const cx = offsetX + c * cellSize + cellSize / 2;
+            const cy = offsetY + (r + 1) * cellSize;
+
+            // Clear small paper window
+            ctx.fillStyle = '#fafaf7';
+            ctx.fillRect(cx - 7, cy - 7, 14, 14);
+
+            ctx.lineWidth = 1.8;
+            ctx.strokeStyle = '#111111';
+            ctx.lineCap = 'butt';
+            if (e === 1) {
+              // '=': 2 horizontal parallel bars
+              ctx.beginPath();
+              ctx.moveTo(cx - 4.5, cy - 2.5);
+              ctx.lineTo(cx + 4.5, cy - 2.5);
+              ctx.moveTo(cx - 4.5, cy + 2.5);
+              ctx.lineTo(cx + 4.5, cy + 2.5);
+              ctx.stroke();
+            } else if (e === 2) {
+              // 'x': diagonal cross
+              ctx.beginPath();
+              ctx.moveTo(cx - 3.5, cy - 3.5);
+              ctx.lineTo(cx + 3.5, cy + 3.5);
+              ctx.moveTo(cx - 3.5, cy + 3.5);
+              ctx.lineTo(cx + 3.5, cy - 3.5);
+              ctx.stroke();
+            }
+          }
+        }
+      }
+
+      // 5. Clue Digits (0 and 1)
+      const fontSize = size === 6 ? 28 : 21;
+      ctx.fillStyle = '#111111';
+      ctx.font = `bold ${fontSize}px "Space Mono", monospace`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      for (let r = 0; r < size; r++) {
+        for (let c = 0; c < size; c++) {
+          const val = tgData.puzzle[r][c];
+          if (val === 0 || val === 1) {
+            const cx = offsetX + c * cellSize + cellSize / 2;
+            const cy = offsetY + r * cellSize + cellSize / 2;
+            ctx.fillText(val.toString(), cx, cy);
+          }
+        }
+      }
+
+      // 6. Heavy Outer Perimeter (Tier 1: 3.5px solid #111111)
+      ctx.lineWidth = 3.5;
+      ctx.lineCap = 'square';
+      ctx.strokeStyle = '#111111';
+      ctx.strokeRect(offsetX, offsetY, actualGridSize, actualGridSize);
+    }
+
     // =========================================================================
     // 3. RECEIPT COMPOSER & RENDERER (Mixed Text + Dithered Canvas)
     // =========================================================================
@@ -5721,6 +6218,7 @@
     const bridgesSim = new BridgesSimulator();
     const killerSim = new KillerSudokuSimulator();
     const cryptogramSim = new CryptogramSimulator();
+    const tangoSim = new TangoSimulator();
 
     let rawReceiptLines = [];
 
@@ -5747,7 +6245,8 @@
       'TENTS': 'Pitch 8 tents next to trees without tents touching, matching row and column counts.',
       'BRIDGES': 'Connect all islands into one network using 1 or 2 lines matching each island\'s number.',
       'KILLER': 'Fill every row, column, and box with digits 1-4, matching cage sums without repeats.',
-      'CRYPTOGRAM': 'Deduce the hidden phrase using the 2 letter clues and substitution logic.'
+      'CRYPTOGRAM': 'Deduce the hidden phrase using the 2 letter clues and substitution logic.',
+      'TANGO': 'Fill each line with three 0s and three 1s without trios; = means same, x means opposite.'
     };
 
     function wrapText(str, maxLen = 44) {
@@ -6336,6 +6835,61 @@
         });
       }
 
+      // 12. TANGO
+      if (document.getElementById('toggle-tango') && document.getElementById('toggle-tango').checked) {
+        const diff = document.getElementById('diff-tango').value;
+        const tgData = tangoSim.generate(diff);
+
+        const tgDesc = (tgData.size === 6)
+          ? 'Fill each line with three 0s and three 1s without trios; = means same, x means opposite.'
+          : 'Fill each line with four 0s and four 1s without trios; = means same, x means opposite.';
+        addStandardPuzzleHeader(items, 'TANGO', diff, tgDesc);
+
+        if (isGraphic) {
+          items.push({
+            type: 'canvas',
+            render: (canvas) => drawTangoCanvas(canvas, tgData)
+          });
+        } else {
+          // Monospaced ASCII Grid with = and x dividers
+          const size = tgData.size;
+          items.push({ type: 'text', text: '   +' + '---+'.repeat(size) });
+          for (let r = 0; r < size; r++) {
+            let rowLine = '   |';
+            for (let c = 0; c < size; c++) {
+              const val = tgData.puzzle[r][c];
+              rowLine += (val === 0 || val === 1) ? ` ${val} ` : '   ';
+              if (c < size - 1) {
+                const e = (tgData.edges_h && tgData.edges_h[r] && tgData.edges_h[r][c]) || 0;
+                rowLine += e === 1 ? '=' : (e === 2 ? 'x' : '|');
+              } else {
+                rowLine += '|';
+              }
+            }
+            items.push({ type: 'text', text: rowLine });
+            if (r < size - 1) {
+              let divLine = '   +';
+              for (let c = 0; c < size; c++) {
+                const e = (tgData.edges_v && tgData.edges_v[r] && tgData.edges_v[r][c]) || 0;
+                divLine += e === 1 ? '-=-+' : (e === 2 ? '-x-+' : '---+');
+              }
+              items.push({ type: 'text', text: divLine });
+            } else {
+              items.push({ type: 'text', text: '   +' + '---+'.repeat(size) });
+            }
+          }
+        }
+
+        items.push({ type: 'blank', text: '' });
+        items.push({ type: 'rule', text: '-'.repeat(COLS) });
+
+        solutionsContent.push({
+          name: 'Tango',
+          solution: tgData.solution,
+          size: tgData.size
+        });
+      }
+
       // Optional Solutions Key
       if (document.getElementById('toggle-solutions').checked && solutionsContent.length > 0) {
         items.push({ type: 'rule', text: '-'.repeat(COLS) });
@@ -6437,6 +6991,14 @@
             for (const line of ansLines) {
               items.push({ type: 'text', text: line });
             }
+          } else if (item.name === 'Tango') {
+            for (let r = 0; r < item.size; r++) {
+              let rowStr = '      ';
+              for (let c = 0; c < item.size; c++) {
+                rowStr += item.solution[r][c] + ' ';
+              }
+              items.push({ type: 'text', text: rowStr });
+            }
           } else if (item.name === 'Nonogram' || item.grid) {
             for (let r = 0; r < item.size; r++) {
               let rowStr = '      ';
@@ -6535,7 +7097,8 @@
       'diff-tents': { easy: 'easy', medium: 'medium', hard: 'hard' },
       'diff-bridges': { easy: 'easy', medium: 'medium', hard: 'hard' },
       'diff-killer': { easy: 'easy', medium: 'medium', hard: 'extreme' },
-      'diff-cryptogram': { easy: 'easy', medium: 'medium', hard: 'hard' }
+      'diff-cryptogram': { easy: 'easy', medium: 'medium', hard: 'hard' },
+      'diff-tango': { easy: 'easy', medium: 'medium', hard: 'hard' }
     };
 
     function applyGlobalDifficulty(diff) {
@@ -6645,6 +7208,7 @@
       'toggle-bridges', 'diff-bridges',
       'toggle-killer', 'diff-killer',
       'toggle-cryptogram', 'diff-cryptogram',
+      'toggle-tango', 'diff-tango',
       'toggle-ruler', 'toggle-solutions', 'toggle-burn'
     ];
     inputs.forEach(id => {

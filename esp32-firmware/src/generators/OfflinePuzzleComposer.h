@@ -12,6 +12,7 @@ class EscPosPrinter;
 #include "MinesGen.h"
 #include "TentsGen.h"
 #include "BridgesGen.h"
+#include "TangoGen.h"
 
 enum PuzzleGrade {
     GRADE_EASY = 0,
@@ -24,7 +25,7 @@ class OfflinePuzzleComposer {
 public:
     OfflinePuzzleComposer();
 
-    // Generates a complete random bundle of all 9 puzzles on the ESP32 and prints directly
+    // Generates a complete random bundle of all puzzles on the ESP32 and prints directly
     bool generateAndPrintReceipt(EscPosPrinter& printer, const String& dateStr = "", PuzzleGrade grade = GRADE_ROTATING);
 
     void cycleGrade();
@@ -42,6 +43,7 @@ private:
     MinesGen      _mines;
     TentsGen      _tents;
     BridgesGen    _bridges;
+    TangoGen      _tango;
 
     PuzzleGrade   _currentGrade;
     uint8_t       _rotationIndex;
