@@ -5282,9 +5282,11 @@
     }
 
     /**
-     * Renders a high-contrast 1-bit thermal Killer Sudoku puzzle canvas.
-     * Features bold box borders, dashed cage perimeters, light dotted internal separators,
-     * and top-left cage sum numbers.
+     * Renders an authentic Killer Sudoku puzzle canvas:
+     * - Thick solid lines (3.5px) for outer frame and 2x2 / 2x3 box boundaries.
+     * - Thin solid lines (1px) between all individual cells.
+     * - Inset dashed lines tracing the inner perimeter of each cage (~5-6px inset).
+     * - Top-left cage sum numbers tucked neatly inside the inset dashed border.
      */
     function drawKillerCanvas(canvas, kData) {
       const size = kData.size;
@@ -5296,6 +5298,7 @@
       const totalWidth = 345;
       const boardSize = totalWidth - padding * 2;
       const cellSize = boardSize / size;
+      const inset = size === 4 ? 6 : 5;
 
       canvas.width = totalWidth;
       canvas.height = totalWidth;
@@ -5305,109 +5308,148 @@
       ctx.fillStyle = '#fafaf7';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Map each cell to cage ID
-      const cellCage = new Map();
-      for (const cg of cages) {
-        for (const [r, c] of cg.cells) {
-          cellCage.set(`${r},${c}`, cg.id);
-        }
-      }
-
-      // 2. Outer Frame (Tier 1 solid boundary)
+      // 2. Outer Frame
       ctx.lineWidth = 3.5;
       ctx.strokeStyle = '#111111';
       ctx.strokeRect(padding, padding, boardSize, boardSize);
 
-      // 3. Horizontal Grid & Cage Lines
+      // 3. Grid Lines (Thick for box boundaries, Thin for cell boundaries)
       for (let r = 1; r < size; r++) {
         const y = padding + r * cellSize;
         const isBox = (r % boxR === 0);
-
-        if (isBox) {
-          ctx.lineWidth = 3.5;
-          ctx.strokeStyle = '#111111';
-          ctx.beginPath();
-          ctx.moveTo(padding, y);
-          ctx.lineTo(padding + boardSize, y);
-          ctx.stroke();
-        } else {
-          for (let c = 0; c < size; c++) {
-            const x0 = padding + c * cellSize;
-            const x1 = x0 + cellSize;
-            const idTop = cellCage.get(`${r - 1},${c}`);
-            const idBot = cellCage.get(`${r},${c}`);
-
-            if (idTop !== idBot) {
-              // Dashed cage border
-              ctx.lineWidth = 1.8;
-              ctx.strokeStyle = '#111111';
-              ctx.setLineDash([4, 4]);
-              ctx.beginPath();
-              ctx.moveTo(x0, y);
-              ctx.lineTo(x1, y);
-              ctx.stroke();
-              ctx.setLineDash([]);
-            } else {
-              // Light dotted separator inside cage
-              ctx.lineWidth = 0.8;
-              ctx.strokeStyle = 'rgba(0,0,0,0.18)';
-              ctx.setLineDash([1, 4]);
-              ctx.beginPath();
-              ctx.moveTo(x0, y);
-              ctx.lineTo(x1, y);
-              ctx.stroke();
-              ctx.setLineDash([]);
-            }
-          }
-        }
+        ctx.lineWidth = isBox ? 3.5 : 1.0;
+        ctx.strokeStyle = isBox ? '#111111' : 'rgba(0, 0, 0, 0.4)';
+        ctx.beginPath();
+        ctx.moveTo(padding, y);
+        ctx.lineTo(padding + boardSize, y);
+        ctx.stroke();
       }
 
-      // 4. Vertical Grid & Cage Lines
       for (let c = 1; c < size; c++) {
         const x = padding + c * cellSize;
         const isBox = (c % boxC === 0);
+        ctx.lineWidth = isBox ? 3.5 : 1.0;
+        ctx.strokeStyle = isBox ? '#111111' : 'rgba(0, 0, 0, 0.4)';
+        ctx.beginPath();
+        ctx.moveTo(x, padding);
+        ctx.lineTo(x, padding + boardSize);
+        ctx.stroke();
+      }
 
-        if (isBox) {
-          ctx.lineWidth = 3.5;
-          ctx.strokeStyle = '#111111';
-          ctx.beginPath();
-          ctx.moveTo(x, padding);
-          ctx.lineTo(x, padding + boardSize);
-          ctx.stroke();
-        } else {
-          for (let r = 0; r < size; r++) {
-            const y0 = padding + r * cellSize;
-            const y1 = y0 + cellSize;
-            const idLeft = cellCage.get(`${r},${c - 1}`);
-            const idRight = cellCage.get(`${r},${c}`);
+      // 4. Inset Dashed Cage Outlines
+      const hSegments = [];
+      const vSegments = [];
 
-            if (idLeft !== idRight) {
-              // Dashed cage border
-              ctx.lineWidth = 1.8;
-              ctx.strokeStyle = '#111111';
-              ctx.setLineDash([4, 4]);
-              ctx.beginPath();
-              ctx.moveTo(x, y0);
-              ctx.lineTo(x, y1);
-              ctx.stroke();
-              ctx.setLineDash([]);
-            } else {
-              // Light dotted separator inside cage
-              ctx.lineWidth = 0.8;
-              ctx.strokeStyle = 'rgba(0,0,0,0.18)';
-              ctx.setLineDash([1, 4]);
-              ctx.beginPath();
-              ctx.moveTo(x, y0);
-              ctx.lineTo(x, y1);
-              ctx.stroke();
-              ctx.setLineDash([]);
-            }
+      for (const cg of cages) {
+        const cellSet = new Set(cg.cells.map(([r, c]) => `${r},${c}`));
+        const inCage = (r, c) => cellSet.has(`${r},${c}`);
+
+        for (const [r, c] of cg.cells) {
+          const x0 = padding + c * cellSize;
+          const x1 = x0 + cellSize;
+          const y0 = padding + r * cellSize;
+          const y1 = y0 + cellSize;
+
+          // Top edge
+          if (!inCage(r - 1, c)) {
+            const y = y0 + inset;
+            const x_s = !inCage(r, c - 1) ? x0 + inset : (inCage(r - 1, c - 1) ? x0 - inset : x0);
+            const x_e = !inCage(r, c + 1) ? x1 - inset : (inCage(r - 1, c + 1) ? x1 + inset : x1);
+            hSegments.push({ x1: Math.min(x_s, x_e), x2: Math.max(x_s, x_e), y });
+          }
+
+          // Bottom edge
+          if (!inCage(r + 1, c)) {
+            const y = y1 - inset;
+            const x_s = !inCage(r, c - 1) ? x0 + inset : (inCage(r + 1, c - 1) ? x0 - inset : x0);
+            const x_e = !inCage(r, c + 1) ? x1 - inset : (inCage(r + 1, c + 1) ? x1 + inset : x1);
+            hSegments.push({ x1: Math.min(x_s, x_e), x2: Math.max(x_s, x_e), y });
+          }
+
+          // Left edge
+          if (!inCage(r, c - 1)) {
+            const x = x0 + inset;
+            const y_s = !inCage(r - 1, c) ? y0 + inset : (inCage(r - 1, c - 1) ? y0 - inset : y0);
+            const y_e = !inCage(r + 1, c) ? y1 - inset : (inCage(r + 1, c - 1) ? y1 + inset : y1);
+            vSegments.push({ x, y1: Math.min(y_s, y_e), y2: Math.max(y_s, y_e) });
+          }
+
+          // Right edge
+          if (!inCage(r, c + 1)) {
+            const x = x1 - inset;
+            const y_s = !inCage(r - 1, c) ? y0 + inset : (inCage(r - 1, c + 1) ? y0 - inset : y0);
+            const y_e = !inCage(r + 1, c) ? y1 - inset : (inCage(r + 1, c + 1) ? y1 + inset : y1);
+            vSegments.push({ x, y1: Math.min(y_s, y_e), y2: Math.max(y_s, y_e) });
           }
         }
       }
 
+      // Merge collinear segments
+      const hByY = new Map();
+      for (const seg of hSegments) {
+        const key = Math.round(seg.y * 10) / 10;
+        if (!hByY.has(key)) hByY.set(key, []);
+        hByY.get(key).push([seg.x1, seg.x2, seg.y]);
+      }
+      const mergedH = [];
+      for (const [_, intervals] of hByY) {
+        intervals.sort((a, b) => a[0] - b[0]);
+        let [curS, curE, curY] = intervals[0];
+        for (let i = 1; i < intervals.length; i++) {
+          const [s, e] = intervals[i];
+          if (s <= curE) {
+            curE = Math.max(curE, e);
+          } else {
+            mergedH.push([curS, curE, curY]);
+            curS = s;
+            curE = e;
+          }
+        }
+        mergedH.push([curS, curE, curY]);
+      }
+
+      const vByX = new Map();
+      for (const seg of vSegments) {
+        const key = Math.round(seg.x * 10) / 10;
+        if (!vByX.has(key)) vByX.set(key, []);
+        vByX.get(key).push([seg.y1, seg.y2, seg.x]);
+      }
+      const mergedV = [];
+      for (const [_, intervals] of vByX) {
+        intervals.sort((a, b) => a[0] - b[0]);
+        let [curS, curE, curX] = intervals[0];
+        for (let i = 1; i < intervals.length; i++) {
+          const [s, e] = intervals[i];
+          if (s <= curE) {
+            curE = Math.max(curE, e);
+          } else {
+            mergedV.push([curX, curS, curE]);
+            curS = s;
+            curE = e;
+          }
+        }
+        mergedV.push([curX, curS, curE]);
+      }
+
+      // Draw dashed lines
+      ctx.lineWidth = 1.6;
+      ctx.strokeStyle = '#222222';
+      ctx.setLineDash([4, 3]);
+
+      ctx.beginPath();
+      for (const [x1, x2, y] of mergedH) {
+        ctx.moveTo(x1, y);
+        ctx.lineTo(x2, y);
+      }
+      for (const [x, y1, y2] of mergedV) {
+        ctx.moveTo(x, y1);
+        ctx.lineTo(x, y2);
+      }
+      ctx.stroke();
+      ctx.setLineDash([]);
+
       // 5. Cage Sum Numbers in Top-Left
-      const fontSize = size === 4 ? 14 : 11;
+      const fontSize = size === 4 ? 13 : 10;
       ctx.font = `bold ${fontSize}px "Space Mono", monospace`;
       ctx.fillStyle = '#111111';
       ctx.textAlign = 'left';
@@ -5416,8 +5458,8 @@
       for (const cg of cages) {
         if (!cg.cells || cg.cells.length === 0) continue;
         const [r0, c0] = cg.cells[0];
-        const tx = padding + c0 * cellSize + 5;
-        const ty = padding + r0 * cellSize + 4;
+        const tx = padding + c0 * cellSize + inset + 3;
+        const ty = padding + r0 * cellSize + inset + 2;
         ctx.fillText(cg.sum.toString(), tx, ty);
       }
     }

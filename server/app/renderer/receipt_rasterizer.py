@@ -964,9 +964,10 @@ def render_bridges_raster(bridges_data: Dict[str, Any], target_width: int = THER
 def render_killer_raster(killer_data: Dict[str, Any], target_width: int = THERMAL_WIDTH_DOTS) -> bytes:
     """
     Renders a 576-dot wide Killer Sudoku grid (4x4 or 6x6) for 80mm thermal receipts:
-    - Thick solid lines for 2x2 or 2x3 box boundaries and outer frame.
-    - Dashed line segments between adjacent cells belonging to different cages.
-    - Bold top-left clue numbers inside each cage's anchor cell.
+    - Thick solid lines (4px) for outer frame and 2x2 / 2x3 box boundaries.
+    - Thin solid lines (2px) between all individual cells.
+    - Inset dashed lines tracing the inner perimeter of each cage (~8-10 dots inset).
+    - Top-left cage sum numbers tucked neatly inside the inset dashed border.
     """
     size = killer_data.get("size", 4)
     box_r = killer_data.get("box_rows", 2)
@@ -978,71 +979,132 @@ def render_killer_raster(killer_data: Dict[str, Any], target_width: int = THERMA
     c_size = board_size // size
     actual_board = c_size * size
     total_h = padding + actual_board + padding
+    inset = 10 if size == 4 else 8
 
-    # Map each cell to its cage ID
-    cell_cage = {}
+    # Collect inset cage boundary segments
+    h_segments = []
+    v_segments = []
     for cg in cages:
+        cell_set = {(r, c) for r, c in cg.get("cells", [])}
+
+        def in_cage(r: int, c: int) -> bool:
+            return (r, c) in cell_set
+
         for r, c in cg.get("cells", []):
-            cell_cage[(r, c)] = cg["id"]
+            x0 = padding + c * c_size
+            x1 = x0 + c_size
+            y0 = padding + r * c_size
+            y1 = y0 + c_size
+
+            # Top edge
+            if not in_cage(r - 1, c):
+                y = y0 + inset
+                x_s = x0 + inset if not in_cage(r, c - 1) else (x0 - inset if in_cage(r - 1, c - 1) else x0)
+                x_e = x1 - inset if not in_cage(r, c + 1) else (x1 + inset if in_cage(r - 1, c + 1) else x1)
+                h_segments.append((min(x_s, x_e), max(x_s, x_e), y))
+
+            # Bottom edge
+            if not in_cage(r + 1, c):
+                y = y1 - inset
+                x_s = x0 + inset if not in_cage(r, c - 1) else (x0 - inset if in_cage(r + 1, c - 1) else x0)
+                x_e = x1 - inset if not in_cage(r, c + 1) else (x1 + inset if in_cage(r + 1, c + 1) else x1)
+                h_segments.append((min(x_s, x_e), max(x_s, x_e), y))
+
+            # Left edge
+            if not in_cage(r, c - 1):
+                x = x0 + inset
+                y_s = y0 + inset if not in_cage(r - 1, c) else (y0 - inset if in_cage(r - 1, c - 1) else y0)
+                y_e = y1 - inset if not in_cage(r + 1, c) else (y1 + inset if in_cage(r + 1, c - 1) else y1)
+                v_segments.append((x, min(y_s, y_e), max(y_s, y_e)))
+
+            # Right edge
+            if not in_cage(r, c + 1):
+                x = x1 - inset
+                y_s = y0 + inset if not in_cage(r - 1, c) else (y0 - inset if in_cage(r - 1, c + 1) else y0)
+                y_e = y1 - inset if not in_cage(r + 1, c) else (y1 + inset if in_cage(r + 1, c + 1) else y1)
+                v_segments.append((x, min(y_s, y_e), max(y_s, y_e)))
+
+    # Merge collinear segments
+    from collections import defaultdict
+    h_by_y = defaultdict(list)
+    for x1, x2, y in h_segments:
+        h_by_y[y].append((x1, x2))
+    merged_h = []
+    for y, intervals in h_by_y.items():
+        intervals.sort()
+        cur_s, cur_e = intervals[0]
+        for s, e in intervals[1:]:
+            if s <= cur_e:
+                cur_e = max(cur_e, e)
+            else:
+                merged_h.append((cur_s, cur_e, y))
+                cur_s, cur_e = s, e
+        merged_h.append((cur_s, cur_e, y))
+
+    v_by_x = defaultdict(list)
+    for x, y1, y2 in v_segments:
+        v_by_x[x].append((y1, y2))
+    merged_v = []
+    for x, intervals in v_by_x.items():
+        intervals.sort()
+        cur_s, cur_e = intervals[0]
+        for s, e in intervals[1:]:
+            if s <= cur_e:
+                cur_e = max(cur_e, e)
+            else:
+                merged_v.append((x, cur_s, cur_e))
+                cur_s, cur_e = s, e
+        merged_v.append((x, cur_s, cur_e))
+
+    dash_len = 8
+    gap_len = 6
 
     if HAS_PILLOW:
         img = Image.new("L", (target_width, total_h), 255)
         draw = ImageDraw.Draw(img)
 
         try:
-            font_clue = ImageFont.truetype("Courier.ttf", max(14, int(c_size * 0.18)))
+            font_clue = ImageFont.truetype("Courier.ttf", max(13, int(c_size * 0.16)))
         except IOError:
             font_clue = ImageFont.load_default()
 
-        # 1. Outer Frame
+        # 1. Outer Frame (4px)
         draw.rectangle([padding, padding, padding + actual_board, padding + actual_board], outline=0, width=4)
 
-        # 2. Horizontal borders
+        # 2. Grid lines
         for r in range(1, size):
             y = padding + r * c_size
-            is_box = (r % box_r == 0)
-            if is_box:
-                draw.line([padding, y, padding + actual_board, y], fill=0, width=4)
-            else:
-                for c in range(size):
-                    x0 = padding + c * c_size
-                    x1 = x0 + c_size
-                    if cell_cage.get((r - 1, c)) != cell_cage.get((r, c)):
-                        # Dashed cage separator
-                        for dx in range(0, c_size, 10):
-                            draw.line([x0 + dx, y, min(x1, x0 + dx + 5), y], fill=0, width=2)
-                    else:
-                        # Light dotted line
-                        for dx in range(0, c_size, 8):
-                            draw.point([x0 + dx, y], fill=180)
+            thick = 4 if (r % box_r == 0) else 1
+            draw.line([padding, y, padding + actual_board, y], fill=0, width=thick)
 
-        # 3. Vertical borders
         for c in range(1, size):
             x = padding + c * c_size
-            is_box = (c % box_c == 0)
-            if is_box:
-                draw.line([x, padding, x, padding + actual_board], fill=0, width=4)
-            else:
-                for r in range(size):
-                    y0 = padding + r * c_size
-                    y1 = y0 + c_size
-                    if cell_cage.get((r, c - 1)) != cell_cage.get((r, c)):
-                        # Dashed cage separator
-                        for dy in range(0, c_size, 10):
-                            draw.line([x, y0 + dy, x, min(y1, y0 + dy + 5)], fill=0, width=2)
-                    else:
-                        # Light dotted line
-                        for dy in range(0, c_size, 8):
-                            draw.point([x, y0 + dy], fill=180)
+            thick = 4 if (c % box_c == 0) else 1
+            draw.line([x, padding, x, padding + actual_board], fill=0, width=thick)
 
-        # 4. Cage Sum Clues (top-left of first cell)
+        # 3. Inset Dashed Cage Outlines
+        for x1, x2, y in merged_h:
+            x = x1
+            while x < x2:
+                seg = min(dash_len, x2 - x)
+                draw.line([x, y, x + seg, y], fill=0, width=2)
+                x += dash_len + gap_len
+
+        for x, y1, y2 in merged_v:
+            y = y1
+            while y < y2:
+                seg = min(dash_len, y2 - y)
+                draw.line([x, y, x, y + seg], fill=0, width=2)
+                y += dash_len + gap_len
+
+        # 4. Cage Sum Clues
         for cg in cages:
             cells = sorted(cg.get("cells", []))
             if not cells:
                 continue
             r0, c0 = cells[0]
-            tx = padding + c0 * c_size + 6
-            ty = padding + r0 * c_size + 4
+            tx = padding + c0 * c_size + inset + 4
+            ty = padding + r0 * c_size + inset + 2
             draw.text((tx, ty), str(cg.get("sum", "")), fill=0, font=font_clue)
 
         return pil_to_escpos(img)
@@ -1050,47 +1112,43 @@ def render_killer_raster(killer_data: Dict[str, Any], target_width: int = THERMA
     # Pure Python ThermalBitmap Fallback
     tb = ThermalBitmap(target_width, total_h)
 
-    # 1. Outer Frame
+    # 1. Outer Frame (4px)
     tb.draw_rect(padding, padding, actual_board, actual_board, thickness=4)
 
-    # 2. Horizontal Borders
+    # 2. Grid lines
     for r in range(1, size):
         y = padding + r * c_size
-        is_box = (r % box_r == 0)
-        if is_box:
-            tb.draw_hline(padding, y, actual_board, thickness=4)
-        else:
-            for c in range(size):
-                if cell_cage.get((r - 1, c)) != cell_cage.get((r, c)):
-                    # Dashed line
-                    x0 = padding + c * c_size
-                    for dx in range(0, c_size, 10):
-                        seg = min(5, c_size - dx)
-                        tb.draw_hline(x0 + dx, y, seg, thickness=2)
+        thick = 4 if (r % box_r == 0) else 2
+        tb.draw_hline(padding, y, actual_board, thickness=thick)
 
-    # 3. Vertical Borders
     for c in range(1, size):
         x = padding + c * c_size
-        is_box = (c % box_c == 0)
-        if is_box:
-            tb.draw_vline(x, padding, actual_board, thickness=4)
-        else:
-            for r in range(size):
-                if cell_cage.get((r, c - 1)) != cell_cage.get((r, c)):
-                    # Dashed line
-                    y0 = padding + r * c_size
-                    for dy in range(0, c_size, 10):
-                        seg = min(5, c_size - dy)
-                        tb.draw_vline(x, y0 + dy, seg, thickness=2)
+        thick = 4 if (c % box_c == 0) else 2
+        tb.draw_vline(x, padding, actual_board, thickness=thick)
 
-    # 4. Cage Sum Clues (scale 2 text)
+    # 3. Inset Dashed Cage Outlines
+    for x1, x2, y in merged_h:
+        x = x1
+        while x < x2:
+            seg = min(dash_len, x2 - x)
+            tb.draw_hline(x, y, seg, thickness=2)
+            x += dash_len + gap_len
+
+    for x, y1, y2 in merged_v:
+        y = y1
+        while y < y2:
+            seg = min(dash_len, y2 - y)
+            tb.draw_vline(x, y, seg, thickness=2)
+            y += dash_len + gap_len
+
+    # 4. Cage Sum Clues
     for cg in cages:
         cells = sorted(cg.get("cells", []))
         if not cells:
             continue
         r0, c0 = cells[0]
-        tx = padding + c0 * c_size + 6
-        ty = padding + r0 * c_size + 6
+        tx = padding + c0 * c_size + inset + 3
+        ty = padding + r0 * c_size + inset + 3
         tb.draw_text(tx, ty, str(cg.get("sum", "")), scale=2, color=1)
 
     return tb.to_escpos()
