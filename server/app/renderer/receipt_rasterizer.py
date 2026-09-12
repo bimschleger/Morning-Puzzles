@@ -895,9 +895,6 @@ def render_tents_raster(tents_data: Dict[str, Any], target_width: int = THERMAL_
                         prog = (y - tier_top) / float(max(1, tier_base - tier_top))
                         cur_w = int(half_w * prog)
                         tb.draw_hline(cx - cur_w, y, cur_w * 2 + 1, thickness=1, color=1)
-            else:
-                # Subtle guide dot in empty cell for pencil solving
-                tb.draw_circle(cx, cy, 2, thickness=2, color=1)
 
     return tb.to_escpos()
 
