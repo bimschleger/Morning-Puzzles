@@ -137,6 +137,20 @@
         </select>
       </div>
 
+      <!-- Global Difficulty Switch -->
+      <div class="bg-slate-900 border border-amber-500/40 rounded-xl p-3.5 flex items-center justify-between gap-3 shadow-inner">
+        <label for="global-difficulty" class="text-xs font-bold text-slate-200 whitespace-nowrap">
+          Difficulty:
+        </label>
+        <select id="global-difficulty" class="w-full max-w-[210px] bg-slate-800 border border-amber-500/50 text-amber-400 font-semibold rounded-lg px-2.5 py-1.5 text-xs outline-none focus:border-amber-500 transition">
+          <option value="easy">Easy</option>
+          <option value="medium" selected>Medium</option>
+          <option value="hard">Hard</option>
+          <option value="random">Random</option>
+          <option value="custom">Custom</option>
+        </select>
+      </div>
+
       <!-- Puzzle Selection Toggles -->
       <div class="border-t border-slate-800/80 pt-4 flex flex-col gap-3">
         <h2 class="text-xs uppercase tracking-wider font-bold text-slate-400">Included Games & Options</h2>
@@ -220,8 +234,8 @@
           <div class="flex items-center justify-between pl-6 text-xs text-slate-400">
             <span>Difficulty:</span>
             <select id="diff-nonogram" class="bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2 py-1 text-xs outline-none focus:border-amber-500">
-              <option value="5" selected>Easy: 5x5</option>
-              <option value="8">Medium: 8x8</option>
+              <option value="5">Easy: 5x5</option>
+              <option value="8" selected>Medium: 8x8</option>
               <option value="10">Hard: 10x10</option>
               <option value="15">Extreme: 15x15</option>
             </select>
@@ -3480,17 +3494,101 @@
     // =========================================================================
     // 4. EVENT LISTENERS & INITIALIZATION
     // =========================================================================
-    
+
+    // Global Difficulty Mapping & Sync
+    const GAME_DIFFICULTIES = {
+      'diff-queens': { easy: '6x6_1star', medium: '8x8_1star', hard: '9x9_2star' },
+      'diff-sudoku': { easy: 'easy', medium: 'medium', hard: 'hard' },
+      'diff-wordsearch': { easy: '8x8', medium: '8x10', hard: '8x12' },
+      'diff-nonogram': { easy: '5', medium: '8', hard: '10' },
+      'diff-jumble': { easy: 'easy', medium: 'medium', hard: 'hard' },
+      'diff-binary': { easy: 'easy', medium: 'medium', hard: 'hard' },
+      'diff-mines': { easy: 'easy', medium: 'medium', hard: 'hard' },
+      'diff-tents': { easy: 'easy', medium: 'medium', hard: 'hard' },
+      'diff-bridges': { easy: 'easy', medium: 'medium', hard: 'hard' }
+    };
+
+    function applyGlobalDifficulty(diff) {
+      const levels = ['easy', 'medium', 'hard'];
+      if (diff === 'easy' || diff === 'medium' || diff === 'hard') {
+        for (const [id, map] of Object.entries(GAME_DIFFICULTIES)) {
+          const el = document.getElementById(id);
+          if (el && map[diff]) el.value = map[diff];
+        }
+      } else if (diff === 'random') {
+        for (const [id, map] of Object.entries(GAME_DIFFICULTIES)) {
+          const randomLevel = levels[Math.floor(Math.random() * levels.length)];
+          const el = document.getElementById(id);
+          if (el && map[randomLevel]) el.value = map[randomLevel];
+        }
+      }
+    }
+
+    function syncGlobalDifficultyFromGames() {
+      const globalDiffEl = document.getElementById('global-difficulty');
+      if (!globalDiffEl) return;
+
+      let allEasy = true;
+      let allMedium = true;
+      let allHard = true;
+
+      for (const [id, map] of Object.entries(GAME_DIFFICULTIES)) {
+        const el = document.getElementById(id);
+        if (!el) continue;
+        if (el.value !== map.easy) allEasy = false;
+        if (el.value !== map.medium) allMedium = false;
+        if (el.value !== map.hard) allHard = false;
+      }
+
+      if (allEasy) {
+        globalDiffEl.value = 'easy';
+      } else if (allMedium) {
+        globalDiffEl.value = 'medium';
+      } else if (allHard) {
+        globalDiffEl.value = 'hard';
+      } else {
+        globalDiffEl.value = 'custom';
+      }
+    }
+
+    // Global difficulty switch
+    const globalDiffEl = document.getElementById('global-difficulty');
+    if (globalDiffEl) {
+      globalDiffEl.addEventListener('change', () => {
+        if (globalDiffEl.value !== 'custom') {
+          applyGlobalDifficulty(globalDiffEl.value);
+        }
+        renderReceipt();
+      });
+    }
+
+    // Sync global difficulty when individual game difficulties change
+    Object.keys(GAME_DIFFICULTIES).forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('change', () => {
+          syncGlobalDifficultyFromGames();
+        });
+      }
+    });
+
+    function handleRandomize() {
+      if (globalDiffEl && globalDiffEl.value === 'random') {
+        applyGlobalDifficulty('random');
+      }
+      renderReceipt();
+    }
+
     // Randomize buttons
     document.getElementById('btn-randomize-top').addEventListener('click', () => {
       const icon = document.getElementById('dice-icon');
       icon.classList.add('rotate-180');
       setTimeout(() => icon.classList.remove('rotate-180'), 300);
-      renderReceipt();
+      handleRandomize();
     });
 
     document.getElementById('btn-randomize-panel').addEventListener('click', () => {
-      renderReceipt();
+      handleRandomize();
     });
 
     // Copy raw monospace text
@@ -3523,7 +3621,10 @@
     });
 
     // Initial render on page load
-    window.addEventListener('DOMContentLoaded', renderReceipt);
+    window.addEventListener('DOMContentLoaded', () => {
+      syncGlobalDifficultyFromGames();
+      renderReceipt();
+    });
   </script>
 </body>
 </html>
