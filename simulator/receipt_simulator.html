@@ -126,51 +126,39 @@
         </button>
       </div>
 
+      <!-- Global Render Style Switch -->
+      <div class="bg-slate-900 border border-amber-500/40 rounded-xl p-3.5 flex items-center justify-between gap-3 shadow-inner">
+        <label for="global-render-style" class="text-xs font-bold text-slate-200 flex items-center gap-1.5 whitespace-nowrap">
+          <span>🎨</span> Render Style:
+        </label>
+        <select id="global-render-style" class="w-full max-w-[210px] bg-slate-800 border border-amber-500/50 text-amber-400 font-semibold rounded-lg px-2.5 py-1.5 text-xs outline-none focus:border-amber-500 transition">
+          <option value="graphic" selected>🖼️ Drawing Rendering</option>
+          <option value="ascii">🔤 ASCII Style</option>
+        </select>
+      </div>
+
       <!-- Puzzle Selection Toggles -->
       <div class="border-t border-slate-800/80 pt-4 flex flex-col gap-3">
         <h2 class="text-xs uppercase tracking-wider font-bold text-slate-400">Included Games & Options</h2>
         
-        <!-- 1. Queens / Star Battle Toggle (Highlighted Feature) -->
-        <div class="bg-slate-900 border-2 border-amber-500/40 rounded-xl p-3.5 flex flex-col gap-2.5 transition hover:border-amber-500/70">
+        <!-- 1. Queens / Star Battle Toggle -->
+        <div class="bg-slate-900 border border-slate-800/80 rounded-xl p-3.5 flex flex-col gap-2.5 transition hover:border-slate-700">
           <div class="flex items-center justify-between">
             <label class="flex items-center gap-2.5 cursor-pointer select-none">
               <input type="checkbox" id="toggle-queens" checked class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
-              <span class="font-semibold text-sm text-slate-100 flex items-center gap-1.5">
-                ⭐ Stars
-                <span class="text-[10px] bg-amber-500 text-slate-950 font-bold px-1.5 py-0.2 rounded">Dithered</span>
-              </span>
+              <span class="font-semibold text-sm text-slate-200">Stars</span>
             </label>
-            <span class="text-[11px] text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded">Territories</span>
           </div>
           
-          <!-- Variant -->
+          <!-- Difficulty -->
           <div class="flex items-center justify-between pl-6 text-xs text-slate-400">
-            <span>Variant:</span>
-            <select id="variant-queens" class="bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2 py-1 text-xs outline-none focus:border-amber-500">
-              <option value="6x6_1star">6x6 (1-Star / Queens)</option>
-              <option value="8x8_1star" selected>8x8 (1-Star / Queens)</option>
-              <option value="9x9_2star">9x9 (2-Star Battle)</option>
-              <option value="10x10_2star">10x10 (2-Star Master Battle)</option>
+            <span>Difficulty:</span>
+            <select id="diff-queens" class="bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2 py-1 text-xs outline-none focus:border-amber-500">
+              <option value="6x6_1star">Easy: 1 Star (6x6)</option>
+              <option value="8x8_1star" selected>Medium: 1 Star (8x8)</option>
+              <option value="9x9_2star">Hard: 2 Stars (9x9)</option>
+              <option value="10x10_2star">Extreme: 2 Stars (10x10)</option>
             </select>
-          </div>
-
-          <!-- Dithering & Graphic Style Option -->
-          <div class="flex items-center justify-between pl-6 text-xs text-slate-400">
-            <span class="text-amber-300 font-medium">Territory Style:</span>
-            <select id="style-queens" class="bg-slate-800 border border-amber-500/50 text-amber-400 font-semibold rounded-lg px-2 py-1 text-xs outline-none focus:border-amber-500">
-              <option value="dithered_bayer">🖼️ 1-Bit Bayer Halftone (Grayscale)</option>
-              <option value="dithered_hatch" selected>📐 1-Bit Geometric Hatches</option>
-              <option value="ascii_text">🔤 Legacy ASCII Text (Letters A-H)</option>
-            </select>
-          </div>
-
-          <!-- Solution Stars Overlay Checkbox -->
-          <div class="flex items-center justify-between pl-6 text-xs text-slate-400">
-            <span>Overlay Solution Stars:</span>
-            <label class="flex items-center gap-1.5 cursor-pointer">
-              <input type="checkbox" id="toggle-queens-solution" class="w-3.5 h-3.5 accent-amber-500 rounded cursor-pointer">
-              <span class="text-[11px] text-slate-300">Show ★</span>
-            </label>
           </div>
         </div>
 
@@ -181,21 +169,13 @@
               <input type="checkbox" id="toggle-sudoku" checked class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
               <span class="font-semibold text-sm text-slate-200">Sudoku</span>
             </label>
-            <span class="text-[11px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded">9x9 Grid</span>
           </div>
           <div class="flex items-center justify-between pl-6 text-xs text-slate-400">
             <span>Difficulty:</span>
             <select id="diff-sudoku" class="bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2 py-1 text-xs outline-none focus:border-amber-500">
-              <option value="easy">Easy (38 Clues)</option>
-              <option value="medium" selected>Medium (30 Clues)</option>
-              <option value="hard">Hard (25 Clues)</option>
-            </select>
-          </div>
-          <div class="flex items-center justify-between pl-6 text-xs text-slate-400">
-            <span>Render Style:</span>
-            <select id="style-sudoku" class="bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2 py-1 text-xs outline-none focus:border-amber-500">
-              <option value="graphic" selected>🖼️ Crisp Graphic Grid (Bold 3x3)</option>
-              <option value="ascii">🔤 Monospaced ASCII Text</option>
+              <option value="easy">Easy: 38 Clues</option>
+              <option value="medium" selected>Medium: 30 Clues</option>
+              <option value="hard">Hard: 25 Clues</option>
             </select>
           </div>
         </div>
@@ -207,14 +187,13 @@
               <input type="checkbox" id="toggle-wordsearch" checked class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
               <span class="font-semibold text-sm text-slate-200">Search</span>
             </label>
-            <span class="text-[11px] text-amber-400 font-semibold bg-amber-950/40 border border-amber-500/30 px-2 py-0.5 rounded">80mm Graphic</span>
           </div>
           <div class="flex items-center justify-between pl-6 text-xs text-slate-400">
-            <span>Size:</span>
-            <select id="size-wordsearch" class="bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2 py-1 text-xs outline-none focus:border-amber-500">
-              <option value="8x8">8x8 (Compact - 5 words)</option>
-              <option value="8x10" selected>8x10 (Standard - 7 words)</option>
-              <option value="8x12">8x12 (Tall - 8 words)</option>
+            <span>Difficulty:</span>
+            <select id="diff-wordsearch" class="bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2 py-1 text-xs outline-none focus:border-amber-500">
+              <option value="8x8">Easy: 5 Words</option>
+              <option value="8x10" selected>Medium: 7 Words</option>
+              <option value="8x12">Hard: 8 Words</option>
             </select>
           </div>
           <div class="flex items-center justify-between pl-6 text-xs text-slate-400">
@@ -228,13 +207,6 @@
               <option value="Technology">Technology</option>
             </select>
           </div>
-          <div class="flex items-center justify-between pl-6 text-xs text-slate-400">
-            <span>Style:</span>
-            <select id="style-wordsearch" class="bg-slate-800 border border-amber-500/50 text-amber-400 font-semibold rounded-lg px-2 py-1 text-xs outline-none focus:border-amber-500">
-              <option value="graphic" selected>★ Thermal Graphic (203 DPI)</option>
-              <option value="ascii">Plain Text ASCII</option>
-            </select>
-          </div>
         </div>
 
         <!-- 4. Nonogram Toggle -->
@@ -244,22 +216,14 @@
               <input type="checkbox" id="toggle-nonogram" checked class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
               <span class="font-semibold text-sm text-slate-200">Nonogram</span>
             </label>
-            <span class="text-[11px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded">RLE Logic</span>
           </div>
           <div class="flex items-center justify-between pl-6 text-xs text-slate-400">
-            <span>Size:</span>
-            <select id="size-nonogram" class="bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2 py-1 text-xs outline-none focus:border-amber-500">
-              <option value="5" selected>5x5 (Quick Solver)</option>
-              <option value="8">8x8 (Standard)</option>
-              <option value="10">10x10 (Challenge)</option>
-              <option value="15">15x15 (Master Picross)</option>
-            </select>
-          </div>
-          <div class="flex items-center justify-between pl-6 text-xs text-slate-400">
-            <span class="text-amber-300 font-medium">Render Style:</span>
-            <select id="style-nonogram" class="bg-slate-800 border border-amber-500/50 text-amber-400 font-semibold rounded-lg px-2 py-1 text-xs outline-none focus:border-amber-500">
-              <option value="graphic" selected>🖼️ Crisp Thermal Grid (Full Width)</option>
-              <option value="ascii">🔤 Legacy Monospaced ASCII</option>
+            <span>Difficulty:</span>
+            <select id="diff-nonogram" class="bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2 py-1 text-xs outline-none focus:border-amber-500">
+              <option value="5" selected>Easy: 5x5</option>
+              <option value="8">Medium: 8x8</option>
+              <option value="10">Hard: 10x10</option>
+              <option value="15">Extreme: 15x15</option>
             </select>
           </div>
         </div>
@@ -271,21 +235,13 @@
               <input type="checkbox" id="toggle-jumble" checked class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
               <span class="font-semibold text-sm text-slate-200">Jumble</span>
             </label>
-            <span class="text-[11px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded">Anagrams + Riddle</span>
           </div>
           <div class="flex items-center justify-between pl-6 text-xs text-slate-400">
             <span>Difficulty:</span>
             <select id="diff-jumble" class="bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2 py-1 text-xs outline-none focus:border-amber-500">
-              <option value="easy">Easy (4-5 letters)</option>
-              <option value="medium" selected>Medium (5-6 letters)</option>
-              <option value="hard">Hard (6-7 letters)</option>
-            </select>
-          </div>
-          <div class="flex items-center justify-between pl-6 text-xs text-slate-400">
-            <span class="text-amber-300 font-medium">Render Style:</span>
-            <select id="style-jumble" class="bg-slate-800 border border-amber-500/50 text-amber-400 font-semibold rounded-lg px-2 py-1 text-xs outline-none focus:border-amber-500">
-              <option value="graphic" selected>🖼️ Newspaper Graphic (Boxes & Circles)</option>
-              <option value="ascii">🔤 Legacy Monospaced ASCII</option>
+              <option value="easy">Easy: 4-5 Letters</option>
+              <option value="medium" selected>Medium: 5-6 Letters</option>
+              <option value="hard">Hard: 6-7 Letters</option>
             </select>
           </div>
         </div>
@@ -297,21 +253,13 @@
               <input type="checkbox" id="toggle-binary" checked class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
               <span class="font-semibold text-sm text-slate-200">Binary</span>
             </label>
-            <span class="text-[11px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded">0/1 Deduction</span>
           </div>
           <div class="flex items-center justify-between pl-6 text-xs text-slate-400">
             <span>Difficulty:</span>
             <select id="diff-binary" class="bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2 py-1 text-xs outline-none focus:border-amber-500">
-              <option value="easy">Easy (6x6)</option>
-              <option value="medium" selected>Medium (8x8)</option>
-              <option value="hard">Hard (8x8)</option>
-            </select>
-          </div>
-          <div class="flex items-center justify-between pl-6 text-xs text-slate-400">
-            <span class="text-amber-300 font-medium">Render Style:</span>
-            <select id="style-binary" class="bg-slate-800 border border-amber-500/50 text-amber-400 font-semibold rounded-lg px-2 py-1 text-xs outline-none focus:border-amber-500">
-              <option value="graphic" selected>🖼️ Crisp Thermal Grid (3.5px Border)</option>
-              <option value="ascii">🔤 Legacy Monospaced ASCII</option>
+              <option value="easy">Easy: 16 Clues (6x6)</option>
+              <option value="medium" selected>Medium: 28 Clues (8x8)</option>
+              <option value="hard">Hard: 22 Clues (8x8)</option>
             </select>
           </div>
         </div>
@@ -323,21 +271,13 @@
               <input type="checkbox" id="toggle-mines" checked class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
               <span class="font-semibold text-sm text-slate-200">Mines</span>
             </label>
-            <span class="text-[11px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded">Solitaire / Logic</span>
           </div>
           <div class="flex items-center justify-between pl-6 text-xs text-slate-400">
             <span>Difficulty:</span>
             <select id="diff-mines" class="bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2 py-1 text-xs outline-none focus:border-amber-500">
-              <option value="easy">Easy (8 Mines)</option>
-              <option value="medium" selected>Medium (12 Mines)</option>
-              <option value="hard">Hard (15 Mines)</option>
-            </select>
-          </div>
-          <div class="flex items-center justify-between pl-6 text-xs text-slate-400">
-            <span class="text-amber-300 font-medium">Render Style:</span>
-            <select id="style-mines" class="bg-slate-800 border border-amber-500/50 text-amber-400 font-semibold rounded-lg px-2 py-1 text-xs outline-none focus:border-amber-500">
-              <option value="graphic" selected>🖼️ Crisp Thermal Grid (3.5px Border)</option>
-              <option value="ascii">🔤 Legacy Monospaced ASCII</option>
+              <option value="easy">Easy: 8 Mines</option>
+              <option value="medium" selected>Medium: 12 Mines</option>
+              <option value="hard">Hard: 15 Mines</option>
             </select>
           </div>
         </div>
@@ -2521,24 +2461,33 @@
       items.push({ type: 'rule-double', text: '='.repeat(COLS) });
       items.push({ type: 'blank', text: '' });
 
+      const globalStyle = (document.getElementById('global-render-style') ? document.getElementById('global-render-style').value : 'graphic');
+      const isGraphic = (globalStyle === 'graphic');
+
       let solutionsContent = [];
 
       // 1. QUEENS / STAR BATTLE (Placed at Top for Visibility)
       if (document.getElementById('toggle-queens').checked) {
-        const variant = document.getElementById('variant-queens').value;
-        const style = document.getElementById('style-queens').value;
-        const showStars = document.getElementById('toggle-queens-solution').checked;
+        const variantEl = document.getElementById('diff-queens') || document.getElementById('variant-queens');
+        const variant = variantEl ? variantEl.value : '8x8_1star';
+        const showStars = false;
 
         let size = 8, stars = 1, diffStr = 'MEDIUM';
         if (variant === '6x6_1star') { size = 6; stars = 1; diffStr = 'EASY'; }
         else if (variant === '8x8_1star') { size = 8; stars = 1; diffStr = 'MEDIUM'; }
         else if (variant === '9x9_2star') { size = 9; stars = 2; diffStr = 'HARD'; }
-        else if (variant === '10x10_2star') { size = 10; stars = 2; diffStr = 'MASTER'; }
+        else if (variant === '10x10_2star') { size = 10; stars = 2; diffStr = 'EXTREME'; }
 
         const qData = queensSim.generate(size, stars);
         addStandardPuzzleHeader(items, 'STARS', diffStr);
 
-        if (style === 'ascii_text') {
+        if (isGraphic) {
+          // 1-Bit Geometric Hatches Graphic Mode (Canvas)
+          items.push({
+            type: 'canvas',
+            render: (canvas) => drawQueensCanvas(canvas, qData, 'dithered_hatch', showStars)
+          });
+        } else {
           // ASCII letters fallback
           let colHdr = '     ';
           for (let c = 0; c < size; c++) colHdr += (c + 1) + ' ';
@@ -2552,12 +2501,6 @@
             }
             items.push({ type: 'text', text: rowStr });
           }
-        } else {
-          // 1-Bit Dithered Graphic Mode (Canvas)
-          items.push({
-            type: 'canvas',
-            render: (canvas) => drawQueensCanvas(canvas, qData, style, showStars)
-          });
         }
 
         items.push({ type: 'blank', text: '' });
@@ -2569,13 +2512,12 @@
       // 2. SUDOKU
       if (document.getElementById('toggle-sudoku').checked) {
         const diff = document.getElementById('diff-sudoku').value;
-        const style = document.getElementById('style-sudoku').value;
         const clues = diff === 'easy' ? 38 : (diff === 'hard' ? 25 : 30);
         const sData = sudokuSim.generate(clues);
 
         addStandardPuzzleHeader(items, 'SUDOKU', diff);
 
-        if (style === 'graphic') {
+        if (isGraphic) {
           // Crisp Graphic Grid
           items.push({
             type: 'canvas',
@@ -2609,13 +2551,17 @@
       // 3. SEARCH
       if (document.getElementById('toggle-wordsearch').checked) {
         let theme = document.getElementById('theme-wordsearch').value;
-        const sizeStr = document.getElementById('size-wordsearch') ? document.getElementById('size-wordsearch').value : '8x10';
-        const wsStyle = document.getElementById('style-wordsearch') ? document.getElementById('style-wordsearch').value : 'graphic';
+        const diffEl = document.getElementById('diff-wordsearch') || document.getElementById('size-wordsearch');
+        const sizeStr = diffEl ? diffEl.value : '8x10';
         const wsData = wordSearchSim.generate(theme, sizeStr);
 
-        addStandardPuzzleHeader(items, 'SEARCH');
+        let wsDiff = 'MEDIUM';
+        if (sizeStr === '8x8') wsDiff = 'EASY';
+        else if (sizeStr === '8x12') wsDiff = 'HARD';
 
-        if (wsStyle === 'graphic') {
+        addStandardPuzzleHeader(items, 'SEARCH', wsDiff);
+
+        if (isGraphic) {
           items.push({
             type: 'canvas',
             render: (canvas) => drawWordSearchCanvas(canvas, wsData)
@@ -2648,15 +2594,15 @@
 
       // 4. NONOGRAM / PICROSS
       if (document.getElementById('toggle-nonogram').checked) {
-        const size = parseInt(document.getElementById('size-nonogram').value, 10);
-        const nStyle = document.getElementById('style-nonogram').value;
+        const diffEl = document.getElementById('diff-nonogram') || document.getElementById('size-nonogram');
+        const size = parseInt(diffEl.value, 10);
         const nData = nonogramSim.generate(size);
-        const diffMap = { 5: 'EASY', 8: 'MEDIUM', 10: 'HARD', 15: 'EXPERT' };
+        const diffMap = { 5: 'EASY', 8: 'MEDIUM', 10: 'HARD', 15: 'EXTREME' };
         const diffStr = diffMap[size] || 'MEDIUM';
 
         addStandardPuzzleHeader(items, 'NONOGRAM', diffStr);
 
-        if (nStyle === 'graphic') {
+        if (isGraphic) {
           items.push({
             type: 'canvas',
             render: (canvas) => drawNonogramCanvas(canvas, nData)
@@ -2701,12 +2647,11 @@
       // 5. DAILY JUMBLE
       if (document.getElementById('toggle-jumble').checked) {
         const diff = document.getElementById('diff-jumble').value;
-        const jStyle = document.getElementById('style-jumble').value;
         const jData = jumbleSim.generate(diff);
 
         addStandardPuzzleHeader(items, 'JUMBLE', diff);
 
-        if (jStyle === 'graphic') {
+        if (isGraphic) {
           items.push({
             type: 'canvas',
             render: (canvas) => drawJumbleCanvas(canvas, jData)
@@ -2738,12 +2683,11 @@
       // 6. BINARY
       if (document.getElementById('toggle-binary') && document.getElementById('toggle-binary').checked) {
         const diff = document.getElementById('diff-binary').value;
-        const bStyle = document.getElementById('style-binary').value;
         const bData = binarySim.generate(diff);
 
         addStandardPuzzleHeader(items, 'BINARY', diff);
 
-        if (bStyle === 'graphic') {
+        if (isGraphic) {
           items.push({
             type: 'canvas',
             render: (canvas) => drawBinaryCanvas(canvas, bData)
@@ -2779,14 +2723,13 @@
       // 7. MINES
       if (document.getElementById('toggle-mines') && document.getElementById('toggle-mines').checked) {
         const diff = document.getElementById('diff-mines').value;
-        const mStyle = document.getElementById('style-mines').value;
         const mData = minesSim.generate(diff);
 
         addStandardPuzzleHeader(items, 'MINES', diff);
         items.push({ type: 'text', text: centerLine(`TOTAL MINES: ${mData.minesCount}`, COLS) });
         items.push({ type: 'blank', text: '' });
 
-        if (mStyle === 'graphic') {
+        if (isGraphic) {
           items.push({
             type: 'canvas',
             render: (canvas) => drawMinesCanvas(canvas, mData)
@@ -2960,17 +2903,19 @@
 
     // Re-render on input changes
     const inputs = [
-      'toggle-queens', 'variant-queens', 'style-queens', 'toggle-queens-solution',
-      'toggle-sudoku', 'diff-sudoku', 'style-sudoku',
-      'toggle-wordsearch', 'size-wordsearch', 'theme-wordsearch', 'style-wordsearch',
-      'toggle-nonogram', 'size-nonogram', 'style-nonogram',
-      'toggle-jumble', 'diff-jumble', 'style-jumble',
-      'toggle-binary', 'diff-binary', 'style-binary',
-      'toggle-mines', 'diff-mines', 'style-mines',
+      'global-render-style',
+      'toggle-queens', 'diff-queens', 'variant-queens',
+      'toggle-sudoku', 'diff-sudoku',
+      'toggle-wordsearch', 'diff-wordsearch', 'size-wordsearch', 'theme-wordsearch',
+      'toggle-nonogram', 'diff-nonogram', 'size-nonogram',
+      'toggle-jumble', 'diff-jumble',
+      'toggle-binary', 'diff-binary',
+      'toggle-mines', 'diff-mines',
       'toggle-ruler', 'toggle-solutions', 'toggle-burn'
     ];
     inputs.forEach(id => {
-      document.getElementById(id).addEventListener('change', renderReceipt);
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('change', renderReceipt);
     });
 
     // Initial render on page load
