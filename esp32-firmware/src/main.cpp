@@ -156,8 +156,53 @@ void setup() {
     Serial.println("1. Short-press BOOT button (GPIO 0) -> Instantly generates & prints a new grade of puzzles!");
     Serial.println("2. Long-press BOOT button (3 sec)   -> Starts local Wi-Fi hotspot to sync time from phone!");
     Serial.printf("3. Daily scheduled auto-print       -> Every morning at %02d:%02d\n", DAILY_PRINT_HOUR, DAILY_PRINT_MINUTE);
-    Serial.println("4. Serial Monitor (115200 baud)     -> [P]rint | [1] Easy | [2] Med | [3] Hard | [G]rade | [S]tatus\n");
+    Serial.println("4. Auto-print on Printer Power-ON   -> Flip printer switch ON to print automatically!");
+    Serial.println("5. Serial Monitor (115200 baud)     -> [P]rint | [1] Easy | [2] Med | [3] Hard | [G]rade | [S]tatus\n");
+
+#if AUTO_PRINT_ON_BOOT
+    Serial.println("[MAIN] AUTO_PRINT_ON_BOOT active. Checking printer readiness...");
+    delay(PRINTER_READY_SETTLE_MS);
+    if (printer.isPrinterOnline(1000)) {
+        Serial.println("[MAIN] Printer online at boot -> Executing auto-print job!");
+        executePrintJob(GRADE_ROTATING);
+    } else {
+        Serial.println("[MAIN] Printer not reachable yet at boot. Will auto-print when printer switch is turned ON.");
+    }
+#endif
 }
+
+#if AUTO_PRINT_ON_PRINTER_POWER
+void checkPrinterPowerTransition() {
+    static unsigned long lastPollMs = 0;
+    static bool lastPrinterOnline = false;
+    static bool initializedState = false;
+
+    unsigned long now = millis();
+    if (now - lastPollMs < PRINTER_POLL_INTERVAL_MS) {
+        return;
+    }
+    lastPollMs = now;
+
+    bool isOnline = printer.isPrinterOnline(300);
+
+    if (!initializedState) {
+        lastPrinterOnline = isOnline;
+        initializedState = true;
+        return;
+    }
+
+    // Detected transition from OFF -> ON!
+    if (isOnline && !lastPrinterOnline) {
+        Serial.println("\n[PRINTER] >>> PRINTER POWER-ON DETECTED! <<<");
+        Serial.println("[PRINTER] Waiting for thermal head homing and motor boot...");
+        delay(PRINTER_READY_SETTLE_MS);
+        Serial.println("[PRINTER] Starting automatic print job...");
+        executePrintJob(GRADE_ROTATING);
+    }
+
+    lastPrinterOnline = isOnline;
+}
+#endif
 
 void loop() {
     // 1. Handle SoftAP captive portal requests if user opened setup mode
@@ -174,6 +219,11 @@ void loop() {
         Serial.println("[MAIN] 7:00 AM Morning Cron Trigger! Starting daily print job...");
         executePrintJob(GRADE_ROTATING);
     }
+
+#if AUTO_PRINT_ON_PRINTER_POWER
+    // 5. Monitor printer power switch (auto-print when printer turns ON)
+    checkPrinterPowerTransition();
+#endif
 
     delay(20);
 }

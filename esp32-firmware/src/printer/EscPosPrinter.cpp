@@ -63,6 +63,21 @@ bool EscPosPrinter::isConnected() {
     return _tcpClient.connected();
 }
 
+bool EscPosPrinter::isPrinterOnline(uint32_t timeoutMs) {
+    if (_mode == PRINTER_MODE_SERIAL) {
+        return (_serial != nullptr);
+    }
+    if (_tcpClient.connected()) {
+        return true;
+    }
+    WiFiClient probe;
+    if (probe.connect(PRINTER_IP_ADDR, PRINTER_TCP_PORT, timeoutMs)) {
+        probe.stop();
+        return true;
+    }
+    return false;
+}
+
 void EscPosPrinter::sendCommand(const uint8_t* cmd, size_t length) {
     if (_outputStream) {
         _outputStream->write(cmd, length);

@@ -45,9 +45,18 @@
 #define ACTIVE_PRINTER_MODE     PRINTER_MODE_ETHERNET
 
 // Ethernet Printer Settings (Raw JetDirect Port 9100 on 80mm commercial printers)
-#define PRINTER_IP_ADDR         "192.168.1.150"
+// Factory default static IP for Vretti, Munbyn, Rongta is typically 192.168.123.100
+#define PRINTER_IP_ADDR         "192.168.123.100"
 #define PRINTER_TCP_PORT        9100
 #define PRINTER_CONNECT_TIMEOUT 5000
+
+// -----------------------------------------------------------------------------
+// 4B. Automatic Print Triggers (Zero-Button Operation)
+// -----------------------------------------------------------------------------
+#define AUTO_PRINT_ON_BOOT             true    // Print automatically once when ESP32 boots up
+#define AUTO_PRINT_ON_PRINTER_POWER    true    // Print automatically when printer switch is turned ON
+#define PRINTER_POLL_INTERVAL_MS       1500    // Background probe interval to sense printer power-on
+#define PRINTER_READY_SETTLE_MS        2000    // Settle time for thermal head homing and motor boot
 
 // Serial Fallback Settings (UART2)
 #define PRINTER_SERIAL_BAUD     115200
