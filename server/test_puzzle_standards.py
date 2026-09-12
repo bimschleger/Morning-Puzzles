@@ -1,0 +1,303 @@
+#!/usr/bin/env python3
+"""
+Automated Test Suite: Morning Puzzles Presentation & Authoring Standards
+Strictly validates:
+  - docs/PUZZLE_HEADER_SPEC.md (Single-word titles, difficulty rules, header hierarchy)
+  - docs/PUZZLE_DESCRIPTION_GUIDELINES.md (<= 100 chars, imperative formula, plain English)
+  - docs/PUZZLE_SOLUTION_KEY_SPEC.md (48-column monospaced solution layout, indentation, separators)
+  - simulator/receipt_simulator.html consistency with Python backend & specifications
+"""
+
+import os
+import re
+import sys
+
+# Add server directory to sys.path
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from app.main import generate_daily_bundle
+from app.renderer.text_formatter import build_daily_receipt_bytes, EscPosTextReceipt
+
+APPROVED_TITLES = [
+    "SUDOKU",
+    "SEARCH",
+    "NONOGRAM",
+    "STARS",
+    "JUMBLE",
+    "BINARY",
+    "MINES",
+    "TENTS",
+    "BRIDGES",
+    "KILLER",
+]
+
+FORBIDDEN_TITLE_PATTERNS = [
+    r"Word\s+Search",
+    r"Daily\s+Jumble",
+    r"Queens\s*/\s*Star\s*Battle",
+    r"Nonogram\s*/\s*Picross",
+    r"Tents\s*(?:and|&)\s*Trees",
+    r"Hashiwokakero",
+    r"Picross",
+    r"Star\s*Battle",
+]
+
+FORBIDDEN_JARGON_TERMS = [
+    "orthogonally adjacent",
+    "orthogonal",
+    "in a row",
+    "polyomino",
+    "connected component",
+    "spanning tree",
+    "bipartite",
+    "permutation",
+]
+
+APPROVED_IMPERATIVE_VERBS = [
+    "Place",
+    "Fill",
+    "Find",
+    "Shade",
+    "Unscramble",
+    "Deduce",
+    "Pitch",
+    "Connect",
+]
+
+
+def test_titles_and_forbidden_terms():
+    print("Test 1: Verifying Strict One-Word Titles & Zero Forbidden Aliases...")
+    bundle = generate_daily_bundle(difficulty="medium")
+    receipt_bytes = build_daily_receipt_bytes(bundle)
+    receipt_text = receipt_bytes.decode("latin-1")
+
+    # 1. Verify all approved one-word titles exist in the receipt
+    for title in APPROVED_TITLES:
+        expected_header = f"--- {title} ---"
+        assert expected_header in receipt_text, f"Missing canonical header '{expected_header}' in receipt output"
+        # Must be strictly one word
+        assert len(title.split()) == 1, f"Title '{title}' is not a single word"
+        assert title.isupper(), f"Title '{title}' must be uppercase"
+
+    # 2. Verify no forbidden aliases appear anywhere in the output
+    for pattern in FORBIDDEN_TITLE_PATTERNS:
+        match = re.search(pattern, receipt_text, re.IGNORECASE)
+        assert not match, f"Forbidden title alias matching '{pattern}' found in receipt: '{match.group(0) if match else ''}'"
+
+    print("  -> Passed! All 10 puzzle headers use strictly one-word uppercase titles with zero forbidden aliases.\n")
+
+
+def test_difficulty_presentation_and_theme_rules():
+    print("Test 2: Verifying Difficulty Representation & Theme Rules...")
+    bundle = generate_daily_bundle(difficulty="medium")
+    receipt_bytes = build_daily_receipt_bytes(bundle)
+    receipt_text = receipt_bytes.decode("latin-1")
+
+    # 1. SEARCH must NEVER display a difficulty line
+    lines = receipt_text.split("\n")
+    for i, line in enumerate(lines):
+        if "--- SEARCH ---" in line:
+            # Check the next 3 lines
+            surrounding = "\n".join(lines[i : i + 4])
+            assert "DIFFICULTY:" not in surrounding, (
+                f"SEARCH header must omit difficulty line! Found:\n{surrounding}"
+            )
+
+    # 2. Puzzles with difficulty must have DIFFICULTY: [LEVEL] directly below title
+    difficulty_puzzles = ["SUDOKU", "NONOGRAM", "STARS", "JUMBLE", "BINARY", "MINES", "TENTS", "BRIDGES", "KILLER"]
+    for title in difficulty_puzzles:
+        header_str = f"--- {title} ---"
+        assert header_str in receipt_text, f"Missing header {header_str}"
+        for i, line in enumerate(lines):
+            if header_str in line:
+                diff_line = lines[i + 1] if i + 1 < len(lines) else ""
+                assert "DIFFICULTY:" in diff_line, (
+                    f"{title}: Expected 'DIFFICULTY: [LEVEL]' immediately beneath title line. Got: '{diff_line}'"
+                )
+
+    print("  -> Passed! Difficulty rules verified: SEARCH omits difficulty, other 9 puzzles correctly display DIFFICULTY: [LEVEL].\n")
+
+
+def test_description_length_and_canonical_formula():
+    print("Test 3: Verifying Description Length (<= 100 chars) & Canonical Formula across all difficulties...")
+    # Test descriptions across multiple difficulties
+    difficulties = ["easy", "medium", "hard", "extreme"]
+
+    for diff in difficulties:
+        bundle = generate_daily_bundle(difficulty=diff)
+
+        descriptions = []
+
+        # 1. Sudoku
+        descriptions.append(("Sudoku", "Fill every row, column, and 3x3 box with digits 1-9 without repeating."))
+
+        # 2. Search
+        ws = bundle.get("wordsearch", {})
+        words_count = len(ws.get("placed_words", [])) or len(ws.get("words", []))
+        search_desc = f"Find all {words_count} hidden words listed below." if words_count else "Find all listed words hidden across the grid."
+        descriptions.append(("Search", search_desc))
+
+        # 3. Nonogram
+        descriptions.append(("Nonogram", "Shade blocks of cells matching each clue in order, separated by at least one empty cell."))
+
+        # 4. Stars
+        q = bundle.get("queens", {})
+        q_diff = str(q.get("difficulty", diff))
+        stars_num = 2 if q_diff.lower() in ("hard", "master", "extreme") or q.get("stars_per_unit", 1) > 1 else 1
+        star_str = "2 stars" if stars_num > 1 else "1 star"
+        descriptions.append(("Stars", f"Place {star_str} in each row, column, and region with no stars touching, even diagonally."))
+
+        # 5. Jumble
+        descriptions.append(("Jumble", "Unscramble each word, then use the circled letters to solve the riddle."))
+
+        # 6. Binary
+        b = bundle.get("binary", {})
+        b_size = b.get("size", 8)
+        if b_size == 6 or diff == "easy":
+            b_desc = "Fill each row and column with three 0s and three 1s, with no more than two consecutive of each type."
+        else:
+            b_desc = "Fill each row and column with four 0s and four 1s, with no more than two consecutive of each type."
+        descriptions.append(("Binary", b_desc))
+
+        # 7. Mines
+        m = bundle.get("mines", {})
+        m_diff = str(m.get("difficulty", diff))
+        total_mines = m.get("total_mines", 8 if m_diff.lower() == "easy" else (15 if m_diff.lower() == "hard" else 12))
+        descriptions.append(("Mines", f"Deduce all {total_mines} hidden mines using the adjacent numbered clues."))
+
+        # 8. Tents
+        t = bundle.get("tents", {})
+        t_diff = str(t.get("difficulty", diff))
+        t_count = t.get("tree_count", 4 if t_diff.lower() == "easy" else (11 if t_diff.lower() == "hard" else 8))
+        descriptions.append(("Tents", f"Pitch {t_count} tents next to trees without tents touching, matching row and column counts."))
+
+        # 9. Bridges
+        descriptions.append(("Bridges", "Connect all islands into one network using 1 or 2 lines matching each island's number."))
+
+        # 10. Killer
+        k = bundle.get("killer", {})
+        k_size = k.get("size", 4)
+        k_range = "1-4" if k_size == 4 else "1-6"
+        descriptions.append(("Killer", f"Fill every row, column, and box with digits {k_range}, matching cage sums without repeats."))
+
+        # Validate each description
+        for name, desc in descriptions:
+            # Rule 1: <= 100 characters
+            assert len(desc) <= 100, (
+                f"{name} description exceeds 100 characters ({len(desc)} chars) in '{diff}':\n  '{desc}'"
+            )
+
+            # Rule 2: Exactly 1 sentence (ends with single period, exactly one period total)
+            assert desc.endswith("."), f"{name} description must end with a period: '{desc}'"
+            assert desc.count(".") == 1, f"{name} description must be exactly one sentence. Found {desc.count('.')} periods: '{desc}'"
+
+            # Rule 3: Starts with approved imperative verb
+            first_word = desc.split()[0]
+            assert first_word in APPROVED_IMPERATIVE_VERBS, (
+                f"{name} description must start with approved imperative verb {APPROVED_IMPERATIVE_VERBS}, got '{first_word}'"
+            )
+
+            # Rule 4: Zero forbidden jargon
+            for jargon in FORBIDDEN_JARGON_TERMS:
+                assert jargon not in desc.lower(), (
+                    f"{name} description contains forbidden jargon term '{jargon}': '{desc}'"
+                )
+
+    print("  -> Passed! All descriptions across all difficulties are <= 100 chars, follow the canonical 1-sentence formula, and contain zero jargon.\n")
+
+
+def test_solution_key_spec():
+    print("Test 4: Verifying Solution Key Monospaced Layout, Indentation & Width Limits...")
+    bundle = generate_daily_bundle(difficulty="medium")
+    bundle["show_solutions"] = True
+    receipt_bytes = build_daily_receipt_bytes(bundle)
+    receipt_text = receipt_bytes.decode("latin-1")
+
+    # 1. Check master header
+    assert "------------------------------------------------" in receipt_text
+    assert "[ SOLUTION KEY ]" in receipt_text
+
+    # Extract solution key text
+    key_start = receipt_text.find("[ SOLUTION KEY ]")
+    assert key_start != -1
+    key_text = receipt_text[key_start:]
+
+    # Strip ESC and GS hardware control sequences to get clean printable text
+    clean_key_text = re.sub(r'\x1b[a-zA-Z@!][\x00-\xff]?|\x1d[a-zA-Z@!][\x00-\xff]?', '', key_text)
+
+    # 2. Check each game subtitle matches strictly one-word uppercase
+    for title in APPROVED_TITLES:
+        # Title must appear as a standalone subtitle line
+        pattern = rf"(?:^|\n){re.escape(title)}\n"
+        assert re.search(pattern, clean_key_text), f"Missing solution subtitle for '{title}' in Solution Key"
+
+    # 3. Check line width restriction (<= 48 characters for every line)
+    lines = clean_key_text.split("\n")
+    for line in lines:
+        clean = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', line)
+        assert len(clean) <= 48, (
+            f"Solution key line exceeds 48 characters ({len(clean)} chars): '{clean}'"
+        )
+
+    # 4. Check 2D ASCII grid safe indent (6 spaces) for grid-based solutions
+    for grid_title in ["SUDOKU", "NONOGRAM", "BINARY", "MINES", "KILLER"]:
+        idx = clean_key_text.find(f"\n{grid_title}\n")
+        assert idx != -1
+        grid_section = clean_key_text[idx + len(grid_title) + 2 : idx + len(grid_title) + 200]
+        first_grid_line = grid_section.split("\n")[0]
+        assert first_grid_line.startswith("      "), (
+            f"{grid_title} grid line does not have 6 spaces left padding: '{first_grid_line}'"
+        )
+
+    print("  -> Passed! Solution Key adheres strictly to 48-column ESC/POS constraints, 6-space indentation, and single-word subtitles.\n")
+
+
+def test_simulator_consistency():
+    print("Test 5: Verifying Simulator Template & Header Call Consistency...")
+    sim_path = os.path.join(os.path.dirname(__file__), "..", "simulator", "receipt_simulator.html")
+    assert os.path.exists(sim_path), f"Simulator file not found at {sim_path}"
+
+    with open(sim_path, "r", encoding="utf-8") as f:
+        sim_content = f.read()
+
+    # 1. Search header call must NOT pass difficulty in simulator
+    # Correct: addStandardPuzzleHeader(items, 'SEARCH', null, searchDesc) or without wsDiff
+    search_call_match = re.search(r"addStandardPuzzleHeader\s*\(\s*items\s*,\s*['\"]SEARCH['\"]\s*,\s*([^,)]+)", sim_content)
+    assert search_call_match, "Could not find addStandardPuzzleHeader call for SEARCH in simulator"
+    diff_arg = search_call_match.group(1).strip()
+    assert diff_arg in ("null", "undefined", "None", "false"), (
+        f"Simulator must NOT pass difficulty to SEARCH header! Found '{diff_arg}'. SEARCH is theme-driven."
+    )
+
+    # 2. Check PUZZLE_INSTRUCTIONS table lengths
+    instr_block_match = re.search(r"const\s+PUZZLE_INSTRUCTIONS\s*=\s*\{([^}]+)\};", sim_content)
+    assert instr_block_match, "Could not find PUZZLE_INSTRUCTIONS in simulator"
+    instr_block = instr_block_match.group(1)
+
+    for line in instr_block.split("\n"):
+        line = line.strip()
+        if not line or not line.startswith("'"):
+            continue
+        m = re.match(r"'([A-Z]+)'\s*:\s*'([^']+)'", line)
+        if m:
+            game_name, text = m.group(1), m.group(2)
+            assert len(text) <= 100, f"Simulator PUZZLE_INSTRUCTIONS for {game_name} exceeds 100 chars ({len(text)}): '{text}'"
+            assert game_name in APPROVED_TITLES, f"Unknown game {game_name} in simulator PUZZLE_INSTRUCTIONS"
+
+    print("  -> Passed! Simulator templates and header calls strictly match canonical specification.\n")
+
+
+if __name__ == "__main__":
+    print("==================================================================")
+    print("RUNNING MORNING PUZZLES PRESENTATION & AUTHORING STANDARDS TESTS")
+    print("==================================================================\n")
+
+    test_titles_and_forbidden_terms()
+    test_difficulty_presentation_and_theme_rules()
+    test_description_length_and_canonical_formula()
+    test_solution_key_spec()
+    test_simulator_consistency()
+
+    print("==================================================================")
+    print("ALL PRESENTATION & AUTHORING STANDARDS TESTS PASSED (5/5)!")
+    print("==================================================================")

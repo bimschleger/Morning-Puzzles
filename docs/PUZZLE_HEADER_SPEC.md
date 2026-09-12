@@ -60,9 +60,9 @@ All existing games—and any future games added to Morning Puzzles—must strict
 
 | Puzzle Name | Exact Title Header | Has Difficulty? | Standard Difficulty Values | Canonical One-Sentence Gameplay Instruction | Notes / Placement Rules |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Stars** | `--- STARS ---` | **Yes** | `EASY` (5x5), `MEDIUM` (8x8), `HARD` (9x9 2★), `MASTER` (10x10 2★) | *Place [1 star / 2 stars] in each row, column, and region with no stars touching, even diagonally.* | Dynamic star count (1★ for Easy/Medium, 2★ for Hard/Master). Replaces legacy "Queens" / "Star Battle". |
+| **Stars** | `--- STARS ---` | **Yes** | `EASY` (5x5/6x6), `MEDIUM` (8x8), `HARD` (9x9 2★), `MASTER` / `EXTREME` (10x10 2★) | *Place [1 star / 2 stars] in each row, column, and region with no stars touching, even diagonally.* | Dynamic star count (1★ for Easy/Medium, 2★ for Hard/Master). Replaces legacy "Queens" / "Star Battle". |
 | **Sudoku** | `--- SUDOKU ---` | **Yes** | `EASY`, `MEDIUM`, `HARD` | *Fill every row, column, and 3x3 box with digits 1-9 without repeating.* | Direct and concise. Pure 9x9 grid follows instruction. |
-| **Search** | `--- SEARCH ---` | **No** *(Theme)* | *None* | *Find all [N] hidden words listed below.* *(Fallback: Find all listed words hidden across the grid.)* | Dynamic word count [N]. `★ THEME: [NAME]` placed with checklist words below grid. |
+| **Search** | `--- SEARCH ---` | **No** *(Theme)* | *None* | *Find all [N] hidden words listed below.* *(Fallback: Find all listed words hidden across the grid.)* | Dynamic word count [N]. `★ THEME: [NAME]` placed with checklist words below grid. Difficulty line is strictly omitted. |
 | **Nonogram** | `--- NONOGRAM ---` | **Yes** | `EASY` (5x5), `MEDIUM` (8x8), `HARD` (10x10), `EXPERT` (15x15) | *Shade blocks of cells matching each clue in order, separated by at least one empty cell.* | Explains multiple ordered block sequences and separating empty cells without referencing pictures. |
 | **Jumble** | `--- JUMBLE ---` | **Yes** | `EASY`, `MEDIUM`, `HARD` | *Unscramble each word, then use the circled letters to solve the riddle.* | Clean 2-step prompt without jargon. |
 | **Binary** | `--- BINARY ---` | **Yes** | `EASY` (6x6), `MEDIUM` (8x8), `HARD` (8x8) | *Fill each row and column with [three 0s and three 1s / four 0s and four 1s], with no more than two consecutive of each type.* | Dynamic counts: three 0s/1s for 6x6 (Easy), four 0s/1s for 8x8 (Medium/Hard). Avoids "in a row" ambiguity. |
@@ -93,9 +93,27 @@ When adding a new puzzle type to Morning Puzzles:
 1. **Select Strict One-Word Title**: Choose a single uppercase English word (e.g., `--- CROSSWORD ---`, `--- TANGLE ---`, `--- KAKURO ---`, `--- BATTLESHIPS ---`, `--- NURIKABE ---`). Multi-word, hyphenated, or slash-separated names are strictly forbidden.
 2. **Define One-Sentence Instruction**: Author exactly one clear, concise sentence explaining the objective so new players understand how to play immediately. The instruction must strictly adhere to the $\le 100$-character limit, canonical formula, and dynamic parameterization rules detailed in [`docs/PUZZLE_DESCRIPTION_GUIDELINES.md`](PUZZLE_DESCRIPTION_GUIDELINES.md).
 3. **Determine Difficulty Applicability**:
-   - If the game has discrete difficulty levels, map them to standard keywords (`EASY`, `MEDIUM`, `HARD`, `EXPERT`, `MASTER`) and display via `DIFFICULTY: [LEVEL]`.
+   - If the game has discrete difficulty levels, map them to standard keywords (`EASY`, `MEDIUM`, `HARD`, `EXPERT`, `MASTER`, `EXTREME`) and display via `DIFFICULTY: [LEVEL]`.
    - If the game is driven by theme or topic rather than difficulty, omit the difficulty line and place the one-sentence instruction directly below the title.
 4. **Canvas Drawing**: Start the canvas directly with the visual puzzle component (borders, cells, or game clues). Do not draw a banner title inside the canvas.
 5. **Checklist & Clues**: Place any answer verification or pencil-tracking tools (checkboxes `[ ]`, scratch lines) underneath the puzzle grid separated by a dashed tear-line.
 6. **Solution Key Formatting**: Ensure the game's solution format strictly follows the monospaced ASCII requirements in [`docs/PUZZLE_SOLUTION_KEY_SPEC.md`](PUZZLE_SOLUTION_KEY_SPEC.md).
+
+---
+
+## 6. Automated Verification Pipeline
+
+All puzzle title headers, difficulty lines, and descriptions are continuously and automatically validated by:
+
+```bash
+python3 server/test_puzzle_standards.py
+```
+
+This test programmatically validates:
+1. All 10 puzzle headers use strictly one uppercase word enclosed in triple dashes.
+2. Zero forbidden title aliases appear anywhere in the codebase.
+3. Theme-driven puzzles (`SEARCH`) omit the difficulty line.
+4. All difficulty-bearing puzzles have valid uppercase difficulty strings directly under the title.
+5. Simulator JavaScript templates match Python server formatting.
+
 

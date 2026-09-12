@@ -584,7 +584,7 @@ def _append_solution_key(r: EscPosTextReceipt, daily_data: Dict[str, Any]):
     # 4. Stars
     if "queens" in daily_data:
         q = daily_data["queens"]
-        stars = q.get("queens", [])
+        stars = q.get("stars_solution") or q.get("queens") or q.get("stars") or []
         if stars:
             r.bold(True)
             r.println("STARS")

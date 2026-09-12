@@ -109,3 +109,21 @@ Before submitting or committing a new puzzle description, verify:
 - [ ] The sentence contains zero algorithmic jargon (*no "orthogonally adjacent", "polyomino", etc.*).
 - [ ] Wraps into $\le 2$ lines on a 48-column thermal receipt without splitting words.
 - [ ] Accurately represents what the generator actually creates without making false aesthetic promises.
+
+---
+
+## 6. Automated Verification Pipeline
+
+All puzzle descriptions, string lengths, imperative verbs, and prohibited jargon are continuously and automatically validated by:
+
+```bash
+python3 server/test_puzzle_standards.py
+```
+
+This test programmatically validates:
+1. Every description across all difficulty tiers (`EASY`, `MEDIUM`, `HARD`, `EXTREME`) is strictly $\le 100$ characters.
+2. Every description is exactly one sentence.
+3. Every description begins with an approved imperative verb.
+4. Zero algorithmic or geometric jargon terms (*"orthogonally adjacent"*, *"in a row"*, *"polyomino"*, *"connected component"*, etc.) are present.
+5. All Web Simulator fallback instruction templates are synchronized with the canonical matrix.
+

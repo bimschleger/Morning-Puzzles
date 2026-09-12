@@ -16,19 +16,23 @@ Runs **100% On-Device and Offline** on an **ESP32** in native C++ with zero clou
 
 ---
 
-## 🧩 Featured Games (All 9 Included)
+## 🧩 Featured Games (All 10 Included)
 
-Every print job generates a randomized, unique daily edition featuring all 9 open-source (Apache 2.0 / MIT) puzzle types:
+Every print job generates a randomized, unique daily edition featuring all 10 open-source (Apache 2.0 / MIT) puzzle types conforming to strict presentation standards:
 
 1. **Sudoku**: 9x9 grid with standard 3x3 block hierarchy, generated with a backtracking solver mathematically guaranteed to have exactly one unique solution.
-2. **Search (Word Search)**: Dynamic 12x12 letter matrix with randomized hidden words (horizontal, vertical, diagonal) across curated themes (Morning, Space, Animals, Nature, Tech), complete with checkbox tracking.
-3. **Nonogram (Picross)**: Deductive picture logic grids (5x5, 8x8, 10x10) with row and column clue numbers.
-4. **Stars (Queens / Star Battle)**: LinkedIn Queens & 2-Star Battle format with irregular contiguous region partitioning where no two stars touch, even diagonally.
+2. **Search** *(Word Search)*: Dynamic letter matrix with randomized hidden words (horizontal, vertical, diagonal) across curated themes (Morning, Space, Animals, Nature, Tech), complete with checkbox tracking. Theme-driven with no difficulty line.
+3. **Nonogram** *(Picross)*: Deductive picture logic grids (5x5, 8x8, 10x10) with row and column clue numbers.
+4. **Stars** *(Queens / Star Battle)*: LinkedIn Queens & 2-Star Battle format with irregular contiguous region partitioning where no two stars touch, even diagonally.
 5. **Jumble**: 4 scrambled clue words with circled letter positions, ruled handwriting scratchpad lines, and a punchline riddle to solve.
-6. **Binary (Takuzu / Binairo)**: 0 and 1 logic puzzle with strict adjacency rules (no three in a row) and equal row/column parity.
-7. **Mines (Minesweeper Deduction)**: 100% deductive, guess-free minefield with adjacent mine count clues and total mine counter.
-8. **Tents (Tents & Trees)**: Bipartite matching puzzle where each tree is paired with an orthogonally adjacent tent, tents never touch even diagonally, and margin numbers indicate line totals.
-9. **Bridges (Hashiwokakero)**: Connect numbered circular islands with horizontal and vertical single/double bridges to form a single continuous spanning network without crossings.
+6. **Binary** *(Takuzu / Binairo)*: 0 and 1 logic puzzle with strict adjacency rules (no two consecutive identical symbols) and equal row/column parity.
+7. **Mines** *(Minesweeper Deduction)*: 100% deductive, guess-free minefield with adjacent mine count clues and total mine counter.
+8. **Tents** *(Tents & Trees)*: Bipartite matching puzzle where each tree is paired with a tent next to it, tents never touch even diagonally, and margin numbers indicate line totals.
+9. **Bridges** *(Hashiwokakero)*: Connect numbered circular islands with horizontal and vertical single/double bridges to form a single continuous spanning network without crossings.
+10. **Killer** *(Killer Sudoku)*: Cage-sum deduction puzzle (4x4 on Easy/Medium, 6x6 on Extreme) combining Latin-square non-repeating digits with dashed cage arithmetic sums.
+
+> [!NOTE]
+> All puzzle presentation formatting (single-word uppercase titles, $\le 100$-character one-sentence descriptions, centered difficulty placement, and 48-column ASCII solution keys) strictly adheres to [`docs/PUZZLE_HEADER_SPEC.md`](docs/PUZZLE_HEADER_SPEC.md), [`docs/PUZZLE_DESCRIPTION_GUIDELINES.md`](docs/PUZZLE_DESCRIPTION_GUIDELINES.md), and [`docs/PUZZLE_SOLUTION_KEY_SPEC.md`](docs/PUZZLE_SOLUTION_KEY_SPEC.md), verified by `python3 server/test_puzzle_standards.py`.
 
 ---
 

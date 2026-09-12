@@ -222,3 +222,21 @@ When the solution key is enabled, it is appended to the bottom of the receipt di
 - [x] **NO missing blank line after an entry** (must separate each puzzle's solution block).
 - [x] **NO multi-word subtitles** (must use strictly single-word uppercase matching [`docs/PUZZLE_HEADER_SPEC.md`](PUZZLE_HEADER_SPEC.md)).
 - [x] **NO ambiguous glyphs** (must strictly follow the glyph definitions in Section 3).
+
+---
+
+## 5. Automated Verification Pipeline
+
+All solution keys, indentation offsets, maximum line widths, and per-puzzle subtitles are continuously and automatically validated by:
+
+```bash
+python3 server/test_puzzle_standards.py
+python3 server/test_thermal_format.py
+```
+
+This test programmatically validates:
+1. Every solution key line strictly adheres to the 48-character thermal printing column width ($\le 48$ characters).
+2. All 2D ASCII grid outputs use a safe left margin of 6 spaces (`'      '`).
+3. Every puzzle subtitle is strictly a single uppercase word matching the master title.
+4. Each game entry is followed by exactly one blank line separator.
+

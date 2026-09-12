@@ -5499,9 +5499,9 @@
       'SEARCH': 'Find all listed words hidden across the grid.',
       'NONOGRAM': 'Shade blocks of cells matching each clue in order, separated by at least one empty cell.',
       'JUMBLE': 'Unscramble each word, then use the circled letters to solve the riddle.',
-      'BINARY': 'Fill each row and column with equal 0s and 1s, with no more than two consecutive of each type.',
-      'MINES': 'Deduce all hidden mines using the adjacent numbered clues.',
-      'TENTS': 'Pitch 1 tent next to each tree without tents touching, matching row and column counts.',
+      'BINARY': 'Fill each row and column with four 0s and four 1s, with no more than two consecutive of each type.',
+      'MINES': 'Deduce all 12 hidden mines using the adjacent numbered clues.',
+      'TENTS': 'Pitch 8 tents next to trees without tents touching, matching row and column counts.',
       'BRIDGES': 'Connect all islands into one network using 1 or 2 lines matching each island\'s number.',
       'KILLER': 'Fill every row, column, and box with digits 1-4, matching cage sums without repeats.'
     };
@@ -5674,7 +5674,7 @@
         else if (sizeStr === '8x12') wsDiff = 'HARD';
 
         const searchDesc = `Find all ${wsData.words.length} hidden words listed below.`;
-        addStandardPuzzleHeader(items, 'SEARCH', wsDiff, searchDesc);
+        addStandardPuzzleHeader(items, 'SEARCH', null, searchDesc);
 
         if (isGraphic) {
           items.push({
