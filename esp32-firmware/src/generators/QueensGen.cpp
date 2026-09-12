@@ -356,12 +356,19 @@ bool QueensGen::validate() {
 void QueensGen::printToReceipt(EscPosPrinter& printer) {
     const char* diffStr = (_size <= 6) ? "EASY" : ((_starsPerUnit > 1) ? "HARD" : "MEDIUM");
 
+    uint8_t starsCount = (_starsPerUnit > 1 || diffStr[0] == 'H') ? 2 : 1;
+
     printer.setBold(true);
     printer.println("--- STARS ---");
     printer.setBold(false);
     printer.println(String("DIFFICULTY: ") + diffStr);
     printer.println("Place stars so each row, column, and shaped");
-    printer.println("region has required stars with no two touching.");
+    if (starsCount == 1) {
+        printer.println("region contains 1 star with no two stars");
+    } else {
+        printer.println("region contains 2 stars with no two stars");
+    }
+    printer.println("touching, even diagonally.");
     printer.println("");
 
     // Column numbers header

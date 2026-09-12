@@ -155,10 +155,13 @@ def build_daily_receipt_bytes(daily_data: Dict[str, Any]) -> bytes:
     # 4. Queens / Star Battle
     if "queens" in daily_data:
         q = daily_data["queens"]
+        q_diff = str(q.get("difficulty", "Medium"))
+        stars_num = 2 if q_diff.lower() in ("hard", "master", "extreme") or q.get("stars_per_unit", 1) > 1 else 1
+        star_str = f"{stars_num} stars" if stars_num > 1 else "1 star"
         r.puzzle_header(
             "STARS",
-            q.get("difficulty", "Medium"),
-            "Place stars so each row, column, and shaped region contains the required star count with no two stars touching, even diagonally."
+            q_diff,
+            f"Place stars so each row, column, and shaped region contains {star_str} with no two stars touching, even diagonally."
         )
         for line in q.get("text", "").split("\n"):
             r.println("   " + line)
@@ -194,12 +197,14 @@ def build_daily_receipt_bytes(daily_data: Dict[str, Any]) -> bytes:
     # 7. Mines
     if "mines" in daily_data:
         m = daily_data["mines"]
+        m_diff = str(m.get("difficulty", "Medium"))
+        total_mines = m.get("total_mines", 8 if m_diff.lower() == "easy" else (15 if m_diff.lower() == "hard" else 12))
         r.puzzle_header(
             "MINES",
-            m.get("difficulty", "Medium"),
-            "Use the numbered clues showing adjacent mine counts to deduce and mark every hidden mine across the grid."
+            m_diff,
+            f"Use the numbered clues showing adjacent mine counts to deduce each of the {total_mines} hidden mines across the grid."
         )
-        r.println(f"TOTAL MINES: {m.get('total_mines', 10)}")
+        r.println(f"TOTAL MINES: {total_mines}")
         r.println()
         for line in m.get("text", "").split("\n"):
             r.println("   " + line)
@@ -339,10 +344,13 @@ def build_hybrid_daily_receipt_bytes(daily_data: Dict[str, Any]) -> bytes:
     # 5. Stars / Queens
     if "queens" in daily_data:
         q = daily_data["queens"]
+        q_diff = str(q.get("difficulty", "Medium"))
+        stars_num = 2 if q_diff.lower() in ("hard", "master", "extreme") or q.get("stars_per_unit", 1) > 1 else 1
+        star_str = f"{stars_num} stars" if stars_num > 1 else "1 star"
         r.puzzle_header(
             "STARS",
-            q.get("difficulty", "Medium"),
-            "Place stars so each row, column, and shaped region contains the required star count with no two stars touching, even diagonally."
+            q_diff,
+            f"Place stars so each row, column, and shaped region contains {star_str} with no two stars touching, even diagonally."
         )
         try:
             raster = render_queens_dithered_raster(q)
@@ -390,16 +398,18 @@ def build_hybrid_daily_receipt_bytes(daily_data: Dict[str, Any]) -> bytes:
     # 8. Mines
     if "mines" in daily_data:
         m = daily_data["mines"]
+        m_diff = str(m.get("difficulty", "Medium"))
+        total_mines = m.get("total_mines", 8 if m_diff.lower() == "easy" else (15 if m_diff.lower() == "hard" else 12))
         r.puzzle_header(
             "MINES",
-            m.get("difficulty", "Medium"),
-            "Use the numbered clues showing adjacent mine counts to deduce and mark every hidden mine across the grid."
+            m_diff,
+            f"Use the numbered clues showing adjacent mine counts to deduce each of the {total_mines} hidden mines across the grid."
         )
         try:
             raster = render_mines_raster(m)
             r.write_raw(raster)
         except Exception:
-            r.println(f"TOTAL MINES: {m.get('total_mines', 10)}")
+            r.println(f"TOTAL MINES: {total_mines}")
             r.println()
             for line in m.get("text", "").split("\n"):
                 r.println("   " + line)

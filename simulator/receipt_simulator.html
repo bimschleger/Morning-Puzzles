@@ -4972,13 +4972,13 @@
     }
 
     const PUZZLE_INSTRUCTIONS = {
-      'STARS': 'Place stars so each row, column, and shaped region contains the required star count with no two stars touching, even diagonally.',
+      'STARS': 'Place stars so each row, column, and shaped region contains 1 star with no two stars touching, even diagonally.',
       'SUDOKU': 'Fill the grid so that every row, column, and 3x3 box contains digits 1 through 9 without repeating.',
       'SEARCH': 'Find and circle all of the listed words hidden horizontally, vertically, or diagonally within the letter grid.',
       'NONOGRAM': 'Use the number clues outside the grid to shade the correct cells and reveal the hidden pixel picture.',
       'JUMBLE': 'Unscramble the clue words, then arrange the circled letters to solve the punchline riddle.',
       'BINARY': 'Fill the grid with 0s and 1s so no more than two identical numbers touch and each row and column has equal counts.',
-      'MINES': 'Use the numbered clues showing adjacent mine counts to deduce and mark every hidden mine across the grid.',
+      'MINES': 'Use the numbered clues showing adjacent mine counts to deduce each of the hidden mines across the grid.',
       'TENTS': 'Pair each tree with an orthogonally adjacent tent such that tents never touch, even diagonally, matching the row and column counts.',
       'BRIDGES': 'Connect the numbered islands with single or double lines horizontally and vertically so all islands form a single network matching each island\'s bridge count.'
     };
@@ -5007,12 +5007,12 @@
      * Line 2: Centered difficulty: DIFFICULTY: [LEVEL] (if applicable)
      * Line 3: One-sentence gameplay instruction / goal
      */
-    function addStandardPuzzleHeader(items, title, difficulty = null) {
+    function addStandardPuzzleHeader(items, title, difficulty = null, customInstruction = null) {
       items.push({ type: 'header', text: centerLine(`--- ${title} ---`, 48) });
       if (difficulty) {
         items.push({ type: 'text', text: centerLine(`DIFFICULTY: ${difficulty.toUpperCase()}`, 48) });
       }
-      const instruction = PUZZLE_INSTRUCTIONS[title.toUpperCase()];
+      const instruction = customInstruction || PUZZLE_INSTRUCTIONS[title.toUpperCase()];
       if (instruction) {
         const wrapped = wrapText(instruction, 44);
         for (const line of wrapped) {
@@ -5070,7 +5070,8 @@
         else if (variant === '10x10_2star') { size = 10; stars = 2; diffStr = 'EXTREME'; }
 
         const qData = queensSim.generate(size, stars);
-        addStandardPuzzleHeader(items, 'STARS', diffStr);
+        const starsDesc = `Place stars so each row, column, and shaped region contains ${stars} star${stars > 1 ? 's' : ''} with no two stars touching, even diagonally.`;
+        addStandardPuzzleHeader(items, 'STARS', diffStr, starsDesc);
 
         if (isGraphic) {
           // 1-Bit Geometric Hatches Graphic Mode (Canvas)
@@ -5315,7 +5316,8 @@
         const diff = document.getElementById('diff-mines').value;
         const mData = minesSim.generate(diff);
 
-        addStandardPuzzleHeader(items, 'MINES', diff);
+        const minesDesc = `Use the numbered clues showing adjacent mine counts to deduce each of the ${mData.minesCount} hidden mines across the grid.`;
+        addStandardPuzzleHeader(items, 'MINES', diff, minesDesc);
         items.push({ type: 'text', text: centerLine(`TOTAL MINES: ${mData.minesCount}`, COLS) });
         items.push({ type: 'blank', text: '' });
 
