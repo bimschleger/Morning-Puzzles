@@ -197,10 +197,8 @@ void BridgesGen::printToReceipt(EscPosPrinter& printer, BridgesDifficulty diff) 
     printer.println("--- BRIDGES ---");
     printer.setBold(false);
     printer.println(String("DIFFICULTY: ") + diffStr);
-    printer.println("Connect the numbered islands with single or");
-    printer.println("double lines horizontally and vertically so all");
-    printer.println("islands form a single network matching each");
-    printer.println("island's bridge count.");
+    printer.println("Connect all islands into one network using");
+    printer.println("1 or 2 lines matching each island's number.");
     printer.println("");
 
     uint8_t gridH = 2 * _size - 1;

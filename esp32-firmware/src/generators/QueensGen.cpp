@@ -362,13 +362,12 @@ void QueensGen::printToReceipt(EscPosPrinter& printer) {
     printer.println("--- STARS ---");
     printer.setBold(false);
     printer.println(String("DIFFICULTY: ") + diffStr);
-    printer.println("Place stars so each row, column, and shaped");
     if (starsCount == 1) {
-        printer.println("region contains 1 star with no two stars");
+        printer.println("Place 1 star in each row, column, and region");
     } else {
-        printer.println("region contains 2 stars with no two stars");
+        printer.println("Place 2 stars in each row, column, and region");
     }
-    printer.println("touching, even diagonally.");
+    printer.println("with no stars touching, even diagonally.");
     printer.println("");
 
     // Column numbers header

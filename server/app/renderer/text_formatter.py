@@ -79,7 +79,9 @@ class EscPosTextReceipt:
         if difficulty:
             self.println(f"DIFFICULTY: {difficulty.upper()}")
         if instruction:
-            self.println(instruction)
+            import textwrap
+            for line in textwrap.wrap(instruction, width=44):
+                self.println(line)
         self.println()
         self.align("left")
 
@@ -119,7 +121,7 @@ def build_daily_receipt_bytes(daily_data: Dict[str, Any]) -> bytes:
         r.puzzle_header(
             "SUDOKU",
             s.get("difficulty", "Medium"),
-            "Fill the grid so that every row, column, and 3x3 box contains digits 1 through 9 without repeating."
+            "Fill every row, column, and 3x3 box with digits 1-9 without repeating."
         )
         for line in s.get("text", "").split("\n"):
             r.println("   " + line)
@@ -129,10 +131,12 @@ def build_daily_receipt_bytes(daily_data: Dict[str, Any]) -> bytes:
     # 2. Word Search
     if "wordsearch" in daily_data:
         ws = daily_data["wordsearch"]
+        words_count = len(ws.get("placed_words", [])) or len(ws.get("words", []))
+        search_desc = f"Find all {words_count} hidden words listed below." if words_count else "Find all listed words hidden across the grid."
         r.puzzle_header(
             "SEARCH",
             None,
-            "Find and circle all of the listed words hidden horizontally, vertically, or diagonally within the letter grid."
+            search_desc
         )
         for line in ws.get("text", "").split("\n"):
             r.println(line)
@@ -145,7 +149,7 @@ def build_daily_receipt_bytes(daily_data: Dict[str, Any]) -> bytes:
         r.puzzle_header(
             "NONOGRAM",
             n.get("difficulty", "Easy"),
-            "Use the number clues outside the grid to shade the correct cells and reveal the hidden pixel picture."
+            "Shade blocks of cells matching each clue in order, separated by at least one empty cell."
         )
         for line in n.get("text", "").split("\n"):
             r.println(line)
@@ -157,11 +161,11 @@ def build_daily_receipt_bytes(daily_data: Dict[str, Any]) -> bytes:
         q = daily_data["queens"]
         q_diff = str(q.get("difficulty", "Medium"))
         stars_num = 2 if q_diff.lower() in ("hard", "master", "extreme") or q.get("stars_per_unit", 1) > 1 else 1
-        star_str = f"{stars_num} stars" if stars_num > 1 else "1 star"
+        star_str = "2 stars" if stars_num > 1 else "1 star"
         r.puzzle_header(
             "STARS",
             q_diff,
-            f"Place stars so each row, column, and shaped region contains {star_str} with no two stars touching, even diagonally."
+            f"Place {star_str} in each row, column, and region with no stars touching, even diagonally."
         )
         for line in q.get("text", "").split("\n"):
             r.println("   " + line)
@@ -174,7 +178,7 @@ def build_daily_receipt_bytes(daily_data: Dict[str, Any]) -> bytes:
         r.puzzle_header(
             "JUMBLE",
             j.get("difficulty", "Medium"),
-            "Unscramble the clue words, then arrange the circled letters to solve the punchline riddle."
+            "Unscramble each word, then use the circled letters to solve the riddle."
         )
         for line in j.get("text", "").split("\n"):
             r.println(line)
@@ -184,10 +188,16 @@ def build_daily_receipt_bytes(daily_data: Dict[str, Any]) -> bytes:
     # 6. Binary
     if "binary" in daily_data:
         b = daily_data["binary"]
+        b_diff = str(b.get("difficulty", "Medium"))
+        b_size = b.get("size", 8)
+        if b_size == 6 or b_diff.lower() == "easy":
+            binary_desc = "Fill each row and column with three 0s and three 1s, with no more than two consecutive of each type."
+        else:
+            binary_desc = "Fill each row and column with four 0s and four 1s, with no more than two consecutive of each type."
         r.puzzle_header(
             "BINARY",
-            b.get("difficulty", "Medium"),
-            "Fill the grid with 0s and 1s so no more than two identical numbers touch and each row and column has equal counts."
+            b_diff,
+            binary_desc
         )
         for line in b.get("text", "").split("\n"):
             r.println("   " + line)
@@ -202,7 +212,7 @@ def build_daily_receipt_bytes(daily_data: Dict[str, Any]) -> bytes:
         r.puzzle_header(
             "MINES",
             m_diff,
-            f"Use the numbered clues showing adjacent mine counts to deduce each of the {total_mines} hidden mines across the grid."
+            f"Deduce all {total_mines} hidden mines using the adjacent numbered clues."
         )
         r.println(f"TOTAL MINES: {total_mines}")
         r.println()
@@ -214,10 +224,12 @@ def build_daily_receipt_bytes(daily_data: Dict[str, Any]) -> bytes:
     if "tents" in daily_data:
         r.horizontal_rule("-")
         t = daily_data["tents"]
+        t_diff = str(t.get("difficulty", "Medium"))
+        t_count = t.get("tree_count", 4 if t_diff.lower() == "easy" else (11 if t_diff.lower() == "hard" else 8))
         r.puzzle_header(
             "TENTS",
-            t.get("difficulty", "Medium"),
-            "Pair each tree with an orthogonally adjacent tent such that tents never touch, even diagonally, matching the row and column counts."
+            t_diff,
+            f"Pitch {t_count} tents next to trees without tents touching, matching row and column counts."
         )
         for line in t.get("text", "").split("\n"):
             r.println(line)
@@ -230,7 +242,7 @@ def build_daily_receipt_bytes(daily_data: Dict[str, Any]) -> bytes:
         r.puzzle_header(
             "BRIDGES",
             b.get("difficulty", "Medium"),
-            "Connect the numbered islands with single or double lines horizontally and vertically so all islands form a single network matching each island's bridge count."
+            "Connect all islands into one network using 1 or 2 lines matching each island's number."
         )
         for line in b.get("text", "").split("\n"):
             r.println(line)
@@ -296,7 +308,7 @@ def build_hybrid_daily_receipt_bytes(daily_data: Dict[str, Any]) -> bytes:
         r.puzzle_header(
             "SUDOKU",
             s.get("difficulty", "Medium"),
-            "Fill the grid so that every row, column, and 3x3 box contains digits 1 through 9 without repeating."
+            "Fill every row, column, and 3x3 box with digits 1-9 without repeating."
         )
         try:
             raster = render_sudoku_raster(s)
@@ -310,10 +322,12 @@ def build_hybrid_daily_receipt_bytes(daily_data: Dict[str, Any]) -> bytes:
     # 3. Word Search
     if "wordsearch" in daily_data:
         ws = daily_data["wordsearch"]
+        words_count = len(ws.get("placed_words", [])) or len(ws.get("words", []))
+        search_desc = f"Find all {words_count} hidden words listed below." if words_count else "Find all listed words hidden across the grid."
         r.puzzle_header(
             "SEARCH",
             None,
-            "Find and circle all of the listed words hidden horizontally, vertically, or diagonally within the letter grid."
+            search_desc
         )
         try:
             raster = render_wordsearch_raster(ws)
@@ -330,7 +344,7 @@ def build_hybrid_daily_receipt_bytes(daily_data: Dict[str, Any]) -> bytes:
         r.puzzle_header(
             "NONOGRAM",
             n.get("difficulty", "Easy"),
-            "Use the number clues outside the grid to shade the correct cells and reveal the hidden pixel picture."
+            "Shade blocks of cells matching each clue in order, separated by at least one empty cell."
         )
         try:
             raster = render_nonogram_raster(n)
@@ -346,11 +360,11 @@ def build_hybrid_daily_receipt_bytes(daily_data: Dict[str, Any]) -> bytes:
         q = daily_data["queens"]
         q_diff = str(q.get("difficulty", "Medium"))
         stars_num = 2 if q_diff.lower() in ("hard", "master", "extreme") or q.get("stars_per_unit", 1) > 1 else 1
-        star_str = f"{stars_num} stars" if stars_num > 1 else "1 star"
+        star_str = "2 stars" if stars_num > 1 else "1 star"
         r.puzzle_header(
             "STARS",
             q_diff,
-            f"Place stars so each row, column, and shaped region contains {star_str} with no two stars touching, even diagonally."
+            f"Place {star_str} in each row, column, and region with no stars touching, even diagonally."
         )
         try:
             raster = render_queens_dithered_raster(q)
@@ -367,7 +381,7 @@ def build_hybrid_daily_receipt_bytes(daily_data: Dict[str, Any]) -> bytes:
         r.puzzle_header(
             "JUMBLE",
             j.get("difficulty", "Medium"),
-            "Unscramble the clue words, then arrange the circled letters to solve the punchline riddle."
+            "Unscramble each word, then use the circled letters to solve the riddle."
         )
         try:
             raster = render_jumble_raster(j)
@@ -381,10 +395,16 @@ def build_hybrid_daily_receipt_bytes(daily_data: Dict[str, Any]) -> bytes:
     # 7. Binary
     if "binary" in daily_data:
         b = daily_data["binary"]
+        b_diff = str(b.get("difficulty", "Medium"))
+        b_size = b.get("size", 8)
+        if b_size == 6 or b_diff.lower() == "easy":
+            binary_desc = "Fill each row and column with three 0s and three 1s, with no more than two consecutive of each type."
+        else:
+            binary_desc = "Fill each row and column with four 0s and four 1s, with no more than two consecutive of each type."
         r.puzzle_header(
             "BINARY",
-            b.get("difficulty", "Medium"),
-            "Fill the grid with 0s and 1s so no more than two identical numbers touch and each row and column has equal counts."
+            b_diff,
+            binary_desc
         )
         try:
             raster = render_binary_raster(b)
@@ -403,7 +423,7 @@ def build_hybrid_daily_receipt_bytes(daily_data: Dict[str, Any]) -> bytes:
         r.puzzle_header(
             "MINES",
             m_diff,
-            f"Use the numbered clues showing adjacent mine counts to deduce each of the {total_mines} hidden mines across the grid."
+            f"Deduce all {total_mines} hidden mines using the adjacent numbered clues."
         )
         try:
             raster = render_mines_raster(m)
@@ -419,10 +439,12 @@ def build_hybrid_daily_receipt_bytes(daily_data: Dict[str, Any]) -> bytes:
     if "tents" in daily_data:
         r.horizontal_rule("-")
         t = daily_data["tents"]
+        t_diff = str(t.get("difficulty", "Medium"))
+        t_count = t.get("tree_count", 4 if t_diff.lower() == "easy" else (11 if t_diff.lower() == "hard" else 8))
         r.puzzle_header(
             "TENTS",
-            t.get("difficulty", "Medium"),
-            "Pair each tree with an orthogonally adjacent tent such that tents never touch, even diagonally, matching the row and column counts."
+            t_diff,
+            f"Pitch {t_count} tents next to trees without tents touching, matching row and column counts."
         )
         try:
             raster = render_tents_raster(t)
@@ -439,7 +461,7 @@ def build_hybrid_daily_receipt_bytes(daily_data: Dict[str, Any]) -> bytes:
         r.puzzle_header(
             "BRIDGES",
             b.get("difficulty", "Medium"),
-            "Connect the numbered islands with single or double lines horizontally and vertically so all islands form a single network matching each island's bridge count."
+            "Connect all islands into one network using 1 or 2 lines matching each island's number."
         )
         try:
             raster = render_bridges_raster(b)

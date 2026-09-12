@@ -118,8 +118,7 @@ void WordSearchGen::printToReceipt(EscPosPrinter& printer) {
     printer.setBold(true);
     printer.println("--- SEARCH ---");
     printer.setBold(false);
-    printer.println("Find and circle all of the listed words hidden");
-    printer.println("horizontally, vertically, or diagonally.");
+    printer.println(String("Find all ") + _placedWords.size() + " hidden words listed below.");
     printer.println("");
 
     // Print 12x12 grid centered

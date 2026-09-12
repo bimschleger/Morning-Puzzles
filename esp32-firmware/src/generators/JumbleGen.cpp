@@ -60,8 +60,8 @@ void JumbleGen::printToReceipt(EscPosPrinter& printer) {
     printer.println("--- JUMBLE ---");
     printer.setBold(false);
     printer.println("DIFFICULTY: MEDIUM");
-    printer.println("Unscramble the clue words, then arrange the");
-    printer.println("circled letters to solve the punchline riddle.");
+    printer.println("Unscramble each word, then use the circled");
+    printer.println("letters to solve the riddle.");
     printer.println("");
 
     for (uint8_t i = 0; i < _numWords; i++) {

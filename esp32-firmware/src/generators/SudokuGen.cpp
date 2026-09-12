@@ -122,8 +122,8 @@ void SudokuGen::printToReceipt(EscPosPrinter& printer, SudokuDifficulty diff) {
     printer.println("--- SUDOKU ---");
     printer.setBold(false);
     printer.println(String("DIFFICULTY: ") + diffStr);
-    printer.println("Fill the grid so that every row, column, and 3x3");
-    printer.println("box contains digits 1-9 without repeating.");
+    printer.println("Fill every row, column, and 3x3 box with digits");
+    printer.println("1-9 without repeating.");
     printer.println("");
 
     printer.println("   +-------+-------+-------+");

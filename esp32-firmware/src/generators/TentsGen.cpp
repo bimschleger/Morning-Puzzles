@@ -133,9 +133,8 @@ void TentsGen::printToReceipt(EscPosPrinter& printer, TentsDifficulty diff) {
     printer.println("--- TENTS ---");
     printer.setBold(false);
     printer.println(String("DIFFICULTY: ") + diffStr);
-    printer.println("Pair each tree with an orthogonally adjacent tent");
-    printer.println("such that tents never touch, even diagonally,");
-    printer.println("matching the row and column counts.");
+    printer.println(String("Pitch ") + _treeCount + " tents next to trees without tents");
+    printer.println("touching, matching row and column counts.");
     printer.println("");
 
     // Col clues header

@@ -209,7 +209,7 @@ class MinesGenerator:
         lines.append("--- MINES ---")
         lines.append(f"DIFFICULTY: {puzzle_data['difficulty']}")
         total_mines = puzzle_data.get('total_mines', 12)
-        lines.append(f"Use the numbered clues showing adjacent mine counts to deduce each of the {total_mines} hidden mines across the grid.")
+        lines.append(f"Deduce all {total_mines} hidden mines using the adjacent numbered clues.")
         lines.append(f"TOTAL MINES: {puzzle_data['total_mines']}")
         lines.append("")
 

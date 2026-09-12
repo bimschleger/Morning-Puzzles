@@ -64,8 +64,8 @@ void NonogramGen::printToReceipt(EscPosPrinter& printer) {
     printer.println("--- NONOGRAM ---");
     printer.setBold(false);
     printer.println(String("DIFFICULTY: ") + diffStr);
-    printer.println("Use the number clues outside the grid to shade");
-    printer.println("the correct cells and reveal the pixel picture.");
+    printer.println("Shade blocks of cells matching each clue in");
+    printer.println("order, separated by at least one empty cell.");
     printer.println("");
 
     // Find maximum depth of column clues

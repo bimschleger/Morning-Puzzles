@@ -4972,15 +4972,15 @@
     }
 
     const PUZZLE_INSTRUCTIONS = {
-      'STARS': 'Place stars so each row, column, and shaped region contains 1 star with no two stars touching, even diagonally.',
-      'SUDOKU': 'Fill the grid so that every row, column, and 3x3 box contains digits 1 through 9 without repeating.',
-      'SEARCH': 'Find and circle all of the listed words hidden horizontally, vertically, or diagonally within the letter grid.',
-      'NONOGRAM': 'Use the number clues outside the grid to shade the correct cells and reveal the hidden pixel picture.',
-      'JUMBLE': 'Unscramble the clue words, then arrange the circled letters to solve the punchline riddle.',
-      'BINARY': 'Fill the grid with 0s and 1s so no more than two identical numbers touch and each row and column has equal counts.',
-      'MINES': 'Use the numbered clues showing adjacent mine counts to deduce each of the hidden mines across the grid.',
-      'TENTS': 'Pair each tree with an orthogonally adjacent tent such that tents never touch, even diagonally, matching the row and column counts.',
-      'BRIDGES': 'Connect the numbered islands with single or double lines horizontally and vertically so all islands form a single network matching each island\'s bridge count.'
+      'STARS': 'Place 1 star in each row, column, and region with no stars touching, even diagonally.',
+      'SUDOKU': 'Fill every row, column, and 3x3 box with digits 1-9 without repeating.',
+      'SEARCH': 'Find all listed words hidden across the grid.',
+      'NONOGRAM': 'Shade blocks of cells matching each clue in order, separated by at least one empty cell.',
+      'JUMBLE': 'Unscramble each word, then use the circled letters to solve the riddle.',
+      'BINARY': 'Fill each row and column with equal 0s and 1s, with no more than two consecutive of each type.',
+      'MINES': 'Deduce all hidden mines using the adjacent numbered clues.',
+      'TENTS': 'Pitch 1 tent next to each tree without tents touching, matching row and column counts.',
+      'BRIDGES': 'Connect all islands into one network using 1 or 2 lines matching each island\'s number.'
     };
 
     function wrapText(str, maxLen = 44) {
@@ -5070,7 +5070,7 @@
         else if (variant === '10x10_2star') { size = 10; stars = 2; diffStr = 'EXTREME'; }
 
         const qData = queensSim.generate(size, stars);
-        const starsDesc = `Place stars so each row, column, and shaped region contains ${stars} star${stars > 1 ? 's' : ''} with no two stars touching, even diagonally.`;
+        const starsDesc = `Place ${stars} star${stars > 1 ? 's' : ''} in each row, column, and region with no stars touching, even diagonally.`;
         addStandardPuzzleHeader(items, 'STARS', diffStr, starsDesc);
 
         if (isGraphic) {
@@ -5150,7 +5150,8 @@
         if (sizeStr === '8x8') wsDiff = 'EASY';
         else if (sizeStr === '8x12') wsDiff = 'HARD';
 
-        addStandardPuzzleHeader(items, 'SEARCH', wsDiff);
+        const searchDesc = `Find all ${wsData.words.length} hidden words listed below.`;
+        addStandardPuzzleHeader(items, 'SEARCH', wsDiff, searchDesc);
 
         if (isGraphic) {
           items.push({
@@ -5276,7 +5277,10 @@
         const diff = document.getElementById('diff-binary').value;
         const bData = binarySim.generate(diff);
 
-        addStandardPuzzleHeader(items, 'BINARY', diff);
+        const binaryDesc = (bData.size === 6)
+          ? 'Fill each row and column with three 0s and three 1s, with no more than two consecutive of each type.'
+          : 'Fill each row and column with four 0s and four 1s, with no more than two consecutive of each type.';
+        addStandardPuzzleHeader(items, 'BINARY', diff, binaryDesc);
 
         if (isGraphic) {
           items.push({
@@ -5316,7 +5320,7 @@
         const diff = document.getElementById('diff-mines').value;
         const mData = minesSim.generate(diff);
 
-        const minesDesc = `Use the numbered clues showing adjacent mine counts to deduce each of the ${mData.minesCount} hidden mines across the grid.`;
+        const minesDesc = `Deduce all ${mData.minesCount} hidden mines using the adjacent numbered clues.`;
         addStandardPuzzleHeader(items, 'MINES', diff, minesDesc);
         items.push({ type: 'text', text: centerLine(`TOTAL MINES: ${mData.minesCount}`, COLS) });
         items.push({ type: 'blank', text: '' });
@@ -5361,7 +5365,9 @@
         const diff = document.getElementById('diff-tents').value;
         const tData = tentsSim.generate(diff);
 
-        addStandardPuzzleHeader(items, 'TENTS', diff);
+        const tentCount = tData.tents ? tData.tents.length : 8;
+        const tentsDesc = `Pitch ${tentCount} tents next to trees without tents touching, matching row and column counts.`;
+        addStandardPuzzleHeader(items, 'TENTS', diff, tentsDesc);
 
         if (isGraphic) {
           items.push({

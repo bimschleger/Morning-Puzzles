@@ -287,8 +287,14 @@ void BinaryGen::printToReceipt(EscPosPrinter& printer, BinaryDifficulty diff) {
     printer.println("--- BINARY ---");
     printer.setBold(false);
     printer.println(String("DIFFICULTY: ") + diffStr);
-    printer.println("Fill the grid with 0s and 1s so no more than two");
-    printer.println("identical numbers touch and all lines are unique.");
+    if (_size == 6) {
+        printer.println("Fill each row and column with three 0s and");
+        printer.println("three 1s, with no more than two consecutive");
+    } else {
+        printer.println("Fill each row and column with four 0s and");
+        printer.println("four 1s, with no more than two consecutive");
+    }
+    printer.println("of each type.");
     printer.println("");
 
     String sep = "   +";

@@ -59,16 +59,16 @@ All existing games—and any future games added to Morning Puzzles—must strict
 ## 3. Official Game Registry & Matrix
 
 | Puzzle Name | Exact Title Header | Has Difficulty? | Standard Difficulty Values | Canonical One-Sentence Gameplay Instruction | Notes / Placement Rules |
-| :--- | :--- | :---: | :--- | :--- | :--- |
-| **Stars** | `--- STARS ---` | **Yes** | `EASY` (5x5), `MEDIUM` (8x8), `HARD` (9x9 2★), `MASTER` (10x10 2★) | *Place stars so each row, column, and shaped region contains [1 star / 2 stars] with no two stars touching, even diagonally.* | Replaces legacy "Queens" / "Star Battle". Board drawing follows instruction. |
-| **Sudoku** | `--- SUDOKU ---` | **Yes** | `EASY`, `MEDIUM`, `HARD` | *Fill the grid so that every row, column, and 3x3 box contains digits 1 through 9 without repeating.* | Pure 9x9 grid follows instruction. |
-| **Search** | `--- SEARCH ---` | **No** *(Theme)* | *None* | *Find and circle all of the listed words hidden horizontally, vertically, or diagonally within the letter grid.* | Instruction placed directly below title. `★ THEME: [NAME]` placed with checklist words below grid. |
-| **Nonogram** | `--- NONOGRAM ---` | **Yes** | `EASY` (5x5), `MEDIUM` (8x8), `HARD` (10x10), `EXPERT` (15x15) | *Use the number clues outside the grid to shade the correct cells and reveal the hidden pixel picture.* | Board with row/column clues follows instruction. Single-word name replaces "Nonogram / Picross". |
-| **Jumble** | `--- JUMBLE ---` | **Yes** | `EASY`, `MEDIUM`, `HARD` | *Unscramble the clue words, then arrange the circled letters to solve the punchline riddle.* | Clue boxes start directly below instruction. Single-word name replaces "Daily Jumble". |
-| **Binary** | `--- BINARY ---` | **Yes** | `EASY` (6x6), `MEDIUM` (8x8), `HARD` (8x8) | *Fill the grid with 0s and 1s so no more than two identical numbers touch and each row and column has equal counts.* | Pure grid with 0 and 1 clues follows instruction. |
-| **Mines** | `--- MINES ---` | **Yes** | `EASY` (8 Mines), `MEDIUM` (12 Mines), `HARD` (15 Mines) | *Use the numbered clues showing adjacent mine counts to deduce each of the [8 / 12 / 15] hidden mines across the grid.* | `TOTAL MINES: [N]` placed between instruction and drawing. 100% deductive solvability guarantee (zero guessing). |
-| **Tents** | `--- TENTS ---` | **Yes** | `EASY` (6x6), `MEDIUM` (8x8), `HARD` (8x8) | *Pair each tree with an orthogonally adjacent tent such that tents never touch, even diagonally, matching the row and column counts.* | Board with pine trees and row/column margin counts follows instruction. |
-| **Bridges** | `--- BRIDGES ---` | **Yes** | `EASY` (6x6), `MEDIUM` (8x8), `HARD` (8x8) | *Connect the numbered islands with single or double lines horizontally and vertically so all islands form a single network matching each island's bridge count.* | Clean grid with circular island badges and whitespace corridors follows instruction. |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Stars** | `--- STARS ---` | **Yes** | `EASY` (5x5), `MEDIUM` (8x8), `HARD` (9x9 2★), `MASTER` (10x10 2★) | *Place [1 star / 2 stars] in each row, column, and region with no stars touching, even diagonally.* | Dynamic star count (1★ for Easy/Medium, 2★ for Hard/Master). Replaces legacy "Queens" / "Star Battle". |
+| **Sudoku** | `--- SUDOKU ---` | **Yes** | `EASY`, `MEDIUM`, `HARD` | *Fill every row, column, and 3x3 box with digits 1-9 without repeating.* | Direct and concise. Pure 9x9 grid follows instruction. |
+| **Search** | `--- SEARCH ---` | **No** *(Theme)* | *None* | *Find all [N] hidden words listed below.* *(Fallback: Find all listed words hidden across the grid.)* | Dynamic word count [N]. `★ THEME: [NAME]` placed with checklist words below grid. |
+| **Nonogram** | `--- NONOGRAM ---` | **Yes** | `EASY` (5x5), `MEDIUM` (8x8), `HARD` (10x10), `EXPERT` (15x15) | *Shade blocks of cells matching each clue in order, separated by at least one empty cell.* | Explains multiple ordered block sequences and separating empty cells without referencing pictures. |
+| **Jumble** | `--- JUMBLE ---` | **Yes** | `EASY`, `MEDIUM`, `HARD` | *Unscramble each word, then use the circled letters to solve the riddle.* | Clean 2-step prompt without jargon. |
+| **Binary** | `--- BINARY ---` | **Yes** | `EASY` (6x6), `MEDIUM` (8x8), `HARD` (8x8) | *Fill each row and column with [three 0s and three 1s / four 0s and four 1s], with no more than two consecutive of each type.* | Dynamic counts: three 0s/1s for 6x6 (Easy), four 0s/1s for 8x8 (Medium/Hard). Avoids "in a row" ambiguity. |
+| **Mines** | `--- MINES ---` | **Yes** | `EASY` (8 Mines), `MEDIUM` (12 Mines), `HARD` (15 Mines) | *Deduce all [8 / 12 / 15] hidden mines using the adjacent numbered clues.* | Dynamic mine count [N]. `TOTAL MINES: [N]` placed between instruction and drawing. Zero guessing. |
+| **Tents** | `--- TENTS ---` | **Yes** | `EASY` (6x6), `MEDIUM` (8x8), `HARD` (8x8) | *Pitch [4 / 8 / 11] tents next to trees without tents touching, matching row and column counts.* | Dynamic tent count (4 for Easy, 8 for Medium, 11 for Hard). Replaces "orthogonally adjacent" with "next to trees". |
+| **Bridges** | `--- BRIDGES ---` | **Yes** | `EASY` (6x6), `MEDIUM` (8x8), `HARD` (8x8) | *Connect all islands into one network using 1 or 2 lines matching each island's number.* | 45% reduction. Explains single network, 1 or 2 lines, and island matching numbers. |
 
 ---
 
@@ -90,7 +90,7 @@ Before committing any puzzle renderer or generator update, verify that **NONE** 
 When adding a new puzzle type to Morning Puzzles:
 
 1. **Select Strict One-Word Title**: Choose a single uppercase English word (e.g., `--- CROSSWORD ---`, `--- TANGLE ---`, `--- KAKURO ---`, `--- BATTLESHIPS ---`, `--- NURIKABE ---`). Multi-word, hyphenated, or slash-separated names are strictly forbidden.
-2. **Define One-Sentence Instruction**: Author exactly one clear, concise sentence explaining the objective so new players understand how to play immediately.
+2. **Define One-Sentence Instruction**: Author exactly one clear, concise sentence explaining the objective so new players understand how to play immediately. The instruction must strictly adhere to the $\le 100$-character limit, canonical formula, and dynamic parameterization rules detailed in [`docs/PUZZLE_DESCRIPTION_GUIDELINES.md`](PUZZLE_DESCRIPTION_GUIDELINES.md).
 3. **Determine Difficulty Applicability**:
    - If the game has discrete difficulty levels, map them to standard keywords (`EASY`, `MEDIUM`, `HARD`, `EXPERT`, `MASTER`) and display via `DIFFICULTY: [LEVEL]`.
    - If the game is driven by theme or topic rather than difficulty, omit the difficulty line and place the one-sentence instruction directly below the title.
