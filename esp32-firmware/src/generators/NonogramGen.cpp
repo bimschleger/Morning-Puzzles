@@ -58,10 +58,14 @@ void NonogramGen::generate(NonogramDifficulty difficulty) {
 }
 
 void NonogramGen::printToReceipt(EscPosPrinter& printer) {
+    const char* diffStr = (_size <= 5) ? "EASY" : ((_size <= 8) ? "MEDIUM" : "HARD");
+
     printer.setBold(true);
-    printer.println("--- NONOGRAM / PICROSS ---");
+    printer.println("--- NONOGRAM ---");
     printer.setBold(false);
-    printer.println(String("Grid: ") + _size + "x" + _size + " | Logic Puzzle");
+    printer.println(String("DIFFICULTY: ") + diffStr);
+    printer.println("Use the number clues outside the grid to shade");
+    printer.println("the correct cells and reveal the pixel picture.");
     printer.println("");
 
     // Find maximum depth of column clues

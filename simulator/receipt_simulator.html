@@ -2454,15 +2454,51 @@
       return key + ' '.repeat(spaces) + val;
     }
 
+    const PUZZLE_INSTRUCTIONS = {
+      'STARS': 'Place stars so each row, column, and shaped region contains the required star count with no two stars touching, even diagonally.',
+      'SUDOKU': 'Fill the grid so that every row, column, and 3x3 box contains digits 1 through 9 without repeating.',
+      'SEARCH': 'Find and circle all of the listed words hidden horizontally, vertically, or diagonally within the letter grid.',
+      'NONOGRAM': 'Use the number clues outside the grid to shade the correct cells and reveal the hidden pixel picture.',
+      'JUMBLE': 'Unscramble the clue words, then arrange the circled letters to solve the punchline riddle.',
+      'BINARY': 'Fill the grid with 0s and 1s so no more than two identical numbers touch and each row and column has equal counts.',
+      'MINES': 'Use the numbered clues showing adjacent mine counts to deduce and mark every hidden mine across the grid.'
+    };
+
+    function wrapText(str, maxLen = 44) {
+      const words = str.split(' ');
+      const lines = [];
+      let current = '';
+      for (const w of words) {
+        if (!current) {
+          current = w;
+        } else if (current.length + 1 + w.length <= maxLen) {
+          current += ' ' + w;
+        } else {
+          lines.push(current);
+          current = w;
+        }
+      }
+      if (current) lines.push(current);
+      return lines;
+    }
+
     /**
      * Appends the standardized Morning Puzzles header across all puzzle types.
      * Line 1: Centered title: --- [GAME NAME] ---
      * Line 2: Centered difficulty: DIFFICULTY: [LEVEL] (if applicable)
+     * Line 3: One-sentence gameplay instruction / goal
      */
     function addStandardPuzzleHeader(items, title, difficulty = null) {
       items.push({ type: 'header', text: centerLine(`--- ${title} ---`, 48) });
       if (difficulty) {
         items.push({ type: 'text', text: centerLine(`DIFFICULTY: ${difficulty.toUpperCase()}`, 48) });
+      }
+      const instruction = PUZZLE_INSTRUCTIONS[title.toUpperCase()];
+      if (instruction) {
+        const wrapped = wrapText(instruction, 44);
+        for (const line of wrapped) {
+          items.push({ type: 'instruction', text: centerLine(line, 48) });
+        }
       }
       items.push({ type: 'blank', text: '' });
     }
@@ -2888,6 +2924,8 @@
             el.className = classes + 'text-blue-600 bg-blue-50 text-[11px]';
           } else if (item.type === 'caption') {
             el.className = classes + 'text-[10px] text-slate-500 text-center italic';
+          } else if (item.type === 'instruction') {
+            el.className = classes + 'text-[11px] text-slate-600 text-center italic leading-tight px-3 my-0.5';
           } else if (item.type === 'blank') {
             el.className = 'h-2';
           } else {

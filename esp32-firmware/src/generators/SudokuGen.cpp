@@ -116,12 +116,14 @@ void SudokuGen::generate(SudokuDifficulty difficulty) {
 }
 
 void SudokuGen::printToReceipt(EscPosPrinter& printer, SudokuDifficulty diff) {
-    const char* diffStr = (diff == SUDOKU_EASY) ? "Easy" : ((diff == SUDOKU_HARD) ? "Hard" : "Medium");
+    const char* diffStr = (diff == SUDOKU_EASY) ? "EASY" : ((diff == SUDOKU_HARD) ? "HARD" : "MEDIUM");
 
     printer.setBold(true);
     printer.println("--- SUDOKU ---");
     printer.setBold(false);
-    printer.println(String("Difficulty: ") + diffStr + " | Clues: " + String(_cluesCount));
+    printer.println(String("DIFFICULTY: ") + diffStr);
+    printer.println("Fill the grid so that every row, column, and 3x3");
+    printer.println("box contains digits 1-9 without repeating.");
     printer.println("");
 
     printer.println("   +-------+-------+-------+");

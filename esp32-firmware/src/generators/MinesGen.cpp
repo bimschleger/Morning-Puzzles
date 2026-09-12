@@ -287,6 +287,8 @@ void MinesGen::printToReceipt(EscPosPrinter& printer, MinesDifficulty diff) {
     printer.println("--- MINES ---");
     printer.setBold(false);
     printer.println(String("DIFFICULTY: ") + diffStr);
+    printer.println("Use the numbered clues showing adjacent mine counts");
+    printer.println("to deduce and mark every hidden mine across the grid.");
     printer.println(String("TOTAL MINES: ") + String(_totalMines));
     printer.println("");
 

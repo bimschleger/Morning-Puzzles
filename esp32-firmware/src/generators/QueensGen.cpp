@@ -354,15 +354,14 @@ bool QueensGen::validate() {
 }
 
 void QueensGen::printToReceipt(EscPosPrinter& printer) {
+    const char* diffStr = (_size <= 6) ? "EASY" : ((_starsPerUnit > 1) ? "HARD" : "MEDIUM");
+
     printer.setBold(true);
-    if (_starsPerUnit == 1) {
-        printer.println("--- QUEENS PUZZLE ---");
-    } else {
-        printer.println("--- STAR BATTLE (2-STAR) ---");
-    }
+    printer.println("--- STARS ---");
     printer.setBold(false);
-    printer.println(String("Size: ") + _size + "x" + _size + " | Place " + String(_starsPerUnit) + " per row, col, region");
-    printer.println("Rule: No two Queens/Stars may touch diagonally!");
+    printer.println(String("DIFFICULTY: ") + diffStr);
+    printer.println("Place stars so each row, column, and shaped");
+    printer.println("region has required stars with no two touching.");
     printer.println("");
 
     // Column numbers header

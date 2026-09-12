@@ -208,6 +208,7 @@ class MinesGenerator:
         lines = []
         lines.append("--- MINES ---")
         lines.append(f"DIFFICULTY: {puzzle_data['difficulty']}")
+        lines.append("Use the numbered clues showing adjacent mine counts to deduce and mark every hidden mine.")
         lines.append(f"TOTAL MINES: {puzzle_data['total_mines']}")
         lines.append("")
 

@@ -118,9 +118,10 @@ void WordSearchGen::generate(WordSearchDifficulty difficulty, int themeIndex) {
 
 void WordSearchGen::printToReceipt(EscPosPrinter& printer) {
     printer.setBold(true);
-    printer.println("--- WORD SEARCH ---");
+    printer.println("--- SEARCH ---");
     printer.setBold(false);
-    printer.println(String("Theme: ") + _currentTheme + " | Words: " + String(_placedWords.size()));
+    printer.println("Find and circle all of the listed words hidden");
+    printer.println("horizontally, vertically, or diagonally.");
     printer.println("");
 
     // Print 12x12 grid centered
@@ -134,7 +135,7 @@ void WordSearchGen::printToReceipt(EscPosPrinter& printer) {
     }
 
     printer.println("");
-    printer.println("Find the words hidden in the grid:");
+    printer.println(String("Theme: ") + _currentTheme);
 
     // Print word list in 2 columns
     for (size_t i = 0; i < _placedWords.size(); i += 2) {

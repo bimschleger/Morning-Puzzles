@@ -51,6 +51,7 @@ inline long random(long min, long max) { return min + random(max - min); }
 inline uint32_t esp_random() { return (uint32_t)std::rand(); }
 inline void randomSeed(unsigned long seed) { std::srand(seed); }
 inline unsigned long millis() { return (unsigned long)(clock() * 1000 / CLOCKS_PER_SEC); }
+inline unsigned long micros() { return (unsigned long)(clock() * 1000000 / CLOCKS_PER_SEC); }
 inline void delay(int ms) {}
 
 class SerialMock {

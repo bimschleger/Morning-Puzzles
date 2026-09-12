@@ -57,10 +57,11 @@ void JumbleGen::generate(JumbleDifficulty difficulty) {
 
 void JumbleGen::printToReceipt(EscPosPrinter& printer) {
     printer.setBold(true);
-    printer.println("--- DAILY JUMBLE ---");
+    printer.println("--- JUMBLE ---");
     printer.setBold(false);
-    printer.println("Unscramble the letters, one letter to each square:");
-    printer.println("Circled letters ( ) form the answer to the riddle!");
+    printer.println("DIFFICULTY: MEDIUM");
+    printer.println("Unscramble the clue words, then arrange the");
+    printer.println("circled letters to solve the punchline riddle.");
     printer.println("");
 
     for (uint8_t i = 0; i < _numWords; i++) {

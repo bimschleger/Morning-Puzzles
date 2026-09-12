@@ -8,30 +8,37 @@
 // =============================================================================
 
 // -----------------------------------------------------------------------------
-// 1. Operating Mode
+// 1. Operating Mode (100% Standalone Offline Appliance)
 // -----------------------------------------------------------------------------
+#define OFFLINE_ONLY_BUILD      1       // 1 = Strip all outbound network/API client code
+
 // Supported modes:
-//   1 = STANDALONE OFFLINE (All puzzles generated 100% on ESP32, zero server needed)
-//   2 = NETWORK SERVER     (Fetches pre-rendered puzzles from remote API)
-//   3 = HYBRID             (Tries network server first; falls back to on-device generation)
+//   1 = STANDALONE OFFLINE (All 7 puzzles generated 100% on ESP32, zero server needed)
+//   2 = NETWORK SERVER     (Legacy: fetches pre-rendered puzzles from remote API)
+//   3 = HYBRID             (Legacy: tries network server first; falls back to on-device generation)
 #define MODE_STANDALONE_OFFLINE 1
 #define MODE_NETWORK_SERVER     2
 #define MODE_HYBRID             3
 #define ACTIVE_OPERATION_MODE   MODE_STANDALONE_OFFLINE
 
 // -----------------------------------------------------------------------------
-// 2. Daily Cron Schedule Settings (Every morning at 7:00 AM)
+// 2. On-Demand Puzzle Grade & Difficulty Configuration
+// -----------------------------------------------------------------------------
+// 0 = Easy, 1 = Medium, 2 = Hard, 3 = Rotating (advances grade on each button press)
+#define PUZZLE_GRADE_DEFAULT        3       // Default: Rotating grade on button press
+#define PUZZLE_GRADE_CYCLE_ON_PRESS true    // Each hardware button press advances grade
+
+// -----------------------------------------------------------------------------
+// 3. Daily Cron Schedule Settings (Every morning at 7:00 AM)
 // -----------------------------------------------------------------------------
 #define DAILY_PRINT_HOUR        7       // 7:00 AM
 #define DAILY_PRINT_MINUTE      0
 
-// Timezone string (for NTP/POSIX time sync)
+// Timezone string (for internal POSIX time sync)
 #define TIMEZONE_SPEC           "CST6CDT,M3.2.0,M11.1.0"
-#define NTP_SERVER_PRIMARY      "pool.ntp.org"
-#define NTP_SERVER_BACKUP       "time.nist.gov"
 
 // -----------------------------------------------------------------------------
-// 3. Printer Interface Settings
+// 4. Printer Interface Settings
 // -----------------------------------------------------------------------------
 #define PRINTER_MODE_ETHERNET   1
 #define PRINTER_MODE_SERIAL     2
@@ -48,7 +55,7 @@
 #define PRINTER_TX_PIN          17
 
 // -----------------------------------------------------------------------------
-// 4. Wi-Fi & Web Service Settings (Used in Network / Hybrid Modes)
+// 5. Legacy Network & Web Service Settings (Ignored in OFFLINE_ONLY_BUILD)
 // -----------------------------------------------------------------------------
 #define WIFI_SSID               "YOUR_WIFI_SSID"
 #define WIFI_PASSWORD           "YOUR_WIFI_PASSWORD"
@@ -60,7 +67,7 @@
 #define PUZZLE_API_KEY          ""
 
 // -----------------------------------------------------------------------------
-// 5. Hardware Pins & User Interaction
+// 6. Hardware Pins & User Interaction
 // -----------------------------------------------------------------------------
 // Built-in BOOT button on standard ESP32 boards (GPIO 0, active LOW)
 //   - Short press (< 1.5s): Instantly generates and prints a random puzzle set!

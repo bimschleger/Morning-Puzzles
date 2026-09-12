@@ -206,5 +206,5 @@ When building a canvas renderer for a new puzzle game:
 - [ ] Use `1.0px` `rgba(0,0,0,0.22)` for internal cell divider lines.
 - [ ] Scale letter/number fonts to $W_{\text{cell}} \times 0.52$ using `"Space Mono"`, centered with `textAlign = 'center'` and `textBaseline = 'middle'`.
 - [ ] If applying territory shading, use `getGeometricHatchPixel(patternId, px, py)` for deterministic 1-bit hatching.
-- [ ] Do **NOT** draw banner titles or rules inside the canvas—the standardized header (`--- [GAME NAME] ---` and `DIFFICULTY: [LEVEL]`) is placed above the canvas.
+- [ ] Do **NOT** draw banner titles or rules inside the canvas—the standardized header (`--- [GAME NAME] ---`, `DIFFICULTY: [LEVEL]`, and the one-sentence gameplay instruction) is placed above the canvas.
 - [ ] If adding checklists or scratch lines, separate from the grid with the standard $1.2\text{px}$ dashed tear-line (`[3, 3]`).

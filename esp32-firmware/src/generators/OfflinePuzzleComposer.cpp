@@ -1,14 +1,47 @@
 #include "OfflinePuzzleComposer.h"
 #include "../printer/EscPosPrinter.h"
 
-OfflinePuzzleComposer::OfflinePuzzleComposer() {}
+OfflinePuzzleComposer::OfflinePuzzleComposer() : 
+    _currentGrade(GRADE_MEDIUM), 
+    _rotationIndex(0) {
+}
 
-bool OfflinePuzzleComposer::generateAndPrintReceipt(EscPosPrinter& printer, const String& dateStr) {
-    // Seed with ESP32 true hardware random number generator
-    randomSeed(esp_random());
+void OfflinePuzzleComposer::cycleGrade() {
+    _rotationIndex = (_rotationIndex + 1) % 3;
+    _currentGrade = (PuzzleGrade)_rotationIndex;
+}
+
+void OfflinePuzzleComposer::setGrade(PuzzleGrade grade) {
+    _currentGrade = grade;
+}
+
+PuzzleGrade OfflinePuzzleComposer::getCurrentGrade() const {
+    return _currentGrade;
+}
+
+const char* OfflinePuzzleComposer::getGradeName(PuzzleGrade grade) const {
+    switch (grade) {
+        case GRADE_EASY: return "EASY";
+        case GRADE_HARD: return "HARD";
+        case GRADE_MEDIUM:
+        default: return "MEDIUM";
+    }
+}
+
+bool OfflinePuzzleComposer::generateAndPrintReceipt(EscPosPrinter& printer, const String& dateStr, PuzzleGrade grade) {
+    // 1. Reseed PRNG with ESP32 hardware True Random Number Generator + microsecond timer
+    randomSeed(esp_random() ^ (uint32_t)micros());
+
+    // 2. Resolve effective grade for this print job
+    PuzzleGrade effectiveGrade = grade;
+    if (effectiveGrade == GRADE_ROTATING) {
+        effectiveGrade = (PuzzleGrade)(_rotationIndex % 3);
+        _rotationIndex = (_rotationIndex + 1) % 3;
+    }
+    _currentGrade = effectiveGrade;
 
     unsigned long startMs = millis();
-    Serial.println("\n[COMPOSER] Starting on-chip offline puzzle generation...");
+    Serial.printf("\n[COMPOSER] Starting 100%% offline generation for EDITION GRADE: %s...\n", getGradeName(effectiveGrade));
 
     if (!printer.connect()) {
         Serial.println("[COMPOSER] ERROR: Failed to connect to printer.");
@@ -20,48 +53,59 @@ bool OfflinePuzzleComposer::generateAndPrintReceipt(EscPosPrinter& printer, cons
     // 1. Receipt Header
     String headerDate = (dateStr.length() > 0) ? dateStr : "Daily On-Demand Edition";
     printer.printHeader("MORNING PUZZLES", headerDate);
+    printer.setAlign(ALIGN_CENTER);
+    printer.println(String("EDITION GRADE: ") + getGradeName(effectiveGrade));
     printer.println("");
+
+    // Resolve individual puzzle difficulty parameters matching the requested grade
+    SudokuDifficulty     sDiff = (effectiveGrade == GRADE_EASY) ? SUDOKU_EASY : ((effectiveGrade == GRADE_HARD) ? SUDOKU_HARD : SUDOKU_MEDIUM);
+    WordSearchDifficulty wsDiff = (effectiveGrade == GRADE_EASY) ? WS_EASY : ((effectiveGrade == GRADE_HARD) ? WS_HARD : WS_MEDIUM);
+    NonogramDifficulty   nDiff = (effectiveGrade == GRADE_EASY) ? NONO_EASY : ((effectiveGrade == GRADE_HARD) ? NONO_HARD : NONO_MEDIUM);
+    QueensDifficulty     qDiff = (effectiveGrade == GRADE_EASY) ? QUEENS_EASY : ((effectiveGrade == GRADE_HARD) ? QUEENS_HARD : QUEENS_MEDIUM);
+    JumbleDifficulty     jDiff = (effectiveGrade == GRADE_EASY) ? JUMBLE_EASY : ((effectiveGrade == GRADE_HARD) ? JUMBLE_HARD : JUMBLE_MEDIUM);
+    BinaryDifficulty     bDiff = (effectiveGrade == GRADE_EASY) ? BINARY_EASY : ((effectiveGrade == GRADE_HARD) ? BINARY_HARD : BINARY_MEDIUM);
+    MinesDifficulty      mDiff = (effectiveGrade == GRADE_EASY) ? MINES_EASY : ((effectiveGrade == GRADE_HARD) ? MINES_HARD : MINES_MEDIUM);
 
     // 2. Generate and print Sudoku
     Serial.println("[COMPOSER] Generating Sudoku...");
-    _sudoku.generate(SUDOKU_MEDIUM);
-    _sudoku.printToReceipt(printer, SUDOKU_MEDIUM);
+    _sudoku.generate(sDiff);
+    _sudoku.printToReceipt(printer, sDiff);
     printer.printHorizontalLine('-');
 
     // 3. Generate and print Word Search
     Serial.println("[COMPOSER] Generating Word Search...");
-    _wordSearch.generate(WS_MEDIUM);
+    _wordSearch.generate(wsDiff);
     _wordSearch.printToReceipt(printer);
     printer.printHorizontalLine('-');
 
     // 4. Generate and print Nonogram
     Serial.println("[COMPOSER] Generating Nonogram...");
-    _nonogram.generate(NONO_EASY); // 5x5 for fast solving
+    _nonogram.generate(nDiff);
     _nonogram.printToReceipt(printer);
     printer.printHorizontalLine('-');
 
     // 5. Generate and print Queens / Star Battle
     Serial.println("[COMPOSER] Generating Queens puzzle...");
-    _queens.generate(QUEENS_MEDIUM); // 8x8 1-Star Queens
+    _queens.generate(qDiff);
     _queens.printToReceipt(printer);
     printer.printHorizontalLine('-');
 
     // 6. Generate and print Jumble
     Serial.println("[COMPOSER] Generating Daily Jumble...");
-    _jumble.generate(JUMBLE_MEDIUM);
+    _jumble.generate(jDiff);
     _jumble.printToReceipt(printer);
     printer.printHorizontalLine('-');
 
     // 7. Generate and print Binary
     Serial.println("[COMPOSER] Generating Binary...");
-    _binary.generate(BINARY_MEDIUM);
-    _binary.printToReceipt(printer, BINARY_MEDIUM);
+    _binary.generate(bDiff);
+    _binary.printToReceipt(printer, bDiff);
     printer.printHorizontalLine('-');
 
     // 8. Generate and print Mines
     Serial.println("[COMPOSER] Generating Mines...");
-    _mines.generate(MINES_MEDIUM);
-    _mines.printToReceipt(printer, MINES_MEDIUM);
+    _mines.generate(mDiff);
+    _mines.printToReceipt(printer, mDiff);
 
     // 9. Footer
     printer.printDoubleLine();
@@ -76,6 +120,7 @@ bool OfflinePuzzleComposer::generateAndPrintReceipt(EscPosPrinter& printer, cons
     printer.disconnect();
 
     unsigned long elapsed = millis() - startMs;
-    Serial.printf("[COMPOSER] Generation & printing completed in %lu ms!\n\n", elapsed);
+    Serial.printf("[COMPOSER] Generation & printing for %s completed in %lu ms!\n\n", 
+                  getGradeName(effectiveGrade), elapsed);
     return true;
 }

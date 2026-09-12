@@ -1,18 +1,21 @@
 #include <Arduino.h>
-#include <WiFi.h>
 #include "config.h"
 #include "printer/EscPosPrinter.h"
 #include "time/OfflineTimeManager.h"
 #include "generators/OfflinePuzzleComposer.h"
+
+#if !OFFLINE_ONLY_BUILD
+#include <WiFi.h>
 #include "scheduler/DailyScheduler.h"
 #include "net/PuzzleClient.h"
+DailyScheduler         scheduler;
+PuzzleClient           puzzleClient;
+#endif
 
 // Hardware and engines
 EscPosPrinter          printer;
 OfflineTimeManager     timeManager;
 OfflinePuzzleComposer  offlineComposer;
-DailyScheduler         scheduler;
-PuzzleClient           puzzleClient;
 
 // Button timing state
 bool          lastBtnState = HIGH;
@@ -27,32 +30,21 @@ void blinkStatusLed(int count, int delayMs = 100) {
     }
 }
 
-void executePrintJob(bool forceOffline = false) {
+void executePrintJob(PuzzleGrade grade = GRADE_ROTATING) {
     Serial.println("\n========================================================");
-    Serial.println(">>> STARTING MORNING PUZZLES PRINT JOB <<<");
+    Serial.println(">>> STARTING MORNING PUZZLES 100% OFFLINE PRINT JOB <<<");
     Serial.printf(">>> Time: %s\n", timeManager.getFormattedTime().c_str());
+    Serial.printf(">>> Target Grade: %s\n", (grade == GRADE_ROTATING) ? "ROTATING" : offlineComposer.getGradeName(grade));
     Serial.println("========================================================");
 
     digitalWrite(STATUS_LED_PIN, HIGH);
-    bool success = false;
 
-#if (ACTIVE_OPERATION_MODE == MODE_STANDALONE_OFFLINE)
-    // 100% Offline on-device generation
-    success = offlineComposer.generateAndPrintReceipt(printer, timeManager.getFormattedTime("%A, %B %d, %Y"));
-#elif (ACTIVE_OPERATION_MODE == MODE_NETWORK_SERVER)
-    // Remote web service fetch
-    success = puzzleClient.fetchAndPrintDailyPuzzles(printer);
-#elif (ACTIVE_OPERATION_MODE == MODE_HYBRID)
-    // Try remote server first; fall back to local generation if offline
-    if (!forceOffline && WiFi.status() == WL_CONNECTED) {
-        Serial.println("[MAIN] Hybrid Mode: Attempting remote API fetch...");
-        success = puzzleClient.fetchAndPrintDailyPuzzles(printer);
-    }
-    if (!success) {
-        Serial.println("[MAIN] Hybrid Mode: Falling back to on-device generation...");
-        success = offlineComposer.generateAndPrintReceipt(printer, timeManager.getFormattedTime("%A, %B %d, %Y"));
-    }
-#endif
+    // 100% Offline on-device generation across all 7 puzzles
+    bool success = offlineComposer.generateAndPrintReceipt(
+        printer, 
+        timeManager.getFormattedTime("%A, %B %d, %Y"),
+        grade
+    );
 
     digitalWrite(STATUS_LED_PIN, LOW);
 
@@ -60,7 +52,7 @@ void executePrintJob(bool forceOffline = false) {
         Serial.println("[MAIN] Print job completed successfully!\n");
         blinkStatusLed(2, 200);
     } else {
-        Serial.println("[MAIN] Print job failed. Please check printer connection/IP.\n");
+        Serial.println("[MAIN] Print job failed. Please check printer connection/wiring.\n");
         blinkStatusLed(5, 60);
     }
 }
@@ -79,16 +71,16 @@ void handleButtonPress() {
         unsigned long duration = now - btnPressStartMs;
 
         if (duration >= 2500) {
-            // Long Press (>2.5s) -> Toggle SoftAP Setup Portal
+            // Long Press (>2.5s) -> Toggle SoftAP Setup Portal (local phone time sync)
             if (timeManager.isPortalActive()) {
                 timeManager.stopSetupPortal();
             } else {
                 timeManager.startSetupPortal();
             }
         } else if (duration > 80) {
-            // Short Press -> Instant On-Demand Print!
-            Serial.println("[BTN] Short press detected -> Triggering instant random puzzle print!");
-            executePrintJob();
+            // Short Press -> Instant On-Demand Print with a fresh grade!
+            Serial.println("[BTN] Hardware BOOT button pressed -> Generating & printing new grade of puzzles!");
+            executePrintJob(GRADE_ROTATING);
         }
         delay(50); // debounce
     }
@@ -100,23 +92,36 @@ void handleSerialCommands() {
     if (Serial.available() > 0) {
         char cmd = Serial.read();
         if (cmd == 'p' || cmd == 'P') {
-            Serial.println("[CMD] Manual print trigger requested.");
-            executePrintJob();
+            Serial.println("[CMD] Manual print trigger (Rotating Grade).");
+            executePrintJob(GRADE_ROTATING);
+        } else if (cmd == '1') {
+            Serial.println("[CMD] Generating EASY grade puzzle bundle...");
+            executePrintJob(GRADE_EASY);
+        } else if (cmd == '2') {
+            Serial.println("[CMD] Generating MEDIUM grade puzzle bundle...");
+            executePrintJob(GRADE_MEDIUM);
+        } else if (cmd == '3') {
+            Serial.println("[CMD] Generating HARD grade puzzle bundle...");
+            executePrintJob(GRADE_HARD);
+        } else if (cmd == 'g' || cmd == 'G') {
+            offlineComposer.cycleGrade();
+            Serial.printf("[CMD] Cycled active grade to: %s\n", offlineComposer.getGradeName(offlineComposer.getCurrentGrade()));
         } else if (cmd == 'w' || cmd == 'W') {
             if (timeManager.isPortalActive()) timeManager.stopSetupPortal();
             else timeManager.startSetupPortal();
         } else if (cmd == 't' || cmd == 'T') {
             Serial.println("[CMD] Printing self-test ticket...");
-            printer.printSelfTest(WiFi.localIP().toString(), timeManager.getFormattedTime());
+            printer.printSelfTest("Offline Standalone", timeManager.getFormattedTime());
         } else if (cmd == 's' || cmd == 'S') {
             Serial.println("\n--- MORNING PUZZLES STATUS ---");
-            Serial.printf("Mode:       %s\n", (ACTIVE_OPERATION_MODE == MODE_STANDALONE_OFFLINE) ? "100% Standalone Offline" : "Network/Hybrid");
-            Serial.printf("Time:       %s\n", timeManager.getFormattedTime().c_str());
-            Serial.printf("Time Set:   %s\n", timeManager.isTimeSet() ? "Yes" : "No (Hold BOOT 3s to set)");
-            Serial.printf("Printer:    %s:%d\n", PRINTER_IP_ADDR, PRINTER_TCP_PORT);
-            Serial.printf("Daily Cron: %02d:%02d every morning\n", DAILY_PRINT_HOUR, DAILY_PRINT_MINUTE);
-            Serial.printf("Hotspot:    %s\n", timeManager.isPortalActive() ? "Active (Morning-Puzzles-Setup)" : "Inactive");
-            Serial.println("Controls:   [P]rint on demand | [W]i-Fi Setup | [T]est | [S]tatus");
+            Serial.println("Mode:         100% Standalone Offline (Zero External APIs)");
+            Serial.printf("Active Grade: %s\n", offlineComposer.getGradeName(offlineComposer.getCurrentGrade()));
+            Serial.printf("Time:         %s\n", timeManager.getFormattedTime().c_str());
+            Serial.printf("Time Set:     %s\n", timeManager.isTimeSet() ? "Yes" : "No (Hold BOOT 3s to set)");
+            Serial.printf("Printer:      %s (Mode %d)\n", (ACTIVE_PRINTER_MODE == PRINTER_MODE_SERIAL) ? "Direct Hardware Serial (UART2)" : "Ethernet TCP", ACTIVE_PRINTER_MODE);
+            Serial.printf("Daily Cron:   %02d:%02d every morning\n", DAILY_PRINT_HOUR, DAILY_PRINT_MINUTE);
+            Serial.printf("Hotspot:      %s\n", timeManager.isPortalActive() ? "Active (Morning-Puzzles-Setup)" : "Inactive");
+            Serial.println("Controls:     [P]rint (Next Grade) | [1] Easy | [2] Medium | [3] Hard | [G]ycle Grade | [W]i-Fi Setup | [S]tatus");
             Serial.println("-------------------------------\n");
         }
     }
@@ -133,41 +138,25 @@ void setup() {
     Serial.println("\n");
     Serial.println("********************************************************");
     Serial.println("*      MORNING PUZZLES - ESP32 THERMAL PRINTER         *");
-    Serial.println("*      100% On-Device Standalone & Offline Ready       *");
+    Serial.println("*      100% On-Device Standalone & Offline Appliance   *");
+    Serial.println("*      Zero External Network / API Calls Required      *");
     Serial.println("********************************************************");
 
-    // Initialize printer hardware driver
+    // Initialize printer hardware driver (Serial UART or local raw TCP)
     printer.begin();
 
-    // Initialize offline timekeeping (checks for optional DS3231 RTC)
+    // Initialize offline timekeeping (checks for optional DS3231 RTC on I2C)
     timeManager.begin();
 
-#if (ACTIVE_OPERATION_MODE != MODE_STANDALONE_OFFLINE)
-    // Connect Wi-Fi in network/hybrid modes
-    WiFi.mode(WIFI_STA);
-    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-    Serial.print("[WIFI] Connecting");
-    unsigned long startMs = millis();
-    while (WiFi.status() != WL_CONNECTED && millis() - startMs < WIFI_CONNECT_TIMEOUT_MS) {
-        delay(500);
-        Serial.print(".");
-    }
-    if (WiFi.status() == WL_CONNECTED) {
-        Serial.printf("\n[WIFI] Connected! IP: %s\n", WiFi.localIP().toString().c_str());
-        scheduler.begin(); // Sync NTP
-    } else {
-        Serial.println("\n[WIFI] Could not connect to Wi-Fi. Standalone mode ready.");
-    }
-#else
     Serial.println("[MAIN] Operating in 100% STANDALONE OFFLINE mode.");
-    Serial.println("[MAIN] All 5 puzzles will generate on the ESP32 chip on-demand.");
-#endif
+    Serial.println("[MAIN] All 7 puzzles generate directly on the ESP32 chip on-demand.");
+    Serial.printf("[MAIN] Initial puzzle grade: %s\n", offlineComposer.getGradeName(offlineComposer.getCurrentGrade()));
 
     Serial.println("\n--- CONTROLS & HOW TO USE ---");
-    Serial.println("1. Short-press BOOT button (GPIO 0) -> Instantly generates & prints random puzzles!");
-    Serial.println("2. Long-press BOOT button (3 sec)   -> Starts Wi-Fi hotspot to sync time from your phone!");
+    Serial.println("1. Short-press BOOT button (GPIO 0) -> Instantly generates & prints a new grade of puzzles!");
+    Serial.println("2. Long-press BOOT button (3 sec)   -> Starts local Wi-Fi hotspot to sync time from phone!");
     Serial.printf("3. Daily scheduled auto-print       -> Every morning at %02d:%02d\n", DAILY_PRINT_HOUR, DAILY_PRINT_MINUTE);
-    Serial.println("4. Serial Monitor (115200 baud)     -> Type 'P' (print), 'W' (hotspot), 'S' (status)\n");
+    Serial.println("4. Serial Monitor (115200 baud)     -> [P]rint | [1] Easy | [2] Med | [3] Hard | [G]rade | [S]tatus\n");
 }
 
 void loop() {
@@ -183,7 +172,7 @@ void loop() {
     // 4. Check for daily morning 7:00 AM cron trigger
     if (timeManager.isCronTriggerTime(DAILY_PRINT_HOUR, DAILY_PRINT_MINUTE)) {
         Serial.println("[MAIN] 7:00 AM Morning Cron Trigger! Starting daily print job...");
-        executePrintJob();
+        executePrintJob(GRADE_ROTATING);
     }
 
     delay(20);

@@ -1,6 +1,7 @@
 """
 Morning Puzzles - Web Service API
-Serves daily puzzles in both JSON format and binary ESC/POS thermal receipt format.
+Serves daily puzzles in JSON format, pure ESC/POS text, and hybrid 1-bit raster formats
+optimized for commercial 80mm thermal receipt printers.
 Supports FastAPI (when installed) with fallback to Python's built-in http.server.
 """
 
@@ -18,7 +19,13 @@ from app.generators.wordsearch_gen import WordSearchGenerator
 from app.generators.nonogram_gen import NonogramGenerator
 from app.generators.queens_gen import QueensGenerator
 from app.generators.jumble_gen import JumbleGenerator
-from app.renderer.text_formatter import build_daily_receipt_bytes, EscPosTextReceipt
+from app.generators.binary_gen import BinaryGenerator
+from app.generators.mines_gen import MinesGenerator
+from app.renderer.text_formatter import (
+    build_daily_receipt_bytes,
+    build_hybrid_daily_receipt_bytes,
+    EscPosTextReceipt,
+)
 
 # Initialize generators
 sudoku_gen = SudokuGenerator()
@@ -26,6 +33,8 @@ wordsearch_gen = WordSearchGenerator()
 nonogram_gen = NonogramGenerator()
 queens_gen = QueensGenerator()
 jumble_gen = JumbleGenerator()
+binary_gen = BinaryGenerator()
+mines_gen = MinesGenerator()
 
 
 def generate_daily_bundle(difficulty: str = "medium") -> dict:
@@ -38,7 +47,9 @@ def generate_daily_bundle(difficulty: str = "medium") -> dict:
         "wordsearch": wordsearch_gen.generate(difficulty=difficulty),
         "nonogram": nonogram_gen.generate(difficulty="easy" if difficulty == "easy" else "medium"),
         "queens": queens_gen.generate(difficulty=difficulty),
-        "jumble": jumble_gen.generate(difficulty=difficulty)
+        "jumble": jumble_gen.generate(difficulty=difficulty),
+        "binary": binary_gen.generate(difficulty=difficulty),
+        "mines": mines_gen.generate(difficulty=difficulty),
     }
 
 
@@ -51,11 +62,15 @@ try:
 
     app = FastAPI(
         title="Morning Puzzles API",
-        description="API generating daily Sudoku, Word Search, Nonograms, Queens, and Jumble puzzles for 80mm thermal printers",
-        version="1.0.0"
+        description="API generating daily puzzles for 80mm commercial thermal printers (576 dots width)",
+        version="1.1.0"
     )
 
-    SIMULATOR_HTML_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "simulator", "receipt_simulator.html")
+    SIMULATOR_HTML_PATH = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+        "simulator",
+        "receipt_simulator.html"
+    )
 
     @app.get("/", response_class=HTMLResponse)
     @app.get("/simulator", response_class=HTMLResponse)
@@ -72,14 +87,19 @@ try:
     @app.get("/api/v1/daily-print")
     def get_daily_print(
         format: str = Query("escpos", regex="^(escpos|json)$"),
-        difficulty: str = Query("medium", regex="^(easy|medium|hard)$")
+        difficulty: str = Query("medium", regex="^(easy|medium|hard)$"),
+        style: str = Query("hybrid", regex="^(hybrid|text)$")
     ):
         bundle = generate_daily_bundle(difficulty=difficulty)
         if format == "json":
             return JSONResponse(content=bundle)
-        
-        # Default: binary ESC/POS stream for thermal printer
-        escpos_bytes = build_daily_receipt_bytes(bundle)
+
+        # Build binary ESC/POS stream for thermal printer
+        if style == "text":
+            escpos_bytes = build_daily_receipt_bytes(bundle)
+        else:
+            escpos_bytes = build_hybrid_daily_receipt_bytes(bundle)
+
         return Response(
             content=escpos_bytes,
             media_type="application/octet-stream",
@@ -94,8 +114,8 @@ try:
         r = EscPosTextReceipt()
         r.header("TEST RECEIPT", datetime.date.today().strftime("%Y-%m-%d"))
         r.println("ESP32 <-> Thermal Printer link is operational!")
-        r.println("Ready to fetch daily puzzles.")
-        r.feed(3)
+        r.println("576-dot 80mm thermal receipt verified.")
+        r.feed(4)
         r.cut()
         data = r.get_bytes()
         return Response(content=data, media_type="application/octet-stream")
@@ -120,6 +140,14 @@ try:
     def get_jumble(difficulty: str = "medium"):
         return jumble_gen.generate(difficulty=difficulty)
 
+    @app.get("/api/v1/puzzles/binary")
+    def get_binary(difficulty: str = "medium"):
+        return binary_gen.generate(difficulty=difficulty)
+
+    @app.get("/api/v1/puzzles/mines")
+    def get_mines(difficulty: str = "medium"):
+        return mines_gen.generate(difficulty=difficulty)
+
 except ImportError:
     app = None
 
@@ -137,7 +165,11 @@ def run_standalone_server(port: int = 8000, host: str = "0.0.0.0"):
             path = parsed.path
 
             if path in ("/simulator", "/"):
-                sim_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "simulator", "receipt_simulator.html")
+                sim_path = os.path.join(
+                    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+                    "simulator",
+                    "receipt_simulator.html"
+                )
                 if os.path.exists(sim_path):
                     with open(sim_path, "rb") as f:
                         data = f.read()
@@ -155,12 +187,16 @@ def run_standalone_server(port: int = 8000, host: str = "0.0.0.0"):
             elif path == "/api/v1/daily-print":
                 fmt = query_params.get("format", ["escpos"])[0]
                 diff = query_params.get("difficulty", ["medium"])[0]
+                style = query_params.get("style", ["hybrid"])[0]
                 bundle = generate_daily_bundle(diff)
 
                 if fmt == "json":
                     self._send_json(200, bundle)
                 else:
-                    escpos_data = build_daily_receipt_bytes(bundle)
+                    if style == "text":
+                        escpos_data = build_daily_receipt_bytes(bundle)
+                    else:
+                        escpos_data = build_hybrid_daily_receipt_bytes(bundle)
                     self.send_response(200)
                     self.send_header("Content-Type", "application/octet-stream")
                     self.send_header("Content-Length", str(len(escpos_data)))
@@ -170,8 +206,8 @@ def run_standalone_server(port: int = 8000, host: str = "0.0.0.0"):
                 r = EscPosTextReceipt()
                 r.header("TEST RECEIPT", datetime.date.today().strftime("%Y-%m-%d"))
                 r.println("ESP32 <-> Thermal Printer link is operational!")
-                r.println("Ready to fetch daily puzzles.")
-                r.feed(3)
+                r.println("576-dot 80mm thermal receipt verified.")
+                r.feed(4)
                 r.cut()
                 data = r.get_bytes()
                 self.send_response(200)
@@ -194,6 +230,12 @@ def run_standalone_server(port: int = 8000, host: str = "0.0.0.0"):
             elif path == "/api/v1/puzzles/jumble":
                 diff = query_params.get("difficulty", ["medium"])[0]
                 self._send_json(200, jumble_gen.generate(difficulty=diff))
+            elif path == "/api/v1/puzzles/binary":
+                diff = query_params.get("difficulty", ["medium"])[0]
+                self._send_json(200, binary_gen.generate(difficulty=diff))
+            elif path == "/api/v1/puzzles/mines":
+                diff = query_params.get("difficulty", ["medium"])[0]
+                self._send_json(200, mines_gen.generate(difficulty=diff))
             else:
                 self.send_response(404)
                 self.end_headers()

@@ -59,18 +59,41 @@ public:
 int main() {
     std::srand(time(nullptr));
     std::cout << "==================================================" << std::endl;
-    std::cout << "TESTING ON-DEVICE ESP32 C++ OFFLINE GENERATORS" << std::endl;
+    std::cout << "TESTING 100% OFFLINE MULTI-GRADE ENGINE ON ESP32" << std::endl;
     std::cout << "==================================================" << std::endl;
 
     ConsoleEscPosPrinter printer;
     OfflinePuzzleComposer composer;
 
-    bool ok = composer.generateAndPrintReceipt(printer, "Monday, September 14, 2026");
-    if (ok) {
-        std::cout << "\n>>> SUCCESS: ALL 7 C++ GENERATORS EXECUTED PERFECTLY! <<<" << std::endl;
-        return 0;
-    } else {
-        std::cerr << "FAILURE in composer" << std::endl;
+    // Test 1: Generate Easy Grade
+    std::cout << "\n>>> TEST 1: GENERATE EASY GRADE BUNDLE <<<" << std::endl;
+    bool okEasy = composer.generateAndPrintReceipt(printer, "Monday, September 14, 2026", GRADE_EASY);
+    if (!okEasy) {
+        std::cerr << "FAILED on Easy Grade" << std::endl;
         return 1;
     }
+
+    // Test 2: Generate Hard Grade
+    std::cout << "\n>>> TEST 2: GENERATE HARD GRADE BUNDLE <<<" << std::endl;
+    bool okHard = composer.generateAndPrintReceipt(printer, "Tuesday, September 15, 2026", GRADE_HARD);
+    if (!okHard) {
+        std::cerr << "FAILED on Hard Grade" << std::endl;
+        return 1;
+    }
+
+    // Test 3: Simulate 3 Hardware Button Presses (Rotating Grade)
+    std::cout << "\n>>> TEST 3: SIMULATING 3 HARDWARE BUTTON PRESSES (ROTATING GRADE) <<<" << std::endl;
+    for (int press = 1; press <= 3; press++) {
+        std::cout << "\n--- [BUTTON PRESS #" << press << "] ---" << std::endl;
+        bool okPress = composer.generateAndPrintReceipt(printer, "Wednesday, September 16, 2026", GRADE_ROTATING);
+        if (!okPress) {
+            std::cerr << "FAILED on Button Press #" << press << std::endl;
+            return 1;
+        }
+    }
+
+    std::cout << "\n==================================================" << std::endl;
+    std::cout << ">>> SUCCESS: 100% OFFLINE MULTI-GRADE GENERATION VERIFIED! <<<" << std::endl;
+    std::cout << "==================================================" << std::endl;
+    return 0;
 }

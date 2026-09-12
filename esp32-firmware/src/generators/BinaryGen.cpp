@@ -287,6 +287,8 @@ void BinaryGen::printToReceipt(EscPosPrinter& printer, BinaryDifficulty diff) {
     printer.println("--- BINARY ---");
     printer.setBold(false);
     printer.println(String("DIFFICULTY: ") + diffStr);
+    printer.println("Fill the grid with 0s and 1s so no more than two");
+    printer.println("identical numbers touch and all lines are unique.");
     printer.println("");
 
     String sep = "   +";
