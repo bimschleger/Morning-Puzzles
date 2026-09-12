@@ -1319,7 +1319,6 @@
       let rowClueCharWidth;
       let clueFont;
       let labelFont;
-      let dotRadius;
       let majorInterval; // Major line frequency (5 for 5/10/15, 4 for 8x8)
 
       if (size <= 5) {
@@ -1328,7 +1327,6 @@
         rowClueCharWidth = 16;
         clueFont = 'bold 13px "Space Mono", monospace';
         labelFont = 'bold 11px "Space Mono", monospace';
-        dotRadius = 1.5;
         majorInterval = 5;
       } else if (size <= 8) {
         cellSize = 31;
@@ -1336,7 +1334,6 @@
         rowClueCharWidth = 14;
         clueFont = 'bold 11px "Space Mono", monospace';
         labelFont = 'bold 10px "Space Mono", monospace';
-        dotRadius = 1.2;
         majorInterval = 4;
       } else if (size <= 10) {
         cellSize = 24;
@@ -1344,7 +1341,6 @@
         rowClueCharWidth = 13;
         clueFont = 'bold 10px "Space Mono", monospace';
         labelFont = 'bold 9px "Space Mono", monospace';
-        dotRadius = 1.0;
         majorInterval = 5;
       } else {
         // 15x15 or larger
@@ -1353,7 +1349,6 @@
         rowClueCharWidth = 11;
         clueFont = 'bold 8.5px "Space Mono", monospace';
         labelFont = 'bold 8px "Space Mono", monospace';
-        dotRadius = 0.8;
         majorInterval = 5;
       }
 
@@ -1478,12 +1473,6 @@
             // Shaded cell for solution
             ctx.fillStyle = '#111111';
             ctx.fillRect(cx, cy, cellSize, cellSize);
-          } else {
-            // Unsolved cell: tactile tiny center dot guide
-            ctx.fillStyle = '#bbbbbb';
-            ctx.beginPath();
-            ctx.arc(cx + cellSize / 2, cy + cellSize / 2, dotRadius, 0, Math.PI * 2);
-            ctx.fill();
           }
         }
       }

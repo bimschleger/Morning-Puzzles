@@ -34,7 +34,6 @@ Thermal receipt printers only support **binary 1-bit ink state**: a dot is eithe
 | `HAIRLINE_DIVIDER` | `rgba(0, 0, 0, 0.22)` | `(0, 0, 0, 0.22)` | Minor cell dividers, internal grid lines for scanning |
 | `TEAR_DIVIDER` | `#888888` | `(136, 136, 136)` | Dashed rule separating puzzle grid from checklist / clues |
 | `CORNER_TILE_BG` | `#eeebe3` | `(238, 235, 227)` | Nonogram/Picross top-left inactive tile header |
-| `GUIDE_DOT` | `#bbbbbb` | `(187, 187, 187)` | Center guide dots in empty Nonogram cells for pencil work |
 | `SCRATCHPAD_RULE` | `#999999` | `(153, 153, 153)` | Ruled handwriting lines for letter brainstorming |
 
 ---
