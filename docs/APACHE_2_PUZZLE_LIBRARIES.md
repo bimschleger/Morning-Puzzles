@@ -15,6 +15,8 @@ This document provides a technical survey and implementation reference for the o
 | **Jumble** | Native Apache 2.0 Module (`server/app/generators/jumble_gen.py`) | **Apache 2.0** | Python (Standard Library) | `easy` (4–5 letters), `medium` (5–6 letters), `hard` (6–7 letters). Punny riddle solutions. |
 | **Binary** | [IBM/chuk-puzzles-gym](https://github.com/IBM/chuk-puzzles-gym) *(Classic #4 / Takuzu)* | **Apache 2.0** | Python / Native C++ | `easy` (6x6), `medium` (8x8), `hard` (8x8). Trio avoidance, line capacity, and line uniqueness guarantees. |
 | **Mines** | Simon Tatham Portable Puzzle Collection (`mines.c`) / Native Module | **Apache 2.0 / MIT** | Python / Native C++ | `easy` (8 mines, 28 clues), `medium` (12 mines, 22 clues), `hard` (15 mines, 17 clues). 100% deductive solvability (zero guessing). |
+| **Tents** | Simon Tatham Portable Puzzle Collection (`tents.c`) / Native Module | **Apache 2.0 / MIT** | Python / Native C++ | `easy` (6x6, 4–5 trees), `medium` (8x8, 8–9 trees), `hard` (8x8, 10–12 trees). 1:1 tree-tent matching, non-touching, line clues. |
+| **Bridges** | Simon Tatham Portable Puzzle Collection (`bridges.c`) / Native Module | **Apache 2.0 / MIT** | Python / Native C++ | `easy` (6x6, 6–8 islands), `medium` (8x8, 10–12 islands), `hard` (8x8, 14–16 islands). Single connected spanning graph, degree saturation. |
 
 ---
 
@@ -87,6 +89,32 @@ This document provides a technical survey and implementation reference for the o
     *   `medium`: 8x8 grid, 12 mines, ~22 clues (2-cell subset overlap difference logic).
     *   `hard`: 8x8 grid, 15 mines, ~17 clues (global capacity counting and multi-clue subset chains).
 *   **Thermal Receipt Layout**: $8\times 8$ grid ($40\text{px}$ cells) framed by a Tier 1 perimeter border ($3.5\text{px}$) with centered Space Mono clue digits ($0..8$), total mine count context header (`TOTAL MINES: [COUNT]`), and empty white cells for pencil marking.
+
+### H. Tents / Tents and Trees (`tents_gen.py` & `TentsGen.cpp`)
+*   **Upstream Reference**: Simon Tatham's Portable Puzzle Collection (`tents.c`)
+*   **Rules**:
+    *   Match each pine tree with an orthogonally adjacent tent (1:1 pairing).
+    *   No two tents may touch each other, even diagonally.
+    *   Numbers along margins specify the exact number of tents in each row and column.
+*   **Difficulty Scaling**:
+    *   `easy`: 6x6 grid, 4–5 trees/tents (direct line saturation and corner tree matching).
+    *   `medium`: 8x8 grid, 8–9 trees/tents (2-cell subset overlap and diagonal exclusion logic).
+    *   `hard`: 8x8 grid, 10–12 trees/tents (chain capacity deductions across rows and columns).
+*   **Thermal Receipt Layout**: Grid framed by Tier 1 perimeter border ($3.5\text{px}$), 1-bit pine tree icons ($1.8\text{px}$ stroke), and Space Mono clue counts outside the grid.
+
+### I. Bridges / Hashiwokakero (`bridges_gen.py` & `BridgesGen.cpp`)
+*   **Upstream Reference**: Simon Tatham's Portable Puzzle Collection (`bridges.c`) / IBM chuk-gym
+*   **Rules**:
+    *   Connect numbered circular islands with horizontal and vertical bridges.
+    *   Up to two bridges may connect any pair of islands.
+    *   Bridges may not cross other bridges or islands.
+    *   Each island's connected bridge count must match its number ($1..8$).
+    *   All islands must form a single connected network (spanning graph).
+*   **Difficulty Scaling**:
+    *   `easy`: 6x6 grid, 6–8 islands (direct degree saturation and corner degree limits).
+    *   `medium`: 8x8 grid, 10–12 islands (cut-node isolation avoidance and 2-step lookahead).
+    *   `hard`: 8x8 grid, 14–16 islands (islands up to degree 6–8, complex network spanning constraints).
+*   **Thermal Receipt Layout**: Clean grid with $26\text{px}$ circular island badges ($1.8\text{px}$ stroke) and generous unprinted whitespace corridors for pencil line drawings.
 
 ---
 

@@ -816,3 +816,147 @@ def render_mines_raster(mines_data: Dict[str, Any], target_width: int = THERMAL_
                                grid_y + r * cell_size + cell_size // 2, 2, thickness=2)
 
     return tb.to_escpos()
+
+
+# ==============================================================================
+# 8. TENTS RASTERIZER (576 Dots Width)
+# ==============================================================================
+def render_tents_raster(tents_data: Dict[str, Any], target_width: int = THERMAL_WIDTH_DOTS) -> bytes:
+    """
+    Renders a crisp 576-dot wide Tents & Trees grid.
+    Features 1-bit pine tree icons, row/column margin clues, and Tier 1 borders.
+    """
+    size = tents_data.get("size", 8)
+    row_clues = tents_data.get("row_clues", [0] * size)
+    col_clues = tents_data.get("col_clues", [0] * size)
+    puzzle = tents_data.get("puzzle", [])
+
+    padding = 24
+    inner_width = target_width - padding * 2
+    # 1 column for row clues, size columns for grid
+    total_cols = size + 1
+    cell_size = inner_width // total_cols
+    board_w = cell_size * total_cols
+    board_h = cell_size * (size + 1)
+    total_h = padding + board_h + padding
+
+    tb = ThermalBitmap(target_width, total_h)
+
+    # Grid origin
+    gx = padding
+    gy = padding
+
+    # Draw outer perimeter around actual puzzle grid (excluding header clues)
+    puzzle_x = gx + cell_size
+    puzzle_y = gy + cell_size
+    puzzle_w = cell_size * size
+    puzzle_h = cell_size * size
+    tb.draw_rect(puzzle_x, puzzle_y, puzzle_w, puzzle_h, thickness=4)
+
+    # Internal grid lines
+    for i in range(1, size):
+        tb.draw_vline(puzzle_x + i * cell_size, puzzle_y, puzzle_h, thickness=2)
+        tb.draw_hline(puzzle_x, puzzle_y + i * cell_size, puzzle_w, thickness=2)
+
+    # Column clues (top margin)
+    for c in range(size):
+        clue = col_clues[c]
+        cx = puzzle_x + c * cell_size + (cell_size - 18) // 2
+        cy = gy + (cell_size - 21) // 2
+        tb.draw_char(cx, cy, str(clue), scale=3)
+
+    # Row clues (left margin)
+    for r in range(size):
+        clue = row_clues[r]
+        cx = gx + (cell_size - 18) // 2
+        cy = puzzle_y + r * cell_size + (cell_size - 21) // 2
+        tb.draw_char(cx, cy, str(clue), scale=3)
+
+    # Draw cells: pine trees in tree cells
+    for r in range(size):
+        for c in range(size):
+            is_tree = (r < len(puzzle) and c < len(puzzle[r]) and puzzle[r][c] == 1)
+            cx = puzzle_x + c * cell_size + cell_size // 2
+            cy = puzzle_y + r * cell_size + cell_size // 2
+
+            if is_tree:
+                # Draw geometric 1-bit pine tree
+                # Trunk
+                trunk_w = max(4, cell_size // 10)
+                trunk_h = max(6, cell_size // 6)
+                tb.fill_rect(cx - trunk_w // 2, cy + cell_size // 4 - trunk_h, trunk_w, trunk_h, color=1)
+
+                # Tiered foliage (3 stacked triangles)
+                for tier in range(3):
+                    tier_top = cy - cell_size // 3 + tier * (cell_size // 6)
+                    tier_base = tier_top + cell_size // 4
+                    half_w = (tier + 1) * (cell_size // 7)
+                    for y in range(tier_top, tier_base):
+                        prog = (y - tier_top) / float(max(1, tier_base - tier_top))
+                        cur_w = int(half_w * prog)
+                        tb.draw_hline(cx - cur_w, y, cur_w * 2 + 1, thickness=1, color=1)
+            else:
+                # Subtle guide dot in empty cell for pencil solving
+                tb.draw_circle(cx, cy, 2, thickness=2, color=1)
+
+    return tb.to_escpos()
+
+
+# ==============================================================================
+# 9. BRIDGES RASTERIZER (576 Dots Width)
+# ==============================================================================
+def render_bridges_raster(bridges_data: Dict[str, Any], target_width: int = THERMAL_WIDTH_DOTS) -> bytes:
+    """
+    Renders a crisp 576-dot wide Bridges (Hashiwokakero) network.
+    Features circular island badges with centered digits and clean whitespace corridors.
+    """
+    size = bridges_data.get("size", 8)
+    islands = bridges_data.get("islands", [])
+
+    padding = 32
+    board_size = target_width - padding * 2
+    step = board_size // (size - 1) if size > 1 else board_size
+    total_h = padding + board_size + padding
+
+    tb = ThermalBitmap(target_width, total_h)
+
+    # Subtle outer boundary markers
+    corner_len = 16
+    # Top-left
+    tb.draw_hline(padding, padding, corner_len, thickness=2)
+    tb.draw_vline(padding, padding, corner_len, thickness=2)
+    # Top-right
+    tb.draw_hline(padding + board_size - corner_len, padding, corner_len, thickness=2)
+    tb.draw_vline(padding + board_size, padding, corner_len, thickness=2)
+    # Bottom-left
+    tb.draw_hline(padding, padding + board_size, corner_len, thickness=2)
+    tb.draw_vline(padding, padding + board_size - corner_len, corner_len, thickness=2)
+    # Bottom-right
+    tb.draw_hline(padding + board_size - corner_len, padding + board_size, corner_len, thickness=2)
+    tb.draw_vline(padding + board_size, padding + board_size - corner_len, corner_len, thickness=2)
+
+    # Draw Islands
+    island_radius = max(18, min(24, step // 3))
+    for isl in islands:
+        r, c = isl.get("r", 0), isl.get("c", 0)
+        count = isl.get("count", 1)
+
+        cx = padding + c * step
+        cy = padding + r * step
+
+        # Clear background inside island circle
+        tb.fill_circle = getattr(tb, 'fill_circle', None)
+        # Clear square under circle
+        tb.fill_rect(cx - island_radius, cy - island_radius, island_radius * 2, island_radius * 2, color=0)
+
+        # Draw circle outline
+        tb.draw_circle(cx, cy, island_radius, thickness=3, color=1)
+
+        # Draw centered clue digit
+        char_scale = 3 if island_radius >= 20 else 2
+        char_w = 6 * char_scale
+        char_h = 7 * char_scale
+        tb.draw_char(cx - char_w // 2, cy - char_h // 2, str(count), scale=char_scale, color=1)
+
+    return tb.to_escpos()
+

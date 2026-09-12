@@ -53,6 +53,12 @@ public:
 #include "../src/generators/MinesGen.h"
 #include "../src/generators/MinesGen.cpp"
 
+#include "../src/generators/TentsGen.h"
+#include "../src/generators/TentsGen.cpp"
+
+#include "../src/generators/BridgesGen.h"
+#include "../src/generators/BridgesGen.cpp"
+
 #include "../src/generators/OfflinePuzzleComposer.h"
 #include "../src/generators/OfflinePuzzleComposer.cpp"
 

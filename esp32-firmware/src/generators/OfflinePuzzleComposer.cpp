@@ -65,6 +65,8 @@ bool OfflinePuzzleComposer::generateAndPrintReceipt(EscPosPrinter& printer, cons
     JumbleDifficulty     jDiff = (effectiveGrade == GRADE_EASY) ? JUMBLE_EASY : ((effectiveGrade == GRADE_HARD) ? JUMBLE_HARD : JUMBLE_MEDIUM);
     BinaryDifficulty     bDiff = (effectiveGrade == GRADE_EASY) ? BINARY_EASY : ((effectiveGrade == GRADE_HARD) ? BINARY_HARD : BINARY_MEDIUM);
     MinesDifficulty      mDiff = (effectiveGrade == GRADE_EASY) ? MINES_EASY : ((effectiveGrade == GRADE_HARD) ? MINES_HARD : MINES_MEDIUM);
+    TentsDifficulty      tDiff = (effectiveGrade == GRADE_EASY) ? TENTS_EASY : ((effectiveGrade == GRADE_HARD) ? TENTS_HARD : TENTS_MEDIUM);
+    BridgesDifficulty    brDiff = (effectiveGrade == GRADE_EASY) ? BRIDGES_EASY : ((effectiveGrade == GRADE_HARD) ? BRIDGES_HARD : BRIDGES_MEDIUM);
 
     // 2. Generate and print Sudoku
     Serial.println("[COMPOSER] Generating Sudoku...");
@@ -106,6 +108,18 @@ bool OfflinePuzzleComposer::generateAndPrintReceipt(EscPosPrinter& printer, cons
     Serial.println("[COMPOSER] Generating Mines...");
     _mines.generate(mDiff);
     _mines.printToReceipt(printer, mDiff);
+    printer.printHorizontalLine('-');
+
+    // 9. Generate and print Tents
+    Serial.println("[COMPOSER] Generating Tents...");
+    _tents.generate(tDiff);
+    _tents.printToReceipt(printer, tDiff);
+    printer.printHorizontalLine('-');
+
+    // 10. Generate and print Bridges
+    Serial.println("[COMPOSER] Generating Bridges...");
+    _bridges.generate(brDiff);
+    _bridges.printToReceipt(printer, brDiff);
 
     // 9. Footer
     printer.printDoubleLine();

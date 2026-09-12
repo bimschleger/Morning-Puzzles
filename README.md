@@ -8,7 +8,7 @@ Runs **100% On-Device and Offline** on an **ESP32** in native C++ with zero clou
 
 ## 🌟 Key Features
 
-* **100% Standalone & Air-Gapped**: All 7 puzzle algorithms run locally on the ESP32 microcontroller in **<50 milliseconds**. No Wi-Fi, no cloud subscriptions, and no external servers required.
+* **100% Standalone & Air-Gapped**: All 9 puzzle algorithms run locally on the ESP32 microcontroller in **<50 milliseconds**. No Wi-Fi, no cloud subscriptions, and no external servers required.
 * **Auto-Print on Startup / Power-On**: Flip your printer's power switch ON in the morning, and the dispenser automatically senses the printer, generates a brand-new randomized edition, prints the receipt, and cuts the paper.
 * **On-Demand Extra Copies with On-Device Button**: Need another copy or want a different difficulty tier? Simply press the onboard **`BOOT`** button (or an external arcade button) on the device to immediately generate and print a fresh set!
 * **Targeted for 80mm Commercial Receipt Printers**: Designed for standard 80mm receipt rolls at 203 DPI (**576 dots per line / 72 bytes per scanline**), using standard ESC/POS protocol (`GS v 0`), safe thermal duty cycles ($\le 35\%$), and automatic partial cutting.
@@ -16,9 +16,9 @@ Runs **100% On-Device and Offline** on an **ESP32** in native C++ with zero clou
 
 ---
 
-## 🧩 Featured Games (All 7 Included)
+## 🧩 Featured Games (All 9 Included)
 
-Every print job generates a randomized, unique daily edition featuring all 7 open-source (Apache 2.0) puzzle types:
+Every print job generates a randomized, unique daily edition featuring all 9 open-source (Apache 2.0 / MIT) puzzle types:
 
 1. **Sudoku**: 9x9 grid with standard 3x3 block hierarchy, generated with a backtracking solver mathematically guaranteed to have exactly one unique solution.
 2. **Search (Word Search)**: Dynamic 12x12 letter matrix with randomized hidden words (horizontal, vertical, diagonal) across curated themes (Morning, Space, Animals, Nature, Tech), complete with checkbox tracking.
@@ -27,6 +27,8 @@ Every print job generates a randomized, unique daily edition featuring all 7 ope
 5. **Jumble**: 4 scrambled clue words with circled letter positions, ruled handwriting scratchpad lines, and a punchline riddle to solve.
 6. **Binary (Takuzu / Binairo)**: 0 and 1 logic puzzle with strict adjacency rules (no three in a row) and equal row/column parity.
 7. **Mines (Minesweeper Deduction)**: 100% deductive, guess-free minefield with adjacent mine count clues and total mine counter.
+8. **Tents (Tents & Trees)**: Bipartite matching puzzle where each tree is paired with an orthogonally adjacent tent, tents never touch even diagonally, and margin numbers indicate line totals.
+9. **Bridges (Hashiwokakero)**: Connect numbered circular islands with horizontal and vertical single/double bridges to form a single continuous spanning network without crossings.
 
 ---
 
@@ -201,7 +203,7 @@ Morning-Puzzles/
   ```bash
   python3 server/test_thermal_format.py
   ```
-  *Tests 576-dot width, 72-byte row alignment, GS v 0 raster encoding, duty cycle thermal safety ($\le 35\%$), and cutter commands across all 7 games.*
+  *Tests 576-dot width, 72-byte row alignment, GS v 0 raster encoding, duty cycle thermal safety ($\le 35\%$), and cutter commands across all 9 games.*
 
 * **Native ESP32 C++ Puzzle Generation Test**:
   ```bash

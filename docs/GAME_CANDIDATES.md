@@ -1,6 +1,6 @@
 # Candidate Logic Games: Evaluation & Implementation Reference
 
-This document provides the definitive architectural survey, ranking, and technical specification for potential new logic and deduction games to expand the **Morning Puzzles** ecosystem (currently featuring **Stars**, **Sudoku**, **Search**, **Nonogram**, and **Jumble**).
+This document provides the definitive architectural survey, ranking, and technical specification for potential new logic and deduction games to expand the **Morning Puzzles** ecosystem (featuring **Sudoku**, **Search**, **Nonogram**, **Stars**, **Jumble**, **Binary**, **Mines**, **Tents**, and **Bridges**).
 
 Every candidate has been evaluated against three non-negotiable criteria:
 1. **Thermal Printability**: Feasibility of clean rendering on 80mm thermal receipt paper ($576\text{ dots}$ printable width, $321\text{px}$ inner canvas, 1-bit monochrome, comfortable pencil-solving space).
@@ -11,18 +11,18 @@ Every candidate has been evaluated against three non-negotiable criteria:
 
 ## 1. Candidate Comparison Matrix
 
-| Rank | Single-Word Title | Traditional Name | Open-Source Engine | License | Implementation Stack | Thermal Print Fit | Generation Maturity | Allowable Output Guarantee |
-| :---: | :--- | :--- | :--- | :--- | :--- | :---: | :---: | :---: |
-| **1** | **BRIDGES** | Hashiwokakero | Simon Tatham (`bridges.c`) / IBM chuk-gym | **MIT** / **Apache 2.0** | Pure ANSI C / Python | **10 / 10** | High (Spanning tree + solver) | Guaranteed unique; fully connected graph |
-| **2** | **BINARY** | Takuzu / Binairo | Simon Tatham (`unruly.c`) / IBM chuk-gym #4 | **MIT** / **Apache 2.0** | Pure ANSI C / Python | **10 / 10** | High (Backtracking + CP-SAT) | Guaranteed unique; no trios, equal 0/1, unique lines |
-| **3** | **MINES** | Solitaire Minesweeper | Simon Tatham (`mines.c`) / CP-SAT generator | **MIT** / **Apache 2.0** | Pure ANSI C / Python | **9.7 / 10** | High (Deductive no-guess solver) | Guaranteed unique; 100% solvable without guessing |
-| **4** | **HITORI** | Hitori (Nikoli) | Simon Tatham (`hitori.c`) | **MIT** | Pure ANSI C | **9.6 / 10** | High (Backtracking pruner) | Guaranteed unique; 100% connected white cells |
-| **5** | **LOOP** | Slitherlink | Simon Tatham (`loopy.c`) | **MIT** | Pure ANSI C | **9.5 / 10** | Very High (Deductive loop solver) | Guaranteed unique; 1 closed loop, no branches |
-| **6** | **TENTS** | Tents & Trees | Simon Tatham (`tents.c`) | **MIT** | Pure ANSI C | **9.3 / 10** | High (Matching engine + pruner) | Guaranteed unique; 1:1 tree-tent pairing |
-| **7** | **CALCU** | Calcudoku / KenKen | Simon Tatham (`keen.c`) | **MIT** | Pure ANSI C | **9.0 / 10** | High (Latin square + cage solver) | Guaranteed unique; valid integer arithmetic |
-| **8** | **FUTOSHIKI** | Futoshiki / Unequal | Simon Tatham (`unequal.c`) | **MIT** | Pure ANSI C | **9.0 / 10** | High (Latin square + poset solver) | Guaranteed unique; no cyclical inequalities |
-| **9** | **KAKURO** | Cross Sums | Simon Tatham (`kakuro.c`) | **MIT** | Pure ANSI C | **8.7 / 10** | High (Crossword fill + partition solver)| Guaranteed unique; no duplicate digits per run |
-| **10**| **FLEET** | Battleships / Bimaru | Simon Tatham (`pearl.c` variant) / Solitaire Battleship | **MIT** / **Apache 2.0** | C / Python (CP-SAT) | **8.5 / 10** | Medium-High (Fleet placer + SAT solver)| Guaranteed unique; non-touching ship bounds |
+| Rank | Single-Word Title | Traditional Name | Status | Open-Source Engine | License | Implementation Stack | Thermal Print Fit | Generation Maturity | Allowable Output Guarantee |
+| :---: | :--- | :--- | :---: | :--- | :--- | :--- | :---: | :---: | :---: |
+| **1** | **BRIDGES** | Hashiwokakero | **Included** | Simon Tatham (`bridges.c`) / IBM chuk-gym | **MIT** / **Apache 2.0** | Pure ANSI C / Python | **10 / 10** | High (Spanning tree + solver) | Guaranteed unique; fully connected graph |
+| **2** | **BINARY** | Takuzu / Binairo | **Included** | Simon Tatham (`unruly.c`) / IBM chuk-gym #4 | **MIT** / **Apache 2.0** | Pure ANSI C / Python | **10 / 10** | High (Backtracking + CP-SAT) | Guaranteed unique; no trios, equal 0/1, unique lines |
+| **3** | **MINES** | Solitaire Minesweeper | **Included** | Simon Tatham (`mines.c`) / CP-SAT generator | **MIT** / **Apache 2.0** | Pure ANSI C / Python | **9.7 / 10** | High (Deductive no-guess solver) | Guaranteed unique; 100% solvable without guessing |
+| **4** | **HITORI** | Hitori (Nikoli) | Candidate | Simon Tatham (`hitori.c`) | **MIT** | Pure ANSI C | **9.6 / 10** | High (Backtracking pruner) | Guaranteed unique; 100% connected white cells |
+| **5** | **LOOP** | Slitherlink | Candidate | Simon Tatham (`loopy.c`) | **MIT** | Pure ANSI C | **9.5 / 10** | Very High (Deductive loop solver) | Guaranteed unique; 1 closed loop, no branches |
+| **6** | **TENTS** | Tents & Trees | **Included** | Simon Tatham (`tents.c`) | **MIT** / **Apache 2.0** | Pure ANSI C / Python | **9.3 / 10** | High (Matching engine + pruner) | Guaranteed unique; 1:1 tree-tent pairing |
+| **7** | **CALCU** | Calcudoku / KenKen | Candidate | Simon Tatham (`keen.c`) | **MIT** | Pure ANSI C | **9.0 / 10** | High (Latin square + cage solver) | Guaranteed unique; valid integer arithmetic |
+| **8** | **FUTOSHIKI** | Futoshiki / Unequal | Candidate | Simon Tatham (`unequal.c`) | **MIT** | Pure ANSI C | **9.0 / 10** | High (Latin square + poset solver) | Guaranteed unique; no cyclical inequalities |
+| **9** | **KAKURO** | Cross Sums | Candidate | Simon Tatham (`kakuro.c`) | **MIT** | Pure ANSI C | **8.7 / 10** | High (Crossword fill + partition solver)| Guaranteed unique; no duplicate digits per run |
+| **10**| **FLEET** | Battleships / Bimaru | Candidate | Simon Tatham (`pearl.c` variant) / Solitaire Battleship | **MIT** / **Apache 2.0** | C / Python (CP-SAT) | **8.5 / 10** | Medium-High (Fleet placer + SAT solver)| Guaranteed unique; non-touching ship bounds |
 
 ---
 

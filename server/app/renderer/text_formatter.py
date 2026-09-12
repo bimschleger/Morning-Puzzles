@@ -205,6 +205,36 @@ def build_daily_receipt_bytes(daily_data: Dict[str, Any]) -> bytes:
             r.println("   " + line)
         r.println()
 
+    # 8. Tents
+    if "tents" in daily_data:
+        r.horizontal_rule("-")
+        t = daily_data["tents"]
+        r.puzzle_header(
+            "TENTS",
+            t.get("difficulty", "Medium"),
+            "Pair each tree with an orthogonally adjacent tent such that tents never touch, even diagonally, matching the row and column counts."
+        )
+        for line in t.get("text", "").split("\n"):
+            r.println(line)
+        r.println()
+
+    # 9. Bridges
+    if "bridges" in daily_data:
+        r.horizontal_rule("-")
+        b = daily_data["bridges"]
+        r.puzzle_header(
+            "BRIDGES",
+            b.get("difficulty", "Medium"),
+            "Connect the numbered islands with horizontal and vertical bridges so all islands form a single network matching each island's bridge count."
+        )
+        for line in b.get("text", "").split("\n"):
+            r.println(line)
+        r.println()
+
+    # Optional Solution Key
+    if daily_data.get("show_solutions"):
+        _append_solution_key(r, daily_data)
+
     # Footer
     r.align("center")
     r.horizontal_rule("=")
@@ -238,6 +268,8 @@ def build_hybrid_daily_receipt_bytes(daily_data: Dict[str, Any]) -> bytes:
             render_jumble_raster,
             render_binary_raster,
             render_mines_raster,
+            render_tents_raster,
+            render_bridges_raster,
         )
         has_pillow = True
     except (ImportError, RuntimeError):
@@ -373,7 +405,45 @@ def build_hybrid_daily_receipt_bytes(daily_data: Dict[str, Any]) -> bytes:
                 r.println("   " + line)
         r.println()
 
-    # 9. Master Footer
+    # 9. Tents
+    if "tents" in daily_data:
+        r.horizontal_rule("-")
+        t = daily_data["tents"]
+        r.puzzle_header(
+            "TENTS",
+            t.get("difficulty", "Medium"),
+            "Pair each tree with an orthogonally adjacent tent such that tents never touch, even diagonally, matching the row and column counts."
+        )
+        try:
+            raster = render_tents_raster(t)
+            r.write_raw(raster)
+        except Exception:
+            for line in t.get("text", "").split("\n"):
+                r.println(line)
+        r.println()
+
+    # 10. Bridges
+    if "bridges" in daily_data:
+        r.horizontal_rule("-")
+        b = daily_data["bridges"]
+        r.puzzle_header(
+            "BRIDGES",
+            b.get("difficulty", "Medium"),
+            "Connect the numbered islands with horizontal and vertical bridges so all islands form a single network matching each island's bridge count."
+        )
+        try:
+            raster = render_bridges_raster(b)
+            r.write_raw(raster)
+        except Exception:
+            for line in b.get("text", "").split("\n"):
+                r.println(line)
+        r.println()
+
+    # Optional Solution Key
+    if daily_data.get("show_solutions"):
+        _append_solution_key(r, daily_data)
+
+    # Master Footer
     r.align("center")
     r.horizontal_rule("=")
     r.println("Good luck! Solutions tomorrow morning.")
@@ -385,3 +455,165 @@ def build_hybrid_daily_receipt_bytes(daily_data: Dict[str, Any]) -> bytes:
     r.cut()
 
     return r.get_bytes()
+
+
+def _append_solution_key(r: EscPosTextReceipt, daily_data: Dict[str, Any]):
+    """
+    Appends an ASCII Solution Key strictly conforming to docs/PUZZLE_SOLUTION_KEY_SPEC.md.
+    Enforces <= 48 character lines, standard 6-space indent for grids, and blank line separation.
+    """
+    import textwrap
+
+    r.horizontal_rule("-")
+    r.align("center")
+    r.bold(True)
+    r.println("[ SOLUTION KEY ]")
+    r.bold(False)
+    r.horizontal_rule("-")
+    r.align("left")
+    r.println()
+
+    # 1. Sudoku
+    if "sudoku" in daily_data:
+        s = daily_data["sudoku"]
+        sol = s.get("solution", [])
+        if sol:
+            r.bold(True)
+            r.println("SUDOKU")
+            r.bold(False)
+            for row in sol:
+                r.println("      " + " ".join(str(x) for x in row))
+            r.println()
+
+    # 2. Search
+    if "wordsearch" in daily_data:
+        ws = daily_data["wordsearch"]
+        words = ws.get("words", [])
+        theme = ws.get("theme", "")
+        r.bold(True)
+        r.println("SEARCH")
+        r.bold(False)
+        if theme:
+            r.println(f"Theme: {theme}")
+        words_str = "Words: " + ", ".join(words)
+        for line in textwrap.wrap(words_str, 46):
+            r.println(line)
+        r.println()
+
+    # 3. Nonogram
+    if "nonogram" in daily_data:
+        n = daily_data["nonogram"]
+        sol = n.get("solution", [])
+        if sol:
+            r.bold(True)
+            r.println("NONOGRAM")
+            r.bold(False)
+            for row in sol:
+                r.println("      " + " ".join("# " if c == 1 else ". " for c in row))
+            r.println()
+
+    # 4. Stars
+    if "queens" in daily_data:
+        q = daily_data["queens"]
+        stars = q.get("queens", [])
+        if stars:
+            r.bold(True)
+            r.println("STARS")
+            r.bold(False)
+            stars_str = "Stars at: " + "  ".join(f"({sr+1},{sc+1})" for sr, sc in sorted(stars))
+            for line in textwrap.wrap(stars_str, 46):
+                r.println(line)
+            r.println()
+
+    # 5. Jumble
+    if "jumble" in daily_data:
+        j = daily_data["jumble"]
+        raw_words = j.get("words", [])
+        words = [w.get("original", str(w)) if isinstance(w, dict) else str(w) for w in raw_words]
+        ans = j.get("answer", "")
+        r.bold(True)
+        r.println("JUMBLE")
+        r.bold(False)
+        if words:
+            for line in textwrap.wrap("Words:  " + ", ".join(words), 46):
+                r.println(line)
+        if ans:
+            for line in textwrap.wrap(f"Answer: {ans}", 46):
+                r.println(line)
+        r.println()
+
+    # 6. Binary
+    if "binary" in daily_data:
+        b = daily_data["binary"]
+        sol = b.get("solution", [])
+        if sol:
+            r.bold(True)
+            r.println("BINARY")
+            r.bold(False)
+            for row in sol:
+                r.println("      " + " ".join(str(c) for c in row))
+            r.println()
+
+    # 7. Mines
+    if "mines" in daily_data:
+        m = daily_data["mines"]
+        sol = m.get("solution", [])
+        puzzle = m.get("puzzle", [])
+        if sol:
+            r.bold(True)
+            r.println("MINES")
+            r.bold(False)
+            for row_idx in range(len(sol)):
+                row_str = "      "
+                for col_idx in range(len(sol[row_idx])):
+                    if puzzle and puzzle[row_idx][col_idx] >= 0:
+                        row_str += f"{puzzle[row_idx][col_idx]} "
+                    elif sol[row_idx][col_idx] == 1:
+                        row_str += "* "
+                    else:
+                        row_str += ". "
+                r.println(row_str)
+            r.println()
+
+    # 8. Tents
+    if "tents" in daily_data:
+        t = daily_data["tents"]
+        sol = t.get("solution", [])
+        tents = t.get("tents", [])
+        r.bold(True)
+        r.println("TENTS")
+        r.bold(False)
+        if sol:
+            for row in sol:
+                row_str = "      "
+                for cell in row:
+                    if cell == 1:
+                        row_str += "T "
+                    elif cell == 2:
+                        row_str += "^ "
+                    else:
+                        row_str += ". "
+                r.println(row_str)
+        if tents:
+            tents_str = "Tents at: " + "  ".join(f"({tr+1},{tc+1})" for tr, tc in sorted(tents))
+            for line in textwrap.wrap(tents_str, 46):
+                r.println(line)
+        r.println()
+
+    # 9. Bridges
+    if "bridges" in daily_data:
+        b = daily_data["bridges"]
+        sol_text = b.get("solution_text", "")
+        bridges = b.get("solution_bridges", [])
+        r.bold(True)
+        r.println("BRIDGES")
+        r.bold(False)
+        if sol_text:
+            for line in sol_text.split("\n"):
+                r.println(line)
+        if bridges:
+            b_str = "Bridges: " + ", ".join(f"({x['r1']+1},{x['c1']+1})-({x['r2']+1},{x['c2']+1})[{x['count']}]" for x in bridges)
+            for line in textwrap.wrap(b_str, 46):
+                r.println(line)
+        r.println()
+

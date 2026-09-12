@@ -21,6 +21,8 @@ from app.generators.queens_gen import QueensGenerator
 from app.generators.jumble_gen import JumbleGenerator
 from app.generators.binary_gen import BinaryGenerator
 from app.generators.mines_gen import MinesGenerator
+from app.generators.tents_gen import TentsGenerator
+from app.generators.bridges_gen import BridgesGenerator
 from app.renderer.text_formatter import (
     build_daily_receipt_bytes,
     build_hybrid_daily_receipt_bytes,
@@ -35,6 +37,8 @@ queens_gen = QueensGenerator()
 jumble_gen = JumbleGenerator()
 binary_gen = BinaryGenerator()
 mines_gen = MinesGenerator()
+tents_gen = TentsGenerator()
+bridges_gen = BridgesGenerator()
 
 
 def generate_daily_bundle(difficulty: str = "medium") -> dict:
@@ -50,6 +54,8 @@ def generate_daily_bundle(difficulty: str = "medium") -> dict:
         "jumble": jumble_gen.generate(difficulty=difficulty),
         "binary": binary_gen.generate(difficulty=difficulty),
         "mines": mines_gen.generate(difficulty=difficulty),
+        "tents": tents_gen.generate(difficulty=difficulty),
+        "bridges": bridges_gen.generate(difficulty=difficulty),
     }
 
 

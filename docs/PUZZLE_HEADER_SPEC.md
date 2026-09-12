@@ -67,6 +67,8 @@ All existing games—and any future games added to Morning Puzzles—must strict
 | **Jumble** | `--- JUMBLE ---` | **Yes** | `EASY`, `MEDIUM`, `HARD` | *Unscramble the clue words, then arrange the circled letters to solve the punchline riddle.* | Clue boxes start directly below instruction. Single-word name replaces "Daily Jumble". |
 | **Binary** | `--- BINARY ---` | **Yes** | `EASY` (6x6), `MEDIUM` (8x8), `HARD` (8x8) | *Fill the grid with 0s and 1s so no more than two identical numbers touch and each row and column has equal counts.* | Pure grid with 0 and 1 clues follows instruction. |
 | **Mines** | `--- MINES ---` | **Yes** | `EASY` (8 Mines), `MEDIUM` (12 Mines), `HARD` (15 Mines) | *Use the numbered clues showing adjacent mine counts to deduce and mark every hidden mine across the grid.* | `TOTAL MINES: [N]` placed between instruction and drawing. 100% deductive solvability guarantee (zero guessing). |
+| **Tents** | `--- TENTS ---` | **Yes** | `EASY` (6x6), `MEDIUM` (8x8), `HARD` (8x8) | *Pair each tree with an orthogonally adjacent tent such that tents never touch, even diagonally, matching the row and column counts.* | Board with pine trees and row/column margin counts follows instruction. |
+| **Bridges** | `--- BRIDGES ---` | **Yes** | `EASY` (6x6), `MEDIUM` (8x8), `HARD` (8x8) | *Connect the numbered islands with horizontal and vertical bridges so all islands form a single network matching each island's bridge count.* | Clean grid with circular island badges and whitespace corridors follows instruction. |
 
 ---
 
@@ -74,7 +76,7 @@ All existing games—and any future games added to Morning Puzzles—must strict
 
 Before committing any puzzle renderer or generator update, verify that **NONE** of the following elements appear in the header or drawing:
 
-- [x] **NO multi-word titles or slash-separated names** (*"Word Search"*, *"Daily Jumble"*, *"Queens / Star Battle"*, *"Nonogram / Picross"*). Titles must be strictly a single word.
+- [x] **NO multi-word titles or slash-separated names** (*"Word Search"*, *"Daily Jumble"*, *"Queens / Star Battle"*, *"Nonogram / Picross"*, *"Tents and Trees"*, *"Hashiwokakero"*). Titles must be strictly a single word.
 - [x] **NO multi-sentence rule essays or multi-paragraph tutorials** (gameplay instructions must be strictly one concise, clear sentence).
 - [x] **NO missing or omitted gameplay instructions** (every game must include its canonical one-sentence goal between difficulty and drawing).
 - [x] **NO grid dimension metadata in titles** (*"8x10 Grid"*, *"Size: 5x5"*).
@@ -94,3 +96,5 @@ When adding a new puzzle type to Morning Puzzles:
    - If the game is driven by theme or topic rather than difficulty, omit the difficulty line and place the one-sentence instruction directly below the title.
 4. **Canvas Drawing**: Start the canvas directly with the visual puzzle component (borders, cells, or game clues). Do not draw a banner title inside the canvas.
 5. **Checklist & Clues**: Place any answer verification or pencil-tracking tools (checkboxes `[ ]`, scratch lines) underneath the puzzle grid separated by a dashed tear-line.
+6. **Solution Key Formatting**: Ensure the game's solution format strictly follows the monospaced ASCII requirements in [`docs/PUZZLE_SOLUTION_KEY_SPEC.md`](PUZZLE_SOLUTION_KEY_SPEC.md).
+

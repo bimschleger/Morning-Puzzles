@@ -281,6 +281,42 @@
             </select>
           </div>
         </div>
+
+        <!-- 8. Tents Toggle -->
+        <div class="bg-slate-900 border border-slate-800/80 rounded-xl p-3.5 flex flex-col gap-2.5 transition hover:border-slate-700">
+          <div class="flex items-center justify-between">
+            <label class="flex items-center gap-2.5 cursor-pointer select-none">
+              <input type="checkbox" id="toggle-tents" checked class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
+              <span class="font-semibold text-sm text-slate-200">Tents</span>
+            </label>
+          </div>
+          <div class="flex items-center justify-between pl-6 text-xs text-slate-400">
+            <span>Difficulty:</span>
+            <select id="diff-tents" class="bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2 py-1 text-xs outline-none focus:border-amber-500">
+              <option value="easy">Easy: 6x6 (4 Tents)</option>
+              <option value="medium" selected>Medium: 8x8 (8 Tents)</option>
+              <option value="hard">Hard: 8x8 (11 Tents)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 9. Bridges Toggle -->
+        <div class="bg-slate-900 border border-slate-800/80 rounded-xl p-3.5 flex flex-col gap-2.5 transition hover:border-slate-700">
+          <div class="flex items-center justify-between">
+            <label class="flex items-center gap-2.5 cursor-pointer select-none">
+              <input type="checkbox" id="toggle-bridges" checked class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
+              <span class="font-semibold text-sm text-slate-200">Bridges</span>
+            </label>
+          </div>
+          <div class="flex items-center justify-between pl-6 text-xs text-slate-400">
+            <span>Difficulty:</span>
+            <select id="diff-bridges" class="bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2 py-1 text-xs outline-none focus:border-amber-500">
+              <option value="easy">Easy: 6x6 (6 Islands)</option>
+              <option value="medium" selected>Medium: 8x8 (10 Islands)</option>
+              <option value="hard">Hard: 8x8 (14 Islands)</option>
+            </select>
+          </div>
+        </div>
       </div>
 
       <!-- Receipt Visual Customizations -->
@@ -2358,6 +2394,433 @@
     }
 
     // =========================================================================
+    // TENTS SIMULATOR (Simon Tatham tents.c)
+    // =========================================================================
+    class TentsSimulator {
+      constructor() {
+        this.diffSettings = {
+          'easy': { size: 6, tents: 4 },
+          'medium': { size: 8, tents: 8 },
+          'hard': { size: 8, tents: 11 }
+        };
+      }
+
+      getOrthoNeighs(r, c, size) {
+        const res = [];
+        for (const [dr, dc] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
+          const nr = r + dr, nc = c + dc;
+          if (nr >= 0 && nr < size && nc >= 0 && nc < size) res.push([nr, nc]);
+        }
+        return res;
+      }
+
+      getAllNeighs(r, c, size) {
+        const res = [];
+        for (let dr = -1; dr <= 1; dr++) {
+          for (let dc = -1; dc <= 1; dc++) {
+            if (dr === 0 && dc === 0) continue;
+            const nr = r + dr, nc = c + dc;
+            if (nr >= 0 && nr < size && nc >= 0 && nc < size) res.push([nr, nc]);
+          }
+        }
+        return res;
+      }
+
+      generate(diff = 'medium') {
+        const conf = this.diffSettings[diff] || this.diffSettings['medium'];
+        const size = conf.size;
+        const targetTents = conf.tents;
+
+        for (let attempt = 0; attempt < 100; attempt++) {
+          const allCells = [];
+          for (let r = 0; r < size; r++) {
+            for (let c = 0; c < size; c++) allCells.push([r, c]);
+          }
+          allCells.sort(() => Math.random() - 0.5);
+
+          const tents = [];
+          const occupied = new Set();
+
+          for (const [r, c] of allCells) {
+            if (tents.length >= targetTents) break;
+            const key = `${r},${c}`;
+            if (!occupied.has(key)) {
+              tents.push([r, c]);
+              occupied.add(key);
+              for (const [nr, nc] of this.getAllNeighs(r, c, size)) {
+                occupied.add(`${nr},${nc}`);
+              }
+            }
+          }
+
+          if (tents.length < targetTents) continue;
+
+          const trees = [];
+          const used = new Set(tents.map(([r, c]) => `${r},${c}`));
+          let valid = true;
+
+          for (const [tr, tc] of tents) {
+            const adj = this.getOrthoNeighs(tr, tc, size).filter(([nr, nc]) => !used.has(`${nr},${nc}`));
+            if (adj.length === 0) {
+              valid = false;
+              break;
+            }
+            const tree = adj[Math.floor(Math.random() * adj.length)];
+            trees.push(tree);
+            used.add(`${tree[0]},${tree[1]}`);
+          }
+
+          if (!valid || trees.length !== targetTents) continue;
+
+          const rowClues = Array(size).fill(0);
+          const colClues = Array(size).fill(0);
+          for (const [tr, tc] of tents) {
+            rowClues[tr]++;
+            colClues[tc]++;
+          }
+
+          const puzzleGrid = Array.from({ length: size }, () => Array(size).fill(0));
+          for (const [r, c] of trees) puzzleGrid[r][c] = 1;
+
+          const solutionGrid = Array.from({ length: size }, () => Array(size).fill(0));
+          for (const [r, c] of trees) solutionGrid[r][c] = 1;
+          for (const [r, c] of tents) solutionGrid[r][c] = 2;
+
+          return {
+            size,
+            diff: diff.toUpperCase(),
+            rowClues,
+            colClues,
+            trees,
+            tents,
+            puzzle: puzzleGrid,
+            solution: solutionGrid
+          };
+        }
+
+        return this.generate('easy');
+      }
+    }
+
+    // =========================================================================
+    // BRIDGES SIMULATOR (Simon Tatham bridges.c / Hashiwokakero)
+    // =========================================================================
+    class BridgesSimulator {
+      constructor() {
+        this.diffSettings = {
+          'easy': { size: 6, islands: 6, maxDegree: 4 },
+          'medium': { size: 8, islands: 10, maxDegree: 6 },
+          'hard': { size: 8, islands: 14, maxDegree: 8 }
+        };
+      }
+
+      findPotentialEdges(islands) {
+        const edges = [];
+        const n = islands.length;
+        for (let i = 0; i < n; i++) {
+          const [r1, c1] = islands[i];
+          for (let j = i + 1; j < n; j++) {
+            const [r2, c2] = islands[j];
+            if (r1 === r2) {
+              const cMin = Math.min(c1, c2), cMax = Math.max(c1, c2);
+              let blocked = false;
+              for (let k = 0; k < n; k++) {
+                if (k !== i && k !== j && islands[k][0] === r1 && islands[k][1] > cMin && islands[k][1] < cMax) {
+                  blocked = true;
+                  break;
+                }
+              }
+              if (!blocked) edges.push([i, j]);
+            } else if (c1 === c2) {
+              const rMin = Math.min(r1, r2), rMax = Math.max(r1, r2);
+              let blocked = false;
+              for (let k = 0; k < n; k++) {
+                if (k !== i && k !== j && islands[k][1] === c1 && islands[k][0] > rMin && islands[k][0] < rMax) {
+                  blocked = true;
+                  break;
+                }
+              }
+              if (!blocked) edges.push([i, j]);
+            }
+          }
+        }
+        return edges;
+      }
+
+      edgesCross(e1, e2, islands) {
+        const [r1a, c1a] = islands[e1[0]];
+        const [r1b, c1b] = islands[e1[1]];
+        const [r2a, c2a] = islands[e2[0]];
+        const [r2b, c2b] = islands[e2[1]];
+
+        const isE1H = (r1a === r1b);
+        const isE2H = (r2a === r2b);
+        if (isE1H === isE2H) return false;
+
+        let hR, hCMin, hCMax, vC, vRMin, vRMax;
+        if (isE1H) {
+          hR = r1a; hCMin = Math.min(c1a, c1b); hCMax = Math.max(c1a, c1b);
+          vC = c2a; vRMin = Math.min(r2a, r2b); vRMax = Math.max(r2a, r2b);
+        } else {
+          hR = r2a; hCMin = Math.min(c2a, c2b); hCMax = Math.max(c2a, c2b);
+          vC = c1a; vRMin = Math.min(r1a, r1b); vRMax = Math.max(r1a, r1b);
+        }
+        return (vRMin < hR && hR < vRMax) && (hCMin < vC && vC < hCMax);
+      }
+
+      generate(diff = 'medium') {
+        const conf = this.diffSettings[diff] || this.diffSettings['medium'];
+        const size = conf.size;
+        const targetIslands = conf.islands;
+        const maxDegree = conf.maxDegree;
+
+        for (let attempt = 0; attempt < 80; attempt++) {
+          const allCells = [];
+          for (let r = 0; r < size; r++) {
+            for (let c = 0; c < size; c++) allCells.push([r, c]);
+          }
+          allCells.sort(() => Math.random() - 0.5);
+
+          const islands = allCells.slice(0, targetIslands);
+          islands.sort((a, b) => a[0] === b[0] ? a[1] - b[1] : a[0] - b[0]);
+
+          const edges = this.findPotentialEdges(islands);
+          if (edges.length < targetIslands - 1) continue;
+
+          edges.sort(() => Math.random() - 0.5);
+          const parent = Array.from({ length: targetIslands }, (_, i) => i);
+          const find = (i) => {
+            if (parent[i] !== i) parent[i] = find(parent[i]);
+            return parent[i];
+          };
+          const union = (i, j) => {
+            const rootI = find(i), rootJ = find(j);
+            if (rootI !== rootJ) { parent[rootI] = rootJ; return true; }
+            return false;
+          };
+
+          const treeEdges = [];
+          const edgeCount = new Map();
+
+          for (const e of edges) {
+            let crosses = false;
+            for (const te of treeEdges) {
+              if (this.edgesCross(e, te, islands)) { crosses = true; break; }
+            }
+            if (!crosses && union(e[0], e[1])) {
+              treeEdges.push(e);
+              edgeCount.set(`${e[0]}-${e[1]}`, 1);
+            }
+          }
+
+          const root = find(0);
+          if (parent.some((_, i) => find(i) !== root)) continue;
+
+          const degrees = Array(targetIslands).fill(0);
+          for (const e of treeEdges) {
+            degrees[e[0]]++;
+            degrees[e[1]]++;
+          }
+
+          for (const e of treeEdges) {
+            if (degrees[e[0]] < maxDegree && degrees[e[1]] < maxDegree && Math.random() < 0.35) {
+              edgeCount.set(`${e[0]}-${e[1]}`, 2);
+              degrees[e[0]]++;
+              degrees[e[1]]++;
+            }
+          }
+
+          const islandsData = islands.map(([r, c], idx) => ({ r, c, count: degrees[idx] }));
+          const solutionBridges = [];
+          for (const [k, cnt] of edgeCount.entries()) {
+            const [u, v] = k.split('-').map(Number);
+            solutionBridges.push({
+              r1: islands[u][0], c1: islands[u][1],
+              r2: islands[v][0], c2: islands[v][1],
+              count: cnt
+            });
+          }
+
+          const gridH = 2 * size - 1;
+          const gridW = 2 * size - 1;
+          const charGrid = Array.from({ length: gridH }, () => Array(gridW).fill(' '));
+          for (const isl of islandsData) {
+            charGrid[2 * isl.r][2 * isl.c] = isl.count.toString();
+          }
+          for (const b of solutionBridges) {
+            if (b.r1 === b.r2) {
+              const row = 2 * b.r1;
+              const startC = Math.min(2 * b.c1, 2 * b.c2) + 1;
+              const endC = Math.max(2 * b.c1, 2 * b.c2);
+              const sym = b.count === 2 ? '=' : '-';
+              for (let col = startC; col < endC; col++) charGrid[row][col] = sym;
+            } else if (b.c1 === b.c2) {
+              const col = 2 * b.c1;
+              const startR = Math.min(2 * b.r1, 2 * b.r2) + 1;
+              const endR = Math.max(2 * b.r1, 2 * b.r2);
+              const sym = b.count === 2 ? '"' : '|';
+              for (let row = startR; row < endR; row++) charGrid[row][col] = sym;
+            }
+          }
+          const solLines = charGrid.map(row => '      ' + row.join(' ')).join('\n');
+
+          return {
+            size,
+            diff: diff.toUpperCase(),
+            islands: islandsData,
+            solutionBridges,
+            solutionText: solLines
+          };
+        }
+
+        return this.generate('easy');
+      }
+    }
+
+    /**
+     * Renders a high-contrast 1-bit thermal Tents & Trees puzzle grid.
+     */
+    function drawTentsCanvas(canvas, tData) {
+      const size = tData.size;
+      const padding = 12;
+      const totalWidth = 345;
+      const innerWidth = totalWidth - padding * 2; // 321px
+      const totalCols = size + 1;
+      const cellSize = Math.floor(innerWidth / totalCols); // ~35px
+      const actualGridSize = cellSize * size;
+      const offsetX = padding + cellSize;
+      const offsetY = padding + cellSize;
+
+      canvas.width = totalWidth;
+      canvas.height = offsetY + actualGridSize + padding;
+      const ctx = canvas.getContext('2d');
+
+      // 1. Paper Background
+      ctx.fillStyle = '#fafaf7';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // 2. Col Clues (Top Margin)
+      ctx.fillStyle = '#111111';
+      ctx.font = 'bold 18px "Space Mono", monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      for (let c = 0; c < size; c++) {
+        const cx = offsetX + c * cellSize + cellSize / 2;
+        const cy = padding + cellSize / 2;
+        ctx.fillText(tData.colClues[c].toString(), cx, cy);
+      }
+
+      // 3. Row Clues (Left Margin)
+      for (let r = 0; r < size; r++) {
+        const cx = padding + cellSize / 2;
+        const cy = offsetY + r * cellSize + cellSize / 2;
+        ctx.fillText(tData.rowClues[r].toString(), cx, cy);
+      }
+
+      // 4. Interior Cell Dividers (Tier 4: 1.0px)
+      ctx.lineWidth = 1.0;
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.22)';
+      for (let i = 1; i < size; i++) {
+        ctx.beginPath();
+        ctx.moveTo(offsetX, offsetY + i * cellSize);
+        ctx.lineTo(offsetX + actualGridSize, offsetY + i * cellSize);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(offsetX + i * cellSize, offsetY);
+        ctx.lineTo(offsetX + i * cellSize, offsetY + actualGridSize);
+        ctx.stroke();
+      }
+
+      // 5. Outer Perimeter (Tier 1: 3.5px solid #111111)
+      ctx.lineWidth = 3.5;
+      ctx.lineCap = 'square';
+      ctx.strokeStyle = '#111111';
+      ctx.strokeRect(offsetX, offsetY, actualGridSize, actualGridSize);
+
+      // 6. Draw Pine Trees in Tree Cells
+      for (let r = 0; r < size; r++) {
+        for (let c = 0; c < size; c++) {
+          const cx = offsetX + c * cellSize + cellSize / 2;
+          const cy = offsetY + r * cellSize + cellSize / 2;
+          if (tData.puzzle[r][c] === 1) {
+            ctx.fillStyle = '#111111';
+            const trunkW = Math.max(3, Math.floor(cellSize / 10));
+            const trunkH = Math.max(5, Math.floor(cellSize / 6));
+            ctx.fillRect(cx - trunkW / 2, cy + cellSize / 4 - trunkH, trunkW, trunkH);
+
+            ctx.beginPath();
+            ctx.moveTo(cx, cy - cellSize / 3);
+            ctx.lineTo(cx + cellSize / 3, cy + cellSize / 6);
+            ctx.lineTo(cx - cellSize / 3, cy + cellSize / 6);
+            ctx.closePath();
+            ctx.fill();
+          } else {
+            ctx.fillStyle = '#111111';
+            ctx.beginPath();
+            ctx.arc(cx, cy, 1.5, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+      }
+    }
+
+    /**
+     * Renders a high-contrast 1-bit thermal Bridges (Hashiwokakero) puzzle canvas.
+     */
+    function drawBridgesCanvas(canvas, bData) {
+      const size = bData.size;
+      const padding = 20;
+      const totalWidth = 345;
+      const innerWidth = totalWidth - padding * 2;
+      const step = Math.floor(innerWidth / (size - 1));
+      const actualSize = step * (size - 1);
+      const offsetX = padding + Math.floor((innerWidth - actualSize) / 2);
+      const offsetY = padding;
+
+      canvas.width = totalWidth;
+      canvas.height = actualSize + padding * 2;
+      const ctx = canvas.getContext('2d');
+
+      // 1. Paper Background
+      ctx.fillStyle = '#fafaf7';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // 2. Corner Bracket Markers
+      const cornerLen = 12;
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = '#888888';
+      ctx.strokeRect(offsetX, offsetY, cornerLen, 0);
+      ctx.strokeRect(offsetX + actualSize - cornerLen, offsetY, cornerLen, 0);
+      ctx.strokeRect(offsetX, offsetY + actualSize, cornerLen, 0);
+      ctx.strokeRect(offsetX + actualSize - cornerLen, offsetY + actualSize, cornerLen, 0);
+
+      // 3. Islands
+      const islandRadius = Math.max(12, Math.min(16, Math.floor(step / 3)));
+      for (const isl of bData.islands) {
+        const cx = offsetX + isl.c * step;
+        const cy = offsetY + isl.r * step;
+
+        ctx.fillStyle = '#fafaf7';
+        ctx.beginPath();
+        ctx.arc(cx, cy, islandRadius, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.lineWidth = 1.8;
+        ctx.strokeStyle = '#111111';
+        ctx.beginPath();
+        ctx.arc(cx, cy, islandRadius, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.fillStyle = '#111111';
+        ctx.font = 'bold 16px "Space Mono", monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(isl.count.toString(), cx, cy + 1);
+      }
+    }
+
+    // =========================================================================
     // 3. RECEIPT COMPOSER & RENDERER (Mixed Text + Dithered Canvas)
     // =========================================================================
 
@@ -2368,6 +2831,8 @@
     const jumbleSim = new JumbleSimulator();
     const binarySim = new BinarySimulator();
     const minesSim = new MinesSimulator();
+    const tentsSim = new TentsSimulator();
+    const bridgesSim = new BridgesSimulator();
 
     let rawReceiptLines = [];
 
@@ -2390,7 +2855,9 @@
       'NONOGRAM': 'Use the number clues outside the grid to shade the correct cells and reveal the hidden pixel picture.',
       'JUMBLE': 'Unscramble the clue words, then arrange the circled letters to solve the punchline riddle.',
       'BINARY': 'Fill the grid with 0s and 1s so no more than two identical numbers touch and each row and column has equal counts.',
-      'MINES': 'Use the numbered clues showing adjacent mine counts to deduce and mark every hidden mine across the grid.'
+      'MINES': 'Use the numbered clues showing adjacent mine counts to deduce and mark every hidden mine across the grid.',
+      'TENTS': 'Pair each tree with an orthogonally adjacent tent such that tents never touch, even diagonally, matching the row and column counts.',
+      'BRIDGES': 'Connect the numbered islands with horizontal and vertical bridges so all islands form a single network matching each island\'s bridge count.'
     };
 
     function wrapText(str, maxLen = 44) {
@@ -2764,6 +3231,85 @@
         });
       }
 
+      // 8. TENTS
+      if (document.getElementById('toggle-tents') && document.getElementById('toggle-tents').checked) {
+        const diff = document.getElementById('diff-tents').value;
+        const tData = tentsSim.generate(diff);
+
+        addStandardPuzzleHeader(items, 'TENTS', diff);
+
+        if (isGraphic) {
+          items.push({
+            type: 'canvas',
+            render: (canvas) => drawTentsCanvas(canvas, tData)
+          });
+        } else {
+          // Monospaced ASCII Grid
+          const size = tData.size;
+          const colHeader = '       ' + tData.colClues.join(' ');
+          items.push({ type: 'text', text: colHeader });
+          const sep = '     +' + '--'.repeat(size) + '+';
+          items.push({ type: 'text', text: sep });
+          for (let r = 0; r < size; r++) {
+            let rowStr = `   ${tData.rowClues[r]} |`;
+            for (let c = 0; c < size; c++) {
+              rowStr += tData.puzzle[r][c] === 1 ? ' T' : ' .';
+            }
+            rowStr += ' |';
+            items.push({ type: 'text', text: rowStr });
+          }
+          items.push({ type: 'text', text: sep });
+        }
+
+        items.push({ type: 'blank', text: '' });
+        items.push({ type: 'rule', text: '-'.repeat(COLS) });
+
+        solutionsContent.push({
+          name: 'Tents',
+          solution: tData.solution,
+          tents: tData.tents,
+          size: tData.size
+        });
+      }
+
+      // 9. BRIDGES
+      if (document.getElementById('toggle-bridges') && document.getElementById('toggle-bridges').checked) {
+        const diff = document.getElementById('diff-bridges').value;
+        const bData = bridgesSim.generate(diff);
+
+        addStandardPuzzleHeader(items, 'BRIDGES', diff);
+
+        if (isGraphic) {
+          items.push({
+            type: 'canvas',
+            render: (canvas) => drawBridgesCanvas(canvas, bData)
+          });
+        } else {
+          // Monospaced ASCII
+          const size = bData.size;
+          const gridH = 2 * size - 1;
+          const gridW = 2 * size - 1;
+          const charGrid = Array.from({ length: gridH }, () => Array(gridW).fill(' '));
+          for (const isl of bData.islands) {
+            charGrid[2 * isl.r][2 * isl.c] = isl.count.toString();
+          }
+          for (let r = 0; r < gridH; r++) {
+            items.push({ type: 'text', text: '      ' + charGrid[r].join(' ') });
+          }
+        }
+
+        items.push({ type: 'blank', text: '' });
+        items.push({ type: 'rule', text: '-'.repeat(COLS) });
+
+        solutionsContent.push({
+          name: 'Bridges',
+          islands: bData.islands,
+          solutionBridges: bData.solutionBridges,
+          solutionText: bData.solutionText,
+          size: bData.size
+        });
+      }
+
       // Optional Solutions Key
       if (document.getElementById('toggle-solutions').checked && solutionsContent.length > 0) {
         items.push({ type: 'rule', text: '-'.repeat(COLS) });
@@ -2823,6 +3369,31 @@
                 }
               }
               items.push({ type: 'text', text: rowStr });
+            }
+          } else if (item.name === 'Tents') {
+            for (let r = 0; r < item.size; r++) {
+              let rowStr = '      ';
+              for (let c = 0; c < item.size; c++) {
+                const cell = item.solution[r][c];
+                rowStr += (cell === 1 ? 'T ' : (cell === 2 ? '^ ' : '. '));
+              }
+              items.push({ type: 'text', text: rowStr });
+            }
+            if (item.tents && item.tents.length > 0) {
+              const tentsStr = item.tents.map(t => `(${t[0] + 1},${t[1] + 1})`).join('  ');
+              const wrapped = wrapText(`Tents at: ${tentsStr}`, 46);
+              for (const line of wrapped) items.push({ type: 'text', text: line });
+            }
+          } else if (item.name === 'Bridges') {
+            if (item.solutionText) {
+              for (const line of item.solutionText.split('\n')) {
+                items.push({ type: 'text', text: line });
+              }
+            }
+            if (item.solutionBridges && item.solutionBridges.length > 0) {
+              const bStr = item.solutionBridges.map(b => `(${b.r1 + 1},${b.c1 + 1})-(${b.r2 + 1},${b.c2 + 1})[${b.count}]`).join(', ');
+              const wrapped = wrapText(`Bridges: ${bStr}`, 46);
+              for (const line of wrapped) items.push({ type: 'text', text: line });
             }
           } else if (item.name === 'Nonogram' || item.grid) {
             for (let r = 0; r < item.size; r++) {
@@ -2942,6 +3513,8 @@
       'toggle-jumble', 'diff-jumble',
       'toggle-binary', 'diff-binary',
       'toggle-mines', 'diff-mines',
+      'toggle-tents', 'diff-tents',
+      'toggle-bridges', 'diff-bridges',
       'toggle-ruler', 'toggle-solutions', 'toggle-burn'
     ];
     inputs.forEach(id => {
