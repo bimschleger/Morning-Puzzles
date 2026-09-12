@@ -68,7 +68,7 @@ All existing games—and any future games added to Morning Puzzles—must strict
 | **Binary** | `--- BINARY ---` | **Yes** | `EASY` (6x6), `MEDIUM` (8x8), `HARD` (8x8) | *Fill the grid with 0s and 1s so no more than two identical numbers touch and each row and column has equal counts.* | Pure grid with 0 and 1 clues follows instruction. |
 | **Mines** | `--- MINES ---` | **Yes** | `EASY` (8 Mines), `MEDIUM` (12 Mines), `HARD` (15 Mines) | *Use the numbered clues showing adjacent mine counts to deduce and mark every hidden mine across the grid.* | `TOTAL MINES: [N]` placed between instruction and drawing. 100% deductive solvability guarantee (zero guessing). |
 | **Tents** | `--- TENTS ---` | **Yes** | `EASY` (6x6), `MEDIUM` (8x8), `HARD` (8x8) | *Pair each tree with an orthogonally adjacent tent such that tents never touch, even diagonally, matching the row and column counts.* | Board with pine trees and row/column margin counts follows instruction. |
-| **Bridges** | `--- BRIDGES ---` | **Yes** | `EASY` (6x6), `MEDIUM` (8x8), `HARD` (8x8) | *Connect the numbered islands with horizontal and vertical bridges so all islands form a single network matching each island's bridge count.* | Clean grid with circular island badges and whitespace corridors follows instruction. |
+| **Bridges** | `--- BRIDGES ---` | **Yes** | `EASY` (6x6), `MEDIUM` (8x8), `HARD` (8x8) | *Connect the numbered islands with single or double lines horizontally and vertically so all islands form a single network matching each island's bridge count.* | Clean grid with circular island badges and whitespace corridors follows instruction. |
 
 ---
 

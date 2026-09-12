@@ -225,7 +225,7 @@ def build_daily_receipt_bytes(daily_data: Dict[str, Any]) -> bytes:
         r.puzzle_header(
             "BRIDGES",
             b.get("difficulty", "Medium"),
-            "Connect the numbered islands with horizontal and vertical bridges so all islands form a single network matching each island's bridge count."
+            "Connect the numbered islands with single or double lines horizontally and vertically so all islands form a single network matching each island's bridge count."
         )
         for line in b.get("text", "").split("\n"):
             r.println(line)
@@ -429,7 +429,7 @@ def build_hybrid_daily_receipt_bytes(daily_data: Dict[str, Any]) -> bytes:
         r.puzzle_header(
             "BRIDGES",
             b.get("difficulty", "Medium"),
-            "Connect the numbered islands with horizontal and vertical bridges so all islands form a single network matching each island's bridge count."
+            "Connect the numbered islands with single or double lines horizontally and vertically so all islands form a single network matching each island's bridge count."
         )
         try:
             raster = render_bridges_raster(b)
