@@ -151,6 +151,52 @@
         </select>
       </div>
 
+      <!-- Simulator Settings -->
+      <div class="border-t border-slate-800/80 pt-4 flex flex-col gap-3">
+        <h2 class="text-xs uppercase tracking-wider font-bold text-slate-400">Simulator Settings</h2>
+        
+        <!-- Game Count Selection Switch -->
+        <div class="bg-slate-900 border border-amber-500/40 rounded-xl p-3.5 flex items-center justify-between gap-3 shadow-inner">
+          <label for="select-game-count" class="text-xs font-bold text-slate-200 whitespace-nowrap">
+            Game Count:
+          </label>
+          <select id="select-game-count" class="w-full max-w-[210px] bg-slate-800 border border-amber-500/50 text-amber-400 font-semibold rounded-lg px-2.5 py-1.5 text-xs outline-none focus:border-amber-500 transition">
+            <option value="all" selected>All Games (13)</option>
+            <option value="3">Random 3 Games</option>
+            <option value="5">Random 5 Games</option>
+            <option value="custom">Custom Selection</option>
+          </select>
+        </div>
+
+        <label class="flex items-center justify-between text-xs text-slate-300 cursor-pointer px-1">
+          <span>Show Solution Answer Key</span>
+          <input type="checkbox" id="toggle-solutions" class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
+        </label>
+
+        <!-- Hidden Thermal Head Burn Texture toggle (maintained checked in DOM for 1-bit dithering shadow) -->
+        <input type="checkbox" id="toggle-burn" checked class="hidden">
+      </div>
+
+      <!-- Receipt Stats Metric Box -->
+      <div class="bg-slate-900/90 rounded-xl p-3 border border-slate-800 text-xs text-slate-400 flex flex-col gap-1.5">
+        <div class="flex justify-between">
+          <span>Paper Width:</span>
+          <span class="font-mono text-slate-200">80 mm (72mm printable)</span>
+        </div>
+        <div class="flex justify-between">
+          <span>Column Capacity:</span>
+          <span class="font-mono text-slate-200">48 chars / line (Font A)</span>
+        </div>
+        <div class="flex justify-between">
+          <span>Est. Receipt Height:</span>
+          <span class="font-mono text-amber-400 font-semibold" id="stat-height">~30 cm</span>
+        </div>
+        <div class="flex justify-between">
+          <span>Thermal Raster Mode:</span>
+          <span class="font-mono text-emerald-400 font-semibold">1-Bit 203 DPI Active</span>
+        </div>
+      </div>
+
       <!-- Puzzle Selection Toggles -->
       <div class="border-t border-slate-800/80 pt-4 flex flex-col gap-3">
         <h2 class="text-xs uppercase tracking-wider font-bold text-slate-400">Included Games & Options</h2>
@@ -391,46 +437,6 @@
               <option value="hard">Hard: 5 Letters</option>
             </select>
           </div>
-        </div>
-      </div>
-
-      <!-- Receipt Visual Customizations -->
-      <div class="border-t border-slate-800/80 pt-4 flex flex-col gap-3">
-        <h2 class="text-xs uppercase tracking-wider font-bold text-slate-400">Simulator Settings</h2>
-        
-        <label class="flex items-center justify-between text-xs text-slate-300 cursor-pointer">
-          <span>Show 48-Column Ruler Guide</span>
-          <input type="checkbox" id="toggle-ruler" class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
-        </label>
-
-        <label class="flex items-center justify-between text-xs text-slate-300 cursor-pointer">
-          <span>Show Solution Answer Key</span>
-          <input type="checkbox" id="toggle-solutions" class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
-        </label>
-
-        <label class="flex items-center justify-between text-xs text-slate-300 cursor-pointer">
-          <span>Thermal Head Burn Texture</span>
-          <input type="checkbox" id="toggle-burn" checked class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
-        </label>
-      </div>
-
-      <!-- Receipt Stats Metric Box -->
-      <div class="bg-slate-900/90 rounded-xl p-3 border border-slate-800 text-xs text-slate-400 flex flex-col gap-1.5">
-        <div class="flex justify-between">
-          <span>Paper Width:</span>
-          <span class="font-mono text-slate-200">80 mm (72mm printable)</span>
-        </div>
-        <div class="flex justify-between">
-          <span>Column Capacity:</span>
-          <span class="font-mono text-slate-200">48 chars / line (Font A)</span>
-        </div>
-        <div class="flex justify-between">
-          <span>Est. Receipt Height:</span>
-          <span class="font-mono text-amber-400 font-semibold" id="stat-height">~30 cm</span>
-        </div>
-        <div class="flex justify-between">
-          <span>Thermal Raster Mode:</span>
-          <span class="font-mono text-emerald-400 font-semibold">1-Bit 203 DPI Active</span>
         </div>
       </div>
 
@@ -6487,11 +6493,6 @@
       const dateStr = today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
       const timeStr = today.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
-      // Ruler if enabled
-      if (document.getElementById('toggle-ruler').checked) {
-        items.push({ type: 'ruler', text: '123456789012345678901234567890123456789012345678' });
-        items.push({ type: 'ruler', text: '....|....|....|....|....|....|....|....|....|...' });
-      }
 
       // Barcode Header decoration
       items.push({ type: 'center', text: '||| | ||||| || |||||| | |||| ||| ||||| ||' });
@@ -7401,7 +7402,70 @@
       }
     });
 
+    // All 13 puzzle IDs in canonical order
+    const ALL_GAMES = [
+      'queens', 'sudoku', 'wordsearch', 'nonogram', 'jumble',
+      'binary', 'mines', 'tents', 'bridges', 'killer',
+      'cryptogram', 'tango', 'ladder'
+    ];
+
+    function pickRandomGames(count) {
+      const shuffled = [...ALL_GAMES];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      const chosen = new Set(shuffled.slice(0, count));
+      ALL_GAMES.forEach(id => {
+        const el = document.getElementById(`toggle-${id}`);
+        if (el) el.checked = chosen.has(id);
+      });
+    }
+
+    function setAllGames(enabled = true) {
+      ALL_GAMES.forEach(id => {
+        const el = document.getElementById(`toggle-${id}`);
+        if (el) el.checked = enabled;
+      });
+    }
+
+    const gameCountEl = document.getElementById('select-game-count');
+    if (gameCountEl) {
+      gameCountEl.addEventListener('change', () => {
+        const val = gameCountEl.value;
+        if (val === '3' || val === '5') {
+          pickRandomGames(parseInt(val, 10));
+        } else if (val === 'all') {
+          setAllGames(true);
+        }
+        renderReceipt();
+      });
+    }
+
+    // Sync game count select when individual checkboxes are toggled
+    ALL_GAMES.forEach(id => {
+      const el = document.getElementById(`toggle-${id}`);
+      if (el) {
+        el.addEventListener('change', () => {
+          if (!gameCountEl) return;
+          const checkedCount = ALL_GAMES.filter(g => {
+            const cb = document.getElementById(`toggle-${g}`);
+            return cb && cb.checked;
+          }).length;
+          if (checkedCount === ALL_GAMES.length) {
+            gameCountEl.value = 'all';
+          } else {
+            gameCountEl.value = 'custom';
+          }
+        });
+      }
+    });
+
     function handleRandomize() {
+      const countVal = gameCountEl ? gameCountEl.value : 'all';
+      if (countVal === '3' || countVal === '5') {
+        pickRandomGames(parseInt(countVal, 10));
+      }
       if (globalDiffEl && globalDiffEl.value === 'random') {
         applyGlobalDifficulty('random');
       }
@@ -7446,7 +7510,7 @@
       'toggle-cryptogram', 'diff-cryptogram',
       'toggle-tango', 'diff-tango',
       'toggle-ladder', 'diff-ladder',
-      'toggle-ruler', 'toggle-solutions', 'toggle-burn'
+      'toggle-solutions'
     ];
     inputs.forEach(id => {
       const el = document.getElementById(id);
