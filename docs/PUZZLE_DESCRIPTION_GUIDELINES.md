@@ -80,6 +80,7 @@ Only describe what the generation engine guarantees:
 | **TENTS** | Easy (4)<br>Med (8)<br>Hard (11) | `"Pitch [4 / 8 / 11] tents next to trees without tents touching, matching row and column counts."` | **84–85** |
 | **BRIDGES** | All | `"Connect all islands into one network using 1 or 2 lines matching each island's number."` | **88** |
 | **KILLER** | Easy / Med (4x4)<br>Extreme (6x6) | `"Fill every row, column, and box with digits [1-4 / 1-6], matching cage sums without repeats."` | **84** |
+| **CRYPTOGRAM** | Easy (3 clues)<br>Med (2 clues)<br>Hard (1 clue) | **Easy**: `"Deduce the hidden phrase using the 3 letter clues and substitution logic."`<br>**Med**: `"Deduce the hidden phrase using the 2 letter clues and substitution logic."`<br>**Hard**: `"Deduce the hidden phrase using the 1 letter clue and substitution logic."` | **75**<br>**75**<br>**73** |
 
 ---
 

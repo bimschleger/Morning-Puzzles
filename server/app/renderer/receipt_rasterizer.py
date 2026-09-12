@@ -1152,3 +1152,169 @@ def render_killer_raster(killer_data: Dict[str, Any], target_width: int = THERMA
         tb.draw_text(tx, ty, str(cg.get("sum", "")), scale=2, color=1)
 
     return tb.to_escpos()
+
+
+# ==============================================================================
+# 11. CRYPTOGRAM RASTERIZER (576 Dots Width)
+# ==============================================================================
+def render_cryptogram_raster(cryptogram_data: Dict[str, Any], target_width: int = THERMAL_WIDTH_DOTS) -> bytes:
+    """
+    Renders Cryptogram letter substitution puzzle graphics:
+      - Large bold typography for ciphertext letters
+      - Handwriting entry slot lines directly above each ciphertext letter
+      - Generous vertical spacing between wrapped rows
+      - Dashed tear divider
+      - Full-width Alphabet Tracker bar with handwriting slots
+      - 4-5 ruled handwriting scratchpad lines (docs/THERMAL_DRAWING_SPEC.md)
+    """
+    padding = 24
+    inner_width = target_width - padding * 2  # 528 dots
+    ciphertext = str(cryptogram_data.get("ciphertext", "")).strip()
+    author = str(cryptogram_data.get("author", "")).strip()
+
+    # Wrap ciphertext into lines of words (target max ~24 characters per line)
+    words = ciphertext.split(" ")
+    lines: List[str] = []
+    curr = ""
+    for w in words:
+        if not curr:
+            curr = w
+        elif len(curr) + 1 + len(w) <= 24:
+            curr += " " + w
+        else:
+            lines.append(curr)
+            curr = w
+    if curr:
+        lines.append(curr)
+
+    # Dimensions
+    row_height = 76   # 34px guess zone + 42px letter zone
+    row_gap = 20
+    header_gap = 16
+    author_height = 36 if author else 0
+    tracker_height = 80
+    scratchpad_height = 140
+    total_h = header_gap + len(lines) * (row_height + row_gap) + author_height + tracker_height + scratchpad_height + 40
+
+    if HAS_PILLOW:
+        try:
+            font_cipher = ImageFont.truetype("Courier.ttf", 26)
+            font_label = ImageFont.truetype("Arial.ttf", 16)
+            font_author = ImageFont.truetype("Arial.ttf", 18)
+            font_tracker = ImageFont.truetype("Courier.ttf", 15)
+        except IOError:
+            font_cipher = ImageFont.load_default()
+            font_label = ImageFont.load_default()
+            font_author = ImageFont.load_default()
+            font_tracker = ImageFont.load_default()
+
+        img = Image.new("L", (target_width, total_h), 255)
+        draw = ImageDraw.Draw(img)
+
+        cur_y = 16
+
+        # Draw wrapped lines
+        for line_str in lines:
+            line_len = len(line_str)
+            char_w = inner_width / max(1, line_len)
+            char_w = min(char_w, 24.0)  # max letter cell width
+
+            start_x = padding + (inner_width - line_len * char_w) / 2.0
+
+            slot_y = cur_y + 26  # Handwriting slot underline Y
+            char_y = cur_y + 36  # Ciphertext letter baseline Y
+
+            for idx, ch in enumerate(line_str):
+                cx = start_x + idx * char_w
+                if ch.isalpha():
+                    # Draw pencil guess slot line above letter
+                    draw.line([cx + 3, slot_y, cx + char_w - 3, slot_y], fill=120, width=2)
+                # Draw ciphertext letter
+                draw.text((cx + char_w / 2.0 - 7, char_y), ch, fill=0, font=font_cipher)
+
+            cur_y += row_height + row_gap
+
+        # Author attribution
+        if author:
+            draw.text((padding + 12, cur_y), f"-- {author}", fill=0, font=font_author)
+            cur_y += author_height
+
+        # Dashed tear divider ([3, 3] pattern)
+        for dx in range(padding, padding + inner_width, 8):
+            draw.line([dx, cur_y, min(dx + 4, padding + inner_width), cur_y], fill=140, width=2)
+        cur_y += 18
+
+        # Alphabet Tracker
+        draw.text((padding, cur_y), "ALPHABET TRACKER:", fill=0, font=font_label)
+        cur_y += 22
+
+        letters_az = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        col_w = inner_width / 26.0
+        for i, let in enumerate(letters_az):
+            lx = padding + i * col_w
+            draw.text((lx + col_w / 2.0 - 5, cur_y), let, fill=0, font=font_tracker)
+            # Underline slot below letter for solver to write plain substitution
+            draw.line([lx + 1, cur_y + 22, lx + col_w - 2, cur_y + 22], fill=140, width=2)
+
+        cur_y += 38
+
+        # Scratchpad
+        draw.text((padding, cur_y), "SCRATCHPAD:", fill=80, font=font_label)
+        cur_y += 24
+        for _ in range(4):
+            # [4, 4] dashed lines
+            for dx in range(padding, padding + inner_width, 10):
+                draw.line([dx, cur_y, min(dx + 5, padding + inner_width), cur_y], fill=160, width=2)
+            cur_y += 26
+
+        return pil_to_escpos(img.crop((0, 0, target_width, min(cur_y + 10, total_h))))
+
+    # Pure Python ThermalBitmap Fallback
+    tb = ThermalBitmap(target_width, total_h)
+    cur_y = 16
+
+    for line_str in lines:
+        line_len = len(line_str)
+        char_w = int(inner_width / max(1, line_len))
+        char_w = min(char_w, 24)
+        start_x = padding + int((inner_width - line_len * char_w) / 2)
+
+        slot_y = cur_y + 24
+        char_y = cur_y + 34
+
+        for idx, ch in enumerate(line_str):
+            cx = start_x + idx * char_w
+            if ch.isalpha():
+                tb.draw_hline(cx + 3, slot_y, max(1, char_w - 6), thickness=2)
+            tb.draw_text(cx + 4, char_y, ch, scale=2, color=1)
+
+        cur_y += row_height + row_gap
+
+    if author:
+        tb.draw_text(padding + 12, cur_y, f"-- {author}", scale=1, color=1)
+        cur_y += author_height
+
+    # Dashed divider
+    for dx in range(padding, padding + inner_width, 8):
+        tb.draw_hline(dx, cur_y, 4, thickness=2)
+    cur_y += 18
+
+    tb.draw_text(padding, cur_y, "ALPHABET TRACKER:", scale=1, color=1)
+    cur_y += 20
+    col_w = int(inner_width / 26)
+    letters_az = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    for i, let in enumerate(letters_az):
+        lx = padding + i * col_w
+        tb.draw_text(lx + 2, cur_y, let, scale=1, color=1)
+        tb.draw_hline(lx + 1, cur_y + 16, max(1, col_w - 2), thickness=1)
+
+    cur_y += 32
+    tb.draw_text(padding, cur_y, "SCRATCHPAD:", scale=1, color=1)
+    cur_y += 22
+    for _ in range(4):
+        for dx in range(padding, padding + inner_width, 10):
+            tb.draw_hline(dx, cur_y, 5, thickness=1)
+        cur_y += 24
+
+    return tb.to_escpos()
+

@@ -212,6 +212,18 @@ When the solution key is enabled, it is appended to the bottom of the receipt di
 
   ```
 
+### K. CRYPTOGRAM (`CRYPTOGRAM`)
+* **Format**:
+  * Line 1: `Author: [AUTHOR NAME]` (if author attribution is present).
+  * Line 2+: `Answer: [DECRYPTED PHRASE]` word-wrapped to $\le 46$ characters per line.
+* **Example**:
+  ```text
+  CRYPTOGRAM
+  Author: ELEANOR ROOSEVELT
+  Answer: THE FUTURE BELONGS TO THOSE WHO BELIEVE
+  IN THE BEAUTY OF THEIR DREAMS.
+
+  ```
 
 ---
 

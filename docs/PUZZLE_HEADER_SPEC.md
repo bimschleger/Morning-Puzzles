@@ -70,6 +70,7 @@ All existing games—and any future games added to Morning Puzzles—must strict
 | **Tents** | `--- TENTS ---` | **Yes** | `EASY` (6x6), `MEDIUM` (8x8), `HARD` (8x8) | *Pitch [4 / 8 / 11] tents next to trees without tents touching, matching row and column counts.* | Dynamic tent count (4 for Easy, 8 for Medium, 11 for Hard). Replaces "orthogonally adjacent" with "next to trees". |
 | **Bridges** | `--- BRIDGES ---` | **Yes** | `EASY` (6x6), `MEDIUM` (8x8), `HARD` (8x8) | *Connect all islands into one network using 1 or 2 lines matching each island's number.* | 45% reduction. Explains single network, 1 or 2 lines, and island matching numbers. |
 | **Killer** | `--- KILLER ---` | **Yes** | `EASY` (4x4), `MEDIUM` (4x4), `EXTREME` (6x6) | *Fill every row, column, and box with digits [1-4 / 1-6], matching cage sums without repeats.* | 4x4 (2x2 boxes) on Easy/Medium, 6x6 (2x3 boxes) on Extreme. Cages have dashed borders and top-left sum clues. |
+| **Cryptogram** | `--- CRYPTOGRAM ---` | **Yes** | `EASY` (3 Clues), `MEDIUM` (2 Clues), `HARD` (1 Clue) | *Deduce the hidden phrase using the [3 letter clues / 2 letter clues / 1 letter clue] and substitution logic.* | Dynamic clue count parameterization. `CLUES: [CIPHER] = [PLAIN]` context line placed directly below instruction. |
 
 ---
 

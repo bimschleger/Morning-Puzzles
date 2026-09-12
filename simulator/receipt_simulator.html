@@ -338,6 +338,24 @@
             </select>
           </div>
         </div>
+
+        <!-- 11. Cryptogram Toggle -->
+        <div class="bg-slate-900 border border-slate-800/80 rounded-xl p-3.5 flex flex-col gap-2.5 transition hover:border-slate-700">
+          <div class="flex items-center justify-between">
+            <label class="flex items-center gap-2.5 cursor-pointer select-none">
+              <input type="checkbox" id="toggle-cryptogram" checked class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
+              <span class="font-semibold text-sm text-slate-200">Cryptogram</span>
+            </label>
+          </div>
+          <div class="flex items-center justify-between pl-6 text-xs text-slate-400">
+            <span>Difficulty:</span>
+            <select id="diff-cryptogram" class="bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2 py-1 text-xs outline-none focus:border-amber-500">
+              <option value="easy">Easy (3 Clues)</option>
+              <option value="medium" selected>Medium (2 Clues)</option>
+              <option value="hard">Hard (1 Clue)</option>
+            </select>
+          </div>
+        </div>
       </div>
 
       <!-- Receipt Visual Customizations -->
@@ -5465,6 +5483,230 @@
     }
 
     // =========================================================================
+    // CRYPTOGRAM SIMULATOR & CANVAS RENDERER
+    // =========================================================================
+    class CryptogramSimulator {
+      constructor() {
+        this.puzzles = [
+          { diff: 'easy', phrase: 'A JOURNEY OF A THOUSAND MILES BEGINS WITH A SINGLE STEP.', author: 'LAO TZU' },
+          { diff: 'easy', phrase: 'ACTIONS SPEAK LOUDER THAN WORDS.', author: 'PROVERB' },
+          { diff: 'easy', phrase: 'WHERE THERE IS A WILL, THERE IS A WAY.', author: 'PROVERB' },
+          { diff: 'easy', phrase: 'ALL THAT GLITTERS IS NOT GOLD.', author: 'WILLIAM SHAKESPEARE' },
+          { diff: 'easy', phrase: 'A BIRD IN THE HAND IS WORTH TWO IN THE BUSH.', author: 'PROVERB' },
+          { diff: 'easy', phrase: 'HONESTY IS THE BEST POLICY.', author: 'BENJAMIN FRANKLIN' },
+          { diff: 'easy', phrase: 'FORTUNE FAVORS THE BOLD.', author: 'VIRGIL' },
+          { diff: 'easy', phrase: 'PRACTICE MAKES PERFECT.', author: 'PROVERB' },
+          { diff: 'easy', phrase: 'KNOWLEDGE IS POWER.', author: 'FRANCIS BACON' },
+          { diff: 'medium', phrase: 'THE FUTURE BELONGS TO THOSE WHO BELIEVE IN THE BEAUTY OF THEIR DREAMS.', author: 'ELEANOR ROOSEVELT' },
+          { diff: 'medium', phrase: 'IT DOES NOT MATTER HOW SLOWLY YOU GO AS LONG AS YOU DO NOT STOP.', author: 'CONFUCIUS' },
+          { diff: 'medium', phrase: 'IN THE MIDDLE OF EVERY DIFFICULTY LIES OPPORTUNITY.', author: 'ALBERT EINSTEIN' },
+          { diff: 'medium', phrase: 'THE ONLY WAY TO DO GREAT WORK IS TO LOVE WHAT YOU DO.', author: 'STEVE JOBS' },
+          { diff: 'medium', phrase: 'WHATEVER YOU ARE, BE A GOOD ONE.', author: 'ABRAHAM LINCOLN' },
+          { diff: 'medium', phrase: 'THE SECRET OF GETTING AHEAD IS GETTING STARTED.', author: 'MARK TWAIN' },
+          { diff: 'medium', phrase: 'BELIEVE YOU CAN AND YOU ARE HALFWAY THERE.', author: 'THEODORE ROOSEVELT' },
+          { diff: 'hard', phrase: 'I USED TO THINK I WAS INDECISIVE, BUT NOW I AM NOT SO SURE.', author: 'TOMMY COOPER' },
+          { diff: 'hard', phrase: 'THE ROAD TO SUCCESS IS ALWAYS UNDER CONSTRUCTION.', author: 'LILY TOMLIN' },
+          { diff: 'hard', phrase: 'EXPERIENCE IS SIMPLY THE NAME WE GIVE OUR MISTAKES.', author: 'OSCAR WILDE' },
+          { diff: 'hard', phrase: 'EDUCATION IS WHAT REMAINS AFTER ONE HAS FORGOTTEN WHAT ONE HAS LEARNED IN SCHOOL.', author: 'ALBERT EINSTEIN' },
+          { diff: 'hard', phrase: 'THE ONLY TRUE WISDOM IS IN KNOWING YOU KNOW NOTHING.', author: 'SOCRATES' },
+          { diff: 'hard', phrase: 'TWO THINGS ARE INFINITE: THE UNIVERSE AND HUMAN STUPIDITY; AND I AM NOT SURE ABOUT THE UNIVERSE.', author: 'ALBERT EINSTEIN' }
+        ];
+      }
+
+      generate(diff = 'medium') {
+        const candidates = this.puzzles.filter(p => p.diff === diff);
+        const selected = (candidates.length > 0)
+          ? candidates[Math.floor(Math.random() * candidates.length)]
+          : this.puzzles[0];
+
+        const phrase = selected.phrase.toUpperCase();
+        const author = selected.author.toUpperCase();
+
+        // Generate derangement key
+        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+        let shuffled = letters.slice();
+        for (let tries = 0; tries < 100; tries++) {
+          shuffled.sort(() => Math.random() - 0.5);
+          if (letters.every((l, i) => l !== shuffled[i])) break;
+        }
+        const p2c = {};
+        const c2p = {};
+        letters.forEach((l, i) => {
+          p2c[l] = shuffled[i];
+          c2p[shuffled[i]] = l;
+        });
+
+        const ciphertext = phrase.split('').map(ch => p2c[ch] || ch).join('');
+
+        // Distinct letters in phrase
+        const distinctLetters = [...new Set(phrase.split('').filter(ch => /[A-Z]/.test(ch)))];
+        const clueCount = diff === 'easy' ? 3 : (diff === 'hard' ? 1 : 2);
+        const actualCount = Math.min(clueCount, distinctLetters.length);
+
+        // Pick distinct clues
+        const commonOrder = ['E','T','A','O','I','N','S','H','R','D','L','C','U','M','W','F','G','Y','P','B','V','K','J','X','Q','Z'];
+        const sortedInPhrase = commonOrder.filter(c => distinctLetters.includes(c));
+        const samplePool = sortedInPhrase.slice(0, Math.max(actualCount * 2, actualCount));
+        samplePool.sort(() => Math.random() - 0.5);
+        const chosenPlain = samplePool.slice(0, actualCount);
+
+        const clues = chosenPlain.map(p => ({ cipher: p2c[p], plain: p }));
+        clues.sort((a, b) => a.cipher.localeCompare(b.cipher));
+
+        const clueStr = clues.length === 1
+          ? `CLUE: ${clues[0].cipher} = ${clues[0].plain}`
+          : 'CLUES: ' + clues.map(c => `${c.cipher} = ${c.plain}`).join(', ');
+
+        return {
+          title: 'CRYPTOGRAM',
+          difficulty: diff,
+          phrase: phrase,
+          author: author,
+          ciphertext: ciphertext,
+          plainToCipher: p2c,
+          cipherToPlain: c2p,
+          clues: clues,
+          clueStr: clueStr,
+          clueCount: clues.length
+        };
+      }
+    }
+
+    function drawCryptogramCanvas(canvas, cData) {
+      const width = 345;
+      const padding = 12;
+      const innerWidth = width - 2 * padding; // 321px
+
+      // Word wrap ciphertext (target ~20 chars per line)
+      const words = cData.ciphertext.split(' ');
+      const lines = [];
+      let curr = '';
+      for (const w of words) {
+        if (!curr) curr = w;
+        else if (curr.length + 1 + w.length <= 20) curr += ' ' + w;
+        else { lines.push(curr); curr = w; }
+      }
+      if (curr) lines.push(curr);
+
+      const rowHeight = 44;
+      const rowGap = 16;
+      const authorHeight = cData.author ? 24 : 0;
+      const trackerHeight = 46;
+      const scratchpadHeight = 84;
+      const totalH = 16 + lines.length * (rowHeight + rowGap) + authorHeight + trackerHeight + scratchpadHeight + 20;
+
+      canvas.width = width;
+      canvas.height = totalH;
+      const ctx = canvas.getContext('2d');
+
+      // Paper ivory background
+      ctx.fillStyle = '#fafaf7';
+      ctx.fillRect(0, 0, width, totalH);
+
+      let curY = 16;
+
+      // Draw wrapped rows
+      for (const line of lines) {
+        const lineLen = line.length;
+        const charW = Math.min(18.0, innerWidth / Math.max(1, lineLen));
+        const startX = padding + (innerWidth - lineLen * charW) / 2.0;
+
+        const slotY = curY + 16;
+        const charY = curY + 22;
+
+        for (let idx = 0; idx < lineLen; idx++) {
+          const ch = line[idx];
+          const cx = startX + idx * charW;
+
+          if (/[A-Z]/.test(ch)) {
+            // Handwriting slot line above letter
+            ctx.strokeStyle = '#888888';
+            ctx.lineWidth = 1.2;
+            ctx.beginPath();
+            ctx.moveTo(cx + 2, slotY);
+            ctx.lineTo(cx + charW - 2, slotY);
+            ctx.stroke();
+          }
+
+          // Ciphertext character
+          ctx.fillStyle = '#111111';
+          ctx.font = 'bold 16px "Space Mono", monospace';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'top';
+          ctx.fillText(ch, cx + charW / 2.0, charY);
+        }
+
+        curY += rowHeight + rowGap;
+      }
+
+      // Author attribution
+      if (cData.author) {
+        ctx.font = 'italic 11px "Space Mono", monospace';
+        ctx.fillStyle = '#333333';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'top';
+        ctx.fillText('-- ' + cData.author, padding + 8, curY);
+        curY += authorHeight;
+      }
+
+      // Dashed tear divider
+      ctx.strokeStyle = '#888888';
+      ctx.lineWidth = 1.2;
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath();
+      ctx.moveTo(padding, curY);
+      ctx.lineTo(padding + innerWidth, curY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      curY += 14;
+
+      // Alphabet Tracker
+      ctx.font = 'bold 9px "Space Mono", monospace';
+      ctx.fillStyle = '#222222';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'top';
+      ctx.fillText('ALPHABET TRACKER:', padding, curY);
+      curY += 14;
+
+      const lettersAZ = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      const colW = innerWidth / 26.0;
+      for (let i = 0; i < 26; i++) {
+        const lx = padding + i * colW;
+        ctx.fillStyle = '#111111';
+        ctx.font = 'bold 8px "Space Mono", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(lettersAZ[i], lx + colW / 2.0, curY);
+
+        ctx.strokeStyle = '#999999';
+        ctx.lineWidth = 1.0;
+        ctx.beginPath();
+        ctx.moveTo(lx + 1, curY + 12);
+        ctx.lineTo(lx + colW - 1, curY + 12);
+        ctx.stroke();
+      }
+      curY += 24;
+
+      // Scratchpad
+      ctx.font = 'bold 9px "Space Mono", monospace';
+      ctx.fillStyle = '#666666';
+      ctx.textAlign = 'left';
+      ctx.fillText('SCRATCHPAD:', padding, curY);
+      curY += 14;
+
+      ctx.strokeStyle = '#999999';
+      ctx.lineWidth = 1.2;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      for (let i = 0; i < 4; i++) {
+        ctx.moveTo(padding, curY);
+        ctx.lineTo(padding + innerWidth, curY);
+        curY += 16;
+      }
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    // =========================================================================
     // 3. RECEIPT COMPOSER & RENDERER (Mixed Text + Dithered Canvas)
     // =========================================================================
 
@@ -5478,6 +5720,7 @@
     const tentsSim = new TentsSimulator();
     const bridgesSim = new BridgesSimulator();
     const killerSim = new KillerSudokuSimulator();
+    const cryptogramSim = new CryptogramSimulator();
 
     let rawReceiptLines = [];
 
@@ -5503,7 +5746,8 @@
       'MINES': 'Deduce all 12 hidden mines using the adjacent numbered clues.',
       'TENTS': 'Pitch 8 tents next to trees without tents touching, matching row and column counts.',
       'BRIDGES': 'Connect all islands into one network using 1 or 2 lines matching each island\'s number.',
-      'KILLER': 'Fill every row, column, and box with digits 1-4, matching cage sums without repeats.'
+      'KILLER': 'Fill every row, column, and box with digits 1-4, matching cage sums without repeats.',
+      'CRYPTOGRAM': 'Deduce the hidden phrase using the 2 letter clues and substitution logic.'
     };
 
     function wrapText(str, maxLen = 44) {
@@ -6027,6 +6271,71 @@
         });
       }
 
+      // 11. CRYPTOGRAM
+      if (document.getElementById('toggle-cryptogram') && document.getElementById('toggle-cryptogram').checked) {
+        const diff = document.getElementById('diff-cryptogram').value;
+        const cData = cryptogramSim.generate(diff);
+        const clueWord = cData.clueCount === 1 ? '1 letter clue' : `${cData.clueCount} letter clues`;
+        const desc = `Deduce the hidden phrase using the ${clueWord} and substitution logic.`;
+
+        addStandardPuzzleHeader(items, 'CRYPTOGRAM', diff, desc);
+        if (cData.clueStr) {
+          items.push({ type: 'text', text: centerLine(cData.clueStr, 48) });
+          items.push({ type: 'blank', text: '' });
+        }
+
+        if (isGraphic) {
+          items.push({
+            type: 'canvas',
+            render: (canvas) => drawCryptogramCanvas(canvas, cData)
+          });
+        } else {
+          // Monospaced ASCII fallback
+          const words = cData.ciphertext.split(' ');
+          const lines = [];
+          let curr = '';
+          for (const w of words) {
+            if (!curr) curr = w;
+            else if (curr.length + 1 + w.length <= 20) curr += ' ' + w;
+            else { lines.push(curr); curr = w; }
+          }
+          if (curr) lines.push(curr);
+
+          for (const line of lines) {
+            const slotChars = line.split('').map(ch => /[A-Z]/.test(ch) ? '_' : ' ').join(' ');
+            const cipherChars = line.split('').join(' ');
+            items.push({ type: 'text', text: '   ' + slotChars });
+            items.push({ type: 'text', text: '   ' + cipherChars });
+            items.push({ type: 'blank', text: '' });
+          }
+
+          if (cData.author) {
+            items.push({ type: 'text', text: `   -- ${cData.author}` });
+            items.push({ type: 'blank', text: '' });
+          }
+
+          items.push({ type: 'text', text: '  - - - - - - - - - - - - - - - - - - - - - - - -' });
+          items.push({ type: 'text', text: '  ALPHABET TRACKER:' });
+          items.push({ type: 'text', text: '  A B C D E F G H I J K L M N O P Q R S T U V W X Y Z' });
+          items.push({ type: 'text', text: '  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _' });
+          items.push({ type: 'blank', text: '' });
+          items.push({ type: 'text', text: '  SCRATCHPAD:' });
+          for (let i = 0; i < 4; i++) {
+            items.push({ type: 'text', text: '  ______________________________________________' });
+            items.push({ type: 'blank', text: '' });
+          }
+        }
+
+        items.push({ type: 'blank', text: '' });
+        items.push({ type: 'rule', text: '-'.repeat(COLS) });
+
+        solutionsContent.push({
+          name: 'Cryptogram',
+          phrase: cData.phrase,
+          author: cData.author
+        });
+      }
+
       // Optional Solutions Key
       if (document.getElementById('toggle-solutions').checked && solutionsContent.length > 0) {
         items.push({ type: 'rule', text: '-'.repeat(COLS) });
@@ -6119,6 +6428,14 @@
                 rowStr += item.solution[r][c] + ' ';
               }
               items.push({ type: 'text', text: rowStr });
+            }
+          } else if (item.name === 'Cryptogram') {
+            if (item.author) {
+              items.push({ type: 'text', text: `Author: ${item.author}` });
+            }
+            const ansLines = wrapText(`Answer: ${item.phrase}`, 46);
+            for (const line of ansLines) {
+              items.push({ type: 'text', text: line });
             }
           } else if (item.name === 'Nonogram' || item.grid) {
             for (let r = 0; r < item.size; r++) {
@@ -6217,7 +6534,8 @@
       'diff-mines': { easy: 'easy', medium: 'medium', hard: 'hard' },
       'diff-tents': { easy: 'easy', medium: 'medium', hard: 'hard' },
       'diff-bridges': { easy: 'easy', medium: 'medium', hard: 'hard' },
-      'diff-killer': { easy: 'easy', medium: 'medium', hard: 'extreme' }
+      'diff-killer': { easy: 'easy', medium: 'medium', hard: 'extreme' },
+      'diff-cryptogram': { easy: 'easy', medium: 'medium', hard: 'hard' }
     };
 
     function applyGlobalDifficulty(diff) {
@@ -6326,6 +6644,7 @@
       'toggle-tents', 'diff-tents',
       'toggle-bridges', 'diff-bridges',
       'toggle-killer', 'diff-killer',
+      'toggle-cryptogram', 'diff-cryptogram',
       'toggle-ruler', 'toggle-solutions', 'toggle-burn'
     ];
     inputs.forEach(id => {

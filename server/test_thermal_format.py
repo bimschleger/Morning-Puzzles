@@ -28,6 +28,7 @@ from app.renderer.receipt_rasterizer import (
     render_tents_raster,
     render_bridges_raster,
     render_killer_raster,
+    render_cryptogram_raster,
     THERMAL_WIDTH_DOTS,
     THERMAL_WIDTH_BYTES,
 )
@@ -41,12 +42,12 @@ from app.renderer.text_formatter import (
 
 
 def test_bundle_completeness():
-    print("Test 1: Verifying Daily Bundle Completeness (All 10 Puzzles)...")
+    print("Test 1: Verifying Daily Bundle Completeness (All 11 Puzzles)...")
     bundle = generate_daily_bundle(difficulty="medium")
-    required_keys = ["title", "date", "difficulty", "sudoku", "wordsearch", "nonogram", "queens", "jumble", "binary", "mines", "tents", "bridges", "killer"]
+    required_keys = ["title", "date", "difficulty", "sudoku", "wordsearch", "nonogram", "queens", "jumble", "binary", "mines", "tents", "bridges", "killer", "cryptogram"]
     for k in required_keys:
         assert k in bundle, f"Missing key '{k}' in generated bundle"
-    print("  -> Passed! All 10 puzzles present in daily bundle.\n")
+    print("  -> Passed! All 11 puzzles present in daily bundle.\n")
     return bundle
 
 
@@ -63,6 +64,7 @@ def test_raster_specifications(bundle):
         ("Tents", render_tents_raster, "tents"),
         ("Bridges", render_bridges_raster, "bridges"),
         ("Killer", render_killer_raster, "killer"),
+        ("Cryptogram", render_cryptogram_raster, "cryptogram"),
     ]
 
     for name, fn, key in rasterizers:
@@ -103,7 +105,7 @@ def test_raster_specifications(bundle):
 
         print(f"  -> {name:15}: {duty['width_dots']}x{duty['height_dots']} dots | {len(raster)} bytes | Avg Duty: {duty['average_duty_cycle_pct']:5.2f}% | Safe: OK")
 
-    print("  -> Passed! All 10 rasterizers conform strictly to 576-dot thermal standard.\n")
+    print(f"  -> Passed! All {len(rasterizers)} rasterizers conform strictly to 576-dot thermal standard.\n")
 
 
 def test_text_receipt_format(bundle):
@@ -122,10 +124,10 @@ def test_text_receipt_format(bundle):
 
     # 4. PUZZLE_HEADER_SPEC compliance: check strict one-word titles
     receipt_text = receipt_bytes.decode("latin-1")
-    for title in ["--- SUDOKU ---", "--- SEARCH ---", "--- NONOGRAM ---", "--- STARS ---", "--- JUMBLE ---", "--- BINARY ---", "--- MINES ---", "--- TENTS ---", "--- BRIDGES ---", "--- KILLER ---"]:
+    for title in ["--- SUDOKU ---", "--- SEARCH ---", "--- NONOGRAM ---", "--- STARS ---", "--- JUMBLE ---", "--- BINARY ---", "--- MINES ---", "--- TENTS ---", "--- BRIDGES ---", "--- KILLER ---", "--- CRYPTOGRAM ---"]:
         assert title in receipt_text, f"Missing canonical title '{title}' in text receipt"
 
-    print("  -> Passed! Text receipt contains all 10 canonical headers, pre-cut feeds, and cutter commands.\n")
+    print("  -> Passed! Text receipt contains all 11 canonical headers, pre-cut feeds, and cutter commands.\n")
 
 
 def test_hybrid_receipt_format(bundle):
@@ -141,7 +143,7 @@ def test_hybrid_receipt_format(bundle):
     # 3. Contains embedded GS v 0 raster commands
     gs_v_0_signature = bytes([0x1D, 0x76, 0x30, 0x00, 72, 0])
     count = hybrid_bytes.count(gs_v_0_signature)
-    assert count >= 7, f"Expected multiple embedded GS v 0 raster commands in hybrid receipt, found {count}"
+    assert count >= 8, f"Expected multiple embedded GS v 0 raster commands in hybrid receipt, found {count}"
 
     # 4. Pre-cut feed check
     pre_cut_slice = hybrid_bytes[-(len(CMD_CUT_PARTIAL) + 4) : -len(CMD_CUT_PARTIAL)]
@@ -162,7 +164,7 @@ def test_solution_key_spec(bundle):
     assert "[ SOLUTION KEY ]" in receipt_text, "Missing [ SOLUTION KEY ] header"
 
     # Check that each game is represented in the solution key
-    expected_subtitles = ["SUDOKU", "SEARCH", "NONOGRAM", "STARS", "JUMBLE", "BINARY", "MINES", "TENTS", "BRIDGES", "KILLER"]
+    expected_subtitles = ["SUDOKU", "SEARCH", "NONOGRAM", "STARS", "JUMBLE", "BINARY", "MINES", "TENTS", "BRIDGES", "KILLER", "CRYPTOGRAM"]
     for sub in expected_subtitles:
         assert sub in receipt_text, f"Missing '{sub}' in Solution Key"
 

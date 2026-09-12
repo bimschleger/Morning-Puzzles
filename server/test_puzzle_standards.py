@@ -29,6 +29,7 @@ APPROVED_TITLES = [
     "TENTS",
     "BRIDGES",
     "KILLER",
+    "CRYPTOGRAM",
 ]
 
 FORBIDDEN_TITLE_PATTERNS = [
@@ -84,7 +85,7 @@ def test_titles_and_forbidden_terms():
         match = re.search(pattern, receipt_text, re.IGNORECASE)
         assert not match, f"Forbidden title alias matching '{pattern}' found in receipt: '{match.group(0) if match else ''}'"
 
-    print("  -> Passed! All 10 puzzle headers use strictly one-word uppercase titles with zero forbidden aliases.\n")
+    print(f"  -> Passed! All {len(APPROVED_TITLES)} puzzle headers use strictly one-word uppercase titles with zero forbidden aliases.\n")
 
 
 def test_difficulty_presentation_and_theme_rules():
@@ -104,7 +105,7 @@ def test_difficulty_presentation_and_theme_rules():
             )
 
     # 2. Puzzles with difficulty must have DIFFICULTY: [LEVEL] directly below title
-    difficulty_puzzles = ["SUDOKU", "NONOGRAM", "STARS", "JUMBLE", "BINARY", "MINES", "TENTS", "BRIDGES", "KILLER"]
+    difficulty_puzzles = ["SUDOKU", "NONOGRAM", "STARS", "JUMBLE", "BINARY", "MINES", "TENTS", "BRIDGES", "KILLER", "CRYPTOGRAM"]
     for title in difficulty_puzzles:
         header_str = f"--- {title} ---"
         assert header_str in receipt_text, f"Missing header {header_str}"
@@ -115,7 +116,7 @@ def test_difficulty_presentation_and_theme_rules():
                     f"{title}: Expected 'DIFFICULTY: [LEVEL]' immediately beneath title line. Got: '{diff_line}'"
                 )
 
-    print("  -> Passed! Difficulty rules verified: SEARCH omits difficulty, other 9 puzzles correctly display DIFFICULTY: [LEVEL].\n")
+    print(f"  -> Passed! Difficulty rules verified: SEARCH omits difficulty, other {len(difficulty_puzzles)} puzzles correctly display DIFFICULTY: [LEVEL].\n")
 
 
 def test_description_length_and_canonical_formula():
@@ -179,6 +180,12 @@ def test_description_length_and_canonical_formula():
         k_size = k.get("size", 4)
         k_range = "1-4" if k_size == 4 else "1-6"
         descriptions.append(("Killer", f"Fill every row, column, and box with digits {k_range}, matching cage sums without repeats."))
+
+        # 11. Cryptogram
+        c = bundle.get("cryptogram", {})
+        c_cnt = c.get("clue_count", 3 if diff == "easy" else (1 if diff == "hard" else 2))
+        c_clue_word = "1 letter clue" if c_cnt == 1 else f"{c_cnt} letter clues"
+        descriptions.append(("Cryptogram", f"Deduce the hidden phrase using the {c_clue_word} and substitution logic."))
 
         # Validate each description
         for name, desc in descriptions:

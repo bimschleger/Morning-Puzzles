@@ -1,6 +1,6 @@
 # Candidate Logic Games: Evaluation & Implementation Reference
 
-This document provides the definitive architectural survey, ranking, and technical specification for potential new logic and deduction games to expand the **Morning Puzzles** ecosystem (featuring **Sudoku**, **Search**, **Nonogram**, **Stars**, **Jumble**, **Binary**, **Mines**, **Tents**, **Bridges**, and **Killer**).
+This document provides the definitive architectural survey, ranking, and technical specification for potential new logic and deduction games to expand the **Morning Puzzles** ecosystem (featuring **Sudoku**, **Search**, **Nonogram**, **Stars**, **Jumble**, **Binary**, **Mines**, **Tents**, **Bridges**, **Killer**, and **Cryptogram**).
 
 Every candidate has been evaluated against three non-negotiable criteria:
 1. **Thermal Printability**: Feasibility of clean rendering on 80mm thermal receipt paper ($576\text{ dots}$ printable width, $321\text{px}$ inner canvas, 1-bit monochrome, comfortable pencil-solving space).

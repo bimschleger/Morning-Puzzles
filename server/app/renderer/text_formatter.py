@@ -264,6 +264,25 @@ def build_daily_receipt_bytes(daily_data: Dict[str, Any]) -> bytes:
             r.println(line)
         r.println()
 
+    # 11. Cryptogram
+    if "cryptogram" in daily_data:
+        r.horizontal_rule("-")
+        c = daily_data["cryptogram"]
+        c_diff = str(c.get("difficulty", "Medium"))
+        clue_cnt = c.get("clue_count", 3 if c_diff.lower() == "easy" else (1 if c_diff.lower() == "hard" else 2))
+        clue_word = "1 letter clue" if clue_cnt == 1 else f"{clue_cnt} letter clues"
+        r.puzzle_header(
+            "CRYPTOGRAM",
+            c_diff,
+            f"Deduce the hidden phrase using the {clue_word} and substitution logic."
+        )
+        if c.get("clue_str"):
+            r.println(c["clue_str"])
+            r.println()
+        for line in c.get("text", "").split("\n"):
+            r.println(line)
+        r.println()
+
     # Optional Solution Key
     if daily_data.get("show_solutions"):
         _append_solution_key(r, daily_data)
@@ -304,6 +323,7 @@ def build_hybrid_daily_receipt_bytes(daily_data: Dict[str, Any]) -> bytes:
             render_tents_raster,
             render_bridges_raster,
             render_killer_raster,
+            render_cryptogram_raster,
         )
         has_pillow = True
     except (ImportError, RuntimeError):
@@ -508,6 +528,29 @@ def build_hybrid_daily_receipt_bytes(daily_data: Dict[str, Any]) -> bytes:
                 r.println(line)
         r.println()
 
+    # 12. Cryptogram
+    if "cryptogram" in daily_data:
+        r.horizontal_rule("-")
+        c = daily_data["cryptogram"]
+        c_diff = str(c.get("difficulty", "Medium"))
+        clue_cnt = c.get("clue_count", 3 if c_diff.lower() == "easy" else (1 if c_diff.lower() == "hard" else 2))
+        clue_word = "1 letter clue" if clue_cnt == 1 else f"{clue_cnt} letter clues"
+        r.puzzle_header(
+            "CRYPTOGRAM",
+            c_diff,
+            f"Deduce the hidden phrase using the {clue_word} and substitution logic."
+        )
+        if c.get("clue_str"):
+            r.println(c["clue_str"])
+            r.println()
+        try:
+            raster = render_cryptogram_raster(c)
+            r.write_raw(raster)
+        except Exception:
+            for line in c.get("text", "").split("\n"):
+                r.println(line)
+        r.println()
+
     # Optional Solution Key
     if daily_data.get("show_solutions"):
         _append_solution_key(r, daily_data)
@@ -697,4 +740,20 @@ def _append_solution_key(r: EscPosTextReceipt, daily_data: Dict[str, Any]):
             for row in sol:
                 r.println("      " + " ".join(str(c) for c in row))
             r.println()
+
+    # 11. Cryptogram
+    if "cryptogram" in daily_data:
+        c = daily_data["cryptogram"]
+        phrase = c.get("phrase") or c.get("solution", "")
+        author = c.get("author", "")
+        if phrase:
+            r.bold(True)
+            r.println("CRYPTOGRAM")
+            r.bold(False)
+            if author:
+                r.println(f"Author: {author}")
+            for line in textwrap.wrap(f"Answer: {phrase}", 46):
+                r.println(line)
+            r.println()
+
 
