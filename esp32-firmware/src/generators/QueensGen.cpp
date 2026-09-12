@@ -246,7 +246,7 @@ void QueensGen::growRegions() {
 
 void QueensGen::generate(QueensDifficulty difficulty) {
     if (difficulty == QUEENS_EASY) {
-        _size = 6;
+        _size = 5;
         _starsPerUnit = 1;
     } else if (difficulty == QUEENS_HARD) {
         _size = 9;

@@ -45,7 +45,7 @@ void BridgesGen::generate(BridgesDifficulty diff) {
     uint8_t maxDegree = 6;
     if (diff == BRIDGES_EASY) {
         _size = 6;
-        _islandCount = 6;
+        _islandCount = 8;
         maxDegree = 4;
     } else if (diff == BRIDGES_HARD) {
         _size = 8;

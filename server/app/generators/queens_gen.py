@@ -28,7 +28,7 @@ class QueensGenerator:
         No two Stars can touch, even diagonally.
     """
     DIFFICULTY_CONFIGS = {
-        "easy":   {"size": 6, "stars": 1},
+        "easy":   {"size": 5, "stars": 1},
         "medium": {"size": 8, "stars": 1},
         "hard":   {"size": 9, "stars": 2},
         "master": {"size": 10, "stars": 2}

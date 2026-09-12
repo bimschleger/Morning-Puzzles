@@ -6,7 +6,7 @@
 class EscPosPrinter;
 
 enum QueensDifficulty {
-    QUEENS_EASY   = 0, // 6x6, 1-Star
+    QUEENS_EASY   = 0, // 5x5, 1-Star
     QUEENS_MEDIUM = 1, // 8x8, 1-Star
     QUEENS_HARD   = 2, // 9x9, 2-Star
     QUEENS_MASTER = 3  // 10x10, 2-Star

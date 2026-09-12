@@ -24,7 +24,7 @@ class BridgesGenerator:
     """
 
     DIFFICULTY_SETTINGS = {
-        "easy": {"size": 6, "islands": 6, "max_degree": 4},
+        "easy": {"size": 6, "islands": 8, "max_degree": 4},
         "medium": {"size": 8, "islands": 10, "max_degree": 6},
         "hard": {"size": 8, "islands": 14, "max_degree": 8},
     }

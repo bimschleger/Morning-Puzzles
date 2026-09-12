@@ -5,7 +5,7 @@
 class EscPosPrinter;
 
 enum BridgesDifficulty {
-    BRIDGES_EASY   = 0, // 6x6, 6 islands, max degree 4
+    BRIDGES_EASY   = 0, // 6x6, 8 islands, max degree 4
     BRIDGES_MEDIUM = 1, // 8x8, 10 islands, max degree 6
     BRIDGES_HARD   = 2  // 8x8, 14 islands, max degree 8
 };

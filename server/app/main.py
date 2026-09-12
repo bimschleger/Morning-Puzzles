@@ -131,8 +131,8 @@ try:
         return sudoku_gen.generate(difficulty=difficulty)
 
     @app.get("/api/v1/puzzles/wordsearch")
-    def get_wordsearch(difficulty: str = "medium"):
-        return wordsearch_gen.generate(difficulty=difficulty)
+    def get_wordsearch(difficulty: str = "medium", theme: Optional[str] = None):
+        return wordsearch_gen.generate(difficulty=difficulty, theme=theme)
 
     @app.get("/api/v1/puzzles/nonogram")
     def get_nonogram(difficulty: str = "medium"):
@@ -226,7 +226,8 @@ def run_standalone_server(port: int = 8000, host: str = "0.0.0.0"):
                 self._send_json(200, sudoku_gen.generate(difficulty=diff))
             elif path == "/api/v1/puzzles/wordsearch":
                 diff = query_params.get("difficulty", ["medium"])[0]
-                self._send_json(200, wordsearch_gen.generate(difficulty=diff))
+                th = query_params.get("theme", [None])[0]
+                self._send_json(200, wordsearch_gen.generate(difficulty=diff, theme=th))
             elif path == "/api/v1/puzzles/nonogram":
                 diff = query_params.get("difficulty", ["medium"])[0]
                 self._send_json(200, nonogram_gen.generate(difficulty=diff))

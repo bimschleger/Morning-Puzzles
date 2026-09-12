@@ -54,7 +54,7 @@ This document provides a technical survey and implementation reference for the o
     *   **1-Star (LinkedIn Queens)**: $N \times N$ grid partitioned into $N$ contiguous color/letter regions. Place exactly 1 Queen per row, column, and region. No two Queens may touch orthogonally or diagonally.
     *   **2-Star (Classic Star Battle)**: Place exactly 2 Stars per row, column, and region. No two Stars may touch orthogonally or diagonally.
 *   **Difficulty Scaling**:
-    *   `easy`: 6x6 grid, 1-Star (Queens).
+    *   `easy`: 5x5 grid, 1-Star (Queens).
     *   `medium`: 8x8 grid, 1-Star (Queens).
     *   `hard`: 9x9 or 10x10 grid, 2-Star.
 
@@ -111,7 +111,7 @@ This document provides a technical survey and implementation reference for the o
     *   Each island's connected bridge count must match its number ($1..8$).
     *   All islands must form a single connected network (spanning graph).
 *   **Difficulty Scaling**:
-    *   `easy`: 6x6 grid, 6–8 islands (direct degree saturation and corner degree limits).
+    *   `easy`: 6x6 grid, 8 islands (direct degree saturation and corner degree limits).
     *   `medium`: 8x8 grid, 10–12 islands (cut-node isolation avoidance and 2-step lookahead).
     *   `hard`: 8x8 grid, 14–16 islands (islands up to degree 6–8, complex network spanning constraints).
 *   **Thermal Receipt Layout**: Clean grid with $26\text{px}$ circular island badges ($1.8\text{px}$ stroke) and generous unprinted whitespace corridors for pencil line drawings.

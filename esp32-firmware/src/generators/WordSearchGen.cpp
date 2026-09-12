@@ -1,50 +1,20 @@
 #include "WordSearchGen.h"
+#include "WordSearchDataset.h"
 #include "../printer/EscPosPrinter.h"
-
-struct ThemeDef {
-    const char* name;
-    const char* words[12];
-};
-
-static const ThemeDef THEMES[] = {
-    {
-        "Morning Routine",
-        {"COFFEE", "SUNRISE", "PANCAKE", "WAFFLE", "TOAST", "OATMEAL", 
-         "SHOWER", "ALARM", "PAPER", "JOGGING", "TEAPOT", "KITCHEN"}
-    },
-    {
-        "Great Outdoors",
-        {"FOREST", "CANYON", "RIVER", "SUMMIT", "VALLEY", "STREAM", 
-         "MEADOW", "GLACIER", "BOULDER", "ISLAND", "DESERT", "TRAIL"}
-    },
-    {
-        "Space & Cosmos",
-        {"PLANET", "GALAXY", "METEOR", "ORBIT", "NEBULA", "COMET", 
-         "ECLIPSE", "PULSAR", "ROCKET", "GRAVITY", "STELLAR", "SOLAR"}
-    },
-    {
-        "Wildlife",
-        {"FALCON", "DOLPHIN", "BADGER", "JAGUAR", "OTTER", "COUGAR", 
-         "PENGUIN", "CHEETAH", "GIRAFFE", "BEAVER", "OSPREY", "PANTHER"}
-    },
-    {
-        "Technology",
-        {"SYSTEM", "SERVER", "ROUTER", "MEMORY", "SOCKET", "SENSOR", 
-         "CIRCUIT", "BINARY", "BUFFER", "KERNEL", "PYTHON", "DEVICE"}
-    }
-};
-
-static const size_t NUM_THEMES = sizeof(THEMES) / sizeof(THEMES[0]);
 
 WordSearchGen::WordSearchGen() : _currentTheme("General") {
     memset(_grid, ' ', sizeof(_grid));
 }
 
-bool WordSearchGen::tryPlaceWord(const char* word, int8_t dr, int8_t dc) {
+bool WordSearchGen::tryPlaceWord(const char* word, const int8_t dirs[][2], uint8_t numDirs) {
     uint8_t len = strlen(word);
     if (len > GRID_SIZE) return false;
 
-    for (int attempts = 0; attempts < 50; attempts++) {
+    for (int attempts = 0; attempts < 100; attempts++) {
+        uint8_t dIdx = random(numDirs);
+        int8_t dr = dirs[dIdx][0];
+        int8_t dc = dirs[dIdx][1];
+
         int rStart = random(GRID_SIZE);
         int cStart = random(GRID_SIZE);
 
@@ -77,10 +47,13 @@ void WordSearchGen::generate(WordSearchDifficulty difficulty, int themeIndex) {
     memset(_grid, ' ', sizeof(_grid));
     _placedWords.clear();
 
-    if (themeIndex < 0 || themeIndex >= (int)NUM_THEMES) {
-        themeIndex = random(NUM_THEMES);
+    size_t poolCount = 0;
+    const ThemeDef* pool = getWordSearchPool(difficulty, poolCount);
+
+    if (themeIndex < 0 || themeIndex >= (int)poolCount) {
+        themeIndex = random(poolCount);
     }
-    const ThemeDef& chosenTheme = THEMES[themeIndex];
+    const ThemeDef& chosenTheme = pool[themeIndex];
     _currentTheme = chosenTheme.name;
 
     // Define direction vectors according to difficulty
@@ -99,12 +72,37 @@ void WordSearchGen::generate(WordSearchDifficulty difficulty, int themeIndex) {
     if (difficulty == WS_MEDIUM) numDirs = 4; // Medium: E, S, SE, NE
     else if (difficulty == WS_HARD) numDirs = 8; // Hard: all 8 directions
 
-    // Try placing words (aim for 8 words)
+    // Sort words by length descending to place longer words first on empty grid
+    const char* sortedWords[12];
     for (int i = 0; i < 12; i++) {
-        if (_placedWords.size() >= 8) break;
-        uint8_t dIdx = random(numDirs);
-        tryPlaceWord(chosenTheme.words[i], dirs[dIdx][0], dirs[dIdx][1]);
+        sortedWords[i] = chosenTheme.words[i];
     }
+    std::sort(sortedWords, sortedWords + 12, [](const char* a, const char* b) {
+        return strlen(a) > strlen(b);
+    });
+
+    char bestGrid[GRID_SIZE][GRID_SIZE];
+    std::vector<PlacedWord> bestPlaced;
+
+    for (int retry = 0; retry < 5; retry++) {
+        memset(_grid, ' ', sizeof(_grid));
+        _placedWords.clear();
+
+        for (int i = 0; i < 12; i++) {
+            if (_placedWords.size() >= 8) break;
+            tryPlaceWord(sortedWords[i], dirs, numDirs);
+        }
+
+        if (_placedWords.size() > bestPlaced.size()) {
+            memcpy(bestGrid, _grid, sizeof(_grid));
+            bestPlaced = _placedWords;
+        }
+
+        if (bestPlaced.size() >= 8) break;
+    }
+
+    memcpy(_grid, bestGrid, sizeof(_grid));
+    _placedWords = bestPlaced;
 
     // Fill remaining blank cells with random uppercase letters
     for (uint8_t r = 0; r < GRID_SIZE; r++) {

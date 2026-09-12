@@ -18,6 +18,15 @@ import random
 import string
 from typing import List, Tuple, Dict, Any, Optional
 
+from app.generators.wordsearch_dataset import (
+    WORDSEARCH_THEMES_EASY,
+    WORDSEARCH_THEMES_MEDIUM,
+    WORDSEARCH_THEMES_HARD,
+    THEMES_BY_DIFFICULTY,
+    get_random_theme,
+    get_theme_words,
+)
+
 DIRECTIONS = {
     "E":  (0, 1),    # Horizontal forward
     "S":  (1, 0),    # Vertical downward
@@ -29,7 +38,9 @@ DIRECTIONS = {
     "NW": (-1, -1),  # Diagonal upward left
 }
 
+# Backward compatibility mapping
 THEMES = {
+    **WORDSEARCH_THEMES_MEDIUM,
     "Morning": ["COFFEE", "SUNRISE", "BAGEL", "ALARM", "TOAST", "PAPER", "SHOWER", "ROOSTER"],
     "Nature":  ["FOREST", "RIVER", "MEADOW", "CANYON", "SUMMIT", "BREEZE", "VALLEY", "STREAM"],
     "Tech":    ["PYTHON", "SERVER", "SOCKET", "ROUTER", "BUFFER", "SERIAL", "BINARY", "KERNEL"],
@@ -42,7 +53,7 @@ class WordSearchGenerator:
 
     def generate(self, 
                  words: Optional[List[str]] = None, 
-                 theme: str = "Morning",
+                 theme: Optional[str] = None,
                  grid_size: int = 12, 
                  difficulty: str = "medium") -> Dict[str, Any]:
         """
@@ -61,50 +72,78 @@ class WordSearchGenerator:
             allowed_dirs = ["E", "S", "SE", "NE"]
 
         if not words:
-            words = THEMES.get(theme, THEMES["Morning"])
+            if theme:
+                theme_name, words = get_theme_words(theme, difficulty=difficulty)
+            else:
+                theme_name, words = get_random_theme(difficulty=difficulty)
+        else:
+            theme_name = theme or "Custom"
 
         # Filter and sanitize words
-        clean_words = [w.strip().upper() for w in words if len(w.strip()) <= grid_size]
-        random.shuffle(clean_words)
+        raw_words = [w.strip().upper() for w in words if len(w.strip()) <= grid_size]
 
-        grid = [[" " for _ in range(grid_size)] for _ in range(grid_size)]
-        placed_words = []
-        placements = {}
+        best_grid = None
+        best_placed = []
+        best_placements = {}
 
-        for word in clean_words:
-            placed = False
-            attempts = 0
-            while not placed and attempts < 100:
-                attempts += 1
-                direction_name = random.choice(allowed_dirs)
-                dr, dc = DIRECTIONS[direction_name]
+        # Attempt generation with up to 5 restarts to achieve 7-8 placed words
+        for retry in range(5):
+            clean_words = list(raw_words)
+            random.shuffle(clean_words)
+            clean_words.sort(key=len, reverse=True)
 
-                # Compute valid start coordinates
-                r_start = random.randint(0, grid_size - 1)
-                c_start = random.randint(0, grid_size - 1)
+            grid = [[" " for _ in range(grid_size)] for _ in range(grid_size)]
+            placed_words = []
+            placements = {}
 
-                r_end = r_start + dr * (len(word) - 1)
-                c_end = c_start + dc * (len(word) - 1)
+            for word in clean_words:
+                if len(placed_words) >= 8:
+                    break
+                placed = False
+                attempts = 0
+                while not placed and attempts < 150:
+                    attempts += 1
+                    direction_name = random.choice(allowed_dirs)
+                    dr, dc = DIRECTIONS[direction_name]
 
-                if 0 <= r_end < grid_size and 0 <= c_end < grid_size:
-                    # Check overlap collision
-                    can_place = True
-                    for i in range(len(word)):
-                        curr_r = r_start + dr * i
-                        curr_c = c_start + dc * i
-                        if grid[curr_r][curr_c] not in (" ", word[i]):
-                            can_place = False
-                            break
-                    
-                    if can_place:
+                    # Compute valid start coordinates
+                    r_start = random.randint(0, grid_size - 1)
+                    c_start = random.randint(0, grid_size - 1)
+
+                    r_end = r_start + dr * (len(word) - 1)
+                    c_end = c_start + dc * (len(word) - 1)
+
+                    if 0 <= r_end < grid_size and 0 <= c_end < grid_size:
+                        # Check overlap collision
+                        can_place = True
                         for i in range(len(word)):
-                            grid[r_start + dr * i][c_start + dc * i] = word[i]
-                        placed_words.append(word)
-                        placements[word] = {
-                            "start": (r_start, c_start),
-                            "direction": direction_name
-                        }
-                        placed = True
+                            curr_r = r_start + dr * i
+                            curr_c = c_start + dc * i
+                            if grid[curr_r][curr_c] not in (" ", word[i]):
+                                can_place = False
+                                break
+                        
+                        if can_place:
+                            for i in range(len(word)):
+                                grid[r_start + dr * i][c_start + dc * i] = word[i]
+                            placed_words.append(word)
+                            placements[word] = {
+                                "start": (r_start, c_start),
+                                "direction": direction_name
+                            }
+                            placed = True
+
+            if len(placed_words) > len(best_placed):
+                best_grid = grid
+                best_placed = placed_words
+                best_placements = placements
+
+            if len(best_placed) >= 8:
+                break
+
+        grid = best_grid or [[" " for _ in range(grid_size)] for _ in range(grid_size)]
+        placed_words = best_placed
+        placements = best_placements
 
         # Fill blanks with random letters
         solution_mask = [row[:] for row in grid]
@@ -116,7 +155,7 @@ class WordSearchGenerator:
         return {
             "type": "wordsearch",
             "difficulty": difficulty,
-            "theme": theme,
+            "theme": theme_name,
             "grid_size": grid_size,
             "words": sorted(placed_words),
             "grid": grid,

@@ -60,7 +60,7 @@ All existing games—and any future games added to Morning Puzzles—must strict
 
 | Puzzle Name | Exact Title Header | Has Difficulty? | Standard Difficulty Values | Canonical One-Sentence Gameplay Instruction | Notes / Placement Rules |
 | :--- | :--- | :---: | :--- | :--- | :--- |
-| **Stars** | `--- STARS ---` | **Yes** | `EASY` (6x6), `MEDIUM` (8x8), `HARD` (9x9 2★), `MASTER` (10x10 2★) | *Place stars so each row, column, and shaped region contains the required star count with no two stars touching, even diagonally.* | Replaces legacy "Queens" / "Star Battle". Board drawing follows instruction. |
+| **Stars** | `--- STARS ---` | **Yes** | `EASY` (5x5), `MEDIUM` (8x8), `HARD` (9x9 2★), `MASTER` (10x10 2★) | *Place stars so each row, column, and shaped region contains the required star count with no two stars touching, even diagonally.* | Replaces legacy "Queens" / "Star Battle". Board drawing follows instruction. |
 | **Sudoku** | `--- SUDOKU ---` | **Yes** | `EASY`, `MEDIUM`, `HARD` | *Fill the grid so that every row, column, and 3x3 box contains digits 1 through 9 without repeating.* | Pure 9x9 grid follows instruction. |
 | **Search** | `--- SEARCH ---` | **No** *(Theme)* | *None* | *Find and circle all of the listed words hidden horizontally, vertically, or diagonally within the letter grid.* | Instruction placed directly below title. `★ THEME: [NAME]` placed with checklist words below grid. |
 | **Nonogram** | `--- NONOGRAM ---` | **Yes** | `EASY` (5x5), `MEDIUM` (8x8), `HARD` (10x10), `EXPERT` (15x15) | *Use the number clues outside the grid to shade the correct cells and reveal the hidden pixel picture.* | Board with row/column clues follows instruction. Single-word name replaces "Nonogram / Picross". |

@@ -36,7 +36,7 @@ private:
     std::vector<PlacedWord> _placedWords;
     const char* _currentTheme;
 
-    bool tryPlaceWord(const char* word, int8_t dr, int8_t dc);
+    bool tryPlaceWord(const char* word, const int8_t dirs[][2], uint8_t numDirs);
 };
 
 #endif // WORD_SEARCH_GEN_H
