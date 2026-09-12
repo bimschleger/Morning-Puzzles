@@ -188,6 +188,31 @@ When the solution key is enabled, it is appended to the bottom of the receipt di
 
   ```
 
+### J. KILLER (`KILLER`)
+* **Format**: Pure solved numeric grid (4 rows of 4 digits for 4x4, or 6 rows of 6 digits for 6x6) with digits separated by single spaces.
+* **Indentation**: 6 spaces left padding (safe thermal indent).
+* **Example** (4x4):
+  ```text
+  KILLER
+        1 4 2 3
+        3 2 4 1
+        4 1 3 2
+        2 3 1 4
+
+  ```
+* **Example** (6x6):
+  ```text
+  KILLER
+        1 4 2 3 5 6
+        3 5 6 1 4 2
+        2 1 3 4 6 5
+        6 2 4 5 1 3
+        4 6 5 2 3 1
+        5 3 1 6 2 4
+
+  ```
+
+
 ---
 
 ## 4. Prohibited Elements Checklist in Solution Keys

@@ -69,6 +69,7 @@ All existing games—and any future games added to Morning Puzzles—must strict
 | **Mines** | `--- MINES ---` | **Yes** | `EASY` (8 Mines), `MEDIUM` (12 Mines), `HARD` (15 Mines) | *Deduce all [8 / 12 / 15] hidden mines using the adjacent numbered clues.* | Dynamic mine count [N]. `TOTAL MINES: [N]` placed between instruction and drawing. Zero guessing. |
 | **Tents** | `--- TENTS ---` | **Yes** | `EASY` (6x6), `MEDIUM` (8x8), `HARD` (8x8) | *Pitch [4 / 8 / 11] tents next to trees without tents touching, matching row and column counts.* | Dynamic tent count (4 for Easy, 8 for Medium, 11 for Hard). Replaces "orthogonally adjacent" with "next to trees". |
 | **Bridges** | `--- BRIDGES ---` | **Yes** | `EASY` (6x6), `MEDIUM` (8x8), `HARD` (8x8) | *Connect all islands into one network using 1 or 2 lines matching each island's number.* | 45% reduction. Explains single network, 1 or 2 lines, and island matching numbers. |
+| **Killer** | `--- KILLER ---` | **Yes** | `EASY` (4x4), `MEDIUM` (4x4), `EXTREME` (6x6) | *Fill every row, column, and box with digits [1-4 / 1-6], matching cage sums without repeats.* | 4x4 (2x2 boxes) on Easy/Medium, 6x6 (2x3 boxes) on Extreme. Cages have dashed borders and top-left sum clues. |
 
 ---
 

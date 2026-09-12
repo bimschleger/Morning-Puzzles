@@ -248,6 +248,22 @@ def build_daily_receipt_bytes(daily_data: Dict[str, Any]) -> bytes:
             r.println(line)
         r.println()
 
+    # 10. Killer Sudoku
+    if "killer" in daily_data:
+        r.horizontal_rule("-")
+        k = daily_data["killer"]
+        k_diff = str(k.get("difficulty", "Medium"))
+        k_size = k.get("size", 4)
+        k_range = "1-4" if k_size == 4 else "1-6"
+        r.puzzle_header(
+            "KILLER",
+            k_diff,
+            f"Fill every row, column, and box with digits {k_range}, matching cage sums without repeats."
+        )
+        for line in k.get("text", "").split("\n"):
+            r.println(line)
+        r.println()
+
     # Optional Solution Key
     if daily_data.get("show_solutions"):
         _append_solution_key(r, daily_data)
@@ -287,6 +303,7 @@ def build_hybrid_daily_receipt_bytes(daily_data: Dict[str, Any]) -> bytes:
             render_mines_raster,
             render_tents_raster,
             render_bridges_raster,
+            render_killer_raster,
         )
         has_pillow = True
     except (ImportError, RuntimeError):
@@ -471,6 +488,26 @@ def build_hybrid_daily_receipt_bytes(daily_data: Dict[str, Any]) -> bytes:
                 r.println(line)
         r.println()
 
+    # 11. Killer Sudoku
+    if "killer" in daily_data:
+        r.horizontal_rule("-")
+        k = daily_data["killer"]
+        k_diff = str(k.get("difficulty", "Medium"))
+        k_size = k.get("size", 4)
+        k_range = "1-4" if k_size == 4 else "1-6"
+        r.puzzle_header(
+            "KILLER",
+            k_diff,
+            f"Fill every row, column, and box with digits {k_range}, matching cage sums without repeats."
+        )
+        try:
+            raster = render_killer_raster(k)
+            r.write_raw(raster)
+        except Exception:
+            for line in k.get("text", "").split("\n"):
+                r.println(line)
+        r.println()
+
     # Optional Solution Key
     if daily_data.get("show_solutions"):
         _append_solution_key(r, daily_data)
@@ -648,4 +685,16 @@ def _append_solution_key(r: EscPosTextReceipt, daily_data: Dict[str, Any]):
             for line in textwrap.wrap(b_str, 46):
                 r.println(line)
         r.println()
+
+    # 10. Killer Sudoku
+    if "killer" in daily_data:
+        k = daily_data["killer"]
+        sol = k.get("solution", [])
+        if sol:
+            r.bold(True)
+            r.println("KILLER")
+            r.bold(False)
+            for row in sol:
+                r.println("      " + " ".join(str(c) for c in row))
+            r.println()
 

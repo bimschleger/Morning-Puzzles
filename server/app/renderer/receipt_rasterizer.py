@@ -957,3 +957,140 @@ def render_bridges_raster(bridges_data: Dict[str, Any], target_width: int = THER
 
     return tb.to_escpos()
 
+
+# ==============================================================================
+# 10. KILLER SUDOKU RASTERIZER (576 Dots Width)
+# ==============================================================================
+def render_killer_raster(killer_data: Dict[str, Any], target_width: int = THERMAL_WIDTH_DOTS) -> bytes:
+    """
+    Renders a 576-dot wide Killer Sudoku grid (4x4 or 6x6) for 80mm thermal receipts:
+    - Thick solid lines for 2x2 or 2x3 box boundaries and outer frame.
+    - Dashed line segments between adjacent cells belonging to different cages.
+    - Bold top-left clue numbers inside each cage's anchor cell.
+    """
+    size = killer_data.get("size", 4)
+    box_r = killer_data.get("box_rows", 2)
+    box_c = killer_data.get("box_cols", 2 if size == 4 else 3)
+    cages = killer_data.get("cages", [])
+
+    padding = 24
+    board_size = target_width - padding * 2
+    c_size = board_size // size
+    actual_board = c_size * size
+    total_h = padding + actual_board + padding
+
+    # Map each cell to its cage ID
+    cell_cage = {}
+    for cg in cages:
+        for r, c in cg.get("cells", []):
+            cell_cage[(r, c)] = cg["id"]
+
+    if HAS_PILLOW:
+        img = Image.new("L", (target_width, total_h), 255)
+        draw = ImageDraw.Draw(img)
+
+        try:
+            font_clue = ImageFont.truetype("Courier.ttf", max(14, int(c_size * 0.18)))
+        except IOError:
+            font_clue = ImageFont.load_default()
+
+        # 1. Outer Frame
+        draw.rectangle([padding, padding, padding + actual_board, padding + actual_board], outline=0, width=4)
+
+        # 2. Horizontal borders
+        for r in range(1, size):
+            y = padding + r * c_size
+            is_box = (r % box_r == 0)
+            if is_box:
+                draw.line([padding, y, padding + actual_board, y], fill=0, width=4)
+            else:
+                for c in range(size):
+                    x0 = padding + c * c_size
+                    x1 = x0 + c_size
+                    if cell_cage.get((r - 1, c)) != cell_cage.get((r, c)):
+                        # Dashed cage separator
+                        for dx in range(0, c_size, 10):
+                            draw.line([x0 + dx, y, min(x1, x0 + dx + 5), y], fill=0, width=2)
+                    else:
+                        # Light dotted line
+                        for dx in range(0, c_size, 8):
+                            draw.point([x0 + dx, y], fill=180)
+
+        # 3. Vertical borders
+        for c in range(1, size):
+            x = padding + c * c_size
+            is_box = (c % box_c == 0)
+            if is_box:
+                draw.line([x, padding, x, padding + actual_board], fill=0, width=4)
+            else:
+                for r in range(size):
+                    y0 = padding + r * c_size
+                    y1 = y0 + c_size
+                    if cell_cage.get((r, c - 1)) != cell_cage.get((r, c)):
+                        # Dashed cage separator
+                        for dy in range(0, c_size, 10):
+                            draw.line([x, y0 + dy, x, min(y1, y0 + dy + 5)], fill=0, width=2)
+                    else:
+                        # Light dotted line
+                        for dy in range(0, c_size, 8):
+                            draw.point([x, y0 + dy], fill=180)
+
+        # 4. Cage Sum Clues (top-left of first cell)
+        for cg in cages:
+            cells = sorted(cg.get("cells", []))
+            if not cells:
+                continue
+            r0, c0 = cells[0]
+            tx = padding + c0 * c_size + 6
+            ty = padding + r0 * c_size + 4
+            draw.text((tx, ty), str(cg.get("sum", "")), fill=0, font=font_clue)
+
+        return pil_to_escpos(img)
+
+    # Pure Python ThermalBitmap Fallback
+    tb = ThermalBitmap(target_width, total_h)
+
+    # 1. Outer Frame
+    tb.draw_rect(padding, padding, actual_board, actual_board, thickness=4)
+
+    # 2. Horizontal Borders
+    for r in range(1, size):
+        y = padding + r * c_size
+        is_box = (r % box_r == 0)
+        if is_box:
+            tb.draw_hline(padding, y, actual_board, thickness=4)
+        else:
+            for c in range(size):
+                if cell_cage.get((r - 1, c)) != cell_cage.get((r, c)):
+                    # Dashed line
+                    x0 = padding + c * c_size
+                    for dx in range(0, c_size, 10):
+                        seg = min(5, c_size - dx)
+                        tb.draw_hline(x0 + dx, y, seg, thickness=2)
+
+    # 3. Vertical Borders
+    for c in range(1, size):
+        x = padding + c * c_size
+        is_box = (c % box_c == 0)
+        if is_box:
+            tb.draw_vline(x, padding, actual_board, thickness=4)
+        else:
+            for r in range(size):
+                if cell_cage.get((r, c - 1)) != cell_cage.get((r, c)):
+                    # Dashed line
+                    y0 = padding + r * c_size
+                    for dy in range(0, c_size, 10):
+                        seg = min(5, c_size - dy)
+                        tb.draw_vline(x, y0 + dy, seg, thickness=2)
+
+    # 4. Cage Sum Clues (scale 2 text)
+    for cg in cages:
+        cells = sorted(cg.get("cells", []))
+        if not cells:
+            continue
+        r0, c0 = cells[0]
+        tx = padding + c0 * c_size + 6
+        ty = padding + r0 * c_size + 6
+        tb.draw_text(tx, ty, str(cg.get("sum", "")), scale=2, color=1)
+
+    return tb.to_escpos()

@@ -79,6 +79,7 @@ Only describe what the generation engine guarantees:
 | **MINES** | Easy (8)<br>Med (12)<br>Hard (15) | `"Deduce all [8 / 12 / 15] hidden mines using the adjacent numbered clues."` | **60–61** |
 | **TENTS** | Easy (4)<br>Med (8)<br>Hard (11) | `"Pitch [4 / 8 / 11] tents next to trees without tents touching, matching row and column counts."` | **84–85** |
 | **BRIDGES** | All | `"Connect all islands into one network using 1 or 2 lines matching each island's number."` | **88** |
+| **KILLER** | Easy / Med (4x4)<br>Extreme (6x6) | `"Fill every row, column, and box with digits [1-4 / 1-6], matching cage sums without repeats."` | **84** |
 
 ---
 

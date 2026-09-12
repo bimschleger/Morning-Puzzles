@@ -23,6 +23,7 @@ from app.generators.binary_gen import BinaryGenerator
 from app.generators.mines_gen import MinesGenerator
 from app.generators.tents_gen import TentsGenerator
 from app.generators.bridges_gen import BridgesGenerator
+from app.generators.killer_gen import KillerSudokuGenerator
 from app.renderer.text_formatter import (
     build_daily_receipt_bytes,
     build_hybrid_daily_receipt_bytes,
@@ -39,10 +40,12 @@ binary_gen = BinaryGenerator()
 mines_gen = MinesGenerator()
 tents_gen = TentsGenerator()
 bridges_gen = BridgesGenerator()
+killer_gen = KillerSudokuGenerator()
 
 
 def generate_daily_bundle(difficulty: str = "medium") -> dict:
     today_str = datetime.date.today().strftime("%A, %B %d, %Y")
+    killer_diff = "extreme" if difficulty.lower() == "hard" else difficulty
     return {
         "title": "DAILY MORNING PUZZLES",
         "date": today_str,
@@ -56,6 +59,7 @@ def generate_daily_bundle(difficulty: str = "medium") -> dict:
         "mines": mines_gen.generate(difficulty=difficulty),
         "tents": tents_gen.generate(difficulty=difficulty),
         "bridges": bridges_gen.generate(difficulty=difficulty),
+        "killer": killer_gen.generate(difficulty=killer_diff),
     }
 
 
@@ -154,6 +158,18 @@ try:
     def get_mines(difficulty: str = "medium"):
         return mines_gen.generate(difficulty=difficulty)
 
+    @app.get("/api/v1/puzzles/tents")
+    def get_tents(difficulty: str = "medium"):
+        return tents_gen.generate(difficulty=difficulty)
+
+    @app.get("/api/v1/puzzles/bridges")
+    def get_bridges(difficulty: str = "medium"):
+        return bridges_gen.generate(difficulty=difficulty)
+
+    @app.get("/api/v1/puzzles/killer")
+    def get_killer(difficulty: str = "medium"):
+        return killer_gen.generate(difficulty=difficulty)
+
 except ImportError:
     app = None
 
@@ -243,6 +259,15 @@ def run_standalone_server(port: int = 8000, host: str = "0.0.0.0"):
             elif path == "/api/v1/puzzles/mines":
                 diff = query_params.get("difficulty", ["medium"])[0]
                 self._send_json(200, mines_gen.generate(difficulty=diff))
+            elif path == "/api/v1/puzzles/tents":
+                diff = query_params.get("difficulty", ["medium"])[0]
+                self._send_json(200, tents_gen.generate(difficulty=diff))
+            elif path == "/api/v1/puzzles/bridges":
+                diff = query_params.get("difficulty", ["medium"])[0]
+                self._send_json(200, bridges_gen.generate(difficulty=diff))
+            elif path == "/api/v1/puzzles/killer":
+                diff = query_params.get("difficulty", ["medium"])[0]
+                self._send_json(200, killer_gen.generate(difficulty=diff))
             else:
                 self.send_response(404)
                 self.end_headers()

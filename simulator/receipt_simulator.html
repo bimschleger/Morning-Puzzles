@@ -320,6 +320,24 @@
             </select>
           </div>
         </div>
+
+        <!-- 10. Killer Sudoku Toggle -->
+        <div class="bg-slate-900 border border-slate-800/80 rounded-xl p-3.5 flex flex-col gap-2.5 transition hover:border-slate-700">
+          <div class="flex items-center justify-between">
+            <label class="flex items-center gap-2.5 cursor-pointer select-none">
+              <input type="checkbox" id="toggle-killer" checked class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
+              <span class="font-semibold text-sm text-slate-200">Killer Sudoku</span>
+            </label>
+          </div>
+          <div class="flex items-center justify-between pl-6 text-xs text-slate-400">
+            <span>Difficulty:</span>
+            <select id="diff-killer" class="bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2 py-1 text-xs outline-none focus:border-amber-500">
+              <option value="easy">Easy: 4x4 (2x2 Boxes)</option>
+              <option value="medium" selected>Medium: 4x4 (2x2 Boxes)</option>
+              <option value="extreme">Extreme: 6x6 (2x3 Boxes)</option>
+            </select>
+          </div>
+        </div>
       </div>
 
       <!-- Receipt Visual Customizations -->
@@ -4944,6 +4962,467 @@
     }
 
     // =========================================================================
+    // KILLER SUDOKU SIMULATOR (Procedural Generator & Solver)
+    // =========================================================================
+    class KillerSudokuSimulator {
+      constructor() {
+        this.difficultySettings = {
+          easy: { size: 4, boxR: 2, boxC: 2, minCage: 1, maxCage: 2 },
+          medium: { size: 4, boxR: 2, boxC: 2, minCage: 2, maxCage: 3 },
+          extreme: { size: 6, boxR: 2, boxC: 3, minCage: 2, maxCage: 4 }
+        };
+      }
+
+      _generateSolvedBoard(size, boxR, boxC) {
+        const board = Array.from({ length: size }, () => Array(size).fill(0));
+
+        const isValid = (r, c, val) => {
+          for (let i = 0; i < size; i++) {
+            if (board[r][i] === val || board[i][c] === val) return false;
+          }
+          const br = Math.floor(r / boxR) * boxR;
+          const bc = Math.floor(c / boxC) * boxC;
+          for (let dr = 0; dr < boxR; dr++) {
+            for (let dc = 0; dc < boxC; dc++) {
+              if (board[br + dr][bc + dc] === val) return false;
+            }
+          }
+          return true;
+        };
+
+        const fill = (r, c) => {
+          if (r === size) return true;
+          const nextR = r + Math.floor((c + 1) / size);
+          const nextC = (c + 1) % size;
+
+          const nums = Array.from({ length: size }, (_, i) => i + 1);
+          for (let i = nums.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [nums[i], nums[j]] = [nums[j], nums[i]];
+          }
+
+          for (const n of nums) {
+            if (isValid(r, c, n)) {
+              board[r][c] = n;
+              if (fill(nextR, nextC)) return true;
+              board[r][c] = 0;
+            }
+          }
+          return false;
+        };
+
+        fill(0, 0);
+        return board;
+      }
+
+      _partitionIntoCages(solution, size, minCage, maxCage) {
+        const assigned = Array.from({ length: size }, () => Array(size).fill(-1));
+        const cages = [];
+        const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+        const neighbors = (r, c) => {
+          const res = [];
+          const dirs = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+          for (const [dr, dc] of dirs) {
+            const nr = r + dr, nc = c + dc;
+            if (nr >= 0 && nr < size && nc >= 0 && nc < size) {
+              res.push([nr, nc]);
+            }
+          }
+          return res;
+        };
+
+        const allCoords = [];
+        for (let r = 0; r < size; r++) {
+          for (let c = 0; c < size; c++) {
+            allCoords.push([r, c]);
+          }
+        }
+        for (let i = allCoords.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [allCoords[i], allCoords[j]] = [allCoords[j], allCoords[i]];
+        }
+
+        let cageId = 0;
+        for (const [r, c] of allCoords) {
+          if (assigned[r][c] !== -1) continue;
+
+          const targetSize = minCage + Math.floor(Math.random() * (maxCage - minCage + 1));
+          const currentCageCells = [[r, c]];
+          const currentDigits = new Set([solution[r][c]]);
+          assigned[r][c] = cageId;
+
+          while (currentCageCells.length < targetSize) {
+            const candidates = [];
+            for (const [cr, cc] of currentCageCells) {
+              for (const [nr, nc] of neighbors(cr, cc)) {
+                if (assigned[nr][nc] === -1 && !currentDigits.has(solution[nr][nc])) {
+                  candidates.push([nr, nc]);
+                }
+              }
+            }
+            if (candidates.length === 0) break;
+
+            const chosen = candidates[Math.floor(Math.random() * candidates.length)];
+            currentCageCells.push(chosen);
+            currentDigits.add(solution[chosen[0]][chosen[1]]);
+            assigned[chosen[0]][chosen[1]] = cageId;
+          }
+
+          currentCageCells.sort((a, b) => (a[0] === b[0] ? a[1] - b[1] : a[0] - b[0]));
+          let csum = 0;
+          for (const [cr, cc] of currentCageCells) csum += solution[cr][cc];
+
+          cages.push({
+            id: cageId,
+            label: letters[cageId % letters.length],
+            cells: currentCageCells,
+            sum: csum
+          });
+          cageId++;
+        }
+
+        if (minCage > 1) {
+          for (let idx = cages.length - 1; idx >= 0; idx--) {
+            const cg = cages[idx];
+            if (cg.cells.length === 1) {
+              const [cr, cc] = cg.cells[0];
+              const cval = solution[cr][cc];
+              for (const [nr, nc] of neighbors(cr, cc)) {
+                const nid = assigned[nr][nc];
+                const ncage = cages.find(c => c.id === nid);
+                if (ncage && ncage.cells.length < maxCage) {
+                  const ndigits = new Set(ncage.cells.map(([r, c]) => solution[r][c]));
+                  if (!ndigits.has(cval)) {
+                    ncage.cells.push([cr, cc]);
+                    ncage.cells.sort((a, b) => (a[0] === b[0] ? a[1] - b[1] : a[0] - b[0]));
+                    ncage.sum += cval;
+                    assigned[cr][cc] = nid;
+                    cages.splice(idx, 1);
+                    break;
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        cages.forEach((cg, i) => {
+          cg.id = i;
+          cg.label = letters[i % letters.length];
+        });
+
+        return cages;
+      }
+
+      _findMultipleSolutions(size, boxR, boxC, cages, maxCount = 2) {
+        const board = Array.from({ length: size }, () => Array(size).fill(0));
+        const cellCage = new Map();
+        for (const cg of cages) {
+          for (const [r, c] of cg.cells) {
+            cellCage.set(`${r},${c}`, cg);
+          }
+        }
+
+        const solutions = [];
+
+        const isValidPlacement = (r, c, val) => {
+          for (let i = 0; i < size; i++) {
+            if (board[r][i] === val || board[i][c] === val) return false;
+          }
+          const br = Math.floor(r / boxR) * boxR;
+          const bc = Math.floor(c / boxC) * boxC;
+          for (let dr = 0; dr < boxR; dr++) {
+            for (let dc = 0; dc < boxC; dc++) {
+              if (board[br + dr][bc + dc] === val) return false;
+            }
+          }
+
+          const cg = cellCage.get(`${r},${c}`);
+          let currentSum = val;
+          let filledCells = 1;
+          for (const [cr, cc] of cg.cells) {
+            if (cr === r && cc === c) continue;
+            const v = board[cr][cc];
+            if (v !== 0) {
+              if (v === val) return false;
+              currentSum += v;
+              filledCells++;
+            }
+          }
+
+          const targetSum = cg.sum;
+          const totalCells = cg.cells.length;
+
+          if (currentSum > targetSum) return false;
+          if (filledCells === totalCells) {
+            if (currentSum !== targetSum) return false;
+          } else {
+            const remainingCells = totalCells - filledCells;
+            const minAdd = (remainingCells * (remainingCells + 1)) / 2;
+            if (currentSum + minAdd > targetSum) return false;
+          }
+
+          return true;
+        };
+
+        const solve = (r, c) => {
+          if (r === size) {
+            solutions.push(board.map(row => [...row]));
+            return solutions.length >= maxCount;
+          }
+          const nextR = r + Math.floor((c + 1) / size);
+          const nextC = (c + 1) % size;
+
+          for (let val = 1; val <= size; val++) {
+            if (isValidPlacement(r, c, val)) {
+              board[r][c] = val;
+              if (solve(nextR, nextC)) return true;
+              board[r][c] = 0;
+            }
+          }
+          return false;
+        };
+
+        solve(0, 0);
+        return solutions;
+      }
+
+      generate(difficulty = 'medium') {
+        const diffKey = difficulty.toLowerCase();
+        const cfg = this.difficultySettings[diffKey] || this.difficultySettings.medium;
+        const size = cfg.size;
+        const boxR = cfg.boxR;
+        const boxC = cfg.boxC;
+        const minCage = cfg.minCage;
+        const maxCage = cfg.maxCage;
+        const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+        for (let attempt = 0; attempt < 50; attempt++) {
+          const solution = this._generateSolvedBoard(size, boxR, boxC);
+          const cages = this._partitionIntoCages(solution, size, minCage, maxCage);
+
+          let isUnique = false;
+          for (let step = 0; step < 8; step++) {
+            const sols = this._findMultipleSolutions(size, boxR, boxC, cages, 2);
+            if (sols.length === 1) {
+              isUnique = true;
+              break;
+            } else if (sols.length === 2) {
+              const diffCells = [];
+              for (let r = 0; r < size; r++) {
+                for (let c = 0; c < size; c++) {
+                  if (sols[0][r][c] !== sols[1][r][c]) {
+                    diffCells.push([r, c]);
+                  }
+                }
+              }
+              let splitDone = false;
+              for (const [dr, dc] of diffCells) {
+                for (const cg of cages) {
+                  const cellIdx = cg.cells.findIndex(([r, c]) => r === dr && c === dc);
+                  if (cellIdx !== -1 && cg.cells.length > 1) {
+                    cg.cells.splice(cellIdx, 1);
+                    cg.sum -= solution[dr][dc];
+                    cages.push({
+                      id: cages.length,
+                      label: '',
+                      cells: [[dr, dc]],
+                      sum: solution[dr][dc]
+                    });
+                    splitDone = true;
+                    break;
+                  }
+                }
+                if (splitDone) break;
+              }
+              if (!splitDone) break;
+            } else {
+              break;
+            }
+          }
+
+          if (isUnique) {
+            const cleanCages = cages.filter(cg => cg.cells.length > 0);
+            cleanCages.forEach((cg, i) => {
+              cg.id = i;
+              cg.label = letters[i % letters.length];
+            });
+
+            return {
+              title: 'KILLER',
+              difficulty: difficulty.toUpperCase(),
+              size,
+              box_rows: boxR,
+              box_cols: boxC,
+              cages: cleanCages,
+              solution
+            };
+          }
+        }
+
+        // Fallback
+        const fallbackCfg = this.difficultySettings.easy;
+        const solution = this._generateSolvedBoard(fallbackCfg.size, fallbackCfg.boxR, fallbackCfg.boxC);
+        const cages = this._partitionIntoCages(solution, fallbackCfg.size, 1, 2);
+        cages.forEach((cg, i) => {
+          cg.id = i;
+          cg.label = letters[i % letters.length];
+        });
+        return {
+          title: 'KILLER',
+          difficulty: difficulty.toUpperCase(),
+          size: fallbackCfg.size,
+          box_rows: fallbackCfg.boxR,
+          box_cols: fallbackCfg.boxC,
+          cages,
+          solution
+        };
+      }
+    }
+
+    /**
+     * Renders a high-contrast 1-bit thermal Killer Sudoku puzzle canvas.
+     * Features bold box borders, dashed cage perimeters, light dotted internal separators,
+     * and top-left cage sum numbers.
+     */
+    function drawKillerCanvas(canvas, kData) {
+      const size = kData.size;
+      const boxR = kData.box_rows;
+      const boxC = kData.box_cols;
+      const cages = kData.cages;
+
+      const padding = 16;
+      const totalWidth = 345;
+      const boardSize = totalWidth - padding * 2;
+      const cellSize = boardSize / size;
+
+      canvas.width = totalWidth;
+      canvas.height = totalWidth;
+      const ctx = canvas.getContext('2d');
+
+      // 1. Paper Background
+      ctx.fillStyle = '#fafaf7';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Map each cell to cage ID
+      const cellCage = new Map();
+      for (const cg of cages) {
+        for (const [r, c] of cg.cells) {
+          cellCage.set(`${r},${c}`, cg.id);
+        }
+      }
+
+      // 2. Outer Frame (Tier 1 solid boundary)
+      ctx.lineWidth = 3.5;
+      ctx.strokeStyle = '#111111';
+      ctx.strokeRect(padding, padding, boardSize, boardSize);
+
+      // 3. Horizontal Grid & Cage Lines
+      for (let r = 1; r < size; r++) {
+        const y = padding + r * cellSize;
+        const isBox = (r % boxR === 0);
+
+        if (isBox) {
+          ctx.lineWidth = 3.5;
+          ctx.strokeStyle = '#111111';
+          ctx.beginPath();
+          ctx.moveTo(padding, y);
+          ctx.lineTo(padding + boardSize, y);
+          ctx.stroke();
+        } else {
+          for (let c = 0; c < size; c++) {
+            const x0 = padding + c * cellSize;
+            const x1 = x0 + cellSize;
+            const idTop = cellCage.get(`${r - 1},${c}`);
+            const idBot = cellCage.get(`${r},${c}`);
+
+            if (idTop !== idBot) {
+              // Dashed cage border
+              ctx.lineWidth = 1.8;
+              ctx.strokeStyle = '#111111';
+              ctx.setLineDash([4, 4]);
+              ctx.beginPath();
+              ctx.moveTo(x0, y);
+              ctx.lineTo(x1, y);
+              ctx.stroke();
+              ctx.setLineDash([]);
+            } else {
+              // Light dotted separator inside cage
+              ctx.lineWidth = 0.8;
+              ctx.strokeStyle = 'rgba(0,0,0,0.18)';
+              ctx.setLineDash([1, 4]);
+              ctx.beginPath();
+              ctx.moveTo(x0, y);
+              ctx.lineTo(x1, y);
+              ctx.stroke();
+              ctx.setLineDash([]);
+            }
+          }
+        }
+      }
+
+      // 4. Vertical Grid & Cage Lines
+      for (let c = 1; c < size; c++) {
+        const x = padding + c * cellSize;
+        const isBox = (c % boxC === 0);
+
+        if (isBox) {
+          ctx.lineWidth = 3.5;
+          ctx.strokeStyle = '#111111';
+          ctx.beginPath();
+          ctx.moveTo(x, padding);
+          ctx.lineTo(x, padding + boardSize);
+          ctx.stroke();
+        } else {
+          for (let r = 0; r < size; r++) {
+            const y0 = padding + r * cellSize;
+            const y1 = y0 + cellSize;
+            const idLeft = cellCage.get(`${r},${c - 1}`);
+            const idRight = cellCage.get(`${r},${c}`);
+
+            if (idLeft !== idRight) {
+              // Dashed cage border
+              ctx.lineWidth = 1.8;
+              ctx.strokeStyle = '#111111';
+              ctx.setLineDash([4, 4]);
+              ctx.beginPath();
+              ctx.moveTo(x, y0);
+              ctx.lineTo(x, y1);
+              ctx.stroke();
+              ctx.setLineDash([]);
+            } else {
+              // Light dotted separator inside cage
+              ctx.lineWidth = 0.8;
+              ctx.strokeStyle = 'rgba(0,0,0,0.18)';
+              ctx.setLineDash([1, 4]);
+              ctx.beginPath();
+              ctx.moveTo(x, y0);
+              ctx.lineTo(x, y1);
+              ctx.stroke();
+              ctx.setLineDash([]);
+            }
+          }
+        }
+      }
+
+      // 5. Cage Sum Numbers in Top-Left
+      const fontSize = size === 4 ? 14 : 11;
+      ctx.font = `bold ${fontSize}px "Space Mono", monospace`;
+      ctx.fillStyle = '#111111';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'top';
+
+      for (const cg of cages) {
+        if (!cg.cells || cg.cells.length === 0) continue;
+        const [r0, c0] = cg.cells[0];
+        const tx = padding + c0 * cellSize + 5;
+        const ty = padding + r0 * cellSize + 4;
+        ctx.fillText(cg.sum.toString(), tx, ty);
+      }
+    }
+
+    // =========================================================================
     // 3. RECEIPT COMPOSER & RENDERER (Mixed Text + Dithered Canvas)
     // =========================================================================
 
@@ -4956,6 +5435,7 @@
     const minesSim = new MinesSimulator();
     const tentsSim = new TentsSimulator();
     const bridgesSim = new BridgesSimulator();
+    const killerSim = new KillerSudokuSimulator();
 
     let rawReceiptLines = [];
 
@@ -4980,7 +5460,8 @@
       'BINARY': 'Fill each row and column with equal 0s and 1s, with no more than two consecutive of each type.',
       'MINES': 'Deduce all hidden mines using the adjacent numbered clues.',
       'TENTS': 'Pitch 1 tent next to each tree without tents touching, matching row and column counts.',
-      'BRIDGES': 'Connect all islands into one network using 1 or 2 lines matching each island\'s number.'
+      'BRIDGES': 'Connect all islands into one network using 1 or 2 lines matching each island\'s number.',
+      'KILLER': 'Fill every row, column, and box with digits 1-4, matching cage sums without repeats.'
     };
 
     function wrapText(str, maxLen = 44) {
@@ -5441,6 +5922,69 @@
         });
       }
 
+      // 10. KILLER SUDOKU
+      if (document.getElementById('toggle-killer') && document.getElementById('toggle-killer').checked) {
+        const diff = document.getElementById('diff-killer').value;
+        const kData = killerSim.generate(diff);
+        const desc = kData.size === 6
+          ? 'Fill every row, column, and box with digits 1-6, matching cage sums without repeats.'
+          : 'Fill every row, column, and box with digits 1-4, matching cage sums without repeats.';
+
+        addStandardPuzzleHeader(items, 'KILLER', diff, desc);
+
+        if (isGraphic) {
+          items.push({
+            type: 'canvas',
+            render: (canvas) => drawKillerCanvas(canvas, kData)
+          });
+        } else {
+          // Monospaced ASCII
+          const size = kData.size;
+          const grid = Array.from({ length: size }, () => Array(size).fill(' '));
+          for (const cg of kData.cages) {
+            for (const [r, c] of cg.cells) {
+              grid[r][c] = cg.label;
+            }
+          }
+          const sepBorder = '      +' + '---+'.repeat(size);
+          items.push({ type: 'text', text: sepBorder });
+          for (let r = 0; r < size; r++) {
+            let rowStr = '      |';
+            for (let c = 0; c < size; c++) {
+              rowStr += ` ${grid[r][c]} |`;
+            }
+            items.push({ type: 'text', text: rowStr });
+            items.push({ type: 'text', text: sepBorder });
+          }
+
+          items.push({ type: 'blank', text: '' });
+          const clueItems = kData.cages.map(cg => `${cg.label}=${cg.sum}`);
+          let curLine = 'CAGES: ';
+          const legendLines = [];
+          for (const item of clueItems) {
+            if (curLine.length + item.length + 2 > 44) {
+              legendLines.push(curLine.replace(/,\s*$/, ''));
+              curLine = '       ' + item + ', ';
+            } else {
+              curLine += item + ', ';
+            }
+          }
+          if (curLine.trim()) legendLines.push(curLine.replace(/,\s*$/, ''));
+          for (const line of legendLines) {
+            items.push({ type: 'text', text: line });
+          }
+        }
+
+        items.push({ type: 'blank', text: '' });
+        items.push({ type: 'rule', text: '-'.repeat(COLS) });
+
+        solutionsContent.push({
+          name: 'Killer',
+          solution: kData.solution,
+          size: kData.size
+        });
+      }
+
       // Optional Solutions Key
       if (document.getElementById('toggle-solutions').checked && solutionsContent.length > 0) {
         items.push({ type: 'rule', text: '-'.repeat(COLS) });
@@ -5525,6 +6069,14 @@
               const bStr = item.solutionBridges.map(b => `(${b.r1 + 1},${b.c1 + 1})-(${b.r2 + 1},${b.c2 + 1})[${b.count}]`).join(', ');
               const wrapped = wrapText(`Bridges: ${bStr}`, 46);
               for (const line of wrapped) items.push({ type: 'text', text: line });
+            }
+          } else if (item.name === 'Killer') {
+            for (let r = 0; r < item.size; r++) {
+              let rowStr = '      ';
+              for (let c = 0; c < item.size; c++) {
+                rowStr += item.solution[r][c] + ' ';
+              }
+              items.push({ type: 'text', text: rowStr });
             }
           } else if (item.name === 'Nonogram' || item.grid) {
             for (let r = 0; r < item.size; r++) {
@@ -5622,7 +6174,8 @@
       'diff-binary': { easy: 'easy', medium: 'medium', hard: 'hard' },
       'diff-mines': { easy: 'easy', medium: 'medium', hard: 'hard' },
       'diff-tents': { easy: 'easy', medium: 'medium', hard: 'hard' },
-      'diff-bridges': { easy: 'easy', medium: 'medium', hard: 'hard' }
+      'diff-bridges': { easy: 'easy', medium: 'medium', hard: 'hard' },
+      'diff-killer': { easy: 'easy', medium: 'medium', hard: 'extreme' }
     };
 
     function applyGlobalDifficulty(diff) {
@@ -5730,6 +6283,7 @@
       'toggle-mines', 'diff-mines',
       'toggle-tents', 'diff-tents',
       'toggle-bridges', 'diff-bridges',
+      'toggle-killer', 'diff-killer',
       'toggle-ruler', 'toggle-solutions', 'toggle-burn'
     ];
     inputs.forEach(id => {
