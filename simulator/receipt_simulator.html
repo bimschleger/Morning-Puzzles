@@ -374,6 +374,24 @@
             </select>
           </div>
         </div>
+
+        <!-- 13. Ladder Toggle -->
+        <div class="bg-slate-900 border border-slate-800/80 rounded-xl p-3.5 flex flex-col gap-2.5 transition hover:border-slate-700">
+          <div class="flex items-center justify-between">
+            <label class="flex items-center gap-2.5 cursor-pointer select-none">
+              <input type="checkbox" id="toggle-ladder" checked class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
+              <span class="font-semibold text-sm text-slate-200">Ladder</span>
+            </label>
+          </div>
+          <div class="flex items-center justify-between pl-6 text-xs text-slate-400">
+            <span>Difficulty:</span>
+            <select id="diff-ladder" class="bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2 py-1 text-xs outline-none focus:border-amber-500">
+              <option value="easy">Easy: 4 Letters (Short)</option>
+              <option value="medium" selected>Medium: 4 Letters</option>
+              <option value="hard">Hard: 5 Letters</option>
+            </select>
+          </div>
+        </div>
       </div>
 
       <!-- Receipt Visual Customizations -->
@@ -6203,6 +6221,119 @@
       ctx.strokeRect(offsetX, offsetY, actualGridSize, actualGridSize);
     }
 
+    // LADDER SIMULATOR & CANVAS RENDERER
+    class LadderSimulator {
+      constructor() {
+        this.puzzles = {
+          easy: [
+            { start: 'COLD', target: 'WARM', solution: ['COLD', 'CORD', 'CARD', 'WARD', 'WARM'] },
+            { start: 'HEAD', target: 'TAIL', solution: ['HEAD', 'HEAL', 'TEAL', 'TELL', 'TALL', 'TAIL'] },
+            { start: 'LOVE', target: 'HATE', solution: ['LOVE', 'HOVE', 'HAVE', 'HATE'] },
+            { start: 'SHIP', target: 'DOCK', solution: ['SHIP', 'SHOP', 'SHOT', 'SOOT', 'DOCK'] },
+            { start: 'FIRE', target: 'HOSE', solution: ['FIRE', 'FORE', 'FORK', 'HORK', 'HOSE'] }
+          ],
+          medium: [
+            { start: 'SLOW', target: 'FAST', solution: ['SLOW', 'BLOW', 'BLOT', 'BOOT', 'FOOT', 'FAST'] },
+            { start: 'EAST', target: 'WEST', solution: ['EAST', 'PAST', 'PEST', 'WEST'] },
+            { start: 'SAND', target: 'DUNE', solution: ['SAND', 'SANE', 'DANE', 'DONE', 'DUNE'] },
+            { start: 'CAMP', target: 'TENT', solution: ['CAMP', 'CARP', 'TARP', 'TART', 'TENT'] },
+            { start: 'ROAD', target: 'PATH', solution: ['ROAD', 'READ', 'BEAD', 'BATH', 'PATH'] }
+          ],
+          hard: [
+            { start: 'BLACK', target: 'WHITE', solution: ['BLACK', 'BLANK', 'BLINK', 'CLINK', 'CHINK', 'CHINE', 'WHITE'] },
+            { start: 'STONE', target: 'WATER', solution: ['STONE', 'SHONE', 'SHINE', 'SHIRE', 'SHARE', 'WHARE', 'WATER'] },
+            { start: 'WHEAT', target: 'BREAD', solution: ['WHEAT', 'CHEAT', 'CLEAT', 'BLEAT', 'BLEST', 'BREST', 'BREAD'] },
+            { start: 'TEARS', target: 'SMILE', solution: ['TEARS', 'SEARS', 'STARS', 'STARE', 'STALE', 'SHALE', 'SMILE'] }
+          ]
+        };
+      }
+
+      generate(diff = 'medium') {
+        const list = this.puzzles[diff] || this.puzzles.medium;
+        const p = list[Math.floor(Math.random() * list.length)];
+        return {
+          title: 'LADDER',
+          difficulty: diff,
+          start: p.start,
+          target: p.target,
+          wordLen: p.start.length,
+          intermediateCount: p.solution.length - 2,
+          totalWords: p.solution.length,
+          solution: p.solution
+        };
+      }
+    }
+
+    function drawLadderCanvas(canvas, lData) {
+      const totalWidth = 345;
+      const padding = 12;
+      const innerWidth = totalWidth - padding * 2;
+      const totalRungs = lData.totalWords;
+      const wordLen = lData.wordLen;
+      const tileSize = wordLen === 4 ? 44 : 36;
+      const gapY = 10;
+      const boxWidth = wordLen * tileSize;
+      const numWidth = 26;
+      const gapX = 10;
+      const rowContentWidth = numWidth + gapX + boxWidth;
+      const startX = padding + Math.floor((innerWidth - rowContentWidth) / 2);
+      const numX = startX + numWidth;
+      const boxX = startX + numWidth + gapX;
+      const marginTop = 14;
+      const ladderHeight = totalRungs * tileSize + (totalRungs - 1) * gapY;
+      const totalH = marginTop * 2 + ladderHeight;
+
+      canvas.width = totalWidth;
+      canvas.height = totalH;
+      const ctx = canvas.getContext('2d');
+
+      ctx.fillStyle = '#fafaf7';
+      ctx.fillRect(0, 0, totalWidth, totalH);
+
+      for (let r = 0; r < totalRungs; r++) {
+        const ry = marginTop + r * (tileSize + gapY);
+
+        // Step number
+        ctx.fillStyle = '#333333';
+        ctx.font = 'bold 14px "Space Mono", monospace';
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+        ctx.fillText((r + 1) + '.', numX, ry + tileSize / 2);
+
+        // Word for this rung
+        let rungWord = '';
+        if (r === 0) rungWord = lData.start;
+        else if (r === totalRungs - 1) rungWord = lData.target;
+
+        // Word box outline
+        ctx.strokeStyle = '#111111';
+        ctx.lineWidth = 2.0;
+        ctx.strokeRect(boxX, ry, boxWidth, tileSize);
+
+        // Interior dividers
+        ctx.lineWidth = 1.0;
+        for (let c = 1; c < wordLen; c++) {
+          const divX = boxX + c * tileSize;
+          ctx.beginPath();
+          ctx.moveTo(divX, ry);
+          ctx.lineTo(divX, ry + tileSize);
+          ctx.stroke();
+        }
+
+        // Letter glyphs
+        if (rungWord) {
+          ctx.fillStyle = '#111111';
+          ctx.font = 'bold 22px "Space Mono", monospace';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          for (let c = 0; c < wordLen; c++) {
+            const tx = boxX + c * tileSize;
+            ctx.fillText(rungWord[c], tx + tileSize / 2, ry + tileSize / 2);
+          }
+        }
+      }
+    }
+
     // =========================================================================
     // 3. RECEIPT COMPOSER & RENDERER (Mixed Text + Dithered Canvas)
     // =========================================================================
@@ -6219,6 +6350,7 @@
     const killerSim = new KillerSudokuSimulator();
     const cryptogramSim = new CryptogramSimulator();
     const tangoSim = new TangoSimulator();
+    const ladderSim = new LadderSimulator();
 
     let rawReceiptLines = [];
 
@@ -6246,7 +6378,8 @@
       'BRIDGES': 'Connect all islands into one network using 1 or 2 lines matching each island\'s number.',
       'KILLER': 'Fill every row, column, and box with digits 1-4, matching cage sums without repeats.',
       'CRYPTOGRAM': 'Deduce the hidden phrase using the 2 letter clues and substitution logic.',
-      'TANGO': 'Fill each line with three 0s and three 1s without trios; = means same, x means opposite.'
+      'TANGO': 'Fill each line with three 0s and three 1s without trios; = means same, x means opposite.',
+      'LADDER': 'Deduce 3 English words to link COLD to WARM, changing 1 letter each step.'
     };
 
     function wrapText(str, maxLen = 44) {
@@ -6890,6 +7023,51 @@
         });
       }
 
+      // 13. LADDER
+      if (document.getElementById('toggle-ladder') && document.getElementById('toggle-ladder').checked) {
+        const diff = document.getElementById('diff-ladder').value;
+        const lData = ladderSim.generate(diff);
+        const lCount = lData.intermediateCount;
+        const countWord = lCount === 1 ? '1 English word' : `${lCount} English words`;
+        const lDesc = `Deduce ${countWord} to link ${lData.start} to ${lData.target}, changing 1 letter each step.`;
+        addStandardPuzzleHeader(items, 'LADDER', diff, lDesc);
+
+        if (isGraphic) {
+          items.push({
+            type: 'canvas',
+            render: (canvas) => drawLadderCanvas(canvas, lData)
+          });
+        } else {
+          // Monospaced ASCII Ladder
+          const wordLen = lData.wordLen;
+          const totalRungs = lData.totalWords;
+          const boxSep = '+---'.repeat(wordLen) + '+';
+          const padLen = Math.max(0, Math.floor((COLS - (3 + boxSep.length)) / 2));
+          const indent = ' '.repeat(padLen);
+
+          for (let r = 0; r < totalRungs; r++) {
+            const numStr = (r + 1) + '.';
+            let cells = '|   '.repeat(wordLen) + '|';
+            if (r === 0) {
+              cells = lData.start.split('').map(ch => `| ${ch} `).join('') + '|';
+            } else if (r === totalRungs - 1) {
+              cells = lData.target.split('').map(ch => `| ${ch} `).join('') + '|';
+            }
+            items.push({ type: 'text', text: `${indent}   ${boxSep}` });
+            items.push({ type: 'text', text: `${indent}${numStr.padStart(2)} ${cells}` });
+          }
+          items.push({ type: 'text', text: `${indent}   ${boxSep}` });
+        }
+
+        items.push({ type: 'blank', text: '' });
+        items.push({ type: 'rule', text: '-'.repeat(COLS) });
+
+        solutionsContent.push({
+          name: 'Ladder',
+          solution: lData.solution
+        });
+      }
+
       // Optional Solutions Key
       if (document.getElementById('toggle-solutions').checked && solutionsContent.length > 0) {
         items.push({ type: 'rule', text: '-'.repeat(COLS) });
@@ -7007,6 +7185,11 @@
               }
               items.push({ type: 'text', text: rowStr });
             }
+          } else if (item.name === 'Ladder') {
+            const pathLines = wrapText(item.solution.join(' -> '), 46);
+            for (const line of pathLines) {
+              items.push({ type: 'text', text: line });
+            }
           }
 
           // Leave an empty line after displaying the answer
@@ -7098,7 +7281,8 @@
       'diff-bridges': { easy: 'easy', medium: 'medium', hard: 'hard' },
       'diff-killer': { easy: 'easy', medium: 'medium', hard: 'extreme' },
       'diff-cryptogram': { easy: 'easy', medium: 'medium', hard: 'hard' },
-      'diff-tango': { easy: 'easy', medium: 'medium', hard: 'hard' }
+      'diff-tango': { easy: 'easy', medium: 'medium', hard: 'hard' },
+      'diff-ladder': { easy: 'easy', medium: 'medium', hard: 'hard' }
     };
 
     function applyGlobalDifficulty(diff) {
@@ -7209,6 +7393,7 @@
       'toggle-killer', 'diff-killer',
       'toggle-cryptogram', 'diff-cryptogram',
       'toggle-tango', 'diff-tango',
+      'toggle-ladder', 'diff-ladder',
       'toggle-ruler', 'toggle-solutions', 'toggle-burn'
     ];
     inputs.forEach(id => {

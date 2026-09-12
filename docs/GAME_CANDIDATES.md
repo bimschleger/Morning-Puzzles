@@ -6,7 +6,7 @@ This document provides the architectural survey, evaluation standards, and techn
 
 ## 1. Implemented Games (Active Library)
 
-The following 12 puzzles have been implemented and currently comprise the core Morning Puzzles library across the Python backend (`server/app/puzzles/`), ESP32 firmware (`esp32-firmware/src/generators/`), and web simulator (`simulator/receipt_simulator.html`):
+The following 13 puzzles have been implemented and currently comprise the core Morning Puzzles library across the Python backend (`server/app/puzzles/`), ESP32 firmware (`esp32-firmware/src/generators/`), and web simulator (`simulator/receipt_simulator.html`):
 
 | Single-Word Title | Traditional / Common Name | Genre / Category | Implementation Stack | Difficulty Scaling | Solution Key Representation |
 | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -22,6 +22,7 @@ The following 12 puzzles have been implemented and currently comprise the core M
 | **`--- KILLER ---`** | Killer Sudoku | Latin Square + Arithmetic | Python (CP-SAT / Backtracking) | Easy, Medium, Hard, Extreme | 6-space indented 9×9 ASCII grid |
 | **`--- CRYPTOGRAM ---`** | Monoalphabetic Substitution | Cryptographic Deduction | Python (Procedural derangement) | Easy (3 hint letters), Med (1 hint), Hard (0 hints) | Decoded quote and author |
 | **`--- TANGO ---`** | LinkedIn Tango | Parity / Edge Relations | Python + ESP32 C++ | Easy (6×6, high clues), Med (6×6), Hard (6×6) | 6-space indented Sun/Moon grid |
+| **`--- LADDER ---`** | Word Ladder / Doublets | Word & Pattern | Python (BFS Word Graph) + Dataset | Easy (4-letter, 4–5 words), Med (4-letter, 6–7), Hard (5-letter, 6–8) | Arrow word path ($\le 46$ cols) |
 
 ---
 
@@ -66,7 +67,6 @@ Candidates are organized into five priority tiers. **Tier 1 (Word, Language & Pa
 
 | Priority | Single-Word Title | Traditional Name | Category | Primary Engine / Reference | License | Print Fit | Generation Complexity | Portability to C++ |
 | :---: | :--- | :--- | :--- | :--- | :---: | :---: | :---: | :---: |
-| **P1** | **`LADDER`** | Word Ladder / Doublets | Word & Pattern | BFS Word Graph / Lexicon | Apache 2.0 / MIT | **10 / 10** | Low (Shortest path in unweighted graph) | **High** (Compact graph / trie) |
 | **P1** | **`CODEWORD`** | Coded Crossword / Cipher Grid | Word & Pattern | Compact Crossword Filler + Substitution | Apache 2.0 / MIT | **9.5 / 10** | Medium (Backtracking fill + letter cipher) | **Medium-High** |
 | **P1** | **`WHEEL`** | Word Wheel / Target Anagram | Word & Pattern | Anagram Index / 9-Letter Subsets | Apache 2.0 / MIT | **10 / 10** | Low (Dictionary pre-indexing) | **Very High** (Flash lookup table) |
 | **P1** | **`SQUARE`** | Word Square / Sator Grid | Word & Pattern | Symmetric Backtracking Word Fill | Apache 2.0 / MIT | **9.8 / 10** | Low-Medium (Trie-based symmetric fill) | **High** (Trie on PROGMEM) |
