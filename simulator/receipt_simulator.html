@@ -7197,7 +7197,10 @@
             }
           } else if (item.name === 'Bridges') {
             if (item.solutionText) {
-              for (const line of item.solutionText.split('\n')) {
+              let bLines = item.solutionText.split('\n').map(l => l.trimEnd());
+              while (bLines.length && !bLines[0].trim()) bLines.shift();
+              while (bLines.length && !bLines[bLines.length - 1].trim()) bLines.pop();
+              for (const line of bLines) {
                 items.push({ type: 'text', text: line });
               }
             }

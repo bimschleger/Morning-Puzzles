@@ -210,10 +210,14 @@ class BridgesPuzzle(BasePuzzle):
             islands = puzzle_data.get("islands", [])
             bridges = puzzle_data.get("solution_bridges", [])
             sol_text = self._format_grid_ascii(size, islands, bridges, show_solution=True)
-        lines = []
-        if sol_text:
-            for line in sol_text.split("\n"):
-                lines.append(line)
+        if not sol_text:
+            return []
+        # Strip trailing whitespace per row, then drop leading/trailing blank lines
+        lines = [line.rstrip() for line in sol_text.split("\n")]
+        while lines and not lines[0].strip():
+            lines.pop(0)
+        while lines and not lines[-1].strip():
+            lines.pop()
         return lines
 
     def render_raster(
