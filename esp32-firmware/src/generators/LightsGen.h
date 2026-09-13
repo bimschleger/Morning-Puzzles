@@ -20,6 +20,7 @@ public:
 
     // Prints formatted 80mm receipt section
     void printToReceipt(EscPosPrinter& printer, LightsDifficulty diff);
+    bool printRasterToReceipt(EscPosPrinter& printer, LightsDifficulty diff);
 
     int8_t getCell(uint8_t r, uint8_t c) const { return _puzzle[r][c]; }
     uint8_t getSize() const { return _size; }

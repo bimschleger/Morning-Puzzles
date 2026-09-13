@@ -1,4 +1,5 @@
 #include "OfflinePuzzleComposer.h"
+#include "config.h"
 #include "../printer/EscPosPrinter.h"
 
 OfflinePuzzleComposer::OfflinePuzzleComposer() : 
@@ -21,10 +22,12 @@ PuzzleGrade OfflinePuzzleComposer::getCurrentGrade() const {
 
 const char* OfflinePuzzleComposer::getGradeName(PuzzleGrade grade) const {
     switch (grade) {
-        case GRADE_EASY: return "EASY";
-        case GRADE_HARD: return "HARD";
+        case GRADE_EASY:     return "EASY";
+        case GRADE_HARD:     return "HARD";
+        case GRADE_ROTATING: return "ROTATING";
+        case GRADE_RANDOM:   return "RANDOM";
         case GRADE_MEDIUM:
-        default: return "MEDIUM";
+        default:             return "MEDIUM";
     }
 }
 
@@ -57,83 +60,129 @@ bool OfflinePuzzleComposer::generateAndPrintReceipt(EscPosPrinter& printer, cons
     printer.println(String("EDITION GRADE: ") + getGradeName(effectiveGrade));
     printer.println("");
 
-    // Resolve individual puzzle difficulty parameters matching the requested grade
-    SudokuDifficulty     sDiff = (effectiveGrade == GRADE_EASY) ? SUDOKU_EASY : ((effectiveGrade == GRADE_HARD) ? SUDOKU_HARD : SUDOKU_MEDIUM);
-    WordSearchDifficulty wsDiff = (effectiveGrade == GRADE_EASY) ? WS_EASY : ((effectiveGrade == GRADE_HARD) ? WS_HARD : WS_MEDIUM);
-    NonogramDifficulty   nDiff = (effectiveGrade == GRADE_EASY) ? NONO_EASY : ((effectiveGrade == GRADE_HARD) ? NONO_HARD : NONO_MEDIUM);
-    QueensDifficulty     qDiff = (effectiveGrade == GRADE_EASY) ? QUEENS_EASY : ((effectiveGrade == GRADE_HARD) ? QUEENS_HARD : QUEENS_MEDIUM);
-    JumbleDifficulty     jDiff = (effectiveGrade == GRADE_EASY) ? JUMBLE_EASY : ((effectiveGrade == GRADE_HARD) ? JUMBLE_HARD : JUMBLE_MEDIUM);
-    BinaryDifficulty     bDiff = (effectiveGrade == GRADE_EASY) ? BINARY_EASY : ((effectiveGrade == GRADE_HARD) ? BINARY_HARD : BINARY_MEDIUM);
-    MinesDifficulty      mDiff = (effectiveGrade == GRADE_EASY) ? MINES_EASY : ((effectiveGrade == GRADE_HARD) ? MINES_HARD : MINES_MEDIUM);
-    TentsDifficulty      tDiff = (effectiveGrade == GRADE_EASY) ? TENTS_EASY : ((effectiveGrade == GRADE_HARD) ? TENTS_HARD : TENTS_MEDIUM);
-    BridgesDifficulty    brDiff = (effectiveGrade == GRADE_EASY) ? BRIDGES_EASY : ((effectiveGrade == GRADE_HARD) ? BRIDGES_HARD : BRIDGES_MEDIUM);
-    TangoDifficulty      tgDiff = (effectiveGrade == GRADE_EASY) ? TANGO_EASY : ((effectiveGrade == GRADE_HARD) ? TANGO_HARD : TANGO_MEDIUM);
-    LightsDifficulty     lDiff = (effectiveGrade == GRADE_EASY) ? LIGHTS_EASY : ((effectiveGrade == GRADE_HARD) ? LIGHTS_HARD : LIGHTS_MEDIUM);
+    // Resolve individual puzzle difficulty parameters.
+    // If effectiveGrade is GRADE_RANDOM (default), each game independently generates a random difficulty.
+    auto pickDiff = [&](int easyVal, int medVal, int hardVal) -> int {
+        if (effectiveGrade == GRADE_EASY) return easyVal;
+        if (effectiveGrade == GRADE_HARD) return hardVal;
+        if (effectiveGrade == GRADE_MEDIUM) return medVal;
+        int r = random(3) % 3;
+        return (r == 0) ? easyVal : ((r == 2) ? hardVal : medVal);
+    };
+
+    SudokuDifficulty     sDiff  = (SudokuDifficulty)pickDiff(SUDOKU_EASY, SUDOKU_MEDIUM, SUDOKU_HARD);
+    WordSearchDifficulty wsDiff = (WordSearchDifficulty)pickDiff(WS_EASY, WS_MEDIUM, WS_HARD);
+    NonogramDifficulty   nDiff  = (NonogramDifficulty)pickDiff(NONO_EASY, NONO_MEDIUM, NONO_HARD);
+    QueensDifficulty     qDiff  = (QueensDifficulty)pickDiff(QUEENS_EASY, QUEENS_MEDIUM, QUEENS_HARD);
+    JumbleDifficulty     jDiff  = (JumbleDifficulty)pickDiff(JUMBLE_EASY, JUMBLE_MEDIUM, JUMBLE_HARD);
+    BinaryDifficulty     bDiff  = (BinaryDifficulty)pickDiff(BINARY_EASY, BINARY_MEDIUM, BINARY_HARD);
+    MinesDifficulty      mDiff  = (MinesDifficulty)pickDiff(MINES_EASY, MINES_MEDIUM, MINES_HARD);
+    TentsDifficulty      tDiff  = (TentsDifficulty)pickDiff(TENTS_EASY, TENTS_MEDIUM, TENTS_HARD);
+    BridgesDifficulty    brDiff = (BridgesDifficulty)pickDiff(BRIDGES_EASY, BRIDGES_MEDIUM, BRIDGES_HARD);
+    TangoDifficulty      tgDiff = (TangoDifficulty)pickDiff(TANGO_EASY, TANGO_MEDIUM, TANGO_HARD);
+    WheelDifficulty      wDiff  = (WheelDifficulty)pickDiff(WHEEL_EASY, WHEEL_MEDIUM, WHEEL_HARD);
+    LightsDifficulty     lDiff  = (LightsDifficulty)pickDiff(LIGHTS_EASY, LIGHTS_MEDIUM, LIGHTS_HARD);
+
+#if (OFFLINE_PRINT_STYLE == STYLE_HYBRID)
+    bool useRaster = true;
+#else
+    bool useRaster = false;
+#endif
 
     // 2. Generate and print Sudoku
     Serial.println("[COMPOSER] Generating Sudoku...");
     _sudoku.generate(sDiff);
-    _sudoku.printToReceipt(printer, sDiff);
+    if (!useRaster || !_sudoku.printRasterToReceipt(printer, sDiff)) {
+        _sudoku.printToReceipt(printer, sDiff);
+    }
     printer.printHorizontalLine('-');
 
     // 3. Generate and print Word Search
     Serial.println("[COMPOSER] Generating Word Search...");
     _wordSearch.generate(wsDiff);
-    _wordSearch.printToReceipt(printer);
+    if (!useRaster || !_wordSearch.printRasterToReceipt(printer)) {
+        _wordSearch.printToReceipt(printer);
+    }
     printer.printHorizontalLine('-');
 
     // 4. Generate and print Nonogram
     Serial.println("[COMPOSER] Generating Nonogram...");
     _nonogram.generate(nDiff);
-    _nonogram.printToReceipt(printer);
+    if (!useRaster || !_nonogram.printRasterToReceipt(printer)) {
+        _nonogram.printToReceipt(printer);
+    }
     printer.printHorizontalLine('-');
 
     // 5. Generate and print Queens / Star Battle
     Serial.println("[COMPOSER] Generating Queens puzzle...");
     _queens.generate(qDiff);
-    _queens.printToReceipt(printer);
+    if (!useRaster || !_queens.printRasterToReceipt(printer)) {
+        _queens.printToReceipt(printer);
+    }
     printer.printHorizontalLine('-');
 
     // 6. Generate and print Jumble
     Serial.println("[COMPOSER] Generating Daily Jumble...");
     _jumble.generate(jDiff);
-    _jumble.printToReceipt(printer);
+    if (!useRaster || !_jumble.printRasterToReceipt(printer)) {
+        _jumble.printToReceipt(printer);
+    }
     printer.printHorizontalLine('-');
 
     // 7. Generate and print Binary
     Serial.println("[COMPOSER] Generating Binary...");
     _binary.generate(bDiff);
-    _binary.printToReceipt(printer, bDiff);
+    if (!useRaster || !_binary.printRasterToReceipt(printer, bDiff)) {
+        _binary.printToReceipt(printer, bDiff);
+    }
     printer.printHorizontalLine('-');
 
     // 8. Generate and print Mines
     Serial.println("[COMPOSER] Generating Mines...");
     _mines.generate(mDiff);
-    _mines.printToReceipt(printer, mDiff);
+    if (!useRaster || !_mines.printRasterToReceipt(printer, mDiff)) {
+        _mines.printToReceipt(printer, mDiff);
+    }
     printer.printHorizontalLine('-');
 
     // 9. Generate and print Tents
     Serial.println("[COMPOSER] Generating Tents...");
     _tents.generate(tDiff);
-    _tents.printToReceipt(printer, tDiff);
+    if (!useRaster || !_tents.printRasterToReceipt(printer, tDiff)) {
+        _tents.printToReceipt(printer, tDiff);
+    }
     printer.printHorizontalLine('-');
 
     // 10. Generate and print Bridges
     Serial.println("[COMPOSER] Generating Bridges...");
     _bridges.generate(brDiff);
-    _bridges.printToReceipt(printer, brDiff);
+    if (!useRaster || !_bridges.printRasterToReceipt(printer, brDiff)) {
+        _bridges.printToReceipt(printer, brDiff);
+    }
     printer.printHorizontalLine('-');
 
     // 11. Generate and print Tango
     Serial.println("[COMPOSER] Generating Tango...");
     _tango.generate(tgDiff);
-    _tango.printToReceipt(printer, tgDiff);
+    if (!useRaster || !_tango.printRasterToReceipt(printer, tgDiff)) {
+        _tango.printToReceipt(printer, tgDiff);
+    }
     printer.printHorizontalLine('-');
 
-    // 12. Generate and print Lights
+    // 12. Generate and print Wheel
+    Serial.println("[COMPOSER] Generating Wheel...");
+    _wheel.generate(wDiff);
+    if (!useRaster || !_wheel.printRasterToReceipt(printer)) {
+        _wheel.printToReceipt(printer);
+    }
+    printer.printHorizontalLine('-');
+
+    // 13. Generate and print Lights
     Serial.println("[COMPOSER] Generating Lights...");
     _lights.generate(lDiff);
-    _lights.printToReceipt(printer, lDiff);
+    if (!useRaster || !_lights.printRasterToReceipt(printer, lDiff)) {
+        _lights.printToReceipt(printer, lDiff);
+    }
 
     // Footer
     printer.printDoubleLine();

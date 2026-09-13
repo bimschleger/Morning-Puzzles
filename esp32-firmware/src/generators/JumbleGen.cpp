@@ -1,8 +1,9 @@
 #include "JumbleGen.h"
 #include "JumbleDataset.h"
 #include "../printer/EscPosPrinter.h"
+#include "../printer/ThermalCanvas.h"
 
-JumbleGen::JumbleGen() : _numWords(0), _riddle(""), _answer("") {}
+JumbleGen::JumbleGen() : _numWords(0), _riddle(""), _answer(""), _difficulty(JUMBLE_MEDIUM) {}
 
 String JumbleGen::scrambleWord(const char* word) {
     int len = strlen(word);
@@ -25,6 +26,7 @@ String JumbleGen::scrambleWord(const char* word) {
 }
 
 void JumbleGen::generate(JumbleDifficulty difficulty) {
+    _difficulty = difficulty;
     size_t startIdx = 0;
     size_t count = 100;
     if (difficulty == JUMBLE_MEDIUM) {
@@ -56,13 +58,21 @@ void JumbleGen::generate(JumbleDifficulty difficulty) {
 }
 
 void JumbleGen::printToReceipt(EscPosPrinter& printer) {
+    printer.setAlign(ALIGN_CENTER);
     printer.setBold(true);
     printer.println("--- JUMBLE ---");
     printer.setBold(false);
-    printer.println("DIFFICULTY: MEDIUM");
+    if (_difficulty == JUMBLE_EASY) {
+        printer.println("DIFFICULTY: EASY");
+    } else if (_difficulty == JUMBLE_HARD) {
+        printer.println("DIFFICULTY: HARD");
+    } else {
+        printer.println("DIFFICULTY: MEDIUM");
+    }
     printer.println("Unscramble each word, then use the circled");
     printer.println("letters to solve the riddle.");
     printer.println("");
+    printer.setAlign(ALIGN_LEFT);
 
     for (uint8_t i = 0; i < _numWords; i++) {
         const JumbleItem& item = _words[i];
@@ -94,3 +104,77 @@ void JumbleGen::printToReceipt(EscPosPrinter& printer) {
     printer.println("A: _________________________________________");
     printer.println("");
 }
+
+bool JumbleGen::printRasterToReceipt(EscPosPrinter& printer) {
+    printer.setAlign(ALIGN_CENTER);
+    printer.setBold(true);
+    printer.println("--- JUMBLE ---");
+    printer.setBold(false);
+    if (_difficulty == JUMBLE_EASY) {
+        printer.println("DIFFICULTY: EASY");
+    } else if (_difficulty == JUMBLE_HARD) {
+        printer.println("DIFFICULTY: HARD");
+    } else {
+        printer.println("DIFFICULTY: MEDIUM");
+    }
+    printer.println("Unscramble each word, then use the circled");
+    printer.println("letters to solve the riddle.");
+    printer.println("");
+    printer.setAlign(ALIGN_LEFT);
+
+    const int16_t padding = 24;
+    const int16_t rowH = 48;
+    const int16_t totalH = padding + _numWords * rowH + padding;
+
+    ThermalCanvas canvas;
+    if (!canvas.begin(totalH)) {
+        return false;
+    }
+
+    for (uint8_t i = 0; i < _numWords; i++) {
+        const JumbleItem& item = _words[i];
+        int16_t y = padding + i * rowH;
+
+        // Scrambled word text on left
+        canvas.drawText(padding, y + 10, item.scrambled.c_str(), 3);
+
+        // Letter boxes / circles in middle
+        int16_t slotStartX = padding + 180;
+        int16_t boxSize = 28;
+        for (size_t charIdx = 0; charIdx < item.original.length(); charIdx++) {
+            int16_t bx = slotStartX + charIdx * (boxSize + 8);
+            bool isCircled = false;
+            for (uint8_t c = 0; c < item.numCircles; c++) {
+                if (item.circleIndices[c] == charIdx) {
+                    isCircled = true;
+                    break;
+                }
+            }
+            if (isCircled) {
+                canvas.drawCircle(bx + boxSize / 2, y + 8 + boxSize / 2, boxSize / 2, 2);
+            } else {
+                canvas.drawRect(bx, y + 8, boxSize, boxSize, 2);
+            }
+        }
+
+        // Handwriting underline line on right
+        int16_t lineStartX = slotStartX + item.original.length() * (boxSize + 8) + 16;
+        if (lineStartX < THERMAL_CANVAS_WIDTH - padding) {
+            canvas.drawHLine(lineStartX, y + 36, THERMAL_CANVAS_WIDTH - padding - lineStartX, 2);
+        }
+    }
+
+    bool ok = canvas.printTo(printer);
+    canvas.end();
+
+    if (ok) {
+        printer.println("");
+        printer.println("Arrange the circled letters to answer this riddle:");
+        printer.println(String("Q: \"") + _riddle + "\"");
+        printer.println("A: _________________________________________");
+        printer.println("");
+    }
+
+    return ok;
+}
+

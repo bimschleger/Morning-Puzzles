@@ -1,6 +1,7 @@
 #include "WordSearchGen.h"
 #include "WordSearchDataset.h"
 #include "EscPosPrinter.h"
+#include "ThermalCanvas.h"
 
 WordSearchGen::WordSearchGen() : _currentTheme("General") {
     memset(_grid, ' ', sizeof(_grid));
@@ -142,3 +143,54 @@ void WordSearchGen::printToReceipt(EscPosPrinter& printer) {
     }
     printer.println("");
 }
+
+bool WordSearchGen::printRasterToReceipt(EscPosPrinter& printer) {
+    printer.setAlign(ALIGN_CENTER);
+    printer.setBold(true);
+    printer.println("--- SEARCH ---");
+    printer.setBold(false);
+    printer.println(String("Find all ") + _placedWords.size() + " hidden words listed below.");
+    printer.println("");
+    printer.setAlign(ALIGN_LEFT);
+
+    const int16_t padding = 24;
+    const int16_t boardSize = THERMAL_CANVAS_WIDTH - padding * 2;
+    const int16_t cellSize = boardSize / GRID_SIZE;
+    const int16_t gridH = cellSize * GRID_SIZE;
+    const int16_t totalH = padding + gridH + padding;
+
+    ThermalCanvas canvas;
+    if (!canvas.begin(totalH)) {
+        return false;
+    }
+
+    // Outer border
+    canvas.drawRect(padding, padding, gridH, gridH, 3);
+
+    // Letter matrix
+    for (uint8_t r = 0; r < GRID_SIZE; r++) {
+        for (uint8_t c = 0; c < GRID_SIZE; c++) {
+            char letter = _grid[r][c];
+            int16_t cx = padding + c * cellSize + (cellSize - 12) / 2;
+            int16_t cy = padding + r * cellSize + (cellSize - 14) / 2;
+            canvas.drawChar(cx, cy, letter, 2);
+        }
+    }
+
+    bool ok = canvas.printTo(printer);
+    canvas.end();
+
+    if (ok) {
+        printer.println("");
+        printer.println(String("Theme: ") + _currentTheme);
+        for (size_t i = 0; i < _placedWords.size(); i += 2) {
+            String col1 = "[ ] " + _placedWords[i].word;
+            String col2 = (i + 1 < _placedWords.size()) ? ("[ ] " + _placedWords[i + 1].word) : "";
+            printer.printKeyValue(col1, col2, 44);
+        }
+        printer.println("");
+    }
+
+    return ok;
+}
+

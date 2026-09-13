@@ -1,5 +1,6 @@
 #include "SudokuGen.h"
 #include "../printer/EscPosPrinter.h"
+#include "../printer/ThermalCanvas.h"
 
 SudokuGen::SudokuGen() : _cluesCount(81) {
     memset(_solution, 0, sizeof(_solution));
@@ -145,3 +146,52 @@ void SudokuGen::printToReceipt(EscPosPrinter& printer, SudokuDifficulty diff) {
     printer.println("   +-------+-------+-------+");
     printer.println("");
 }
+
+bool SudokuGen::printRasterToReceipt(EscPosPrinter& printer, SudokuDifficulty diff) {
+    const char* diffStr = (diff == SUDOKU_EASY) ? "EASY" : ((diff == SUDOKU_HARD) ? "HARD" : "MEDIUM");
+
+    printer.setAlign(ALIGN_CENTER);
+    printer.setBold(true);
+    printer.println("--- SUDOKU ---");
+    printer.setBold(false);
+    printer.println(String("DIFFICULTY: ") + diffStr);
+    printer.println("Fill every row, column, and 3x3 box with digits");
+    printer.println("1-9 without repeating.");
+    printer.println("");
+    printer.setAlign(ALIGN_LEFT);
+
+    const int16_t padding = 24;
+    const int16_t boardSize = THERMAL_CANVAS_WIDTH - padding * 2; // 528
+    const int16_t cellSize = boardSize / 9; // 58
+    const int16_t totalH = padding + cellSize * 9 + padding; // 570
+
+    ThermalCanvas canvas;
+    if (!canvas.begin(totalH)) {
+        return false;
+    }
+
+    // Grid lines
+    for (int i = 0; i <= 9; i++) {
+        int16_t pos = padding + i * cellSize;
+        bool isMajor = (i % 3 == 0);
+        canvas.drawHLine(padding, pos, cellSize * 9, isMajor ? 4 : 1);
+        canvas.drawVLine(pos, padding, cellSize * 9, isMajor ? 4 : 1);
+    }
+
+    // Digits
+    for (uint8_t r = 0; r < 9; r++) {
+        for (uint8_t c = 0; c < 9; c++) {
+            uint8_t val = _puzzle[r][c];
+            if (val != 0) {
+                int16_t cx = padding + c * cellSize + (cellSize - 18) / 2;
+                int16_t cy = padding + r * cellSize + (cellSize - 21) / 2;
+                canvas.drawChar(cx, cy, '0' + val, 3);
+            }
+        }
+    }
+
+    bool ok = canvas.printTo(printer);
+    canvas.end();
+    return ok;
+}
+

@@ -16,6 +16,7 @@ public:
 
     void generate(WheelDifficulty difficulty = WHEEL_MEDIUM);
     void printToReceipt(EscPosPrinter& printer);
+    bool printRasterToReceipt(EscPosPrinter& printer);
 
     char getCenterLetter() const { return _center; }
     const char* getOuterLetters() const { return _outer; }

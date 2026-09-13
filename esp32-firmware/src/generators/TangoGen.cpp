@@ -1,5 +1,6 @@
 #include "TangoGen.h"
 #include "../printer/EscPosPrinter.h"
+#include "../printer/ThermalCanvas.h"
 #include <string.h>
 
 static const uint8_t TANGO_VALID_LINES_6[14] = {
@@ -425,3 +426,84 @@ void TangoGen::printToReceipt(EscPosPrinter& printer, TangoDifficulty diff) {
     }
     printer.println("");
 }
+
+bool TangoGen::printRasterToReceipt(EscPosPrinter& printer, TangoDifficulty diff) {
+    const char* diffStr = (diff == TANGO_EASY) ? "EASY" : ((diff == TANGO_HARD) ? "HARD" : "MEDIUM");
+
+    printer.setAlign(ALIGN_CENTER);
+    printer.setBold(true);
+    printer.println("--- TANGO ---");
+    printer.setBold(false);
+    printer.println(String("DIFFICULTY: ") + diffStr);
+    if (_size == 6) {
+        printer.println("Fill each line with three 0s and three 1s");
+    } else {
+        printer.println("Fill each line with four 0s and four 1s");
+    }
+    printer.println("without trios; = means same, x means opposite.");
+    printer.println("");
+    printer.setAlign(ALIGN_LEFT);
+
+    const int16_t padding = 24;
+    const int16_t boardSize = THERMAL_CANVAS_WIDTH - padding * 2;
+    const int16_t cellSize = boardSize / _size;
+    const int16_t totalH = padding + cellSize * _size + padding;
+
+    ThermalCanvas canvas;
+    if (!canvas.begin(totalH)) {
+        return false;
+    }
+
+    // Outer grid border
+    canvas.drawRect(padding, padding, cellSize * _size, cellSize * _size, 4);
+
+    // Inner lines
+    for (uint8_t i = 1; i < _size; i++) {
+        int16_t pos = padding + i * cellSize;
+        canvas.drawHLine(padding, pos, cellSize * _size, 1);
+        canvas.drawVLine(pos, padding, cellSize * _size, 1);
+    }
+
+    // Digits inside cells
+    for (uint8_t r = 0; r < _size; r++) {
+        for (uint8_t c = 0; c < _size; c++) {
+            int8_t val = _puzzle[r][c];
+            if (val == 0 || val == 1) {
+                int16_t cx = padding + c * cellSize + (cellSize - 18) / 2;
+                int16_t cy = padding + r * cellSize + (cellSize - 21) / 2;
+                canvas.drawChar(cx, cy, '0' + val, 3);
+            }
+        }
+    }
+
+    // Horizontal edge markers (between cell c and c+1)
+    for (uint8_t r = 0; r < _size; r++) {
+        for (uint8_t c = 0; c < _size - 1; c++) {
+            uint8_t e = _edgesH[r][c];
+            if (e == 1 || e == 2) {
+                int16_t x = padding + (c + 1) * cellSize;
+                int16_t y = padding + r * cellSize + cellSize / 2;
+                canvas.fillRect(x - 8, y - 8, 16, 16, 0);
+                canvas.drawChar(x - 5, y - 7, (e == 1) ? '=' : 'X', 2, 1);
+            }
+        }
+    }
+
+    // Vertical edge markers (between row r and r+1)
+    for (uint8_t r = 0; r < _size - 1; r++) {
+        for (uint8_t c = 0; c < _size; c++) {
+            uint8_t e = _edgesV[r][c];
+            if (e == 1 || e == 2) {
+                int16_t x = padding + c * cellSize + cellSize / 2;
+                int16_t y = padding + (r + 1) * cellSize;
+                canvas.fillRect(x - 8, y - 8, 16, 16, 0);
+                canvas.drawChar(x - 5, y - 7, (e == 1) ? '=' : 'X', 2, 1);
+            }
+        }
+    }
+
+    bool ok = canvas.printTo(printer);
+    canvas.end();
+    return ok;
+}
+

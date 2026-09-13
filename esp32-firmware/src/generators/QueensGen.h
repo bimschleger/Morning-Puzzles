@@ -25,6 +25,7 @@ public:
 
     void generate(QueensDifficulty difficulty = QUEENS_MEDIUM);
     void printToReceipt(EscPosPrinter& printer);
+    bool printRasterToReceipt(EscPosPrinter& printer);
 
     bool validate();
 

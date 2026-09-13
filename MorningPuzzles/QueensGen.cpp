@@ -1,5 +1,6 @@
 #include "QueensGen.h"
 #include "EscPosPrinter.h"
+#include "ThermalCanvas.h"
 #include <queue>
 #include <algorithm>
 #include <cmath>
@@ -395,3 +396,65 @@ void QueensGen::printToReceipt(EscPosPrinter& printer) {
     }
     printer.println("");
 }
+
+bool QueensGen::printRasterToReceipt(EscPosPrinter& printer) {
+    const char* diffStr = (_size <= 6) ? "EASY" : ((_starsPerUnit > 1) ? "HARD" : "MEDIUM");
+    uint8_t starsCount = (_starsPerUnit > 1 || diffStr[0] == 'H') ? 2 : 1;
+
+    printer.setAlign(ALIGN_CENTER);
+    printer.setBold(true);
+    printer.println("--- STARS ---");
+    printer.setBold(false);
+    printer.println(String("DIFFICULTY: ") + diffStr);
+    if (starsCount == 1) {
+        printer.println("Place 1 star in each row, column, and region");
+    } else {
+        printer.println("Place 2 stars in each row, column, and region");
+    }
+    printer.println("with no stars touching, even diagonally.");
+    printer.println("");
+    printer.setAlign(ALIGN_LEFT);
+
+    const int16_t padding = 24;
+    const int16_t boardSize = THERMAL_CANVAS_WIDTH - padding * 2;
+    const int16_t cellSize = boardSize / _size;
+    const int16_t totalH = padding + cellSize * _size + padding;
+
+    ThermalCanvas canvas;
+    if (!canvas.begin(totalH)) {
+        return false;
+    }
+
+    // Shading per region
+    for (uint8_t r = 0; r < _size; r++) {
+        for (uint8_t c = 0; c < _size; c++) {
+            int8_t reg = _regions[r][c];
+            if (reg >= 0) {
+                int16_t x0 = padding + c * cellSize;
+                int16_t y0 = padding + r * cellSize;
+                canvas.fillHatch(x0, y0, cellSize, cellSize, reg);
+            }
+        }
+    }
+
+    // Region boundaries and grid lines
+    for (uint8_t r = 0; r < _size; r++) {
+        for (uint8_t c = 0; c < _size; c++) {
+            int8_t reg = _regions[r][c];
+            int16_t x0 = padding + c * cellSize;
+            int16_t y0 = padding + r * cellSize;
+            bool isBottom = (r == _size - 1) || (r + 1 < _size && _regions[r + 1][c] != reg);
+            canvas.drawHLine(x0, y0 + cellSize, cellSize, isBottom ? 4 : 1);
+
+            bool isRight = (c == _size - 1) || (c + 1 < _size && _regions[r][c + 1] != reg);
+            canvas.drawVLine(x0 + cellSize, y0, cellSize, isRight ? 4 : 1);
+        }
+    }
+
+    canvas.drawRect(padding, padding, cellSize * _size, cellSize * _size, 5);
+
+    bool ok = canvas.printTo(printer);
+    canvas.end();
+    return ok;
+}
+

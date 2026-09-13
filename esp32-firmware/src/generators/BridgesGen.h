@@ -28,6 +28,7 @@ public:
 
     void generate(BridgesDifficulty difficulty = BRIDGES_MEDIUM);
     void printToReceipt(EscPosPrinter& printer, BridgesDifficulty diff);
+    bool printRasterToReceipt(EscPosPrinter& printer, BridgesDifficulty diff);
 
     uint8_t getSize() const { return _size; }
     uint8_t getIslandCount() const { return _islandCount; }

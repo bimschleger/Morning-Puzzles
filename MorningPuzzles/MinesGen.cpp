@@ -1,5 +1,6 @@
 #include "MinesGen.h"
 #include "EscPosPrinter.h"
+#include "ThermalCanvas.h"
 #include <string.h>
 
 static void shuffleCoords(uint8_t* arr, uint8_t n) {
@@ -307,3 +308,67 @@ void MinesGen::printToReceipt(EscPosPrinter& printer, MinesDifficulty diff) {
     }
     printer.println("");
 }
+
+bool MinesGen::printRasterToReceipt(EscPosPrinter& printer, MinesDifficulty diff) {
+    const char* diffStr = (diff == MINES_EASY) ? "EASY" : ((diff == MINES_HARD) ? "HARD" : "MEDIUM");
+
+    printer.setAlign(ALIGN_CENTER);
+    printer.setBold(true);
+    printer.println("--- MINES ---");
+    printer.setBold(false);
+    printer.println(String("DIFFICULTY: ") + diffStr);
+    printer.println(String("Deduce all ") + String(_totalMines) + " hidden mines using");
+    printer.println("the adjacent numbered clues.");
+    printer.println("");
+    printer.setAlign(ALIGN_LEFT);
+
+    const int16_t padding = 24;
+    const int16_t innerWidth = THERMAL_CANVAS_WIDTH - padding * 2;
+    const int16_t cellSize = innerWidth / 8;
+    const int16_t boardH = cellSize * 8;
+    const int16_t badgeH = 36;
+    const int16_t totalH = 12 + badgeH + 12 + boardH + 12;
+
+    ThermalCanvas canvas;
+    if (!canvas.begin(totalH)) {
+        return false;
+    }
+
+    // Badge
+    canvas.drawRect(padding, 12, innerWidth, badgeH, 3);
+    char badgeBuf[32];
+    snprintf(badgeBuf, sizeof(badgeBuf), "TOTAL MINES: %d", _totalMines);
+    canvas.drawCenteredText(18, badgeBuf, 2);
+
+    int16_t boardY = 12 + badgeH + 12;
+
+    // Outer grid
+    canvas.drawRect(padding, boardY, cellSize * 8, cellSize * 8, 4);
+
+    // Inner lines
+    for (uint8_t i = 1; i < 8; i++) {
+        canvas.drawHLine(padding, boardY + i * cellSize, cellSize * 8, 1);
+        canvas.drawVLine(padding + i * cellSize, boardY, cellSize * 8, 1);
+    }
+
+    // Numbers or unrevealed dots
+    for (uint8_t r = 0; r < 8; r++) {
+        for (uint8_t c = 0; c < 8; c++) {
+            int8_t val = _puzzle[r][c];
+            if (val >= 0) {
+                int16_t cx = padding + c * cellSize + (cellSize - 18) / 2;
+                int16_t cy = boardY + r * cellSize + (cellSize - 21) / 2;
+                canvas.drawChar(cx, cy, '0' + val, 3);
+            } else {
+                int16_t dotX = padding + c * cellSize + cellSize / 2;
+                int16_t dotY = boardY + r * cellSize + cellSize / 2;
+                canvas.fillCircle(dotX, dotY, 2);
+            }
+        }
+    }
+
+    bool ok = canvas.printTo(printer);
+    canvas.end();
+    return ok;
+}
+

@@ -1,5 +1,6 @@
 #include "BridgesGen.h"
 #include "EscPosPrinter.h"
+#include "ThermalCanvas.h"
 #include <string.h>
 
 static void shuffleInts(uint8_t* arr, uint8_t n) {
@@ -222,3 +223,54 @@ void BridgesGen::printToReceipt(EscPosPrinter& printer, BridgesDifficulty diff) 
     }
     printer.println("");
 }
+
+bool BridgesGen::printRasterToReceipt(EscPosPrinter& printer, BridgesDifficulty diff) {
+    const char* diffStr = (diff == BRIDGES_EASY) ? "EASY" : ((diff == BRIDGES_HARD) ? "HARD" : "MEDIUM");
+
+    printer.setAlign(ALIGN_CENTER);
+    printer.setBold(true);
+    printer.println("--- BRIDGES ---");
+    printer.setBold(false);
+    printer.println(String("DIFFICULTY: ") + diffStr);
+    printer.println("Connect all islands into one network using");
+    printer.println("1 or 2 lines matching each island's number.");
+    printer.println("");
+    printer.setAlign(ALIGN_LEFT);
+
+    const int16_t padding = 32;
+    const int16_t boardSize = THERMAL_CANVAS_WIDTH - padding * 2;
+    const int16_t step = (_size > 1) ? (boardSize / (_size - 1)) : boardSize;
+    const int16_t totalH = padding + boardSize + padding;
+
+    ThermalCanvas canvas;
+    if (!canvas.begin(totalH)) {
+        return false;
+    }
+
+    // Corner framing brackets
+    int16_t cornerLen = 16;
+    canvas.drawHLine(padding, padding, cornerLen, 2);
+    canvas.drawVLine(padding, padding, cornerLen, 2);
+    canvas.drawHLine(padding + boardSize - cornerLen, padding, cornerLen, 2);
+    canvas.drawVLine(padding + boardSize, padding, cornerLen, 2);
+    canvas.drawHLine(padding, padding + boardSize, cornerLen, 2);
+    canvas.drawVLine(padding, padding + boardSize - cornerLen, cornerLen, 2);
+    canvas.drawHLine(padding + boardSize - cornerLen, padding + boardSize, cornerLen, 2);
+    canvas.drawVLine(padding + boardSize, padding + boardSize - cornerLen, cornerLen, 2);
+
+    // Islands
+    int16_t islandRadius = max((int16_t)18, min((int16_t)24, (int16_t)(step / 3)));
+    for (uint8_t i = 0; i < _islandCount; i++) {
+        int16_t cx = padding + _islands[i].c * step;
+        int16_t cy = padding + _islands[i].r * step;
+
+        canvas.fillCircle(cx, cy, islandRadius, 0); // clear white interior
+        canvas.drawCircle(cx, cy, islandRadius, 2, 1); // circle border
+        canvas.drawChar(cx - 5, cy - 7, '0' + _islands[i].count, 2, 1);
+    }
+
+    bool ok = canvas.printTo(printer);
+    canvas.end();
+    return ok;
+}
+

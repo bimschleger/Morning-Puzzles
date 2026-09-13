@@ -15,6 +15,17 @@
 #define memcpy_P memcpy
 #define pgm_read_byte(addr) (*(const uint8_t*)(addr))
 #define pgm_read_word(addr) (*(const uint16_t*)(addr))
+
+#ifndef min
+#define min(a,b) (((a)<(b))?(a):(b))
+#endif
+#ifndef max
+#define max(a,b) (((a)>(b))?(a):(b))
+#endif
+#ifndef abs
+#define abs(x) (((x)>0)?(x):(-(x)))
+#endif
+
 class String : public std::string {
 public:
     String() : std::string() {}

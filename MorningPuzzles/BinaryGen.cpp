@@ -1,5 +1,6 @@
 #include "BinaryGen.h"
 #include "EscPosPrinter.h"
+#include "ThermalCanvas.h"
 #include <string.h>
 
 static const uint8_t VALID_LINES_6[14] = {
@@ -313,3 +314,60 @@ void BinaryGen::printToReceipt(EscPosPrinter& printer, BinaryDifficulty diff) {
     }
     printer.println("");
 }
+
+bool BinaryGen::printRasterToReceipt(EscPosPrinter& printer, BinaryDifficulty diff) {
+    const char* diffStr = (diff == BINARY_EASY) ? "EASY" : ((diff == BINARY_HARD) ? "HARD" : "MEDIUM");
+
+    printer.setAlign(ALIGN_CENTER);
+    printer.setBold(true);
+    printer.println("--- BINARY ---");
+    printer.setBold(false);
+    printer.println(String("DIFFICULTY: ") + diffStr);
+    if (_size == 6) {
+        printer.println("Fill each row and column with three 0s and");
+        printer.println("three 1s, with no more than two consecutive");
+    } else {
+        printer.println("Fill each row and column with four 0s and");
+        printer.println("four 1s, with no more than two consecutive");
+    }
+    printer.println("of each type.");
+    printer.println("");
+    printer.setAlign(ALIGN_LEFT);
+
+    const int16_t padding = 24;
+    const int16_t boardSize = THERMAL_CANVAS_WIDTH - padding * 2;
+    const int16_t cellSize = boardSize / _size;
+    const int16_t totalH = padding + cellSize * _size + padding;
+
+    ThermalCanvas canvas;
+    if (!canvas.begin(totalH)) {
+        return false;
+    }
+
+    // Outer border
+    canvas.drawRect(padding, padding, cellSize * _size, cellSize * _size, 4);
+
+    // Inner lines
+    for (uint8_t i = 1; i < _size; i++) {
+        int16_t pos = padding + i * cellSize;
+        canvas.drawHLine(padding, pos, cellSize * _size, 2);
+        canvas.drawVLine(pos, padding, cellSize * _size, 2);
+    }
+
+    // Numbers
+    for (uint8_t r = 0; r < _size; r++) {
+        for (uint8_t c = 0; c < _size; c++) {
+            int8_t val = _puzzle[r][c];
+            if (val != -1) {
+                int16_t cx = padding + c * cellSize + (cellSize - 18) / 2;
+                int16_t cy = padding + r * cellSize + (cellSize - 21) / 2;
+                canvas.drawChar(cx, cy, '0' + val, 3);
+            }
+        }
+    }
+
+    bool ok = canvas.printTo(printer);
+    canvas.end();
+    return ok;
+}
+

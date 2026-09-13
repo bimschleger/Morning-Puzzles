@@ -30,7 +30,13 @@ public:
     }
     void feed(uint8_t n = 1) {}
     void cut(bool) { std::cout << "[PRINTER: CUT PAPER]" << std::endl; }
+    void printRasterBitmap(const uint8_t* bitmapData, uint16_t widthDots, uint16_t heightDots) override {
+        std::cout << "[PRINTER: RASTER BITMAP " << widthDots << "x" << heightDots << " dots (" << ((widthDots + 7) / 8 * heightDots) << " bytes)]" << std::endl;
+    }
 };
+
+#include "../src/printer/ThermalCanvas.h"
+#include "../src/printer/ThermalCanvas.cpp"
 
 #include "../src/generators/SudokuGen.h"
 #include "../src/generators/SudokuGen.cpp"
@@ -105,6 +111,14 @@ int main() {
             std::cerr << "FAILED on Button Press #" << press << std::endl;
             return 1;
         }
+    }
+
+    // Test 4: Generate Random Difficulty per game (GRADE_RANDOM)
+    std::cout << "\n>>> TEST 4: GENERATE RANDOM DIFFICULTY PER GAME (GRADE_RANDOM) <<<" << std::endl;
+    bool okRandom = composer.generateAndPrintReceipt(printer, "Thursday, September 17, 2026", GRADE_RANDOM);
+    if (!okRandom) {
+        std::cerr << "FAILED on Random Grade" << std::endl;
+        return 1;
     }
 
     std::cout << "\n==================================================" << std::endl;

@@ -19,6 +19,7 @@ public:
 
     // Prints formatted 80mm receipt section
     void printToReceipt(EscPosPrinter& printer, TangoDifficulty diff);
+    bool printRasterToReceipt(EscPosPrinter& printer, TangoDifficulty diff);
 
     int8_t getCell(uint8_t r, uint8_t c) const { return _puzzle[r][c]; }
     uint8_t getEdgeH(uint8_t r, uint8_t c) const { return _edgesH[r][c]; }

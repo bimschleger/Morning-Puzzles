@@ -23,6 +23,7 @@ public:
 
     void generate(JumbleDifficulty difficulty = JUMBLE_MEDIUM);
     void printToReceipt(EscPosPrinter& printer);
+    bool printRasterToReceipt(EscPosPrinter& printer);
 
     const char* getRiddle() const { return _riddle; }
     const char* getAnswer() const { return _answer; }
@@ -35,6 +36,7 @@ private:
     uint8_t _numWords;
     const char* _riddle;
     const char* _answer;
+    JumbleDifficulty _difficulty;
 
     String scrambleWord(const char* word);
 };

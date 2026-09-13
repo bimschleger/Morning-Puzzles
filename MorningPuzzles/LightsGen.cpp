@@ -1,5 +1,6 @@
 #include "LightsGen.h"
 #include "EscPosPrinter.h"
+#include "ThermalCanvas.h"
 #include <string.h>
 
 static void shuffleLightsIndices(uint8_t* arr, uint8_t n) {
@@ -393,3 +394,60 @@ void LightsGen::printToReceipt(EscPosPrinter& printer, LightsDifficulty diff) {
     }
     printer.println("");
 }
+
+bool LightsGen::printRasterToReceipt(EscPosPrinter& printer, LightsDifficulty diff) {
+    const char* diffStr = (diff == LIGHTS_EASY) ? "EASY" : ((diff == LIGHTS_HARD) ? "HARD" : ((diff == LIGHTS_EXTREME) ? "EXTREME" : "MEDIUM"));
+
+    printer.setAlign(ALIGN_CENTER);
+    printer.setBold(true);
+    printer.println("--- LIGHTS ---");
+    printer.setBold(false);
+    printer.println(String("DIFFICULTY: ") + diffStr);
+    printer.println(String("Place ") + String(_totalBulbs) + " bulbs to light all corridors without");
+    printer.println("bulbs shining on each other or exceeding numbers.");
+    printer.println("");
+    printer.setAlign(ALIGN_LEFT);
+
+    const int16_t padding = 24;
+    const int16_t innerWidth = THERMAL_CANVAS_WIDTH - padding * 2;
+    const int16_t cellSize = innerWidth / _size;
+    const int16_t totalH = padding + cellSize * _size + padding;
+
+    ThermalCanvas canvas;
+    if (!canvas.begin(totalH)) {
+        return false;
+    }
+
+    // Outer grid border
+    canvas.drawRect(padding, padding, cellSize * _size, cellSize * _size, 4);
+
+    // Inner grid lines
+    for (uint8_t i = 1; i < _size; i++) {
+        canvas.drawHLine(padding, padding + i * cellSize, cellSize * _size, 1);
+        canvas.drawVLine(padding + i * cellSize, padding, cellSize * _size, 1);
+    }
+
+    // Cell contents: black wall blocks or empty
+    for (uint8_t r = 0; r < _size; r++) {
+        for (uint8_t c = 0; c < _size; c++) {
+            int8_t val = _puzzle[r][c];
+            int16_t x0 = padding + c * cellSize;
+            int16_t y0 = padding + r * cellSize;
+            if (val == -2) {
+                // Black wall without number
+                canvas.fillRect(x0, y0, cellSize, cellSize, 1);
+            } else if (val >= 0) {
+                // Black wall with white number
+                canvas.fillRect(x0, y0, cellSize, cellSize, 1);
+                int16_t cx = x0 + (cellSize - 18) / 2;
+                int16_t cy = y0 + (cellSize - 21) / 2;
+                canvas.drawChar(cx, cy, '0' + val, 3, 0);
+            }
+        }
+    }
+
+    bool ok = canvas.printTo(printer);
+    canvas.end();
+    return ok;
+}
+

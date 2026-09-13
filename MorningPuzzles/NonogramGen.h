@@ -19,6 +19,7 @@ public:
 
     void generate(NonogramDifficulty difficulty = NONO_EASY);
     void printToReceipt(EscPosPrinter& printer);
+    bool printRasterToReceipt(EscPosPrinter& printer);
 
     uint8_t getSize() const { return _size; }
 

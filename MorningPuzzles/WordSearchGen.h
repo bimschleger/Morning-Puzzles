@@ -27,6 +27,7 @@ public:
 
     void generate(WordSearchDifficulty difficulty = WS_MEDIUM, int themeIndex = -1);
     void printToReceipt(EscPosPrinter& printer);
+    bool printRasterToReceipt(EscPosPrinter& printer);
 
     const char* getThemeName() const { return _currentTheme; }
     size_t getWordCount() const { return _placedWords.size(); }

@@ -19,6 +19,7 @@ public:
 
     // Prints formatted 80mm receipt section
     void printToReceipt(EscPosPrinter& printer, SudokuDifficulty diff);
+    bool printRasterToReceipt(EscPosPrinter& printer, SudokuDifficulty diff);
 
     uint8_t getCell(uint8_t r, uint8_t c) const { return _puzzle[r][c]; }
     uint8_t getCluesCount() const { return _cluesCount; }

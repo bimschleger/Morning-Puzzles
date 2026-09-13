@@ -16,6 +16,7 @@ public:
 
     void generate(TentsDifficulty difficulty = TENTS_MEDIUM);
     void printToReceipt(EscPosPrinter& printer, TentsDifficulty diff);
+    bool printRasterToReceipt(EscPosPrinter& printer, TentsDifficulty diff);
 
     uint8_t getSize() const { return _size; }
     uint8_t getTreeCount() const { return _treeCount; }

@@ -62,7 +62,7 @@ try:
     @app.get("/api/v1/daily-print")
     def get_daily_print(
         format: str = Query("escpos", regex="^(escpos|json)$"),
-        difficulty: str = Query("medium", regex="^(easy|medium|hard)$"),
+        difficulty: str = Query("medium", regex="^(easy|medium|hard|random)$"),
         style: str = Query("hybrid", regex="^(hybrid|text)$")
     ):
         bundle = generate_daily_bundle(difficulty=difficulty)

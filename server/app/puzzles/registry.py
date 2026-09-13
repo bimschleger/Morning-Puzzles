@@ -5,6 +5,7 @@ the canonical daily sequence for receipt printing and bundle composition.
 """
 
 import datetime
+import random
 from typing import Dict, List, Optional, Any
 from .base import BasePuzzle, BasePuzzleResult
 from .sudoku import SudokuPuzzle
@@ -67,12 +68,15 @@ class PuzzleRegistry:
         diff_lower = difficulty.lower()
 
         for plugin in self.get_all():
-            p_diff = diff_lower
-            # Special difficulty adjustments matching legacy bundle generation
-            if plugin.puzzle_id == "killer" and diff_lower == "hard":
-                p_diff = "extreme"
-            elif plugin.puzzle_id == "nonogram":
-                p_diff = "easy" if diff_lower == "easy" else "medium"
+            if diff_lower == "random":
+                p_diff = random.choice(plugin.supported_difficulties)
+            else:
+                p_diff = diff_lower
+                # Special difficulty adjustments matching legacy bundle generation
+                if plugin.puzzle_id == "killer" and diff_lower == "hard":
+                    p_diff = "extreme"
+                elif plugin.puzzle_id == "nonogram":
+                    p_diff = "easy" if diff_lower == "easy" else "medium"
 
             result = plugin.generate(difficulty=p_diff)
             bundle[plugin.puzzle_id] = result.to_dict()

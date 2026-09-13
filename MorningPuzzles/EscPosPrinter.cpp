@@ -91,6 +91,7 @@ bool EscPosPrinter::connect() {
     _outputStream = nullptr;
     return false;
 #endif
+    return false;
 }
 
 void EscPosPrinter::disconnect() {

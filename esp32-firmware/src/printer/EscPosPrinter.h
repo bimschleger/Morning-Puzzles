@@ -53,7 +53,7 @@ public:
 
     // Raw byte stream & Raster Graphics
     size_t writeRaw(const uint8_t* buffer, size_t size);
-    void printRasterBitmap(const uint8_t* bitmapData, uint16_t widthDots, uint16_t heightDots);
+    virtual void printRasterBitmap(const uint8_t* bitmapData, uint16_t widthDots, uint16_t heightDots);
 
     // Diagnostic Self Test
     void printSelfTest(const String& ipAddress, const String& currentTimeStr);

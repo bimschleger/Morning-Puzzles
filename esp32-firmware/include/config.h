@@ -29,6 +29,15 @@
 #define PUZZLE_GRADE_CYCLE_ON_PRESS true    // Each hardware button press advances grade
 
 // -----------------------------------------------------------------------------
+// 2B. Print Presentation Style (Offline Appliance)
+// -----------------------------------------------------------------------------
+// STYLE_HYBRID = 1  (Text headers + on-device 1-bit raster graphics boards)
+// STYLE_ASCII  = 2  (Classic monospaced ASCII text grids)
+#define STYLE_HYBRID                1
+#define STYLE_ASCII                 2
+#define OFFLINE_PRINT_STYLE         STYLE_HYBRID
+
+// -----------------------------------------------------------------------------
 // 3. Daily Cron Schedule Settings (Every morning at 7:00 AM)
 // -----------------------------------------------------------------------------
 #define DAILY_PRINT_HOUR        7       // 7:00 AM

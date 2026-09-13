@@ -32,7 +32,7 @@ void blinkStatusLed(int count, int delayMs = 100) {
     }
 }
 
-void executePrintJob(PuzzleGrade grade = GRADE_ROTATING) {
+void executePrintJob(PuzzleGrade grade = GRADE_RANDOM) {
     Serial.println("\n========================================================");
     Serial.println(">>> STARTING MORNING PUZZLES 100% OFFLINE PRINT JOB <<<");
     Serial.printf(">>> Time: %s\n", timeManager.getFormattedTime().c_str());
@@ -41,7 +41,7 @@ void executePrintJob(PuzzleGrade grade = GRADE_ROTATING) {
 
     digitalWrite(STATUS_LED_PIN, HIGH);
 
-    // 100% Offline on-device generation across all 7 puzzles
+    // 100% Offline on-device generation across all 12 puzzles
     bool success = offlineComposer.generateAndPrintReceipt(
         printer, 
         timeManager.getFormattedTime("%A, %B %d, %Y"),
@@ -80,9 +80,9 @@ void handleButtonPress() {
                 timeManager.startSetupPortal();
             }
         } else if (duration > 80) {
-            // Short Press -> Instant On-Demand Print with a fresh grade!
-            Serial.println("[BTN] Hardware BOOT button pressed -> Generating & printing new grade of puzzles!");
-            executePrintJob(GRADE_ROTATING);
+            // Short Press -> Instant On-Demand Print with a fresh random difficulty for each game!
+            Serial.println("[BTN] Hardware BOOT button pressed -> Generating & printing random difficulty puzzles!");
+            executePrintJob(GRADE_RANDOM);
         }
         delay(50); // debounce
     }
@@ -93,9 +93,9 @@ void handleButtonPress() {
 void handleSerialCommands() {
     if (Serial.available() > 0) {
         char cmd = Serial.read();
-        if (cmd == 'p' || cmd == 'P') {
-            Serial.println("[CMD] Manual print trigger (Rotating Grade).");
-            executePrintJob(GRADE_ROTATING);
+        if (cmd == 'p' || cmd == 'P' || cmd == 'r' || cmd == 'R') {
+            Serial.println("[CMD] Manual print trigger (Random Difficulty per game).");
+            executePrintJob(GRADE_RANDOM);
         } else if (cmd == '1') {
             Serial.println("[CMD] Generating EASY grade puzzle bundle...");
             executePrintJob(GRADE_EASY);
@@ -197,14 +197,14 @@ void setup() {
     Serial.println("2. Long-press BOOT button (3 sec)   -> Starts local Wi-Fi hotspot to sync time from phone!");
     Serial.printf("3. Daily scheduled auto-print       -> Every morning at %02d:%02d\n", DAILY_PRINT_HOUR, DAILY_PRINT_MINUTE);
     Serial.println("4. Auto-print on Printer Power-ON   -> Flip printer switch ON to print automatically!");
-    Serial.println("5. Serial Monitor (115200 baud)     -> [P]rint | [1] Easy | [2] Med | [3] Hard | [G]rade | [S]tatus\n");
+    Serial.println("5. Serial Monitor (115200 baud)     -> [P]rint / [R]andom | [1] Easy | [2] Med | [3] Hard | [G]rade | [S]tatus\n");
 
 #if AUTO_PRINT_ON_BOOT
     Serial.println("[MAIN] AUTO_PRINT_ON_BOOT active. Checking printer readiness...");
     delay(PRINTER_READY_SETTLE_MS);
     if (printer.isPrinterOnline(1000)) {
         Serial.println("[MAIN] Printer online at boot -> Executing auto-print job!");
-        executePrintJob(GRADE_ROTATING);
+        executePrintJob(GRADE_RANDOM);
     } else {
         Serial.println("[MAIN] Printer not reachable yet at boot. Will auto-print when printer switch is turned ON.");
     }
@@ -237,7 +237,7 @@ void checkPrinterPowerTransition() {
         Serial.println("[PRINTER] Waiting for thermal head homing and motor boot...");
         delay(PRINTER_READY_SETTLE_MS);
         Serial.println("[PRINTER] Starting automatic print job...");
-        executePrintJob(GRADE_ROTATING);
+        executePrintJob(GRADE_RANDOM);
     }
 
     lastPrinterOnline = isOnline;
@@ -257,7 +257,7 @@ void loop() {
     // 4. Check for daily morning 7:00 AM cron trigger
     if (timeManager.isCronTriggerTime(DAILY_PRINT_HOUR, DAILY_PRINT_MINUTE)) {
         Serial.println("[MAIN] 7:00 AM Morning Cron Trigger! Starting daily print job...");
-        executePrintJob(GRADE_ROTATING);
+        executePrintJob(GRADE_RANDOM);
     }
 
 #if AUTO_PRINT_ON_PRINTER_POWER
