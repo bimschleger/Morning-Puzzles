@@ -22,7 +22,8 @@ enum PuzzleGrade {
     GRADE_MEDIUM = 1,
     GRADE_HARD = 2,
     GRADE_ROTATING = 3,
-    GRADE_RANDOM = 4
+    GRADE_RANDOM = 4,
+    GRADE_EXTREME = 5
 };
 
 enum OfflinePuzzleType {
@@ -54,8 +55,11 @@ public:
     PuzzleGrade getCurrentGrade() const;
     const char* getGradeName(PuzzleGrade grade) const;
 
+    PuzzleGrade getGradeForSlot(uint8_t index, uint8_t totalCount) const;
+    bool supportsExtreme(OfflinePuzzleType type) const;
+
 private:
-    void printSinglePuzzle(EscPosPrinter& printer, OfflinePuzzleType type, bool useRaster);
+    void printSinglePuzzle(EscPosPrinter& printer, OfflinePuzzleType type, bool useRaster, PuzzleGrade grade = GRADE_MEDIUM);
 
     SudokuGen     _sudoku;
     WordSearchGen _wordSearch;

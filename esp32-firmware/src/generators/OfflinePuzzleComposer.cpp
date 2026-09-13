@@ -26,16 +26,29 @@ const char* OfflinePuzzleComposer::getGradeName(PuzzleGrade grade) const {
         case GRADE_HARD:     return "HARD";
         case GRADE_ROTATING: return "ROTATING";
         case GRADE_RANDOM:   return "RANDOM";
+        case GRADE_EXTREME:  return "EXTREME";
         case GRADE_MEDIUM:
         default:             return "MEDIUM";
     }
 }
 
-void OfflinePuzzleComposer::printSinglePuzzle(EscPosPrinter& printer, OfflinePuzzleType type, bool useRaster) {
-    int r = random(3);
+PuzzleGrade OfflinePuzzleComposer::getGradeForSlot(uint8_t index, uint8_t totalCount) const {
+    if (totalCount <= 1) return GRADE_MEDIUM;
+    float p = (float)index / (float)(totalCount - 1);
+    if (p < 0.25f) return GRADE_EASY;
+    if (p < 0.65f) return GRADE_MEDIUM;
+    if (p < 0.85f) return GRADE_HARD;
+    return GRADE_EXTREME;
+}
+
+bool OfflinePuzzleComposer::supportsExtreme(OfflinePuzzleType type) const {
+    return (type == PUZZLE_LIGHTS || type == PUZZLE_QUEENS);
+}
+
+void OfflinePuzzleComposer::printSinglePuzzle(EscPosPrinter& printer, OfflinePuzzleType type, bool useRaster, PuzzleGrade grade) {
     switch (type) {
         case PUZZLE_SUDOKU: {
-            SudokuDifficulty diff = (r == 0) ? SUDOKU_EASY : ((r == 1) ? SUDOKU_MEDIUM : SUDOKU_HARD);
+            SudokuDifficulty diff = (grade == GRADE_EASY) ? SUDOKU_EASY : ((grade == GRADE_HARD || grade == GRADE_EXTREME) ? SUDOKU_HARD : SUDOKU_MEDIUM);
             Serial.println("[COMPOSER] Generating Sudoku...");
             _sudoku.generate(diff);
             if (!useRaster || !_sudoku.printRasterToReceipt(printer, diff)) {
@@ -44,7 +57,7 @@ void OfflinePuzzleComposer::printSinglePuzzle(EscPosPrinter& printer, OfflinePuz
             break;
         }
         case PUZZLE_WORDSEARCH: {
-            WordSearchDifficulty diff = (r == 0) ? WS_EASY : ((r == 1) ? WS_MEDIUM : WS_HARD);
+            WordSearchDifficulty diff = (grade == GRADE_EASY) ? WS_EASY : ((grade == GRADE_HARD || grade == GRADE_EXTREME) ? WS_HARD : WS_MEDIUM);
             Serial.println("[COMPOSER] Generating Word Search...");
             _wordSearch.generate(diff);
             if (!useRaster || !_wordSearch.printRasterToReceipt(printer)) {
@@ -53,7 +66,7 @@ void OfflinePuzzleComposer::printSinglePuzzle(EscPosPrinter& printer, OfflinePuz
             break;
         }
         case PUZZLE_NONOGRAM: {
-            NonogramDifficulty diff = (r == 0) ? NONO_EASY : ((r == 1) ? NONO_MEDIUM : NONO_HARD);
+            NonogramDifficulty diff = (grade == GRADE_EASY) ? NONO_EASY : ((grade == GRADE_HARD || grade == GRADE_EXTREME) ? NONO_HARD : NONO_MEDIUM);
             Serial.println("[COMPOSER] Generating Nonogram...");
             _nonogram.generate(diff);
             if (!useRaster || !_nonogram.printRasterToReceipt(printer)) {
@@ -62,7 +75,7 @@ void OfflinePuzzleComposer::printSinglePuzzle(EscPosPrinter& printer, OfflinePuz
             break;
         }
         case PUZZLE_QUEENS: {
-            QueensDifficulty diff = (r == 0) ? QUEENS_EASY : ((r == 1) ? QUEENS_MEDIUM : QUEENS_HARD);
+            QueensDifficulty diff = (grade == GRADE_EASY) ? QUEENS_EASY : ((grade == GRADE_EXTREME) ? QUEENS_MASTER : ((grade == GRADE_HARD) ? QUEENS_HARD : QUEENS_MEDIUM));
             Serial.println("[COMPOSER] Generating Queens puzzle...");
             _queens.generate(diff);
             if (!useRaster || !_queens.printRasterToReceipt(printer)) {
@@ -71,7 +84,7 @@ void OfflinePuzzleComposer::printSinglePuzzle(EscPosPrinter& printer, OfflinePuz
             break;
         }
         case PUZZLE_JUMBLE: {
-            JumbleDifficulty diff = (r == 0) ? JUMBLE_EASY : ((r == 1) ? JUMBLE_MEDIUM : JUMBLE_HARD);
+            JumbleDifficulty diff = (grade == GRADE_EASY) ? JUMBLE_EASY : ((grade == GRADE_HARD || grade == GRADE_EXTREME) ? JUMBLE_HARD : JUMBLE_MEDIUM);
             Serial.println("[COMPOSER] Generating Daily Jumble...");
             _jumble.generate(diff);
             if (!useRaster || !_jumble.printRasterToReceipt(printer)) {
@@ -80,7 +93,7 @@ void OfflinePuzzleComposer::printSinglePuzzle(EscPosPrinter& printer, OfflinePuz
             break;
         }
         case PUZZLE_BINARY: {
-            BinaryDifficulty diff = (r == 0) ? BINARY_EASY : ((r == 1) ? BINARY_MEDIUM : BINARY_HARD);
+            BinaryDifficulty diff = (grade == GRADE_EASY) ? BINARY_EASY : ((grade == GRADE_HARD || grade == GRADE_EXTREME) ? BINARY_HARD : BINARY_MEDIUM);
             Serial.println("[COMPOSER] Generating Binary...");
             _binary.generate(diff);
             if (!useRaster || !_binary.printRasterToReceipt(printer, diff)) {
@@ -89,7 +102,7 @@ void OfflinePuzzleComposer::printSinglePuzzle(EscPosPrinter& printer, OfflinePuz
             break;
         }
         case PUZZLE_MINES: {
-            MinesDifficulty diff = (r == 0) ? MINES_EASY : ((r == 1) ? MINES_MEDIUM : MINES_HARD);
+            MinesDifficulty diff = (grade == GRADE_EASY) ? MINES_EASY : ((grade == GRADE_HARD || grade == GRADE_EXTREME) ? MINES_HARD : MINES_MEDIUM);
             Serial.println("[COMPOSER] Generating Mines...");
             _mines.generate(diff);
             if (!useRaster || !_mines.printRasterToReceipt(printer, diff)) {
@@ -98,7 +111,7 @@ void OfflinePuzzleComposer::printSinglePuzzle(EscPosPrinter& printer, OfflinePuz
             break;
         }
         case PUZZLE_TENTS: {
-            TentsDifficulty diff = (r == 0) ? TENTS_EASY : ((r == 1) ? TENTS_MEDIUM : TENTS_HARD);
+            TentsDifficulty diff = (grade == GRADE_EASY) ? TENTS_EASY : ((grade == GRADE_HARD || grade == GRADE_EXTREME) ? TENTS_HARD : TENTS_MEDIUM);
             Serial.println("[COMPOSER] Generating Tents...");
             _tents.generate(diff);
             if (!useRaster || !_tents.printRasterToReceipt(printer, diff)) {
@@ -107,7 +120,7 @@ void OfflinePuzzleComposer::printSinglePuzzle(EscPosPrinter& printer, OfflinePuz
             break;
         }
         case PUZZLE_BRIDGES: {
-            BridgesDifficulty diff = (r == 0) ? BRIDGES_EASY : ((r == 1) ? BRIDGES_MEDIUM : BRIDGES_HARD);
+            BridgesDifficulty diff = (grade == GRADE_EASY) ? BRIDGES_EASY : ((grade == GRADE_HARD || grade == GRADE_EXTREME) ? BRIDGES_HARD : BRIDGES_MEDIUM);
             Serial.println("[COMPOSER] Generating Bridges...");
             _bridges.generate(diff);
             if (!useRaster || !_bridges.printRasterToReceipt(printer, diff)) {
@@ -116,7 +129,7 @@ void OfflinePuzzleComposer::printSinglePuzzle(EscPosPrinter& printer, OfflinePuz
             break;
         }
         case PUZZLE_TANGO: {
-            TangoDifficulty diff = (r == 0) ? TANGO_EASY : ((r == 1) ? TANGO_MEDIUM : TANGO_HARD);
+            TangoDifficulty diff = (grade == GRADE_EASY) ? TANGO_EASY : ((grade == GRADE_HARD || grade == GRADE_EXTREME) ? TANGO_HARD : TANGO_MEDIUM);
             Serial.println("[COMPOSER] Generating Tango...");
             _tango.generate(diff);
             if (!useRaster || !_tango.printRasterToReceipt(printer, diff)) {
@@ -125,7 +138,7 @@ void OfflinePuzzleComposer::printSinglePuzzle(EscPosPrinter& printer, OfflinePuz
             break;
         }
         case PUZZLE_WHEEL: {
-            WheelDifficulty diff = (r == 0) ? WHEEL_EASY : ((r == 1) ? WHEEL_MEDIUM : WHEEL_HARD);
+            WheelDifficulty diff = (grade == GRADE_EASY) ? WHEEL_EASY : ((grade == GRADE_HARD || grade == GRADE_EXTREME) ? WHEEL_HARD : WHEEL_MEDIUM);
             Serial.println("[COMPOSER] Generating Wheel...");
             _wheel.generate(diff);
             if (!useRaster || !_wheel.printRasterToReceipt(printer)) {
@@ -134,7 +147,7 @@ void OfflinePuzzleComposer::printSinglePuzzle(EscPosPrinter& printer, OfflinePuz
             break;
         }
         case PUZZLE_LIGHTS: {
-            LightsDifficulty diff = (r == 0) ? LIGHTS_EASY : ((r == 1) ? LIGHTS_MEDIUM : LIGHTS_HARD);
+            LightsDifficulty diff = (grade == GRADE_EASY) ? LIGHTS_EASY : ((grade == GRADE_EXTREME) ? LIGHTS_EXTREME : ((grade == GRADE_HARD) ? LIGHTS_HARD : LIGHTS_MEDIUM));
             Serial.println("[COMPOSER] Generating Lights...");
             _lights.generate(diff);
             if (!useRaster || !_lights.printRasterToReceipt(printer, diff)) {
@@ -143,7 +156,7 @@ void OfflinePuzzleComposer::printSinglePuzzle(EscPosPrinter& printer, OfflinePuz
             break;
         }
         case PUZZLE_LOOP: {
-            LoopDifficulty diff = (r == 0) ? LOOP_EASY : ((r == 1) ? LOOP_MEDIUM : LOOP_HARD);
+            LoopDifficulty diff = (grade == GRADE_EASY) ? LOOP_EASY : ((grade == GRADE_HARD || grade == GRADE_EXTREME) ? LOOP_HARD : LOOP_MEDIUM);
             Serial.println("[COMPOSER] Generating Loop...");
             _loop.generate(diff);
             if (!useRaster || !_loop.printRasterToReceipt(printer, diff)) {
@@ -169,7 +182,7 @@ bool OfflinePuzzleComposer::generateAndPrintReceipt(EscPosPrinter& printer, cons
     _currentGrade = effectiveGrade;
 
     unsigned long startMs = millis();
-    Serial.println("\n[COMPOSER] Starting 100% offline generation for DAILY 5-PUZZLE MIX...");
+    Serial.println("\n[COMPOSER] Starting 100% offline generation for DAILY PUZZLE MIX...");
 
     if (!printer.connect()) {
         Serial.println("[COMPOSER] ERROR: Failed to connect to printer.");
@@ -178,11 +191,15 @@ bool OfflinePuzzleComposer::generateAndPrintReceipt(EscPosPrinter& printer, cons
 
     printer.init();
 
+    uint8_t count = OFFLINE_PUZZLE_COUNT;
+    if (count > (uint8_t)OFFLINE_PUZZLE_TOTAL) count = (uint8_t)OFFLINE_PUZZLE_TOTAL;
+    if (count < 1) count = 1;
+
     // 1. Receipt Header
     String headerDate = (dateStr.length() > 0) ? dateStr : "Daily On-Demand Edition";
     printer.printHeader("MORNING PUZZLES", headerDate);
     printer.setAlign(ALIGN_CENTER);
-    printer.println("DAILY 5-PUZZLE MIX");
+    printer.println(String("DAILY ") + count + "-PUZZLE MIX");
     printer.println("");
 
 #if (OFFLINE_PRINT_STYLE == STYLE_HYBRID)
@@ -190,10 +207,6 @@ bool OfflinePuzzleComposer::generateAndPrintReceipt(EscPosPrinter& printer, cons
 #else
     bool useRaster = false;
 #endif
-
-    uint8_t count = OFFLINE_PUZZLE_COUNT;
-    if (count > (uint8_t)OFFLINE_PUZZLE_TOTAL) count = (uint8_t)OFFLINE_PUZZLE_TOTAL;
-    if (count < 1) count = 1;
 
     OfflinePuzzleType allPuzzles[OFFLINE_PUZZLE_TOTAL] = {
         PUZZLE_SUDOKU,
@@ -220,7 +233,11 @@ bool OfflinePuzzleComposer::generateAndPrintReceipt(EscPosPrinter& printer, cons
     }
 
     for (uint8_t i = 0; i < count; i++) {
-        printSinglePuzzle(printer, allPuzzles[i], useRaster);
+        PuzzleGrade slotGrade = effectiveGrade;
+        if (effectiveGrade == GRADE_RANDOM) {
+            slotGrade = getGradeForSlot(i, count);
+        }
+        printSinglePuzzle(printer, allPuzzles[i], useRaster, slotGrade);
         printer.printHorizontalLine('-');
     }
 

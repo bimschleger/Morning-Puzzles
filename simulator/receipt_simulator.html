@@ -162,9 +162,10 @@
             Game Count:
           </label>
           <select id="select-game-count" class="w-full max-w-[210px] bg-slate-800 border border-amber-500/50 text-amber-400 font-semibold rounded-lg px-2.5 py-1.5 text-xs outline-none focus:border-amber-500 transition">
-            <option value="all" selected>All Games (13)</option>
+            <option value="all" selected>All Games (15)</option>
             <option value="3">Random 3 Games</option>
             <option value="5">Random 5 Games</option>
+            <option value="7">Random 7 Games</option>
             <option value="custom">Custom Selection</option>
           </select>
         </div>
@@ -7997,11 +7998,19 @@
       const timeStr = today.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
 
+      const activeCount = ALL_GAMES.filter(g => {
+        const cb = document.getElementById(`toggle-${g}`);
+        return cb && cb.checked;
+      }).length;
+      const subtitleText = (activeCount > 0 && activeCount < ALL_GAMES.length)
+        ? `DAILY ${activeCount}-PUZZLE MIX`
+        : 'Daily Physical Edition - 80mm Strip';
+
       // Barcode Header decoration
       items.push({ type: 'center', text: '||| | ||||| || |||||| | |||| ||| ||||| ||' });
       items.push({ type: 'rule-double', text: '='.repeat(COLS) });
       items.push({ type: 'title', text: centerLine('MORNING PUZZLES', COLS) });
-      items.push({ type: 'subtitle', text: centerLine('Daily Physical Edition - 80mm Strip', COLS) });
+      items.push({ type: 'subtitle', text: centerLine(subtitleText, COLS) });
       items.push({ type: 'text', text: centerLine(dateStr + ' - ' + timeStr, COLS) });
       items.push({ type: 'rule-double', text: '='.repeat(COLS) });
       items.push({ type: 'blank', text: '' });
@@ -8011,9 +8020,10 @@
       const isOfflineRaster = (globalStyle === 'offline_raster');
 
       let solutionsContent = [];
+      const PUZZLE_RENDERERS = {};
 
       // 1. QUEENS / STAR BATTLE (Placed at Top for Visibility)
-      if (document.getElementById('toggle-queens').checked) {
+      PUZZLE_RENDERERS['queens'] = () => {
         const variantEl = document.getElementById('diff-queens') || document.getElementById('variant-queens');
         const variant = variantEl ? variantEl.value : '8x8_1star';
         const showStars = false;
@@ -8060,10 +8070,10 @@
         items.push({ type: 'rule', text: '-'.repeat(COLS) });
 
         solutionsContent.push({ name: 'Stars', stars: qData.stars, size });
-      }
+      };
 
       // 2. SUDOKU
-      if (document.getElementById('toggle-sudoku').checked) {
+      PUZZLE_RENDERERS['sudoku'] = () => {
         const diff = document.getElementById('diff-sudoku').value;
         const clues = diff === 'easy' ? 38 : (diff === 'hard' ? 25 : 30);
         const sData = sudokuSim.generate(clues);
@@ -8104,10 +8114,10 @@
         items.push({ type: 'rule', text: '-'.repeat(COLS) });
 
         solutionsContent.push({ name: 'Sudoku', solution: sData.solution });
-      }
+      };
 
       // 3. SEARCH
-      if (document.getElementById('toggle-wordsearch').checked) {
+      PUZZLE_RENDERERS['wordsearch'] = () => {
         const diffEl = document.getElementById('diff-wordsearch') || document.getElementById('size-wordsearch');
         const sizeStr = diffEl ? diffEl.value : '8x10';
         const wsData = wordSearchSim.generate(sizeStr);
@@ -8153,10 +8163,10 @@
           theme: wsData.theme,
           size: wsData.size
         });
-      }
+      };
 
       // 4. NONOGRAM / PICROSS
-      if (document.getElementById('toggle-nonogram').checked) {
+      PUZZLE_RENDERERS['nonogram'] = () => {
         const diffEl = document.getElementById('diff-nonogram') || document.getElementById('size-nonogram');
         const size = parseInt(diffEl.value, 10);
         const nData = nonogramSim.generate(size);
@@ -8210,10 +8220,10 @@
         items.push({ type: 'rule', text: '-'.repeat(COLS) });
 
         solutionsContent.push({ name: 'Nonogram', grid: nData.grid, size });
-      }
+      };
 
       // 5. DAILY JUMBLE
-      if (document.getElementById('toggle-jumble').checked) {
+      PUZZLE_RENDERERS['jumble'] = () => {
         const diff = document.getElementById('diff-jumble').value;
         const jData = jumbleSim.generate(diff);
 
@@ -8251,10 +8261,10 @@
         items.push({ type: 'rule', text: '-'.repeat(COLS) });
 
         solutionsContent.push({ name: 'Jumble', answer: jData.answer, words: jData.words });
-      }
+      };
 
       // 6. BINARY
-      if (document.getElementById('toggle-binary') && document.getElementById('toggle-binary').checked) {
+      PUZZLE_RENDERERS['binary'] = () => {
         const diff = document.getElementById('diff-binary').value;
         const bData = binarySim.generate(diff);
 
@@ -8299,10 +8309,10 @@
           grid: bData.solution,
           size: bData.size
         });
-      }
+      };
 
       // 7. MINES
-      if (document.getElementById('toggle-mines') && document.getElementById('toggle-mines').checked) {
+      PUZZLE_RENDERERS['mines'] = () => {
         const diff = document.getElementById('diff-mines').value;
         const mData = minesSim.generate(diff);
 
@@ -8351,10 +8361,10 @@
           size: mData.size,
           minesCount: mData.minesCount
         });
-      }
+      };
 
       // 8. TENTS
-      if (document.getElementById('toggle-tents') && document.getElementById('toggle-tents').checked) {
+      PUZZLE_RENDERERS['tents'] = () => {
         const diff = document.getElementById('diff-tents').value;
         const tData = tentsSim.generate(diff);
 
@@ -8399,10 +8409,10 @@
           tents: tData.tents,
           size: tData.size
         });
-      }
+      };
 
       // 9. BRIDGES
-      if (document.getElementById('toggle-bridges') && document.getElementById('toggle-bridges').checked) {
+      PUZZLE_RENDERERS['bridges'] = () => {
         const diff = document.getElementById('diff-bridges').value;
         const bData = bridgesSim.generate(diff);
 
@@ -8442,10 +8452,10 @@
           solutionText: bData.solutionText,
           size: bData.size
         });
-      }
+      };
 
       // 10. KILLER SUDOKU
-      if (document.getElementById('toggle-killer') && document.getElementById('toggle-killer').checked) {
+      PUZZLE_RENDERERS['killer'] = () => {
         const diff = document.getElementById('diff-killer').value;
         const kData = killerSim.generate(diff);
         const desc = kData.size === 6
@@ -8510,10 +8520,10 @@
           solution: kData.solution,
           size: kData.size
         });
-      }
+      };
 
       // 11. CRYPTOGRAM
-      if (document.getElementById('toggle-cryptogram') && document.getElementById('toggle-cryptogram').checked) {
+      PUZZLE_RENDERERS['cryptogram'] = () => {
         const diff = document.getElementById('diff-cryptogram').value;
         const cData = cryptogramSim.generate(diff);
         const clueWord = cData.clueCount === 1 ? '1 letter clue' : `${cData.clueCount} letter clues`;
@@ -8580,10 +8590,10 @@
           phrase: cData.phrase,
           author: cData.author
         });
-      }
+      };
 
       // 12. TANGO
-      if (document.getElementById('toggle-tango') && document.getElementById('toggle-tango').checked) {
+      PUZZLE_RENDERERS['tango'] = () => {
         const diff = document.getElementById('diff-tango').value;
         const tgData = tangoSim.generate(diff);
 
@@ -8640,10 +8650,10 @@
           solution: tgData.solution,
           size: tgData.size
         });
-      }
+      };
 
       // 13. LADDER
-      if (document.getElementById('toggle-ladder') && document.getElementById('toggle-ladder').checked) {
+      PUZZLE_RENDERERS['ladder'] = () => {
         const diff = document.getElementById('diff-ladder').value;
         const lData = ladderSim.generate(diff);
         const lCount = lData.intermediateCount;
@@ -8690,10 +8700,10 @@
           name: 'Ladder',
           solution: lData.solution
         });
-      }
+      };
 
       // 14. LIGHTS
-      if (document.getElementById('toggle-lights') && document.getElementById('toggle-lights').checked) {
+      PUZZLE_RENDERERS['lights'] = () => {
         const diff = document.getElementById('diff-lights').value;
         const lData = lightsSim.generate(diff);
         const lDesc = `Place ${lData.totalBulbs} bulbs to light all corridors without bulbs shining on each other or exceeding numbers.`;
@@ -8741,10 +8751,10 @@
           solution: lData.solution,
           size: lData.size
         });
-      }
+      };
 
       // 15. LOOP
-      if (document.getElementById('toggle-loop') && document.getElementById('toggle-loop').checked) {
+      PUZZLE_RENDERERS['loop'] = () => {
         const diff = document.getElementById('diff-loop').value;
         const loopData = loopSim.generate(diff);
         const loopDesc = 'Draw a single continuous closed loop connecting dots so each number matches its edge count.';
@@ -8779,7 +8789,24 @@
           name: 'Loop',
           data: loopData
         });
-      }
+      };
+
+      // Render active puzzles in progressive/configured order
+      const renderOrder = [];
+      activeGameOrder.forEach(id => {
+        const el = document.getElementById(`toggle-${id}`);
+        if (el && el.checked) renderOrder.push(id);
+      });
+      ALL_GAMES.forEach(id => {
+        const el = document.getElementById(`toggle-${id}`);
+        if (el && el.checked && !renderOrder.includes(id)) {
+          renderOrder.push(id);
+        }
+      });
+
+      renderOrder.forEach(id => {
+        if (PUZZLE_RENDERERS[id]) PUZZLE_RENDERERS[id]();
+      });
 
       // Optional Solutions Key
       if (document.getElementById('toggle-solutions').checked && solutionsContent.length > 0) {
@@ -9012,20 +9039,20 @@
 
     // Global Difficulty Mapping & Sync
     const GAME_DIFFICULTIES = {
-      'diff-queens': { easy: '5x5_1star', medium: '8x8_1star', hard: '9x9_2star' },
+      'diff-queens': { easy: '5x5_1star', medium: '8x8_1star', hard: '9x9_2star', extreme: '10x10_2star' },
       'diff-sudoku': { easy: 'easy', medium: 'medium', hard: 'hard' },
       'diff-wordsearch': { easy: '8x8', medium: '8x10', hard: '8x12' },
-      'diff-nonogram': { easy: '5', medium: '8', hard: '10' },
+      'diff-nonogram': { easy: '5', medium: '8', hard: '10', extreme: '15' },
       'diff-jumble': { easy: 'easy', medium: 'medium', hard: 'hard' },
       'diff-binary': { easy: 'easy', medium: 'medium', hard: 'hard' },
       'diff-mines': { easy: 'easy', medium: 'medium', hard: 'hard' },
       'diff-tents': { easy: 'easy', medium: 'medium', hard: 'hard' },
-      'diff-bridges': { easy: 'easy', medium: 'medium', hard: 'hard' },
-      'diff-killer': { easy: 'easy', medium: 'medium', hard: 'extreme' },
+      'diff-bridges': { easy: 'easy', medium: 'medium', hard: 'hard', extreme: 'extreme' },
+      'diff-killer': { easy: 'easy', medium: 'medium', hard: 'extreme', extreme: 'extreme' },
       'diff-cryptogram': { easy: 'easy', medium: 'medium', hard: 'hard' },
       'diff-tango': { easy: 'easy', medium: 'medium', hard: 'hard' },
       'diff-ladder': { easy: 'easy', medium: 'medium', hard: 'hard' },
-      'diff-lights': { easy: 'easy', medium: 'medium', hard: 'hard' },
+      'diff-lights': { easy: 'easy', medium: 'medium', hard: 'hard', extreme: 'extreme' },
       'diff-loop': { easy: 'easy', medium: 'medium', hard: 'hard' }
     };
 
@@ -9058,7 +9085,7 @@
         if (!el) continue;
         if (el.value !== map.easy) allEasy = false;
         if (el.value !== map.medium) allMedium = false;
-        if (el.value !== map.hard) allHard = false;
+        if (el.value !== map.hard && el.value !== map.extreme) allHard = false;
       }
 
       if (allEasy) {
@@ -9100,20 +9127,56 @@
       'cryptogram', 'tango', 'ladder', 'lights', 'loop'
     ];
 
+    let activeGameOrder = [...ALL_GAMES];
+
+    function getDifficultyTierForSlot(index, count) {
+      if (count <= 1) return 'medium';
+      const p = index / (count - 1);
+      if (p < 0.25) return 'easy';
+      if (p < 0.65) return 'medium';
+      if (p < 0.85) return 'hard';
+      return 'extreme';
+    }
+
     function pickRandomGames(count) {
       const shuffled = [...ALL_GAMES];
       for (let i = shuffled.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
       }
-      const chosen = new Set(shuffled.slice(0, count));
+      const selected = shuffled.slice(0, count);
+      activeGameOrder = [...selected];
+      const chosen = new Set(selected);
+
       ALL_GAMES.forEach(id => {
         const el = document.getElementById(`toggle-${id}`);
         if (el) el.checked = chosen.has(id);
       });
+
+      // Apply progressive difficulty scaling to selected games
+      selected.forEach((gameId, idx) => {
+        const diffKey = `diff-${gameId}`;
+        const map = GAME_DIFFICULTIES[diffKey];
+        if (map) {
+          const tier = getDifficultyTierForSlot(idx, count);
+          let assignedVal = map[tier];
+          if (!assignedVal) {
+            assignedVal = (tier === 'extreme') ? (map['hard'] || map['medium']) : map['medium'];
+          }
+          const el = document.getElementById(diffKey);
+          if (el && assignedVal) {
+            el.value = assignedVal;
+          }
+        }
+      });
+
+      if (globalDiffEl) {
+        globalDiffEl.value = 'mixed';
+      }
     }
 
     function setAllGames(enabled = true) {
+      activeGameOrder = [...ALL_GAMES];
       ALL_GAMES.forEach(id => {
         const el = document.getElementById(`toggle-${id}`);
         if (el) el.checked = enabled;
@@ -9124,7 +9187,7 @@
     if (gameCountEl) {
       gameCountEl.addEventListener('change', () => {
         const val = gameCountEl.value;
-        if (val === '3' || val === '5') {
+        if (val === '3' || val === '5' || val === '7') {
           pickRandomGames(parseInt(val, 10));
         } else if (val === 'all') {
           setAllGames(true);
@@ -9154,8 +9217,16 @@
 
     function handleRandomize() {
       const countVal = gameCountEl ? gameCountEl.value : 'all';
-      if (countVal === '3' || countVal === '5') {
+      if (countVal === '3' || countVal === '5' || countVal === '7') {
         pickRandomGames(parseInt(countVal, 10));
+      } else {
+        const checkedGames = ALL_GAMES.filter(g => {
+          const cb = document.getElementById(`toggle-${g}`);
+          return cb && cb.checked;
+        });
+        if (checkedGames.length > 1 && checkedGames.length < ALL_GAMES.length) {
+          pickRandomGames(checkedGames.length);
+        }
       }
       if (globalDiffEl && globalDiffEl.value === 'random') {
         applyGlobalDifficulty('random');

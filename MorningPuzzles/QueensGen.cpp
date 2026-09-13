@@ -355,9 +355,9 @@ bool QueensGen::validate() {
 }
 
 void QueensGen::printToReceipt(EscPosPrinter& printer) {
-    const char* diffStr = (_size <= 6) ? "EASY" : ((_starsPerUnit > 1) ? "HARD" : "MEDIUM");
+    const char* diffStr = (_size <= 6) ? "EASY" : ((_size >= 10) ? "EXTREME" : ((_starsPerUnit > 1) ? "HARD" : "MEDIUM"));
 
-    uint8_t starsCount = (_starsPerUnit > 1 || diffStr[0] == 'H') ? 2 : 1;
+    uint8_t starsCount = (_starsPerUnit > 1) ? 2 : 1;
 
     printer.setBold(true);
     printer.println("--- STARS ---");
@@ -398,8 +398,8 @@ void QueensGen::printToReceipt(EscPosPrinter& printer) {
 }
 
 bool QueensGen::printRasterToReceipt(EscPosPrinter& printer) {
-    const char* diffStr = (_size <= 6) ? "EASY" : ((_starsPerUnit > 1) ? "HARD" : "MEDIUM");
-    uint8_t starsCount = (_starsPerUnit > 1 || diffStr[0] == 'H') ? 2 : 1;
+    const char* diffStr = (_size <= 6) ? "EASY" : ((_size >= 10) ? "EXTREME" : ((_starsPerUnit > 1) ? "HARD" : "MEDIUM"));
+    uint8_t starsCount = (_starsPerUnit > 1) ? 2 : 1;
 
     printer.setAlign(ALIGN_CENTER);
     printer.setBold(true);

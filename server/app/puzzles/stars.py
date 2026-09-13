@@ -25,10 +25,11 @@ class StarsPuzzle(BasePuzzle):
     """Stars (Queens / Star Battle) puzzle plugin."""
 
     DIFFICULTY_CONFIGS = {
-        "easy":   {"size": 5, "stars": 1},
-        "medium": {"size": 8, "stars": 1},
-        "hard":   {"size": 9, "stars": 2},
-        "master": {"size": 10, "stars": 2},
+        "easy":    {"size": 5, "stars": 1},
+        "medium":  {"size": 8, "stars": 1},
+        "hard":    {"size": 9, "stars": 2},
+        "master":  {"size": 10, "stars": 2},
+        "extreme": {"size": 10, "stars": 2},
     }
 
     @property
@@ -46,7 +47,7 @@ class StarsPuzzle(BasePuzzle):
 
     @property
     def supported_difficulties(self) -> List[str]:
-        return ["easy", "medium", "hard", "master"]
+        return ["easy", "medium", "hard", "master", "extreme"]
 
     def generate(
         self,

@@ -23,9 +23,9 @@ from app.renderer.text_formatter import (
 )
 
 
-def generate_daily_bundle(difficulty: str = "medium") -> Dict[str, Any]:
-    """Generates the bundle of all 12 puzzles for the daily edition."""
-    return DEFAULT_REGISTRY.generate_bundle(difficulty=difficulty)
+def generate_daily_bundle(difficulty: str = "medium", count: Optional[int] = None) -> Dict[str, Any]:
+    """Generates the daily bundle of puzzles (full edition or N-puzzle random mix)."""
+    return DEFAULT_REGISTRY.generate_bundle(difficulty=difficulty, count=count)
 
 
 # ==============================================================================
@@ -62,10 +62,11 @@ try:
     @app.get("/api/v1/daily-print")
     def get_daily_print(
         format: str = Query("escpos", regex="^(escpos|json)$"),
-        difficulty: str = Query("medium", regex="^(easy|medium|hard|random)$"),
-        style: str = Query("hybrid", regex="^(hybrid|text)$")
+        difficulty: str = Query("medium", regex="^(easy|medium|hard|random|staggered|progressive)$"),
+        style: str = Query("hybrid", regex="^(hybrid|text)$"),
+        count: Optional[int] = Query(None)
     ):
-        bundle = generate_daily_bundle(difficulty=difficulty)
+        bundle = generate_daily_bundle(difficulty=difficulty, count=count)
         if format == "json":
             return JSONResponse(content=bundle)
 
@@ -194,7 +195,9 @@ def run_standalone_server(port: int = 8000, host: str = "0.0.0.0"):
                 fmt = query_params.get("format", ["escpos"])[0]
                 diff = query_params.get("difficulty", ["medium"])[0]
                 style = query_params.get("style", ["hybrid"])[0]
-                bundle = generate_daily_bundle(diff)
+                count_param = query_params.get("count", [None])[0]
+                count_val = int(count_param) if count_param and count_param.isdigit() else None
+                bundle = generate_daily_bundle(diff, count=count_val)
 
                 if fmt == "json":
                     self._send_json(200, bundle)

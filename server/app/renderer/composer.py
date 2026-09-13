@@ -135,9 +135,22 @@ class DailyReceiptComposer:
         title = daily_data.get("title", "MORNING PUZZLES")
         date_str = daily_data.get("date", "Daily Edition")
         r.header(title, date_str)
+        subtitle = daily_data.get("subtitle")
+        if subtitle:
+            r.align("center")
+            r.println(subtitle)
+            r.println()
+            r.align("left")
 
-        # 2. Render each puzzle in canonical sequence
-        plugins = [p for p in self.registry.get_all() if p.puzzle_id in daily_data]
+        # 2. Render each puzzle in progressive or canonical sequence
+        if "puzzle_order" in daily_data:
+            plugins = []
+            for pid in daily_data["puzzle_order"]:
+                p = self.registry.get(pid)
+                if p and p.puzzle_id in daily_data:
+                    plugins.append(p)
+        else:
+            plugins = [p for p in self.registry.get_all() if p.puzzle_id in daily_data]
 
         for idx, plugin in enumerate(plugins):
             p_data = daily_data[plugin.puzzle_id]
@@ -200,14 +213,22 @@ class DailyReceiptComposer:
         r.align("left")
         r.println()
 
-        for plugin in self.registry.get_all():
-            if plugin.puzzle_id in daily_data:
-                p_data = daily_data[plugin.puzzle_id]
-                solution_lines = plugin.format_solution_key(p_data)
-                if solution_lines:
-                    r.bold(True)
-                    r.println(plugin.title)
-                    r.bold(False)
-                    for line in solution_lines:
-                        r.println(line)
-                    r.println()
+        if "puzzle_order" in daily_data:
+            plugins = []
+            for pid in daily_data["puzzle_order"]:
+                p = self.registry.get(pid)
+                if p and p.puzzle_id in daily_data:
+                    plugins.append(p)
+        else:
+            plugins = [p for p in self.registry.get_all() if p.puzzle_id in daily_data]
+
+        for plugin in plugins:
+            p_data = daily_data[plugin.puzzle_id]
+            solution_lines = plugin.format_solution_key(p_data)
+            if solution_lines:
+                r.bold(True)
+                r.println(plugin.title)
+                r.bold(False)
+                for line in solution_lines:
+                    r.println(line)
+                r.println()

@@ -54,10 +54,23 @@ class PuzzleRegistry:
         """Returns all registered puzzle plugins in canonical order."""
         return [self._by_id[p_id] for p_id in self._order]
 
-    def generate_bundle(self, difficulty: str = "medium") -> Dict[str, Any]:
+    @staticmethod
+    def get_tier_for_slot(index: int, total_count: int) -> str:
+        if total_count <= 1:
+            return "medium"
+        p = index / (total_count - 1)
+        if p < 0.25:
+            return "easy"
+        if p < 0.65:
+            return "medium"
+        if p < 0.85:
+            return "hard"
+        return "extreme"
+
+    def generate_bundle(self, difficulty: str = "medium", count: Optional[int] = None) -> Dict[str, Any]:
         """
-        Generates the standard daily bundle containing all 12 puzzles.
-        Preserves legacy dictionary keys and difficulty mappings.
+        Generates the standard daily bundle or a random N-puzzle mix.
+        Supports staggered progressive difficulty scaling across arbitrary puzzle counts.
         """
         today_str = datetime.date.today().strftime("%A, %B %d, %Y")
         bundle: Dict[str, Any] = {
@@ -67,8 +80,43 @@ class PuzzleRegistry:
         }
 
         diff_lower = difficulty.lower()
+        all_plugins = self.get_all()
 
-        for plugin in self.get_all():
+        if count is None and diff_lower in ("staggered", "progressive"):
+            count = 5
+
+        if count is not None:
+            n = max(1, min(count, len(all_plugins)))
+            selected_plugins = random.sample(all_plugins, n)
+            is_progressive = diff_lower in ("random", "staggered", "progressive")
+            bundle["subtitle"] = f"DAILY {n}-PUZZLE MIX"
+            bundle["puzzle_order"] = [p.puzzle_id for p in selected_plugins]
+
+            for i, plugin in enumerate(selected_plugins):
+                if is_progressive:
+                    target_tier = self.get_tier_for_slot(i, n)
+                    if target_tier == "extreme":
+                        if "extreme" in plugin.supported_difficulties:
+                            p_diff = "extreme"
+                        elif "master" in plugin.supported_difficulties:
+                            p_diff = "master"
+                        else:
+                            p_diff = "hard"
+                    else:
+                        p_diff = target_tier
+                else:
+                    p_diff = diff_lower
+                    if plugin.puzzle_id == "killer" and diff_lower == "hard":
+                        p_diff = "extreme"
+                    elif plugin.puzzle_id == "nonogram":
+                        p_diff = "easy" if diff_lower == "easy" else "medium"
+
+                result = plugin.generate(difficulty=p_diff)
+                bundle[plugin.puzzle_id] = result.to_dict()
+
+            return bundle
+
+        for plugin in all_plugins:
             if diff_lower == "random":
                 p_diff = random.choice(plugin.supported_difficulties)
             else:
