@@ -15,6 +15,7 @@ class EscPosPrinter;
 #include "TangoGen.h"
 #include "WheelGen.h"
 #include "LightsGen.h"
+#include "LoopGen.h"
 
 enum PuzzleGrade {
     GRADE_EASY = 0,
@@ -37,6 +38,7 @@ enum OfflinePuzzleType {
     PUZZLE_TANGO,
     PUZZLE_WHEEL,
     PUZZLE_LIGHTS,
+    PUZZLE_LOOP,
     OFFLINE_PUZZLE_TOTAL
 };
 
@@ -67,6 +69,7 @@ private:
     TangoGen      _tango;
     WheelGen      _wheel;
     LightsGen     _lights;
+    LoopGen       _loop;
 
     PuzzleGrade   _currentGrade;
     uint8_t       _rotationIndex;

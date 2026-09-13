@@ -142,6 +142,15 @@ void OfflinePuzzleComposer::printSinglePuzzle(EscPosPrinter& printer, OfflinePuz
             }
             break;
         }
+        case PUZZLE_LOOP: {
+            LoopDifficulty diff = (r == 0) ? LOOP_EASY : ((r == 1) ? LOOP_MEDIUM : LOOP_HARD);
+            Serial.println("[COMPOSER] Generating Loop...");
+            _loop.generate(diff);
+            if (!useRaster || !_loop.printRasterToReceipt(printer, diff)) {
+                _loop.printToReceipt(printer, diff);
+            }
+            break;
+        }
         default:
             break;
     }
@@ -198,7 +207,8 @@ bool OfflinePuzzleComposer::generateAndPrintReceipt(EscPosPrinter& printer, cons
         PUZZLE_BRIDGES,
         PUZZLE_TANGO,
         PUZZLE_WHEEL,
-        PUZZLE_LIGHTS
+        PUZZLE_LIGHTS,
+        PUZZLE_LOOP
     };
 
     // Fisher-Yates shuffle

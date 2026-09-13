@@ -6,7 +6,7 @@ This document provides the architectural survey, evaluation standards, and techn
 
 ## 1. Implemented Games (Active Library)
 
-The following 15 puzzles have been implemented and currently comprise the core Morning Puzzles library across the Python backend (`server/app/puzzles/`), ESP32 firmware (`esp32-firmware/src/generators/`), and web simulator (`simulator/receipt_simulator.html`):
+The following 16 puzzles have been implemented and currently comprise the core Morning Puzzles library across the Python backend (`server/app/puzzles/`), ESP32 firmware (`esp32-firmware/src/generators/`), and web simulator (`simulator/receipt_simulator.html`):
 
 | Single-Word Title | Traditional / Common Name | Genre / Category | Implementation Stack | Difficulty Scaling | Solution Key Representation |
 | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -25,6 +25,7 @@ The following 15 puzzles have been implemented and currently comprise the core M
 | **`--- LADDER ---`** | Word Ladder / Doublets | Word & Pattern | Python (BFS Word Graph) + Dataset | Easy (4-letter, 4–5 words), Med (4-letter, 6–7), Hard (5-letter, 6–8) | Arrow word path ($\le 46$ cols) |
 | **`--- WHEEL ---`** | Word Wheel / Target Anagram | Word & Pattern | Python + ESP32 C++ | Easy (25+ words), Med (15–24 words), Hard (10–15 words) | Center letter + word list ($\le 46$ cols) |
 | **`--- LIGHTS ---`** | Akari / Light Up | Line-of-Sight & Illumination | Python (Deductive + SAT) + ESP32 C++ | Easy (6×6), Med (8×8), Hard (10×10), Extreme (12×12) | 6-space indented ASCII grid with bulbs (*) |
+| **`--- LOOP ---`** | Slitherlink / Fences | Loop & Circuit Drawing | Python + ESP32 C++ | Easy (6×6), Medium (7×7), Hard (9×9) | 6-space indented 2D ASCII loop grid |
 
 ---
 

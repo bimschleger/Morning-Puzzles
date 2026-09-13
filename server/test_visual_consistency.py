@@ -141,6 +141,12 @@ def test_visual_consistency():
             py_data = {
                 "puzzle": item["grid"]
             }
+        elif p_name == "loop":
+            py_data = {
+                "size": item["size"],
+                "clues": item["clues"],
+                "difficulty": item.get("difficulty", "medium")
+            }
         else:
             print(f"Unknown puzzle {p_name}")
             continue

@@ -76,3 +76,8 @@ def render_wheel_raster(wheel_data: Dict[str, Any], target_width: int = THERMAL_
 
 def render_lights_raster(lights_data: Dict[str, Any], target_width: int = THERMAL_WIDTH_DOTS) -> bytes:
     return DEFAULT_REGISTRY.get("lights").render_raster(lights_data, target_width=target_width)
+
+
+def render_loop_raster(loop_data: Dict[str, Any], target_width: int = THERMAL_WIDTH_DOTS) -> bytes:
+    return DEFAULT_REGISTRY.get("loop").render_raster(loop_data, target_width=target_width)
+

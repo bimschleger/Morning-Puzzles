@@ -341,5 +341,15 @@ class ThermalBitmap:
                 if r_inner_sq <= dist_sq <= r_outer_sq:
                     self.set_pixel(px, py, color)
 
+    def fill_circle(self, cx: int, cy: int, radius: int, color: int = 1):
+        if radius <= 0:
+            return
+        r_sq = radius * radius
+        for py in range(max(0, cy - radius), min(cy + radius + 1, self.height)):
+            dy_sq = (py - cy) ** 2
+            for px in range(max(0, cx - radius), min(cx + radius + 1, self.width)):
+                if (px - cx) ** 2 + dy_sq <= r_sq:
+                    self.set_pixel(px, py, color)
+
     def to_escpos(self) -> bytes:
         return image_to_escpos_raster(bytes(self.buffer), self.width, self.height)

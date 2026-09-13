@@ -35,6 +35,9 @@
 #include "../esp32-firmware/src/generators/BinaryGen.h"
 #include "../esp32-firmware/src/generators/BinaryGen.cpp"
 
+#include "../esp32-firmware/src/generators/LoopGen.h"
+#include "../esp32-firmware/src/generators/LoopGen.cpp"
+
 #include <iostream>
 #include <iomanip>
 #include <sstream>
@@ -305,6 +308,35 @@ int main(int argc, char** argv) {
             for (uint8_t c = 0; c < 9; c++) {
                 if (c > 0) std::cout << ", ";
                 std::cout << (int)sGen.getCell(r, c);
+            }
+            std::cout << "]";
+        }
+        std::cout << "],\n";
+        std::cout << "    \"raster_hex\": \"" << toHex(printer->lastBitmap) << "\"\n";
+        std::cout << "  }";
+    }
+
+    // 8. LOOP
+    {
+        LoopGen loopGen;
+        loopGen.generate(LOOP_MEDIUM);
+        printer->lastBitmap.clear();
+        loopGen.printRasterToReceipt(*printer, LOOP_MEDIUM);
+
+        printSep();
+        std::cout << "  {\n";
+        std::cout << "    \"puzzle\": \"loop\",\n";
+        std::cout << "    \"difficulty\": \"medium\",\n";
+        std::cout << "    \"width\": " << printer->lastWidth << ",\n";
+        std::cout << "    \"height\": " << printer->lastHeight << ",\n";
+        std::cout << "    \"size\": " << (int)loopGen.getSize() << ",\n";
+        std::cout << "    \"clues\": [";
+        for (uint8_t r = 0; r < loopGen.getSize(); r++) {
+            if (r > 0) std::cout << ", ";
+            std::cout << "[";
+            for (uint8_t c = 0; c < loopGen.getSize(); c++) {
+                if (c > 0) std::cout << ", ";
+                std::cout << (int)loopGen.getClue(r, c);
             }
             std::cout << "]";
         }

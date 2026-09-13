@@ -458,6 +458,24 @@
             </select>
           </div>
         </div>
+
+        <!-- 15. Loop Toggle -->
+        <div class="bg-slate-900 border border-slate-800/80 rounded-xl p-3.5 flex flex-col gap-2.5 transition hover:border-slate-700">
+          <div class="flex items-center justify-between">
+            <label class="flex items-center gap-2.5 cursor-pointer select-none">
+              <input type="checkbox" id="toggle-loop" checked class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
+              <span class="font-semibold text-sm text-slate-200">Loop</span>
+            </label>
+          </div>
+          <div class="flex items-center justify-between pl-6 text-xs text-slate-400">
+            <span>Difficulty:</span>
+            <select id="diff-loop" class="bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2 py-1 text-xs outline-none focus:border-amber-500">
+              <option value="easy">Easy: 6x6 Grid</option>
+              <option value="medium" selected>Medium: 7x7 Grid</option>
+              <option value="hard">Hard: 9x9 Grid</option>
+            </select>
+          </div>
+        </div>
       </div>
 
     </aside>
@@ -6483,6 +6501,102 @@
       }
     }
 
+    // LOOP SIMULATOR & CANVAS RENDERER (Slitherlink / Fences)
+    class LoopSimulator {
+      constructor() {
+        this.puzzles = {
+          easy: [
+            {
+              size: 6,
+              clues: [[0, -1, 1, 0, -1, 0], [-1, 2, 2, 2, 0, -1], [2, -1, -1, -1, -1, -1], [1, 0, -1, 2, 1, 0], [2, -1, 1, 3, 1, 0], [1, -1, -1, -1, -1, -1]],
+              solution_h: [[0, 0, 0, 0, 0, 0], [0, 1, 1, 0, 0, 0], [1, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 1, 0, 0], [1, 1, 0, 1, 1, 0], [0, 0, 1, 1, 1, 0]],
+              solution_v: [[0, 0, 0, 0, 0, 0, 0], [0, 1, 0, 1, 0, 0, 0], [1, 0, 0, 0, 1, 0, 0], [1, 0, 0, 0, 1, 0, 0], [1, 0, 0, 1, 0, 0, 0], [0, 0, 1, 0, 0, 1, 0]]
+            },
+            {
+              size: 6,
+              clues: [[3, -1, 2, -1, 0, 0], [-1, -1, 1, -1, -1, -1], [0, 3, 1, 0, 1, 3], [-1, 3, 0, -1, 2, 2], [-1, -1, -1, -1, 2, -1], [0, 1, -1, -1, 0, 0]],
+              solution_h: [[1, 1, 0, 0, 0, 0], [1, 0, 1, 1, 0, 0], [0, 1, 0, 0, 1, 1], [0, 1, 0, 0, 0, 1], [0, 1, 0, 0, 1, 0], [0, 0, 0, 1, 0, 0], [0, 0, 1, 0, 0, 0]],
+              solution_v: [[1, 0, 1, 0, 0, 0, 0], [0, 1, 0, 0, 1, 0, 0], [0, 0, 1, 0, 0, 0, 1], [0, 1, 0, 0, 0, 1, 0], [0, 0, 1, 0, 1, 0, 0], [0, 0, 1, 1, 0, 0, 0]]
+            }
+          ],
+          medium: [
+            {
+              size: 7,
+              clues: [[-1, 0, -1, 0, -1, -1, 0], [1, 1, 0, -1, -1, -1, -1], [2, -1, -1, 0, 1, 1, -1], [-1, -1, -1, -1, -1, -1, 1], [-1, 0, 0, 2, -1, 3, 0], [1, -1, 1, -1, -1, 2, 1], [2, -1, 2, -1, -1, 2, -1]],
+              solution_h: [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [1, 1, 0, 0, 0, 0, 0], [0, 0, 1, 0, 1, 1, 0], [0, 0, 0, 1, 0, 1, 0], [0, 0, 0, 1, 0, 1, 0], [0, 0, 0, 0, 0, 0, 0], [1, 1, 1, 0, 1, 1, 0]],
+              solution_v: [[0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [1, 0, 1, 0, 0, 0, 0, 0], [1, 0, 0, 1, 1, 0, 1, 0], [1, 0, 0, 0, 0, 1, 0, 0], [1, 0, 0, 1, 1, 0, 1, 0], [1, 0, 0, 1, 1, 0, 1, 0]]
+            },
+            {
+              size: 7,
+              clues: [[-1, 3, 1, -1, -1, 1, -1], [0, -1, 2, -1, -1, 0, 1], [-1, -1, 2, 3, -1, 0, -1], [-1, 3, -1, 1, 1, 1, -1], [-1, -1, -1, 3, 3, -1, 3], [0, 0, -1, -1, -1, 1, -1], [0, -1, -1, 0, -1, 0, -1]],
+              solution_h: [[0, 1, 1, 1, 1, 1, 1], [0, 1, 0, 0, 0, 0, 0], [0, 0, 1, 1, 0, 0, 0], [0, 1, 1, 1, 0, 0, 1], [0, 1, 1, 0, 1, 0, 1], [0, 0, 0, 1, 0, 1, 1], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]],
+              solution_v: [[0, 1, 0, 0, 0, 0, 0, 1], [0, 0, 1, 0, 0, 0, 0, 1], [0, 0, 0, 0, 1, 0, 0, 1], [0, 1, 0, 0, 0, 0, 1, 0], [0, 0, 0, 1, 1, 1, 0, 1], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0]]
+            }
+          ],
+          hard: [
+            {
+              size: 9,
+              clues: [[-1, 1, -1, -1, -1, -1, 1, 1, -1], [-1, -1, -1, 1, 0, -1, 0, -1, -1], [0, -1, 2, -1, -1, -1, -1, 0, 1], [-1, 1, 2, -1, -1, -1, -1, -1, -1], [-1, -1, 2, -1, -1, 3, 1, 2, 2], [0, -1, 2, -1, 3, -1, -1, -1, -1], [-1, -1, -1, -1, -1, 1, -1, -1, -1], [-1, 0, 1, 1, -1, 0, -1, -1, 0], [-1, 0, -1, -1, 0, -1, 0, -1, 0]],
+              solution_h: [[0, 0, 1, 1, 1, 1, 1, 1, 1], [0, 0, 1, 0, 0, 0, 0, 0, 0], [0, 0, 1, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 1, 0, 0, 1, 0, 0, 1], [0, 0, 0, 0, 1, 0, 0, 1, 0], [0, 0, 1, 0, 1, 0, 1, 0, 0], [0, 0, 1, 1, 1, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0]],
+              solution_v: [[0, 0, 1, 0, 0, 0, 0, 0, 0, 1], [0, 0, 0, 1, 0, 0, 0, 0, 0, 1], [0, 0, 1, 0, 0, 0, 0, 0, 0, 1], [0, 0, 1, 0, 0, 0, 0, 0, 0, 1], [0, 0, 0, 1, 0, 1, 1, 0, 1, 0], [0, 0, 0, 1, 1, 0, 1, 1, 0, 0], [0, 0, 1, 0, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+            },
+            {
+              size: 9,
+              clues: [[0, -1, -1, -1, -1, 3, -1, -1, 1], [-1, 0, -1, 1, -1, -1, 1, -1, 3], [-1, -1, -1, -1, -1, 1, -1, -1, -1], [0, -1, -1, 2, 0, -1, -1, 3, 1], [-1, -1, -1, -1, -1, -1, 1, -1, 0], [0, -1, 2, 1, -1, 1, -1, -1, -1], [-1, -1, 2, -1, -1, 3, -1, -1, 3], [0, -1, 2, 3, 3, -1, 1, -1, 1], [-1, -1, 3, -1, -1, -1, -1, -1, 2]],
+              solution_h: [[0, 0, 0, 0, 1, 0, 1, 0, 0], [0, 0, 0, 0, 0, 1, 0, 1, 1], [0, 0, 0, 0, 0, 0, 1, 1, 1], [0, 0, 0, 1, 0, 0, 1, 1, 0], [0, 0, 0, 0, 0, 0, 0, 1, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 1, 0, 0, 1, 0, 0, 1], [0, 0, 0, 1, 0, 0, 0, 1, 0], [0, 0, 0, 0, 1, 0, 0, 0, 0], [0, 0, 1, 0, 0, 0, 1, 1, 1]],
+              solution_v: [[0, 0, 0, 0, 1, 1, 1, 1, 0, 0], [0, 0, 0, 0, 1, 0, 0, 0, 0, 1], [0, 0, 0, 0, 1, 0, 1, 0, 0, 0], [0, 0, 0, 1, 0, 0, 0, 0, 1, 0], [0, 0, 0, 1, 0, 0, 0, 1, 0, 0], [0, 0, 0, 1, 0, 0, 0, 1, 0, 0], [0, 0, 1, 0, 0, 1, 1, 1, 1, 1], [0, 0, 1, 1, 1, 1, 1, 0, 0, 1], [0, 0, 1, 1, 0, 0, 1, 0, 0, 1]]
+            }
+          ]
+        };
+      }
+
+      generate(diff = 'medium') {
+        const list = this.puzzles[diff] || this.puzzles.medium;
+        const p = list[Math.floor(Math.random() * list.length)];
+        return {
+          title: 'LOOP',
+          difficulty: diff,
+          size: p.size,
+          clues: p.clues,
+          solution_h: p.solution_h,
+          solution_v: p.solution_v
+        };
+      }
+
+      formatSolutionKey(p) {
+        const n = p.size;
+        const H = p.solution_h;
+        const V = p.solution_v;
+        const clues = p.clues;
+        const lines = [];
+        const indent = '      ';
+        for (let r = 0; r < n; r++) {
+          let hRow = indent;
+          for (let c = 0; c < n; c++) {
+            hRow += '+' + (H[r][c] ? '---' : '   ');
+          }
+          hRow += '+';
+          lines.push(hRow);
+
+          let vRow = indent;
+          for (let c = 0; c < n; c++) {
+            const v = V[r][c] ? '|' : ' ';
+            const k = clues[r][c] >= 0 ? String(clues[r][c]) : ' ';
+            vRow += `${v} ${k} `;
+          }
+          vRow += V[r][n] ? '|' : ' ';
+          lines.push(vRow);
+        }
+        let bRow = indent;
+        for (let c = 0; c < n; c++) {
+          bRow += '+' + (H[n][c] ? '---' : '   ');
+        }
+        bRow += '+';
+        lines.push(bRow);
+        return lines;
+      }
+    }
+
     function drawLightsCanvas(canvas, lData) {
       const totalWidth = 345;
       const padding = 12;
@@ -7669,6 +7783,41 @@
       tc.renderToCanvas(canvas);
     }
 
+    function renderOfflineLoop(canvas, loopData) {
+      const size = loopData.size || 7;
+      const cellSize = (size === 6) ? 54 : ((size === 9) ? 36 : 46);
+      const padding = (size === 7) ? 27 : 26;
+      const boardSize = cellSize * size;
+      const leftMargin = Math.floor((576 - boardSize) / 2);
+      let totalH = padding + boardSize + padding;
+      totalH = Math.ceil(totalH / 8) * 8;
+
+      const tc = new ThermalCanvasSimulator(576, totalH);
+
+      // Draw dots (clean Nikoli style: 4px diameter filled circles)
+      for (let r = 0; r <= size; r++) {
+        const py = padding + r * cellSize;
+        for (let c = 0; c <= size; c++) {
+          const px = leftMargin + c * cellSize;
+          tc.fillCircle(px, py, 2, 1);
+        }
+      }
+
+      // Draw clue numbers
+      for (let r = 0; r < size; r++) {
+        for (let c = 0; c < size; c++) {
+          const k = loopData.clues[r][c];
+          if (k >= 0) {
+            const tx = leftMargin + c * cellSize + Math.floor((cellSize - 18) / 2);
+            const ty = padding + r * cellSize + Math.floor((cellSize - 21) / 2);
+            tc.drawChar(tx, ty, String(k), 3, 1);
+          }
+        }
+      }
+
+      tc.renderToCanvas(canvas);
+    }
+
     function renderOfflineWheel(canvas, wData) {
       const totalHeight = 368;
       const tc = new ThermalCanvasSimulator(576, totalHeight);
@@ -7746,6 +7895,7 @@
     const tangoSim = new TangoSimulator();
     const ladderSim = new LadderSimulator();
     const lightsSim = new LightsSimulator();
+    const loopSim = new LoopSimulator();
 
     let rawReceiptLines = [];
 
@@ -7776,7 +7926,8 @@
       'TANGO': 'Fill each line with three 0s and three 1s without trios; = means same, x means opposite.',
       'LADDER': 'Deduce 3 English words to link COLD to WARM, changing 1 letter each step.',
       'WHEEL': 'Find 25+ words using center letter and outer letters, including a 7-letter pangram.',
-      'LIGHTS': 'Place 8 bulbs to light all corridors without bulbs shining on each other or exceeding numbers.'
+      'LIGHTS': 'Place 8 bulbs to light all corridors without bulbs shining on each other or exceeding numbers.',
+      'LOOP': 'Draw a single continuous closed loop connecting dots so each number matches its edge count.'
     };
 
     function wrapText(str, maxLen = 44) {
@@ -8579,6 +8730,44 @@
         });
       }
 
+      // 15. LOOP
+      if (document.getElementById('toggle-loop') && document.getElementById('toggle-loop').checked) {
+        const diff = document.getElementById('diff-loop').value;
+        const loopData = loopSim.generate(diff);
+        const loopDesc = 'Draw a single continuous closed loop connecting dots so each number matches its edge count.';
+        addStandardPuzzleHeader(items, 'LOOP', diff, loopDesc);
+
+        if (isOfflineRaster || isGraphic) {
+          items.push({
+            type: 'canvas',
+            render: (canvas) => renderOfflineLoop(canvas, loopData)
+          });
+        } else {
+          // Monospaced ASCII Loop
+          const size = loopData.size;
+          for (let r = 0; r < size; r++) {
+            let dotLine = '      ' + '.   '.repeat(size) + '.';
+            items.push({ type: 'text', text: dotLine });
+            let clueLine = '      ';
+            for (let c = 0; c < size; c++) {
+              const k = loopData.clues[r][c];
+              clueLine += (k >= 0) ? `  ${k} ` : '    ';
+            }
+            clueLine += ' ';
+            items.push({ type: 'text', text: clueLine });
+          }
+          items.push({ type: 'text', text: '      ' + '.   '.repeat(size) + '.' });
+        }
+
+        items.push({ type: 'blank', text: '' });
+        items.push({ type: 'rule', text: '-'.repeat(COLS) });
+
+        solutionsContent.push({
+          name: 'Loop',
+          data: loopData
+        });
+      }
+
       // Optional Solutions Key
       if (document.getElementById('toggle-solutions').checked && solutionsContent.length > 0) {
         items.push({ type: 'rule', text: '-'.repeat(COLS) });
@@ -8710,6 +8899,11 @@
               }
               items.push({ type: 'text', text: rowStr });
             }
+          } else if (item.name === 'Loop') {
+            const solLines = loopSim.formatSolutionKey(item.data);
+            for (const line of solLines) {
+              items.push({ type: 'text', text: line });
+            }
           }
 
           // Leave an empty line after displaying the answer
@@ -8818,7 +9012,8 @@
       'diff-cryptogram': { easy: 'easy', medium: 'medium', hard: 'hard' },
       'diff-tango': { easy: 'easy', medium: 'medium', hard: 'hard' },
       'diff-ladder': { easy: 'easy', medium: 'medium', hard: 'hard' },
-      'diff-lights': { easy: 'easy', medium: 'medium', hard: 'hard' }
+      'diff-lights': { easy: 'easy', medium: 'medium', hard: 'hard' },
+      'diff-loop': { easy: 'easy', medium: 'medium', hard: 'hard' }
     };
 
     function applyGlobalDifficulty(diff) {
@@ -8885,11 +9080,11 @@
       }
     });
 
-    // All 14 puzzle IDs in canonical order
+    // All 15 puzzle IDs in canonical order
     const ALL_GAMES = [
       'queens', 'sudoku', 'wordsearch', 'nonogram', 'jumble',
       'binary', 'mines', 'tents', 'bridges', 'killer',
-      'cryptogram', 'tango', 'ladder', 'lights'
+      'cryptogram', 'tango', 'ladder', 'lights', 'loop'
     ];
 
     function pickRandomGames(count) {
@@ -8994,6 +9189,7 @@
       'toggle-tango', 'diff-tango',
       'toggle-ladder', 'diff-ladder',
       'toggle-lights', 'diff-lights',
+      'toggle-loop', 'diff-loop',
       'toggle-solutions'
     ];
     inputs.forEach(id => {
