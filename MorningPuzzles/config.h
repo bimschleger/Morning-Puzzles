@@ -24,6 +24,7 @@
 // -----------------------------------------------------------------------------
 // 2. On-Demand Puzzle Grade & Difficulty Configuration
 // -----------------------------------------------------------------------------
+#define OFFLINE_PUZZLE_COUNT        5       // Number of random games to select and print (1-12)
 // 0 = Easy, 1 = Medium, 2 = Hard, 3 = Rotating (advances grade on each button press)
 #define PUZZLE_GRADE_DEFAULT        3       // Default: Rotating grade on button press
 #define PUZZLE_GRADE_CYCLE_ON_PRESS true    // Each hardware button press advances grade

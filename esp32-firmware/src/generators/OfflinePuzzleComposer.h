@@ -24,11 +24,27 @@ enum PuzzleGrade {
     GRADE_RANDOM = 4
 };
 
+enum OfflinePuzzleType {
+    PUZZLE_SUDOKU = 0,
+    PUZZLE_WORDSEARCH,
+    PUZZLE_NONOGRAM,
+    PUZZLE_QUEENS,
+    PUZZLE_JUMBLE,
+    PUZZLE_BINARY,
+    PUZZLE_MINES,
+    PUZZLE_TENTS,
+    PUZZLE_BRIDGES,
+    PUZZLE_TANGO,
+    PUZZLE_WHEEL,
+    PUZZLE_LIGHTS,
+    OFFLINE_PUZZLE_TOTAL
+};
+
 class OfflinePuzzleComposer {
 public:
     OfflinePuzzleComposer();
 
-    // Generates a complete random bundle of all puzzles on the ESP32 and prints directly
+    // Generates a random selection of puzzles (OFFLINE_PUZZLE_COUNT) and prints directly
     bool generateAndPrintReceipt(EscPosPrinter& printer, const String& dateStr = "", PuzzleGrade grade = GRADE_RANDOM);
 
     void cycleGrade();
@@ -37,6 +53,8 @@ public:
     const char* getGradeName(PuzzleGrade grade) const;
 
 private:
+    void printSinglePuzzle(EscPosPrinter& printer, OfflinePuzzleType type, bool useRaster);
+
     SudokuGen     _sudoku;
     WordSearchGen _wordSearch;
     NonogramGen   _nonogram;

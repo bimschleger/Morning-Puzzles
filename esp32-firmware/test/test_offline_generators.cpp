@@ -80,17 +80,17 @@ public:
 int main() {
     std::srand(time(nullptr));
     std::cout << "==================================================" << std::endl;
-    std::cout << "TESTING 100% OFFLINE MULTI-GRADE ENGINE ON ESP32" << std::endl;
+    std::cout << "TESTING 100% OFFLINE 5-PUZZLE RANDOM MIX ENGINE ON ESP32" << std::endl;
     std::cout << "==================================================" << std::endl;
 
     ConsoleEscPosPrinter printer;
     OfflinePuzzleComposer composer;
 
-    // Test 1: Generate Easy Grade
-    std::cout << "\n>>> TEST 1: GENERATE EASY GRADE BUNDLE <<<" << std::endl;
+    // Test 1: Generate 5-puzzle mix
+    std::cout << "\n>>> TEST 1: GENERATE 5-PUZZLE RANDOM MIX <<<" << std::endl;
     bool okEasy = composer.generateAndPrintReceipt(printer, "Monday, September 14, 2026", GRADE_EASY);
     if (!okEasy) {
-        std::cerr << "FAILED on Easy Grade" << std::endl;
+        std::cerr << "FAILED on Run 1" << std::endl;
         return 1;
     }
 

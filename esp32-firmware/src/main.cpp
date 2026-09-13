@@ -36,12 +36,12 @@ void executePrintJob(PuzzleGrade grade = GRADE_RANDOM) {
     Serial.println("\n========================================================");
     Serial.println(">>> STARTING MORNING PUZZLES 100% OFFLINE PRINT JOB <<<");
     Serial.printf(">>> Time: %s\n", timeManager.getFormattedTime().c_str());
-    Serial.printf(">>> Target Grade: %s\n", (grade == GRADE_ROTATING) ? "ROTATING" : offlineComposer.getGradeName(grade));
+    Serial.printf(">>> Format: %d-Puzzle Random Mix\n", OFFLINE_PUZZLE_COUNT);
     Serial.println("========================================================");
 
     digitalWrite(STATUS_LED_PIN, HIGH);
 
-    // 100% Offline on-device generation across all 12 puzzles
+    // 100% Offline on-device generation across OFFLINE_PUZZLE_COUNT randomly selected puzzles
     bool success = offlineComposer.generateAndPrintReceipt(
         printer, 
         timeManager.getFormattedTime("%A, %B %d, %Y"),
@@ -80,8 +80,8 @@ void handleButtonPress() {
                 timeManager.startSetupPortal();
             }
         } else if (duration > 80) {
-            // Short Press -> Instant On-Demand Print with a fresh random difficulty for each game!
-            Serial.println("[BTN] Hardware BOOT button pressed -> Generating & printing random difficulty puzzles!");
+            // Short Press -> Instant On-Demand Print with a fresh random 5-puzzle mix
+            Serial.println("[BTN] Hardware BOOT button pressed -> Generating & printing random 5-puzzle mix!");
             executePrintJob(GRADE_RANDOM);
         }
         delay(50); // debounce
@@ -94,17 +94,11 @@ void handleSerialCommands() {
     if (Serial.available() > 0) {
         char cmd = Serial.read();
         if (cmd == 'p' || cmd == 'P' || cmd == 'r' || cmd == 'R') {
-            Serial.println("[CMD] Manual print trigger (Random Difficulty per game).");
+            Serial.println("[CMD] Manual print trigger (Random 5-puzzle mix).");
             executePrintJob(GRADE_RANDOM);
-        } else if (cmd == '1') {
-            Serial.println("[CMD] Generating EASY grade puzzle bundle...");
-            executePrintJob(GRADE_EASY);
-        } else if (cmd == '2') {
-            Serial.println("[CMD] Generating MEDIUM grade puzzle bundle...");
-            executePrintJob(GRADE_MEDIUM);
-        } else if (cmd == '3') {
-            Serial.println("[CMD] Generating HARD grade puzzle bundle...");
-            executePrintJob(GRADE_HARD);
+        } else if (cmd == '1' || cmd == '2' || cmd == '3') {
+            Serial.println("[CMD] Manual print trigger (Random 5-puzzle mix).");
+            executePrintJob(GRADE_RANDOM);
         } else if (cmd == 'g' || cmd == 'G') {
             offlineComposer.cycleGrade();
             Serial.printf("[CMD] Cycled active grade to: %s\n", offlineComposer.getGradeName(offlineComposer.getCurrentGrade()));
@@ -123,7 +117,7 @@ void handleSerialCommands() {
         } else if (cmd == 's' || cmd == 'S') {
             Serial.println("\n--- MORNING PUZZLES STATUS ---");
             Serial.println("Mode:         100% Standalone Offline (Zero External APIs)");
-            Serial.printf("Active Grade: %s\n", offlineComposer.getGradeName(offlineComposer.getCurrentGrade()));
+            Serial.printf("Format:       %d Random Puzzles per print (from 12 available)\n", OFFLINE_PUZZLE_COUNT);
             Serial.printf("Time:         %s\n", timeManager.getFormattedTime().c_str());
             Serial.printf("Time Set:     %s\n", timeManager.isTimeSet() ? "Yes" : "No (Hold BOOT 3s to set)");
 #if (ACTIVE_PRINTER_MODE == PRINTER_MODE_W5500_ETH)
@@ -135,7 +129,7 @@ void handleSerialCommands() {
 #endif
             Serial.printf("Daily Cron:   %02d:%02d every morning\n", DAILY_PRINT_HOUR, DAILY_PRINT_MINUTE);
             Serial.printf("Hotspot:      %s\n", timeManager.isPortalActive() ? "Active (Morning-Puzzles-Setup)" : "Inactive");
-            Serial.println("Controls:     [P]rint (Next Grade) | [1] Easy | [2] Medium | [3] Hard | [G]ycle Grade | [W]i-Fi Setup | [S]tatus");
+            Serial.println("Controls:     [P]rint / [R]andom 5-puzzle mix | [W]i-Fi Setup | [S]tatus");
             Serial.println("-------------------------------\n");
         }
     }
@@ -189,15 +183,14 @@ void setup() {
     timeManager.begin();
 
     Serial.println("[MAIN] Operating in 100% STANDALONE OFFLINE mode.");
-    Serial.println("[MAIN] All 7 puzzles generate directly on the ESP32 chip on-demand.");
-    Serial.printf("[MAIN] Initial puzzle grade: %s\n", offlineComposer.getGradeName(offlineComposer.getCurrentGrade()));
+    Serial.printf("[MAIN] Each printout randomly selects %d unique games from all 12 available offline games.\n", OFFLINE_PUZZLE_COUNT);
 
     Serial.println("\n--- CONTROLS & HOW TO USE ---");
-    Serial.println("1. Short-press BOOT button (GPIO 0) -> Instantly generates & prints a new grade of puzzles!");
+    Serial.println("1. Short-press BOOT button (GPIO 0) -> Instantly generates & prints a random 5-puzzle mix!");
     Serial.println("2. Long-press BOOT button (3 sec)   -> Starts local Wi-Fi hotspot to sync time from phone!");
     Serial.printf("3. Daily scheduled auto-print       -> Every morning at %02d:%02d\n", DAILY_PRINT_HOUR, DAILY_PRINT_MINUTE);
     Serial.println("4. Auto-print on Printer Power-ON   -> Flip printer switch ON to print automatically!");
-    Serial.println("5. Serial Monitor (115200 baud)     -> [P]rint / [R]andom | [1] Easy | [2] Med | [3] Hard | [G]rade | [S]tatus\n");
+    Serial.println("5. Serial Monitor (115200 baud)     -> [P]rint / [R]andom mix | [W]i-Fi Setup | [S]tatus\n");
 
 #if AUTO_PRINT_ON_BOOT
     Serial.println("[MAIN] AUTO_PRINT_ON_BOOT active. Checking printer readiness...");
