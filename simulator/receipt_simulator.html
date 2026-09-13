@@ -132,7 +132,8 @@
           <span>🎨</span> Render Style:
         </label>
         <select id="global-render-style" class="w-full max-w-[210px] bg-slate-800 border border-amber-500/50 text-amber-400 font-semibold rounded-lg px-2.5 py-1.5 text-xs outline-none focus:border-amber-500 transition">
-          <option value="graphic" selected>🖼️ Drawing Rendering</option>
+          <option value="graphic" selected>🖼️ Online Drawing (Service)</option>
+          <option value="offline_raster">📟 Offline ESP32 Raster</option>
           <option value="ascii">🔤 ASCII Style</option>
         </select>
       </div>
@@ -193,7 +194,7 @@
         </div>
         <div class="flex justify-between">
           <span>Thermal Raster Mode:</span>
-          <span class="font-mono text-emerald-400 font-semibold">1-Bit 203 DPI Active</span>
+          <span class="font-mono text-emerald-400 font-semibold" id="stat-raster-mode">Online Drawing (345px)</span>
         </div>
       </div>
 
@@ -6560,6 +6561,935 @@
     }
 
     // =========================================================================
+    // 2B. ESP32 ON-DEVICE 1-BIT THERMAL RASTER ENGINE (100% Hardware Emulation)
+    // =========================================================================
+
+    const FONT_5X7_BITMAP = {
+      '0': [0x1E, 0x21, 0x21, 0x21, 0x21, 0x21, 0x1E],
+      '1': [0x08, 0x18, 0x28, 0x08, 0x08, 0x08, 0x3E],
+      '2': [0x1E, 0x21, 0x01, 0x0E, 0x18, 0x20, 0x3F],
+      '3': [0x1E, 0x21, 0x01, 0x0E, 0x01, 0x21, 0x1E],
+      '4': [0x02, 0x06, 0x0A, 0x12, 0x3F, 0x02, 0x02],
+      '5': [0x3F, 0x20, 0x3E, 0x01, 0x01, 0x21, 0x1E],
+      '6': [0x1E, 0x21, 0x20, 0x3E, 0x21, 0x21, 0x1E],
+      '7': [0x3F, 0x01, 0x02, 0x04, 0x08, 0x10, 0x10],
+      '8': [0x1E, 0x21, 0x21, 0x1E, 0x21, 0x21, 0x1E],
+      '9': [0x1E, 0x21, 0x21, 0x1F, 0x01, 0x21, 0x1E],
+      'A': [0x0C, 0x12, 0x21, 0x3F, 0x21, 0x21, 0x21],
+      'B': [0x3E, 0x21, 0x21, 0x3E, 0x21, 0x21, 0x3E],
+      'C': [0x1E, 0x21, 0x20, 0x20, 0x20, 0x21, 0x1E],
+      'D': [0x3C, 0x22, 0x21, 0x21, 0x21, 0x22, 0x3C],
+      'E': [0x3F, 0x20, 0x20, 0x3E, 0x20, 0x20, 0x3F],
+      'F': [0x3F, 0x20, 0x20, 0x3E, 0x20, 0x20, 0x20],
+      'G': [0x1E, 0x21, 0x20, 0x27, 0x21, 0x21, 0x1E],
+      'H': [0x21, 0x21, 0x21, 0x3F, 0x21, 0x21, 0x21],
+      'I': [0x1F, 0x04, 0x04, 0x04, 0x04, 0x04, 0x1F],
+      'J': [0x07, 0x02, 0x02, 0x02, 0x22, 0x22, 0x1C],
+      'K': [0x21, 0x22, 0x24, 0x38, 0x24, 0x22, 0x21],
+      'L': [0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x3F],
+      'M': [0x21, 0x33, 0x2D, 0x21, 0x21, 0x21, 0x21],
+      'N': [0x21, 0x31, 0x29, 0x25, 0x23, 0x21, 0x21],
+      'O': [0x1E, 0x21, 0x21, 0x21, 0x21, 0x21, 0x1E],
+      'P': [0x3E, 0x21, 0x21, 0x3E, 0x20, 0x20, 0x20],
+      'Q': [0x1E, 0x21, 0x21, 0x21, 0x25, 0x22, 0x1D],
+      'R': [0x3E, 0x21, 0x21, 0x3E, 0x24, 0x22, 0x21],
+      'S': [0x1E, 0x21, 0x20, 0x1E, 0x01, 0x21, 0x1E],
+      'T': [0x3F, 0x04, 0x04, 0x04, 0x04, 0x04, 0x04],
+      'U': [0x21, 0x21, 0x21, 0x21, 0x21, 0x21, 0x1E],
+      'V': [0x21, 0x21, 0x21, 0x12, 0x12, 0x0C, 0x0C],
+      'W': [0x21, 0x21, 0x21, 0x21, 0x2D, 0x33, 0x21],
+      'X': [0x21, 0x12, 0x0C, 0x0C, 0x12, 0x21, 0x21],
+      'Y': [0x21, 0x12, 0x0C, 0x04, 0x04, 0x04, 0x04],
+      'Z': [0x3F, 0x02, 0x04, 0x08, 0x10, 0x20, 0x3F],
+      ' ': [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
+      '.': [0x00, 0x00, 0x00, 0x00, 0x00, 0x0C, 0x0C],
+      ':': [0x00, 0x0C, 0x0C, 0x00, 0x0C, 0x0C, 0x00],
+      '-': [0x00, 0x00, 0x00, 0x3E, 0x00, 0x00, 0x00],
+      '+': [0x00, 0x08, 0x08, 0x3E, 0x08, 0x08, 0x00],
+      '=': [0x00, 0x3E, 0x00, 0x3E, 0x00, 0x00, 0x00],
+      '*': [0x00, 0x2A, 0x1C, 0x3E, 0x1C, 0x2A, 0x00],
+      '/': [0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x00],
+      '(': [0x04, 0x08, 0x10, 0x10, 0x10, 0x08, 0x04],
+      ')': [0x10, 0x08, 0x04, 0x04, 0x04, 0x08, 0x10],
+      '?': [0x1E, 0x21, 0x02, 0x04, 0x04, 0x00, 0x04],
+      '!': [0x04, 0x04, 0x04, 0x04, 0x04, 0x00, 0x04],
+      '[': [0x1E, 0x10, 0x10, 0x10, 0x10, 0x10, 0x1E],
+      ']': [0x1E, 0x02, 0x02, 0x02, 0x02, 0x02, 0x1E],
+      '_': [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3F],
+      ',': [0x00, 0x00, 0x00, 0x00, 0x0C, 0x04, 0x08]
+    };
+
+    class ThermalCanvasSimulator {
+      constructor(width = 576, height = 100) {
+        this.width = width;
+        this.height = height;
+        this.widthBytes = Math.floor((width + 7) / 8);
+        this.buffer = new Uint8Array(this.widthBytes * height);
+      }
+
+      setPixel(x, y, color = 1) {
+        if (x < 0 || x >= this.width || y < 0 || y >= this.height) return;
+        const byteIdx = y * this.widthBytes + (x >> 3);
+        const bitMask = 1 << (7 - (x & 7));
+        if (color) {
+          this.buffer[byteIdx] |= bitMask;
+        } else {
+          this.buffer[byteIdx] &= ~bitMask;
+        }
+      }
+
+      getPixel(x, y) {
+        if (x < 0 || x >= this.width || y < 0 || y >= this.height) return 0;
+        const byteIdx = y * this.widthBytes + (x >> 3);
+        const bitMask = 1 << (7 - (x & 7));
+        return (this.buffer[byteIdx] & bitMask) ? 1 : 0;
+      }
+
+      drawHLine(x, y, w, thickness = 1, color = 1) {
+        if (w <= 0 || thickness <= 0) return;
+        for (let t = 0; t < thickness; t++) {
+          const py = y + t;
+          if (py >= 0 && py < this.height) {
+            const startX = Math.max(0, x);
+            const endX = Math.min(this.width, x + w);
+            for (let px = startX; px < endX; px++) {
+              this.setPixel(px, py, color);
+            }
+          }
+        }
+      }
+
+      drawVLine(x, y, h, thickness = 1, color = 1) {
+        if (h <= 0 || thickness <= 0) return;
+        for (let t = 0; t < thickness; t++) {
+          const px = x + t;
+          if (px >= 0 && px < this.width) {
+            const startY = Math.max(0, y);
+            const endY = Math.min(this.height, y + h);
+            for (let py = startY; py < endY; py++) {
+              this.setPixel(px, py, color);
+            }
+          }
+        }
+      }
+
+      drawRect(x, y, w, h, thickness = 1, color = 1) {
+        if (w <= 0 || h <= 0) return;
+        this.drawHLine(x, y, w, thickness, color);
+        this.drawHLine(x, y + h - thickness, w, thickness, color);
+        this.drawVLine(x, y, h, thickness, color);
+        this.drawVLine(x + w - thickness, y, h, thickness, color);
+      }
+
+      fillRect(x, y, w, h, color = 1) {
+        if (w <= 0 || h <= 0) return;
+        const startY = Math.max(0, y);
+        const endY = Math.min(this.height, y + h);
+        const startX = Math.max(0, x);
+        const endX = Math.min(this.width, x + w);
+        for (let py = startY; py < endY; py++) {
+          for (let px = startX; px < endX; px++) {
+            this.setPixel(px, py, color);
+          }
+        }
+      }
+
+      fillHatch(x, y, w, h, patternId) {
+        if (w <= 0 || h <= 0) return;
+        const pat = patternId % 8;
+        const startY = Math.max(0, y);
+        const endY = Math.min(this.height, y + h);
+        const startX = Math.max(0, x);
+        const endX = Math.min(this.width, x + w);
+        for (let py = startY; py < endY; py++) {
+          for (let px = startX; px < endX; px++) {
+            let isBurn = false;
+            switch (pat) {
+              case 0: isBurn = false; break;
+              case 1: isBurn = ((px + py) % 6 === 0); break;
+              case 2: isBurn = ((px - py + 1000) % 6 === 0); break;
+              case 3: isBurn = (px % 4 === 0 || py % 4 === 0); break;
+              case 4: isBurn = ((px + py) % 4 === 0); break;
+              case 5: isBurn = (px % 3 === 0 && py % 3 === 0); break;
+              case 6: isBurn = ((px + py) % 3 === 0 || (px - py + 1000) % 3 === 0); break;
+              case 7: isBurn = (py % 3 === 0); break;
+            }
+            if (isBurn) this.setPixel(px, py, 1);
+          }
+        }
+      }
+
+      drawCircle(cx, cy, radius, thickness = 2, color = 1) {
+        if (radius <= 0) return;
+        const rInnerSq = (radius >= thickness) ? (radius - thickness) * (radius - thickness) : 0;
+        const rOuterSq = radius * radius;
+        const yStart = Math.max(0, cy - radius);
+        const yEnd = Math.min(this.height, cy + radius + 1);
+        const xStart = Math.max(0, cx - radius);
+        const xEnd = Math.min(this.width, cx + radius + 1);
+        for (let py = yStart; py < yEnd; py++) {
+          const dy = py - cy;
+          const dySq = dy * dy;
+          for (let px = xStart; px < xEnd; px++) {
+            const dx = px - cx;
+            const distSq = dx * dx + dySq;
+            if (distSq >= rInnerSq && distSq <= rOuterSq) {
+              this.setPixel(px, py, color);
+            }
+          }
+        }
+      }
+
+      fillCircle(cx, cy, radius, color = 1) {
+        if (radius <= 0) return;
+        const rSq = radius * radius;
+        const yStart = Math.max(0, cy - radius);
+        const yEnd = Math.min(this.height, cy + radius + 1);
+        const xStart = Math.max(0, cx - radius);
+        const xEnd = Math.min(this.width, cx + radius + 1);
+        for (let py = yStart; py < yEnd; py++) {
+          const dy = py - cy;
+          const dySq = dy * dy;
+          for (let px = xStart; px < xEnd; px++) {
+            const dx = px - cx;
+            if (dx * dx + dySq <= rSq) {
+              this.setPixel(px, py, color);
+            }
+          }
+        }
+      }
+
+      drawChar(x, y, char, scale = 2, color = 1) {
+        if (scale <= 0) return;
+        const upperC = (char || ' ').toUpperCase();
+        const rows = FONT_5X7_BITMAP[upperC] || FONT_5X7_BITMAP[' '];
+        for (let rowIdx = 0; rowIdx < 7; rowIdx++) {
+          const rowByte = rows[rowIdx];
+          for (let colIdx = 0; colIdx < 6; colIdx++) {
+            if ((rowByte >> (5 - colIdx)) & 1) {
+              for (let sy = 0; sy < scale; sy++) {
+                for (let sx = 0; sx < scale; sx++) {
+                  this.setPixel(x + colIdx * scale + sx, y + rowIdx * scale + sy, color);
+                }
+              }
+            }
+          }
+        }
+      }
+
+      drawText(x, y, text, scale = 2, color = 1) {
+        if (!text || scale <= 0) return;
+        let curX = x;
+        const charW = 6 * scale + Math.max(1, Math.floor(scale / 2));
+        for (let i = 0; i < text.length; i++) {
+          this.drawChar(curX, y, text[i], scale, color);
+          curX += charW;
+        }
+      }
+
+      getTextWidth(text, scale = 2) {
+        if (!text || scale <= 0) return 0;
+        const charW = 6 * scale + Math.max(1, Math.floor(scale / 2));
+        return text.length * charW;
+      }
+
+      drawCenteredText(y, text, scale = 2, color = 1) {
+        if (!text) return;
+        const w = this.getTextWidth(text, scale);
+        const x = Math.floor((this.width - w) / 2);
+        this.drawText(x, y, text, scale, color);
+      }
+
+      renderToCanvas(canvas) {
+        canvas.width = this.width;
+        canvas.height = this.height;
+        canvas.style.width = '100%';
+        canvas.style.height = 'auto';
+        const ctx = canvas.getContext('2d');
+        const imgData = ctx.createImageData(this.width, this.height);
+        const data = imgData.data;
+        let pIdx = 0;
+        for (let y = 0; y < this.height; y++) {
+          const lineOffset = y * this.widthBytes;
+          for (let x = 0; x < this.width; x++) {
+            const byteVal = this.buffer[lineOffset + (x >> 3)];
+            const isBurn = (byteVal & (1 << (7 - (x & 7)))) !== 0;
+            if (isBurn) {
+              data[pIdx]     = 17;
+              data[pIdx + 1] = 17;
+              data[pIdx + 2] = 17;
+              data[pIdx + 3] = 255;
+            } else {
+              data[pIdx]     = 250;
+              data[pIdx + 1] = 250;
+              data[pIdx + 2] = 247;
+              data[pIdx + 3] = 255;
+            }
+            pIdx += 4;
+          }
+        }
+        ctx.putImageData(imgData, 0, 0);
+      }
+    }
+
+    // --- On-Device Offline Puzzle Render Functions (576-dot 1-Bit ThermalCanvas) ---
+
+    function renderOfflineQueens(canvas, qData, size = 8, stars = 1) {
+      const padding = 24;
+      const boardSize = 576 - padding * 2; // 528
+      const cellSize = Math.floor(boardSize / size);
+      const totalH = padding + cellSize * size + padding;
+
+      const tc = new ThermalCanvasSimulator(576, totalH);
+
+      // Shading per region
+      for (let r = 0; r < size; r++) {
+        for (let c = 0; c < size; c++) {
+          const reg = qData.regions[r][c];
+          if (reg >= 0) {
+            const x0 = padding + c * cellSize;
+            const y0 = padding + r * cellSize;
+            tc.fillHatch(x0, y0, cellSize, cellSize, reg);
+          }
+        }
+      }
+
+      // Region boundaries and grid lines
+      for (let r = 0; r < size; r++) {
+        for (let c = 0; c < size; c++) {
+          const reg = qData.regions[r][c];
+          const x0 = padding + c * cellSize;
+          const y0 = padding + r * cellSize;
+          const isBottom = (r === size - 1) || (r + 1 < size && qData.regions[r + 1][c] !== reg);
+          tc.drawHLine(x0, y0 + cellSize, cellSize, isBottom ? 4 : 1);
+
+          const isRight = (c === size - 1) || (c + 1 < size && qData.regions[r][c + 1] !== reg);
+          tc.drawVLine(x0 + cellSize, y0, cellSize, isRight ? 4 : 1);
+        }
+      }
+
+      // Outer border frame
+      tc.drawRect(padding, padding, cellSize * size, cellSize * size, 5);
+      tc.renderToCanvas(canvas);
+    }
+
+    function renderOfflineSudoku(canvas, sData) {
+      const padding = 24;
+      const boardSize = 576 - padding * 2; // 528
+      const cellSize = Math.floor(boardSize / 9); // 58
+      const totalH = padding + cellSize * 9 + padding; // 570
+
+      const tc = new ThermalCanvasSimulator(576, totalH);
+
+      // Grid lines
+      for (let i = 0; i <= 9; i++) {
+        const pos = padding + i * cellSize;
+        const isMajor = (i % 3 === 0);
+        tc.drawHLine(padding, pos, cellSize * 9, isMajor ? 4 : 1);
+        tc.drawVLine(pos, padding, cellSize * 9, isMajor ? 4 : 1);
+      }
+
+      // Digits
+      for (let r = 0; r < 9; r++) {
+        for (let c = 0; c < 9; c++) {
+          const val = sData.puzzle[r][c];
+          if (val !== 0) {
+            const cx = padding + c * cellSize + Math.floor((cellSize - 18) / 2);
+            const cy = padding + r * cellSize + Math.floor((cellSize - 21) / 2);
+            tc.drawChar(cx, cy, String(val), 3);
+          }
+        }
+      }
+
+      tc.renderToCanvas(canvas);
+    }
+
+    function renderOfflineWordSearch(canvas, wsData) {
+      const padding = 24;
+      const boardSize = 576 - padding * 2; // 528
+      const cols = wsData.cols || (wsData.grid[0] ? wsData.grid[0].length : 8);
+      const rows = wsData.rows || (wsData.grid ? wsData.grid.length : 10);
+      const cellSize = Math.floor(boardSize / cols);
+      const gridH = cellSize * rows;
+      const totalH = padding + gridH + padding;
+
+      const tc = new ThermalCanvasSimulator(576, totalH);
+
+      // Outer border
+      tc.drawRect(padding, padding, cellSize * cols, gridH, 3);
+
+      // Letter matrix
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const letter = wsData.grid[r][c];
+          const cx = padding + c * cellSize + Math.floor((cellSize - 12) / 2);
+          const cy = padding + r * cellSize + Math.floor((cellSize - 14) / 2);
+          tc.drawChar(cx, cy, letter, 2);
+        }
+      }
+
+      tc.renderToCanvas(canvas);
+    }
+
+    function renderOfflineNonogram(canvas, nData) {
+      const size = nData.size || 5;
+      const padding = 24;
+      const innerWidth = 576 - padding * 2;
+      const cellSize = (size <= 5) ? 76 : ((size <= 8) ? 50 : 40);
+      const majorInterval = (size === 8) ? 4 : 5;
+      const gridSize = cellSize * size;
+      const rowClueWidth = innerWidth - gridSize;
+
+      let maxColClues = 1;
+      for (let c = 0; c < size; c++) {
+        if (nData.colClues[c] && nData.colClues[c].length > maxColClues) {
+          maxColClues = nData.colClues[c].length;
+        }
+      }
+      const colClueItemH = Math.max(24, Math.floor(cellSize * 0.55));
+      const colClueHeight = Math.max(50, maxColClues * colClueItemH + 16);
+      const totalH = 12 + colClueHeight + gridSize + 12;
+
+      const tc = new ThermalCanvasSimulator(576, totalH);
+      const gridX = padding + rowClueWidth;
+      const gridY = 12 + colClueHeight;
+
+      tc.drawRect(padding, 12, rowClueWidth, colClueHeight, 3);
+      tc.drawRect(gridX, 12, gridSize, colClueHeight, 3);
+      tc.drawRect(padding, gridY, rowClueWidth, gridSize, 3);
+      tc.drawRect(gridX, gridY, gridSize, gridSize, 4);
+
+      // Column clues
+      for (let c = 0; c < size; c++) {
+        const colCx = gridX + c * cellSize + Math.floor(cellSize / 2) - 6;
+        const clues = nData.colClues[c] || [];
+        for (let k = 0; k < clues.length; k++) {
+          const dist = (clues.length - 1 - k) * colClueItemH;
+          tc.drawText(colCx, gridY - 18 - dist, String(clues[k]), 2);
+        }
+        if (c > 0) {
+          const isMajor = (c % majorInterval === 0);
+          tc.drawVLine(gridX + c * cellSize, 12, colClueHeight, isMajor ? 3 : 1);
+        }
+      }
+
+      // Row clues
+      for (let r = 0; r < size; r++) {
+        const rowCy = gridY + r * cellSize + Math.floor(cellSize / 2) - 7;
+        const clues = nData.rowClues[r] || [];
+        for (let k = 0; k < clues.length; k++) {
+          const dist = (clues.length - 1 - k) * 20;
+          tc.drawText(gridX - 16 - dist, rowCy, String(clues[k]), 2);
+        }
+        if (r > 0) {
+          const isMajor = (r % majorInterval === 0);
+          tc.drawHLine(padding, gridY + r * cellSize, rowClueWidth, isMajor ? 3 : 1);
+        }
+      }
+
+      // Major/minor grid lines (Empty player cells are clean whitespace with no dots)
+      for (let i = 1; i < size; i++) {
+        const isMajor = (i % majorInterval === 0);
+        const thickness = isMajor ? 4 : 1;
+        tc.drawHLine(gridX, gridY + i * cellSize, gridSize, thickness);
+        tc.drawVLine(gridX + i * cellSize, gridY, gridSize, thickness);
+      }
+
+      tc.renderToCanvas(canvas);
+    }
+
+    function renderOfflineJumble(canvas, jData) {
+      const padding = 24;
+      const rowH = 48;
+      const numWords = jData.words.length;
+      const totalH = padding + numWords * rowH + padding;
+
+      const tc = new ThermalCanvasSimulator(576, totalH);
+
+      for (let i = 0; i < numWords; i++) {
+        const y = padding + i * rowH;
+        const scram = jData.scrambled[i];
+        const orig = jData.words[i];
+        const circles = jData.circles[i] || [];
+
+        // Scrambled word text on left
+        tc.drawText(padding, y + 10, scram, 3);
+
+        // Letter boxes / circles in middle
+        const slotStartX = padding + 180;
+        const boxSize = 28;
+        for (let charIdx = 0; charIdx < orig.length; charIdx++) {
+          const bx = slotStartX + charIdx * (boxSize + 8);
+          const isCircled = circles.includes(charIdx);
+          if (isCircled) {
+            tc.drawCircle(bx + Math.floor(boxSize / 2), y + 8 + Math.floor(boxSize / 2), Math.floor(boxSize / 2), 2);
+          } else {
+            tc.drawRect(bx, y + 8, boxSize, boxSize, 2);
+          }
+        }
+
+        // Handwriting underline line on right
+        const lineStartX = slotStartX + orig.length * (boxSize + 8) + 16;
+        if (lineStartX < 576 - padding) {
+          tc.drawHLine(lineStartX, y + 36, 576 - padding - lineStartX, 2);
+        }
+      }
+
+      tc.renderToCanvas(canvas);
+    }
+
+    function renderOfflineBinary(canvas, bData) {
+      const padding = 24;
+      const boardSize = 576 - padding * 2;
+      const size = bData.size || 8;
+      const cellSize = Math.floor(boardSize / size);
+      const totalH = padding + cellSize * size + padding;
+
+      const tc = new ThermalCanvasSimulator(576, totalH);
+
+      // Outer border
+      tc.drawRect(padding, padding, cellSize * size, cellSize * size, 4);
+
+      // Inner lines
+      for (let i = 1; i < size; i++) {
+        const pos = padding + i * cellSize;
+        tc.drawHLine(padding, pos, cellSize * size, 2);
+        tc.drawVLine(pos, padding, cellSize * size, 2);
+      }
+
+      // Numbers
+      for (let r = 0; r < size; r++) {
+        for (let c = 0; c < size; c++) {
+          const val = bData.puzzle[r][c];
+          if (val !== -1) {
+            const cx = padding + c * cellSize + Math.floor((cellSize - 18) / 2);
+            const cy = padding + r * cellSize + Math.floor((cellSize - 21) / 2);
+            tc.drawChar(cx, cy, String(val), 3);
+          }
+        }
+      }
+
+      tc.renderToCanvas(canvas);
+    }
+
+    function renderOfflineMines(canvas, mData) {
+      const padding = 24;
+      const innerWidth = 576 - padding * 2; // 528
+      const cellSize = Math.floor(innerWidth / 8); // 66
+      const boardH = cellSize * 8;
+      const badgeH = 36;
+      const totalH = 12 + badgeH + 12 + boardH + 12;
+
+      const tc = new ThermalCanvasSimulator(576, totalH);
+
+      // Badge at top
+      tc.drawRect(padding, 12, innerWidth, badgeH, 3);
+      tc.drawCenteredText(18, `TOTAL MINES: ${mData.minesCount}`, 2);
+
+      const boardY = 12 + badgeH + 12;
+
+      // Outer grid
+      tc.drawRect(padding, boardY, cellSize * 8, cellSize * 8, 4);
+
+      // Inner lines
+      for (let i = 1; i < 8; i++) {
+        tc.drawHLine(padding, boardY + i * cellSize, cellSize * 8, 1);
+        tc.drawVLine(padding + i * cellSize, boardY, cellSize * 8, 1);
+      }
+
+      // Numbers (clean whitespace for unrevealed cells, no dots)
+      for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+          const val = mData.puzzle[r][c];
+          if (val >= 0) {
+            const cx = padding + c * cellSize + Math.floor((cellSize - 18) / 2);
+            const cy = boardY + r * cellSize + Math.floor((cellSize - 21) / 2);
+            tc.drawChar(cx, cy, String(val), 3);
+          }
+        }
+      }
+
+      tc.renderToCanvas(canvas);
+    }
+
+    function renderOfflineTents(canvas, tData) {
+      const padding = 24;
+      const innerWidth = 576 - padding * 2;
+      const size = tData.size || 8;
+      const marginW = 48;
+      const boardSize = innerWidth - marginW;
+      const cellSize = Math.floor(boardSize / size);
+      const gridW = cellSize * size;
+      const gridX = padding + marginW;
+      const gridY = padding + marginW;
+      const totalH = gridY + gridW + padding;
+
+      const tc = new ThermalCanvasSimulator(576, totalH);
+
+      // Outer grid border
+      tc.drawRect(gridX, gridY, gridW, gridW, 4);
+
+      // Inner grid lines
+      for (let i = 1; i < size; i++) {
+        tc.drawHLine(gridX, gridY + i * cellSize, gridW, 1);
+        tc.drawVLine(gridX + i * cellSize, gridY, gridW, 1);
+      }
+
+      // Column clues
+      for (let c = 0; c < size; c++) {
+        const cx = gridX + c * cellSize + Math.floor((cellSize - 12) / 2);
+        tc.drawText(cx, gridY - 24, String(tData.colClues[c]), 2);
+      }
+
+      // Row clues
+      for (let r = 0; r < size; r++) {
+        const cy = gridY + r * cellSize + Math.floor((cellSize - 14) / 2);
+        tc.drawText(padding + 16, cy, String(tData.rowClues[r]), 2);
+      }
+
+      // Trees ('T') - empty cells are clean whitespace with no dots
+      for (let r = 0; r < size; r++) {
+        for (let c = 0; c < size; c++) {
+          if (tData.puzzle[r][c] === 1) {
+            const tx = gridX + c * cellSize + Math.floor((cellSize - 18) / 2);
+            const ty = gridY + r * cellSize + Math.floor((cellSize - 21) / 2);
+            tc.drawChar(tx, ty, 'T', 3);
+          }
+        }
+      }
+
+      tc.renderToCanvas(canvas);
+    }
+
+    function renderOfflineBridges(canvas, bData) {
+      const padding = 32;
+      const boardSize = 576 - padding * 2;
+      const size = bData.size || 7;
+      const step = (size > 1) ? Math.floor(boardSize / (size - 1)) : boardSize;
+      const totalH = padding + boardSize + padding;
+
+      const tc = new ThermalCanvasSimulator(576, totalH);
+
+      // Corner framing brackets
+      const cornerLen = 16;
+      tc.drawHLine(padding, padding, cornerLen, 2);
+      tc.drawVLine(padding, padding, cornerLen, 2);
+      tc.drawHLine(padding + boardSize - cornerLen, padding, cornerLen, 2);
+      tc.drawVLine(padding + boardSize, padding, cornerLen, 2);
+      tc.drawHLine(padding, padding + boardSize, cornerLen, 2);
+      tc.drawVLine(padding, padding + boardSize - cornerLen, cornerLen, 2);
+      tc.drawHLine(padding + boardSize - cornerLen, padding + boardSize, cornerLen, 2);
+      tc.drawVLine(padding + boardSize, padding + boardSize - cornerLen, cornerLen, 2);
+
+      // Islands
+      const islandRadius = Math.max(18, Math.min(24, Math.floor(step / 3)));
+      for (let i = 0; i < bData.islands.length; i++) {
+        const isl = bData.islands[i];
+        const cx = padding + isl.c * step;
+        const cy = padding + isl.r * step;
+
+        tc.fillCircle(cx, cy, islandRadius, 0); // clear white interior
+        tc.drawCircle(cx, cy, islandRadius, 2, 1); // circle border
+        tc.drawChar(cx - 5, cy - 7, String(isl.count), 2, 1);
+      }
+
+      tc.renderToCanvas(canvas);
+    }
+
+    function renderOfflineKiller(canvas, kData) {
+      const size = kData.size || 4;
+      const padding = 24;
+      const actualBoard = 576 - padding * 2;
+      const cellSize = Math.floor(actualBoard / size);
+      const totalH = padding + actualBoard + padding;
+      const boxR = (size === 6) ? 2 : 2;
+      const boxC = (size === 6) ? 3 : 2;
+
+      const tc = new ThermalCanvasSimulator(576, totalH);
+      tc.drawRect(padding, padding, actualBoard, actualBoard, 4);
+
+      for (let r = 1; r < size; r++) {
+        const y = padding + r * cellSize;
+        const thick = (r % boxR === 0) ? 4 : 2;
+        tc.drawHLine(padding, y, actualBoard, thick);
+      }
+
+      for (let c = 1; c < size; c++) {
+        const x = padding + c * cellSize;
+        const thick = (c % boxC === 0) ? 4 : 2;
+        tc.drawVLine(x, padding, actualBoard, thick);
+      }
+
+      // Dashed cage boundaries and cage sums
+      const inset = 4;
+      for (const cg of (kData.cages || [])) {
+        const cells = cg.cells || [];
+        for (const [r, c] of cells) {
+          const x0 = padding + c * cellSize + inset;
+          const y0 = padding + r * cellSize + inset;
+          const x1 = padding + (c + 1) * cellSize - inset;
+          const y1 = padding + (r + 1) * cellSize - inset;
+
+          const hasTop = cells.some(([cr, cc]) => cr === r - 1 && cc === c);
+          const hasBottom = cells.some(([cr, cc]) => cr === r + 1 && cc === c);
+          const hasLeft = cells.some(([cr, cc]) => cr === r && cc === c - 1);
+          const hasRight = cells.some(([cr, cc]) => cr === r && cc === c + 1);
+
+          if (!hasTop) {
+            for (let dx = x0; dx < x1; dx += 8) tc.drawHLine(dx, y0, 4, 1);
+          }
+          if (!hasBottom) {
+            for (let dx = x0; dx < x1; dx += 8) tc.drawHLine(dx, y1, 4, 1);
+          }
+          if (!hasLeft) {
+            for (let dy = y0; dy < y1; dy += 8) tc.drawVLine(x0, dy, 4, 1);
+          }
+          if (!hasRight) {
+            for (let dy = y0; dy < y1; dy += 8) tc.drawVLine(x1, dy, 4, 1);
+          }
+        }
+
+        if (cells.length > 0) {
+          const sorted = cells.slice().sort((a, b) => (a[0] - b[0]) || (a[1] - b[1]));
+          const [r0, c0] = sorted[0];
+          tc.drawText(padding + c0 * cellSize + inset + 3, padding + r0 * cellSize + inset + 3, String(cg.sum), 2);
+        }
+      }
+
+      tc.renderToCanvas(canvas);
+    }
+
+    function renderOfflineCryptogram(canvas, cData) {
+      const padding = 24;
+      const innerWidth = 576 - padding * 2;
+      const words = cData.ciphertext.split(' ');
+      const lines = [];
+      let curr = '';
+      for (const w of words) {
+        if (!curr) curr = w;
+        else if (curr.length + 1 + w.length <= 18) curr += ' ' + w;
+        else { lines.push(curr); curr = w; }
+      }
+      if (curr) lines.push(curr);
+
+      const rowHeight = 36;
+      const rowGap = 16;
+      const authorH = cData.author ? 28 : 0;
+      const totalH = 16 + lines.length * (rowHeight + rowGap) + authorH + 60;
+
+      const tc = new ThermalCanvasSimulator(576, totalH);
+      let curY = 16;
+
+      for (const lineStr of lines) {
+        const lineLen = lineStr.length;
+        const charW = Math.min(24, Math.floor(innerWidth / Math.max(1, lineLen)));
+        const startX = padding + Math.floor((innerWidth - lineLen * charW) / 2);
+        const slotY = curY + 24;
+        const charY = curY + 32;
+
+        for (let i = 0; i < lineLen; i++) {
+          const ch = lineStr[i];
+          const cx = startX + i * charW;
+          if (/[A-Z]/.test(ch)) {
+            tc.drawHLine(cx + 3, slotY, Math.max(1, charW - 6), 2);
+          }
+          tc.drawChar(cx + 4, charY, ch, 2, 1);
+        }
+        curY += rowHeight + rowGap;
+      }
+
+      if (cData.author) {
+        tc.drawText(padding + 12, curY, `-- ${cData.author}`, 1, 1);
+        curY += authorH;
+      }
+
+      for (let dx = padding; dx < padding + innerWidth; dx += 8) {
+        tc.drawHLine(dx, curY, 4, 2);
+      }
+      curY += 18;
+
+      tc.drawText(padding, curY, "ALPHABET TRACKER:", 1, 1);
+      curY += 20;
+      const colW = Math.floor(innerWidth / 26);
+      const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      for (let i = 0; i < 26; i++) {
+        const lx = padding + i * colW;
+        tc.drawText(lx + 2, curY, letters[i], 1, 1);
+        tc.drawHLine(lx + 1, curY + 16, Math.max(1, colW - 2), 1);
+      }
+
+      tc.renderToCanvas(canvas);
+    }
+
+    function renderOfflineTango(canvas, tgData) {
+      const padding = 24;
+      const boardSize = 576 - padding * 2; // 528
+      const size = tgData.size || 6;
+      const cellSize = Math.floor(boardSize / size);
+      const totalH = padding + cellSize * size + padding;
+
+      const tc = new ThermalCanvasSimulator(576, totalH);
+
+      // Outer grid border
+      tc.drawRect(padding, padding, cellSize * size, cellSize * size, 4);
+
+      // Inner lines
+      for (let i = 1; i < size; i++) {
+        const pos = padding + i * cellSize;
+        tc.drawHLine(padding, pos, cellSize * size, 1);
+        tc.drawVLine(pos, padding, cellSize * size, 1);
+      }
+
+      // Digits inside cells
+      for (let r = 0; r < size; r++) {
+        for (let c = 0; c < size; c++) {
+          const val = tgData.puzzle[r][c];
+          if (val === 0 || val === 1) {
+            const cx = padding + c * cellSize + Math.floor((cellSize - 18) / 2);
+            const cy = padding + r * cellSize + Math.floor((cellSize - 21) / 2);
+            tc.drawChar(cx, cy, String(val), 3);
+          }
+        }
+      }
+
+      // Horizontal edge markers (between cell c and c+1)
+      for (let r = 0; r < size; r++) {
+        for (let c = 0; c < size - 1; c++) {
+          const e = (tgData.edges_h && tgData.edges_h[r] && tgData.edges_h[r][c]) || 0;
+          if (e === 1 || e === 2) {
+            const x = padding + (c + 1) * cellSize;
+            const y = padding + r * cellSize + Math.floor(cellSize / 2);
+            tc.fillRect(x - 8, y - 8, 16, 16, 0);
+            tc.drawChar(x - 5, y - 7, (e === 1 ? '=' : 'X'), 2, 1);
+          }
+        }
+      }
+
+      // Vertical edge markers (between row r and r+1)
+      for (let r = 0; r < size - 1; r++) {
+        for (let c = 0; c < size; c++) {
+          const e = (tgData.edges_v && tgData.edges_v[r] && tgData.edges_v[r][c]) || 0;
+          if (e === 1 || e === 2) {
+            const x = padding + c * cellSize + Math.floor(cellSize / 2);
+            const y = padding + (r + 1) * cellSize;
+            tc.fillRect(x - 8, y - 8, 16, 16, 0);
+            tc.drawChar(x - 5, y - 7, (e === 1 ? '=' : 'X'), 2, 1);
+          }
+        }
+      }
+
+      tc.renderToCanvas(canvas);
+    }
+
+    function renderOfflineLadder(canvas, lData) {
+      const padding = 24;
+      const totalRungs = lData.totalWords;
+      const wordLen = lData.wordLen;
+      const tileSize = 38;
+      const gapY = 10;
+      const totalH = 20 + totalRungs * (tileSize + gapY) + 20;
+
+      const tc = new ThermalCanvasSimulator(576, totalH);
+      const boxW = wordLen * tileSize;
+      const boxX = padding + Math.floor((576 - padding * 2 - boxW) / 2);
+
+      for (let r = 0; r < totalRungs; r++) {
+        const ry = 20 + r * (tileSize + gapY);
+        tc.drawText(boxX - 30, ry + Math.floor(tileSize / 2) - 8, `${r + 1}.`, 2);
+
+        tc.drawRect(boxX, ry, boxW, tileSize, 2);
+        for (let c = 1; c < wordLen; c++) {
+          tc.drawVLine(boxX + c * tileSize, ry, tileSize, 1);
+        }
+
+        const rungWord = (r === 0 ? lData.start : (r === totalRungs - 1 ? lData.target : ''));
+        if (rungWord) {
+          for (let c = 0; c < wordLen; c++) {
+            tc.drawChar(boxX + c * tileSize + Math.floor(tileSize / 2) - 6, ry + Math.floor(tileSize / 2) - 8, rungWord[c], 2);
+          }
+        }
+      }
+
+      tc.renderToCanvas(canvas);
+    }
+
+    function renderOfflineLights(canvas, lData) {
+      const padding = 24;
+      const innerWidth = 576 - padding * 2;
+      const size = lData.size || 8;
+      const cellSize = Math.floor(innerWidth / size);
+      const totalH = padding + cellSize * size + padding;
+
+      const tc = new ThermalCanvasSimulator(576, totalH);
+
+      // Outer grid border
+      tc.drawRect(padding, padding, cellSize * size, cellSize * size, 4);
+
+      // Inner grid lines
+      for (let i = 1; i < size; i++) {
+        tc.drawHLine(padding, padding + i * cellSize, cellSize * size, 1);
+        tc.drawVLine(padding + i * cellSize, padding, cellSize * size, 1);
+      }
+
+      // Cell contents: black wall blocks or empty
+      for (let r = 0; r < size; r++) {
+        for (let c = 0; c < size; c++) {
+          const val = lData.puzzle[r][c];
+          const x0 = padding + c * cellSize;
+          const y0 = padding + r * cellSize;
+          if (val === -2) {
+            tc.fillRect(x0, y0, cellSize, cellSize, 1);
+          } else if (val >= 0) {
+            tc.fillRect(x0, y0, cellSize, cellSize, 1);
+            const cx = x0 + Math.floor((cellSize - 18) / 2);
+            const cy = y0 + Math.floor((cellSize - 21) / 2);
+            tc.drawChar(cx, cy, String(val), 3, 0);
+          }
+        }
+      }
+
+      tc.renderToCanvas(canvas);
+    }
+
+    function renderOfflineWheel(canvas, wData) {
+      const totalHeight = 368;
+      const tc = new ThermalCanvasSimulator(576, totalHeight);
+
+      const xc = 288;
+      const yc = 135;
+      const cellRadius = 26;
+
+      const outerX = [288, 357, 357, 288, 219, 219];
+      const outerY = [ 55,  95, 175, 215, 175,  95];
+
+      for (let i = 0; i < 6; i++) {
+        const ch = (wData.outer && wData.outer[i]) ? wData.outer[i] : ' ';
+        tc.drawCircle(outerX[i], outerY[i], cellRadius, 2);
+        tc.drawChar(outerX[i] - 7, outerY[i] - 10, ch, 3);
+      }
+
+      tc.drawCircle(xc, yc, cellRadius + 4, 2);
+      tc.drawCircle(xc, yc, cellRadius, 1);
+      tc.drawChar(xc - 7, yc - 10, wData.center || 'A', 3);
+
+      const boxW = 420;
+      const boxH = 34;
+      const boxX = Math.floor((576 - boxW) / 2);
+      const boxY = 260;
+      tc.drawRect(boxX, boxY, boxW, boxH, 2);
+
+      const benchText = `GOOD: ${wData.good || 15}   GREAT: ${wData.great || 25}   GENIUS: ${wData.genius || 35}+`;
+      tc.drawCenteredText(boxY + 8, benchText, 2);
+
+      tc.drawHLine(48, 315, 220, 1);
+      tc.drawHLine(308, 315, 220, 1);
+      tc.drawHLine(48, 345, 220, 1);
+      tc.drawHLine(308, 345, 220, 1);
+
+      tc.renderToCanvas(canvas);
+    }
+
+    // =========================================================================
     // 3. RECEIPT COMPOSER & RENDERER (Mixed Text + Dithered Canvas)
     // =========================================================================
 
@@ -6675,6 +7605,7 @@
 
       const globalStyle = (document.getElementById('global-render-style') ? document.getElementById('global-render-style').value : 'graphic');
       const isGraphic = (globalStyle === 'graphic');
+      const isOfflineRaster = (globalStyle === 'offline_raster');
 
       let solutionsContent = [];
 
@@ -6695,7 +7626,12 @@
         const starsDesc = `Place ${stars} star${stars > 1 ? 's' : ''} in each row, column, and region with no stars touching, even diagonally.`;
         addStandardPuzzleHeader(items, 'STARS', diffStr, starsDesc);
 
-        if (isGraphic) {
+        if (isOfflineRaster) {
+          items.push({
+            type: 'canvas',
+            render: (canvas) => renderOfflineQueens(canvas, qData, size, stars)
+          });
+        } else if (isGraphic) {
           // 1-Bit Geometric Hatches Graphic Mode (Canvas)
           items.push({
             type: 'canvas',
@@ -6731,7 +7667,12 @@
 
         addStandardPuzzleHeader(items, 'SUDOKU', diff);
 
-        if (isGraphic) {
+        if (isOfflineRaster) {
+          items.push({
+            type: 'canvas',
+            render: (canvas) => renderOfflineSudoku(canvas, sData)
+          });
+        } else if (isGraphic) {
           // Crisp Graphic Grid
           items.push({
             type: 'canvas',
@@ -6775,7 +7716,19 @@
         const searchDesc = `Find all ${wsData.words.length} hidden words listed below.`;
         addStandardPuzzleHeader(items, 'SEARCH', null, searchDesc);
 
-        if (isGraphic) {
+        if (isOfflineRaster) {
+          items.push({
+            type: 'canvas',
+            render: (canvas) => renderOfflineWordSearch(canvas, wsData)
+          });
+          items.push({ type: 'blank', text: '' });
+          items.push({ type: 'text', text: 'Theme: ' + wsData.theme.toUpperCase() });
+          for (let i = 0; i < wsData.words.length; i += 2) {
+            const col1 = `[ ] ${wsData.words[i]}`;
+            const col2 = wsData.words[i + 1] ? `[ ] ${wsData.words[i + 1]}` : '';
+            items.push({ type: 'text', text: '  ' + keyValue(col1, col2, 44) });
+          }
+        } else if (isGraphic) {
           items.push({
             type: 'canvas',
             render: (canvas) => drawWordSearchCanvas(canvas, wsData)
@@ -6816,7 +7769,12 @@
 
         addStandardPuzzleHeader(items, 'NONOGRAM', diffStr);
 
-        if (isGraphic) {
+        if (isOfflineRaster) {
+          items.push({
+            type: 'canvas',
+            render: (canvas) => renderOfflineNonogram(canvas, nData)
+          });
+        } else if (isGraphic) {
           items.push({
             type: 'canvas',
             render: (canvas) => drawNonogramCanvas(canvas, nData)
@@ -6865,7 +7823,15 @@
 
         addStandardPuzzleHeader(items, 'JUMBLE', diff);
 
-        if (isGraphic) {
+        if (isOfflineRaster) {
+          items.push({
+            type: 'canvas',
+            render: (canvas) => renderOfflineJumble(canvas, jData)
+          });
+          items.push({ type: 'blank', text: '' });
+          items.push({ type: 'text', text: `Q: "${jData.riddle}"` });
+          items.push({ type: 'text', text: 'A: _________________________________________' });
+        } else if (isGraphic) {
           items.push({
             type: 'canvas',
             render: (canvas) => drawJumbleCanvas(canvas, jData)
@@ -6904,7 +7870,12 @@
           : 'Fill each row and column with four 0s and four 1s, with no more than two consecutive of each type.';
         addStandardPuzzleHeader(items, 'BINARY', diff, binaryDesc);
 
-        if (isGraphic) {
+        if (isOfflineRaster) {
+          items.push({
+            type: 'canvas',
+            render: (canvas) => renderOfflineBinary(canvas, bData)
+          });
+        } else if (isGraphic) {
           items.push({
             type: 'canvas',
             render: (canvas) => drawBinaryCanvas(canvas, bData)
@@ -6944,10 +7915,17 @@
 
         const minesDesc = `Deduce all ${mData.minesCount} hidden mines using the adjacent numbered clues.`;
         addStandardPuzzleHeader(items, 'MINES', diff, minesDesc);
-        items.push({ type: 'text', text: centerLine(`TOTAL MINES: ${mData.minesCount}`, COLS) });
-        items.push({ type: 'blank', text: '' });
+        if (!isOfflineRaster) {
+          items.push({ type: 'text', text: centerLine(`TOTAL MINES: ${mData.minesCount}`, COLS) });
+          items.push({ type: 'blank', text: '' });
+        }
 
-        if (isGraphic) {
+        if (isOfflineRaster) {
+          items.push({
+            type: 'canvas',
+            render: (canvas) => renderOfflineMines(canvas, mData)
+          });
+        } else if (isGraphic) {
           items.push({
             type: 'canvas',
             render: (canvas) => drawMinesCanvas(canvas, mData)
@@ -6991,7 +7969,12 @@
         const tentsDesc = `Pitch ${tentCount} tents next to trees without tents touching, matching row and column counts.`;
         addStandardPuzzleHeader(items, 'TENTS', diff, tentsDesc);
 
-        if (isGraphic) {
+        if (isOfflineRaster) {
+          items.push({
+            type: 'canvas',
+            render: (canvas) => renderOfflineTents(canvas, tData)
+          });
+        } else if (isGraphic) {
           items.push({
             type: 'canvas',
             render: (canvas) => drawTentsCanvas(canvas, tData)
@@ -7032,7 +8015,12 @@
 
         addStandardPuzzleHeader(items, 'BRIDGES', diff);
 
-        if (isGraphic) {
+        if (isOfflineRaster) {
+          items.push({
+            type: 'canvas',
+            render: (canvas) => renderOfflineBridges(canvas, bData)
+          });
+        } else if (isGraphic) {
           items.push({
             type: 'canvas',
             render: (canvas) => drawBridgesCanvas(canvas, bData)
@@ -7073,7 +8061,12 @@
 
         addStandardPuzzleHeader(items, 'KILLER', diff, desc);
 
-        if (isGraphic) {
+        if (isOfflineRaster) {
+          items.push({
+            type: 'canvas',
+            render: (canvas) => renderOfflineKiller(canvas, kData)
+          });
+        } else if (isGraphic) {
           items.push({
             type: 'canvas',
             render: (canvas) => drawKillerCanvas(canvas, kData)
@@ -7139,7 +8132,12 @@
           items.push({ type: 'blank', text: '' });
         }
 
-        if (isGraphic) {
+        if (isOfflineRaster) {
+          items.push({
+            type: 'canvas',
+            render: (canvas) => renderOfflineCryptogram(canvas, cData)
+          });
+        } else if (isGraphic) {
           items.push({
             type: 'canvas',
             render: (canvas) => drawCryptogramCanvas(canvas, cData)
@@ -7201,7 +8199,12 @@
           : 'Fill each line with four 0s and four 1s without trios; = means same, x means opposite.';
         addStandardPuzzleHeader(items, 'TANGO', diff, tgDesc);
 
-        if (isGraphic) {
+        if (isOfflineRaster) {
+          items.push({
+            type: 'canvas',
+            render: (canvas) => renderOfflineTango(canvas, tgData)
+          });
+        } else if (isGraphic) {
           items.push({
             type: 'canvas',
             render: (canvas) => drawTangoCanvas(canvas, tgData)
@@ -7255,7 +8258,12 @@
         const lDesc = `Deduce ${countWord} to link ${lData.start} to ${lData.target}, changing 1 letter each step.`;
         addStandardPuzzleHeader(items, 'LADDER', diff, lDesc);
 
-        if (isGraphic) {
+        if (isOfflineRaster) {
+          items.push({
+            type: 'canvas',
+            render: (canvas) => renderOfflineLadder(canvas, lData)
+          });
+        } else if (isGraphic) {
           items.push({
             type: 'canvas',
             render: (canvas) => drawLadderCanvas(canvas, lData)
@@ -7298,7 +8306,12 @@
         const lDesc = `Place ${lData.totalBulbs} bulbs to light all corridors without bulbs shining on each other or exceeding numbers.`;
         addStandardPuzzleHeader(items, 'LIGHTS', diff, lDesc);
 
-        if (isGraphic) {
+        if (isOfflineRaster) {
+          items.push({
+            type: 'canvas',
+            render: (canvas) => renderOfflineLights(canvas, lData)
+          });
+        } else if (isGraphic) {
           items.push({
             type: 'canvas',
             render: (canvas) => drawLightsCanvas(canvas, lData)
@@ -7540,6 +8553,21 @@
       const mm = Math.round(itemCount * 3.8);
       const inches = (mm / 25.4).toFixed(1);
       document.getElementById('stat-height').innerText = `~${mm} mm (${inches} in)`;
+
+      const rasterModeEl = document.getElementById('stat-raster-mode');
+      if (rasterModeEl) {
+        const renderStyle = document.getElementById('global-render-style')?.value || 'graphic';
+        if (renderStyle === 'offline_raster') {
+          rasterModeEl.innerText = 'Offline ESP32 1-Bit (576px)';
+          rasterModeEl.className = 'font-mono text-cyan-400 font-semibold';
+        } else if (renderStyle === 'graphic') {
+          rasterModeEl.innerText = 'Online Drawing (345px)';
+          rasterModeEl.className = 'font-mono text-emerald-400 font-semibold';
+        } else {
+          rasterModeEl.innerText = 'Font A Monospace (48-col)';
+          rasterModeEl.className = 'font-mono text-amber-400 font-semibold';
+        }
+      }
     }
 
     // =========================================================================
