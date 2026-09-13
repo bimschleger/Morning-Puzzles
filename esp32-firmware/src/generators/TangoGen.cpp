@@ -325,7 +325,7 @@ void TangoGen::generate(TangoDifficulty difficulty) {
         uint8_t totalEdges = numH + numV;
         uint8_t edgeIndices[112];
         for (uint8_t i = 0; i < totalEdges; i++) edgeIndices[i] = i;
-        shuffleArray(edgeIndices, totalEdges);
+        tangoShuffleArray(edgeIndices, totalEdges);
 
         for (uint8_t i = 0; i < targetEdges && i < totalEdges; i++) {
             uint8_t idx = edgeIndices[i];
@@ -345,7 +345,7 @@ void TangoGen::generate(TangoDifficulty difficulty) {
         uint8_t coords[64];
         uint8_t totalCells = _size * _size;
         for (uint8_t i = 0; i < totalCells; i++) coords[i] = i;
-        shuffleArray(coords, totalCells);
+        tangoShuffleArray(coords, totalCells);
 
         _numbersCount = totalCells;
         for (uint8_t i = 0; i < totalCells; i++) {

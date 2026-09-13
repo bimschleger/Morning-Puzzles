@@ -57,6 +57,8 @@ inline unsigned long millis() { return (unsigned long)(clock() * 1000 / CLOCKS_P
 inline unsigned long micros() { return (unsigned long)(clock() * 1000000 / CLOCKS_PER_SEC); }
 inline void delay(int ms) {}
 
+typedef uint8_t byte;
+
 class SerialMock {
 public:
     void print(const String& s) { std::cout << s; }

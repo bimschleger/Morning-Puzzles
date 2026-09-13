@@ -2,7 +2,7 @@
 #include "EscPosPrinter.h"
 #include <string.h>
 
-static void shuffleIndices(uint8_t* arr, uint8_t n) {
+static void shuffleLightsIndices(uint8_t* arr, uint8_t n) {
     for (int i = n - 1; i > 0; i--) {
         int j = random(0, i + 1);
         uint8_t temp = arr[i];
@@ -212,7 +212,7 @@ void LightsGen::generate(LightsDifficulty difficulty) {
         uint8_t coords[144];
         uint8_t totalCells = _size * _size;
         for (uint8_t i = 0; i < totalCells; i++) coords[i] = i;
-        shuffleIndices(coords, totalCells);
+        shuffleLightsIndices(coords, totalCells);
 
         for (uint8_t i = 0; i < totalCells && placed < numPairs; i++) {
             uint8_t r = coords[i] / _size;
@@ -242,7 +242,7 @@ void LightsGen::generate(LightsDifficulty difficulty) {
         }
         if (whiteCount < (_size * _size * 65) / 100) continue;
 
-        shuffleIndices(whiteCoords, whiteCount);
+        shuffleLightsIndices(whiteCoords, whiteCount);
 
         for (uint8_t i = 0; i < whiteCount; i++) {
             uint8_t r = whiteCoords[i] / _size;
@@ -336,7 +336,7 @@ void LightsGen::generate(LightsDifficulty difficulty) {
                 if (_puzzle[r][c] >= 0) wallCoords[wallCount++] = r * _size + c;
             }
         }
-        shuffleIndices(wallCoords, wallCount);
+        shuffleLightsIndices(wallCoords, wallCount);
 
         float retainPct = (difficulty == LIGHTS_EASY) ? 0.85f : ((difficulty == LIGHTS_HARD) ? 0.45f : ((difficulty == LIGHTS_EXTREME) ? 0.35f : 0.65f));
         uint8_t targetClues = (uint8_t)(wallCount * retainPct);

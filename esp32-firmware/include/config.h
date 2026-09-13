@@ -40,15 +40,37 @@
 // -----------------------------------------------------------------------------
 // 4. Printer Interface Settings
 // -----------------------------------------------------------------------------
-#define PRINTER_MODE_ETHERNET   1
+// Supported interface modes:
+//   1 = PRINTER_MODE_WIFI_TCP   (Wi-Fi station connecting to printer across home router)
+//   2 = PRINTER_MODE_SERIAL     (Direct UART2 serial jumper wires to pins 16 & 17)
+//   3 = PRINTER_MODE_W5500_ETH  (Direct SPI W5500 RJ45 Ethernet cable, e.g. ESP32-S3-ETH board)
+#define PRINTER_MODE_WIFI_TCP   1
 #define PRINTER_MODE_SERIAL     2
-#define ACTIVE_PRINTER_MODE     PRINTER_MODE_ETHERNET
+#define PRINTER_MODE_W5500_ETH  3
+#define PRINTER_MODE_ETHERNET   PRINTER_MODE_W5500_ETH  // Backward compatibility alias
 
-// Ethernet Printer Settings (Raw JetDirect Port 9100 on 80mm commercial printers)
-// Factory default static IP for Vretti, Munbyn, Rongta is typically 192.168.123.100
+// Active mode: set to PRINTER_MODE_W5500_ETH for direct cable connection on ESP32-S3-ETH
+#define ACTIVE_PRINTER_MODE     PRINTER_MODE_W5500_ETH
+
+// Target Printer IP & Port (Raw JetDirect Port 9100 on 80mm commercial printers)
+// Factory default static IP for Munbyn, Xprinter, Vretti, Rongta is 192.168.123.100
 #define PRINTER_IP_ADDR         "192.168.123.100"
 #define PRINTER_TCP_PORT        9100
 #define PRINTER_CONNECT_TIMEOUT 5000
+
+// W5500 Hardware SPI Pins (ESP32-S3-ETH Dev Board Pinout)
+#define W5500_CS_PIN            14
+#define W5500_MOSI_PIN          11
+#define W5500_MISO_PIN          12
+#define W5500_SCK_PIN           13
+#define W5500_RST_PIN            9
+#define W5500_INT_PIN           10
+
+// Point-to-Point Direct Static IP Settings for ESP32 (matches printer 192.168.123.x subnet)
+#define ESP32_STATIC_IP         "192.168.123.50"
+#define ESP32_STATIC_GATEWAY    "192.168.123.1"
+#define ESP32_STATIC_SUBNET     "255.255.255.0"
+#define ESP32_STATIC_DNS        "192.168.123.1"
 
 // -----------------------------------------------------------------------------
 // 4B. Automatic Print Triggers (Zero-Button Operation)
@@ -64,8 +86,10 @@
 #define PRINTER_TX_PIN          17
 
 // -----------------------------------------------------------------------------
-// 5. Legacy Network & Web Service Settings (Ignored in OFFLINE_ONLY_BUILD)
+// 5. Wi-Fi Network Settings
 // -----------------------------------------------------------------------------
+// Required when ACTIVE_PRINTER_MODE is PRINTER_MODE_ETHERNET so the ESP32
+// can connect to your router and reach the printer over TCP port 9100.
 #define WIFI_SSID               "YOUR_WIFI_SSID"
 #define WIFI_PASSWORD           "YOUR_WIFI_PASSWORD"
 #define WIFI_CONNECT_TIMEOUT_MS 15000

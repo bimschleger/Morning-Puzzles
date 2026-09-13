@@ -10,6 +10,8 @@
 #include "net/PuzzleClient.h"
 DailyScheduler         scheduler;
 PuzzleClient           puzzleClient;
+#elif (ACTIVE_PRINTER_MODE == PRINTER_MODE_WIFI_TCP)
+#include <WiFi.h>
 #endif
 
 // Hardware and engines
@@ -111,14 +113,26 @@ void handleSerialCommands() {
             else timeManager.startSetupPortal();
         } else if (cmd == 't' || cmd == 'T') {
             Serial.println("[CMD] Printing self-test ticket...");
-            printer.printSelfTest("Offline Standalone", timeManager.getFormattedTime());
+#if (ACTIVE_PRINTER_MODE == PRINTER_MODE_W5500_ETH)
+            printer.printSelfTest(ESP32_STATIC_IP, timeManager.getFormattedTime());
+#elif (ACTIVE_PRINTER_MODE == PRINTER_MODE_WIFI_TCP)
+            printer.printSelfTest(WiFi.localIP().toString(), timeManager.getFormattedTime());
+#else
+            printer.printSelfTest("Direct Serial UART2", timeManager.getFormattedTime());
+#endif
         } else if (cmd == 's' || cmd == 'S') {
             Serial.println("\n--- MORNING PUZZLES STATUS ---");
             Serial.println("Mode:         100% Standalone Offline (Zero External APIs)");
             Serial.printf("Active Grade: %s\n", offlineComposer.getGradeName(offlineComposer.getCurrentGrade()));
             Serial.printf("Time:         %s\n", timeManager.getFormattedTime().c_str());
             Serial.printf("Time Set:     %s\n", timeManager.isTimeSet() ? "Yes" : "No (Hold BOOT 3s to set)");
-            Serial.printf("Printer:      %s (Mode %d)\n", (ACTIVE_PRINTER_MODE == PRINTER_MODE_SERIAL) ? "Direct Hardware Serial (UART2)" : "Ethernet TCP", ACTIVE_PRINTER_MODE);
+#if (ACTIVE_PRINTER_MODE == PRINTER_MODE_W5500_ETH)
+            Serial.printf("Printer:      Direct W5500 RJ45 Ethernet (ESP32: %s -> %s:%d)\n", ESP32_STATIC_IP, PRINTER_IP_ADDR, PRINTER_TCP_PORT);
+#elif (ACTIVE_PRINTER_MODE == PRINTER_MODE_SERIAL)
+            Serial.println("Printer:      Direct Hardware Serial (UART2)");
+#else
+            Serial.printf("Printer:      Wi-Fi TCP (%s:%d)\n", PRINTER_IP_ADDR, PRINTER_TCP_PORT);
+#endif
             Serial.printf("Daily Cron:   %02d:%02d every morning\n", DAILY_PRINT_HOUR, DAILY_PRINT_MINUTE);
             Serial.printf("Hotspot:      %s\n", timeManager.isPortalActive() ? "Active (Morning-Puzzles-Setup)" : "Inactive");
             Serial.println("Controls:     [P]rint (Next Grade) | [1] Easy | [2] Medium | [3] Hard | [G]ycle Grade | [W]i-Fi Setup | [S]tatus");
@@ -142,8 +156,34 @@ void setup() {
     Serial.println("*      Zero External Network / API Calls Required      *");
     Serial.println("********************************************************");
 
-    // Initialize printer hardware driver (Serial UART or local raw TCP)
+    // Initialize printer hardware driver (Serial UART, W5500 Ethernet, or Wi-Fi TCP)
     printer.begin();
+
+#if (ACTIVE_PRINTER_MODE == PRINTER_MODE_WIFI_TCP)
+    if (String(WIFI_SSID) == "YOUR_WIFI_SSID") {
+        Serial.println("\n[WIFI] ----------------------------------------------------");
+        Serial.println("[WIFI] WARNING: WIFI_SSID is still set to 'YOUR_WIFI_SSID'!");
+        Serial.println("[WIFI] Set your home Wi-Fi credentials in config.h so the");
+        Serial.println("[WIFI] ESP32 can connect to your router to reach the printer.");
+        Serial.println("[WIFI] ----------------------------------------------------\n");
+    } else {
+        Serial.printf("\n[WIFI] Connecting to '%s' to reach Ethernet printer (%s:%d)...\n", 
+                      WIFI_SSID, PRINTER_IP_ADDR, PRINTER_TCP_PORT);
+        WiFi.mode(WIFI_STA);
+        WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+        unsigned long wifiStart = millis();
+        while (WiFi.status() != WL_CONNECTED && millis() - wifiStart < WIFI_CONNECT_TIMEOUT_MS) {
+            delay(500);
+            Serial.print(".");
+        }
+        if (WiFi.status() == WL_CONNECTED) {
+            Serial.printf("\n[WIFI] Connected! ESP32 IP: %s | Gateway: %s\n\n", 
+                          WiFi.localIP().toString().c_str(), WiFi.gatewayIP().toString().c_str());
+        } else {
+            Serial.println("\n[WIFI] ERROR: Wi-Fi connection timed out. Check credentials in config.h.");
+        }
+    }
+#endif
 
     // Initialize offline timekeeping (checks for optional DS3231 RTC on I2C)
     timeManager.begin();

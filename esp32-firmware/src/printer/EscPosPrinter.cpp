@@ -20,8 +20,32 @@ bool EscPosPrinter::begin() {
         init();
         return true;
     }
+#if (ACTIVE_PRINTER_MODE == PRINTER_MODE_W5500_ETH)
+    if (_mode == PRINTER_MODE_W5500_ETH) {
+        Serial.println("\n[ETH] Initializing W5500 SPI Ethernet (ESP32-S3-ETH)...");
+        Serial.printf("[ETH] Hardware SPI: SCK=%d, MISO=%d, MOSI=%d, CS=%d\n",
+                      W5500_SCK_PIN, W5500_MISO_PIN, W5500_MOSI_PIN, W5500_CS_PIN);
+        SPI.begin(W5500_SCK_PIN, W5500_MISO_PIN, W5500_MOSI_PIN, W5500_CS_PIN);
+        Ethernet.init(W5500_CS_PIN);
+
+        uint8_t mac[6] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
+        IPAddress ip, gw, mask, dns;
+        ip.fromString(ESP32_STATIC_IP);
+        gw.fromString(ESP32_STATIC_GATEWAY);
+        mask.fromString(ESP32_STATIC_SUBNET);
+        dns.fromString(ESP32_STATIC_DNS);
+
+        Ethernet.begin(mac, ip, dns, gw, mask);
+        delay(200);
+
+        Serial.printf("[ETH] W5500 Configured! ESP32 IP: %s | Subnet: %s | Gateway: %s\n",
+                      Ethernet.localIP().toString().c_str(), ESP32_STATIC_SUBNET, ESP32_STATIC_GATEWAY);
+        Serial.printf("[ETH] Point-to-Point Direct Target Printer: %s:%d\n\n", PRINTER_IP_ADDR, PRINTER_TCP_PORT);
+        return true;
+    }
+#endif
     
-    Serial.printf("[PRINTER] Configured for Ethernet TCP: %s:%d\n", PRINTER_IP_ADDR, PRINTER_TCP_PORT);
+    Serial.printf("[PRINTER] Configured for Wi-Fi TCP: %s:%d\n", PRINTER_IP_ADDR, PRINTER_TCP_PORT);
     return true;
 }
 
@@ -30,6 +54,27 @@ bool EscPosPrinter::connect() {
         return true; // Always connected for UART
     }
 
+#if (ACTIVE_PRINTER_MODE == PRINTER_MODE_W5500_ETH)
+    if (_mode == PRINTER_MODE_W5500_ETH) {
+        if (_ethClient.connected()) {
+            return true;
+        }
+
+        Serial.printf("[PRINTER] Connecting via W5500 Ethernet to %s:%d...\n", PRINTER_IP_ADDR, PRINTER_TCP_PORT);
+        IPAddress targetIP;
+        targetIP.fromString(PRINTER_IP_ADDR);
+        if (_ethClient.connect(targetIP, PRINTER_TCP_PORT)) {
+            _outputStream = &_ethClient;
+            Serial.println("[PRINTER] Connected successfully via W5500 direct Ethernet port 9100!");
+            init();
+            return true;
+        }
+
+        Serial.println("[PRINTER] ERROR: Failed to connect to printer via W5500 direct Ethernet.");
+        _outputStream = nullptr;
+        return false;
+    }
+#else
     if (_tcpClient.connected()) {
         return true;
     }
@@ -45,28 +90,55 @@ bool EscPosPrinter::connect() {
     Serial.println("[PRINTER] ERROR: Failed to connect to printer via TCP port 9100.");
     _outputStream = nullptr;
     return false;
+#endif
 }
 
 void EscPosPrinter::disconnect() {
-    if (_mode == PRINTER_MODE_ETHERNET && _tcpClient.connected()) {
+#if (ACTIVE_PRINTER_MODE == PRINTER_MODE_W5500_ETH)
+    if (_mode == PRINTER_MODE_W5500_ETH && _ethClient.connected()) {
+        _ethClient.flush();
+        _ethClient.stop();
+        _outputStream = nullptr;
+        Serial.println("[PRINTER] Disconnected W5500 Ethernet socket.");
+    }
+#else
+    if (_mode != PRINTER_MODE_SERIAL && _tcpClient.connected()) {
         _tcpClient.flush();
         _tcpClient.stop();
         _outputStream = nullptr;
         Serial.println("[PRINTER] Disconnected TCP socket.");
     }
+#endif
 }
 
 bool EscPosPrinter::isConnected() {
     if (_mode == PRINTER_MODE_SERIAL) {
         return (_serial != nullptr);
     }
+#if (ACTIVE_PRINTER_MODE == PRINTER_MODE_W5500_ETH)
+    return _ethClient.connected();
+#else
     return _tcpClient.connected();
+#endif
 }
 
 bool EscPosPrinter::isPrinterOnline(uint32_t timeoutMs) {
     if (_mode == PRINTER_MODE_SERIAL) {
         return (_serial != nullptr);
     }
+#if (ACTIVE_PRINTER_MODE == PRINTER_MODE_W5500_ETH)
+    if (_ethClient.connected()) {
+        return true;
+    }
+    EthernetClient probe;
+    IPAddress targetIP;
+    targetIP.fromString(PRINTER_IP_ADDR);
+    if (probe.connect(targetIP, PRINTER_TCP_PORT)) {
+        probe.stop();
+        return true;
+    }
+    return false;
+#else
     if (_tcpClient.connected()) {
         return true;
     }
@@ -76,6 +148,7 @@ bool EscPosPrinter::isPrinterOnline(uint32_t timeoutMs) {
         return true;
     }
     return false;
+#endif
 }
 
 void EscPosPrinter::sendCommand(const uint8_t* cmd, size_t length) {
@@ -259,8 +332,9 @@ void EscPosPrinter::printSelfTest(const String& ipAddress, const String& current
     println("");
     setBold(true);
     println("SYSTEM STATUS:");
-    setBold(false);
-    printKeyValue("Interface:", (_mode == PRINTER_MODE_ETHERNET) ? "Ethernet TCP (Port 9100)" : "Serial UART2");
+    const char* ifaceName = (_mode == PRINTER_MODE_W5500_ETH) ? "Direct W5500 RJ45 (Port 9100)" : 
+                            ((_mode == PRINTER_MODE_SERIAL) ? "Serial UART2" : "Wi-Fi TCP (Port 9100)");
+    printKeyValue("Interface:", ifaceName);
     printKeyValue("ESP32 IP:", ipAddress);
     printKeyValue("Printer Target:", String(PRINTER_IP_ADDR) + ":" + String(PRINTER_TCP_PORT));
     printKeyValue("Date & Time:", currentTimeStr);

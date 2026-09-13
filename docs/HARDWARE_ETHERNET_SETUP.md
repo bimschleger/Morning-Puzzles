@@ -110,3 +110,48 @@ GND           ───────────────────> GND    
 
 > [!CAUTION]
 > **Never wire ESP32 GPIOs directly to a DB9 RS-232 port!** DB9 RS-232 signals use $\pm 3\text{V}$ to $\pm 12\text{V}$, which will permanently destroy the ESP32's 3.3V silicon. Always use a MAX3232 transceiver board for DB9 connections.
+
+---
+
+## 6. Direct Point-to-Point Hardware Ethernet (ESP32-S3-ETH Dev Board)
+
+If you are using an **ESP32-S3-ETH** development board (with onboard **W5500 SPI Ethernet controller** and RJ45 jack), you can connect the board **directly to the printer** with an Ethernet cable—requiring **zero Wi-Fi** and **no home router**:
+
+```
+┌─────────────────────────────────┐                       ┌──────────────────────┐
+│  ESP32-S3-ETH Dev Board         │                       │ Commercial 80mm      │
+│  Onboard W5500 SPI Ethernet     │   Direct RJ45 Cable   │ Thermal Receipt      │
+│  Static IP: 192.168.123.50      │◄─────────────────────►│ Printer (Port 9100)  │
+│  (Zero Wi-Fi / 100% Offline)    │  (Point-to-Point)     │ Static: 192.168.123.100│
+└─────────────────────────────────┘                       └──────────────────────┘
+```
+
+### Hardware SPI Pinout (ESP32-S3-ETH)
+The W5500 controller connects to the ESP32-S3 on these dedicated pins:
+- **SCK / Clock**: `GPIO 13`
+- **MISO**: `GPIO 12`
+- **MOSI**: `GPIO 11`
+- **CS**: `GPIO 14`
+- **RST**: `GPIO 9`
+- **INT**: `GPIO 10`
+
+### Firmware Configuration (`config.h`)
+```cpp
+// 1. Set interface mode to W5500 Direct Ethernet
+#define ACTIVE_PRINTER_MODE     PRINTER_MODE_W5500_ETH
+
+// 2. Set target printer IP (192.168.123.100 from printer self-test)
+#define PRINTER_IP_ADDR         "192.168.123.100"
+#define PRINTER_TCP_PORT        9100
+
+// 3. Set ESP32 matching static IP on the same /24 subnet
+#define ESP32_STATIC_IP         "192.168.123.50"
+#define ESP32_STATIC_GATEWAY    "192.168.123.1"
+#define ESP32_STATIC_SUBNET     "255.255.255.0"
+```
+
+### Arduino IDE Library
+Install the official **Ethernet** library by Arduino (v2.0.2) via:
+**Tools ➔ Manage Libraries... ➔ Search "Ethernet" (by Arduino)**.
+*(PlatformIO automatically downloads `arduino-libraries/Ethernet` via `platformio.ini`)*.
+

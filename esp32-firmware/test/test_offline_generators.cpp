@@ -65,6 +65,9 @@ public:
 #include "../src/generators/WheelGen.h"
 #include "../src/generators/WheelGen.cpp"
 
+#include "../src/generators/LightsGen.h"
+#include "../src/generators/LightsGen.cpp"
+
 #include "../src/generators/OfflinePuzzleComposer.h"
 #include "../src/generators/OfflinePuzzleComposer.cpp"
 

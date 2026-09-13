@@ -1,11 +1,16 @@
 #ifndef ESC_POS_PRINTER_H
 #define ESC_POS_PRINTER_H
 
-#include <Arduino.h>
+#include "config.h"
+
+#if (ACTIVE_PRINTER_MODE == PRINTER_MODE_W5500_ETH)
+#include <SPI.h>
+#include <Ethernet.h>
+#else
 #include <WiFi.h>
 #include <WiFiClient.h>
+#endif
 #include <HardwareSerial.h>
-#include "config.h"
 
 enum TextAlignment {
     ALIGN_LEFT   = 0,
@@ -55,7 +60,11 @@ public:
 
 private:
     uint8_t _mode;
+#if (ACTIVE_PRINTER_MODE == PRINTER_MODE_W5500_ETH)
+    EthernetClient _ethClient;
+#else
     WiFiClient _tcpClient;
+#endif
     HardwareSerial* _serial;
     Print* _outputStream;
 
