@@ -178,6 +178,16 @@ FONT_5X7 = {
     '!': [0x04, 0x04, 0x04, 0x04, 0x04, 0x00, 0x04],
     '[': [0x1E, 0x10, 0x10, 0x10, 0x10, 0x10, 0x1E],
     ']': [0x1E, 0x02, 0x02, 0x02, 0x02, 0x02, 0x1E],
+    '+': [0x00, 0x08, 0x08, 0x3E, 0x08, 0x08, 0x00],
+    '=': [0x00, 0x3E, 0x00, 0x3E, 0x00, 0x00, 0x00],
+    '*': [0x00, 0x2A, 0x1C, 0x3E, 0x1C, 0x2A, 0x00],
+    '/': [0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x00],
+    '(': [0x04, 0x08, 0x10, 0x10, 0x10, 0x08, 0x04],
+    ')': [0x10, 0x08, 0x04, 0x04, 0x04, 0x08, 0x10],
+    '_': [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3F],
+    ',': [0x00, 0x00, 0x00, 0x00, 0x0C, 0x04, 0x08],
+    '"': [0x14, 0x14, 0x14, 0x00, 0x00, 0x00, 0x00],
+    "'": [0x08, 0x08, 0x10, 0x00, 0x00, 0x00, 0x00],
 }
 
 
@@ -215,6 +225,49 @@ class ThermalBitmap:
             if 0 <= px < self.width:
                 for py in range(max(0, y), min(y + h, self.height)):
                     self.set_pixel(px, py, color)
+
+    def draw_line(self, x0: int, y0: int, x1: int, y1: int, thickness: int = 1, color: int = 1):
+        dx = abs(x1 - x0)
+        sx = 1 if x0 < x1 else -1
+        dy = -abs(y1 - y0)
+        sy = 1 if y0 < y1 else -1
+        err = dx + dy
+
+        while True:
+            if thickness <= 1:
+                self.set_pixel(x0, y0, color)
+            else:
+                half_t = thickness // 2
+                for ty in range(-half_t, half_t + (thickness % 2)):
+                    for tx in range(-half_t, half_t + (thickness % 2)):
+                        self.set_pixel(x0 + tx, y0 + ty, color)
+            if x0 == x1 and y0 == y1:
+                break
+            e2 = 2 * err
+            if e2 >= dy:
+                err += dy
+                x0 += sx
+            if e2 <= dx:
+                err += dx
+                y0 += sy
+
+    def draw_dashed_hline(self, x: int, y: int, w: int, dash_len: int = 4, gap_len: int = 4, thickness: int = 1, color: int = 1):
+        if w <= 0 or dash_len == 0:
+            return
+        cur_x = x
+        end_x = x + w
+        while cur_x < end_x:
+            seg_w = min(dash_len, end_x - cur_x)
+            self.draw_hline(cur_x, y, seg_w, thickness=thickness, color=color)
+            cur_x += dash_len + gap_len
+
+    def draw_polygon(self, points: List[Tuple[int, int]], thickness: int = 1, color: int = 1):
+        if len(points) < 2:
+            return
+        for i in range(len(points)):
+            p1 = points[i]
+            p2 = points[(i + 1) % len(points)]
+            self.draw_line(int(round(p1[0])), int(round(p1[1])), int(round(p2[0])), int(round(p2[1])), thickness=thickness, color=color)
 
     def draw_rect(self, x: int, y: int, w: int, h: int, thickness: int = 1, color: int = 1):
         self.draw_hline(x, y, w, thickness, color)
@@ -267,6 +320,17 @@ class ThermalBitmap:
         for ch in text:
             self.draw_char(cur_x, y, ch, scale=scale, color=color)
             cur_x += char_w
+
+    def get_text_width(self, text: str, scale: int = 2) -> int:
+        if not text or scale == 0:
+            return 0
+        char_w = 6 * scale + max(1, scale // 2)
+        return len(text) * char_w
+
+    def draw_centered_text(self, y: int, text: str, scale: int = 2, color: int = 1):
+        w = self.get_text_width(text, scale=scale)
+        x = (self.width - w) // 2
+        self.draw_text(x, y, text, scale=scale, color=color)
 
     def draw_circle(self, cx: int, cy: int, radius: int, thickness: int = 2, color: int = 1):
         r_inner_sq = (radius - thickness) ** 2

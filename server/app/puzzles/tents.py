@@ -199,57 +199,43 @@ class TentsPuzzle(BasePuzzle):
 
         padding = 24
         inner_width = target_width - padding * 2
-        total_cols = size + 1
-        cell_size = inner_width // total_cols
-        board_h = cell_size * (size + 1)
-        total_h = padding + board_h + padding
+        margin_w = 48
+        board_size = inner_width - margin_w
+        cell_size = board_size // size
+        grid_w = cell_size * size
+        grid_x = padding + margin_w
+        grid_y = padding + margin_w
+        total_h = grid_y + grid_w + padding
 
         tb = ThermalBitmap(target_width, total_h)
 
-        gx = padding
-        gy = padding
+        # Outer grid border
+        tb.draw_rect(grid_x, grid_y, grid_w, grid_w, thickness=4)
 
-        puzzle_x = gx + cell_size
-        puzzle_y = gy + cell_size
-        puzzle_w = cell_size * size
-        puzzle_h = cell_size * size
-        tb.draw_rect(puzzle_x, puzzle_y, puzzle_w, puzzle_h, thickness=4)
-
+        # Inner grid lines
         for i in range(1, size):
-            tb.draw_vline(puzzle_x + i * cell_size, puzzle_y, puzzle_h, thickness=2)
-            tb.draw_hline(puzzle_x, puzzle_y + i * cell_size, puzzle_w, thickness=2)
+            tb.draw_hline(grid_x, grid_y + i * cell_size, grid_w, thickness=1)
+            tb.draw_vline(grid_x + i * cell_size, grid_y, grid_w, thickness=1)
 
+        # Column clues
         for c in range(size):
             clue = col_clues[c] if c < len(col_clues) else 0
-            cx = puzzle_x + c * cell_size + (cell_size - 18) // 2
-            cy = gy + (cell_size - 21) // 2
-            tb.draw_char(cx, cy, str(clue), scale=3)
+            cx = grid_x + c * cell_size + (cell_size - 12) // 2
+            tb.draw_text(cx, grid_y - 24, str(clue), scale=2)
 
+        # Row clues
         for r in range(size):
             clue = row_clues[r] if r < len(row_clues) else 0
-            cx = gx + (cell_size - 18) // 2
-            cy = puzzle_y + r * cell_size + (cell_size - 21) // 2
-            tb.draw_char(cx, cy, str(clue), scale=3)
+            cy = grid_y + r * cell_size + (cell_size - 14) // 2
+            tb.draw_text(padding + 16, cy, str(clue), scale=2)
 
+        # Trees ('T')
         for r in range(size):
             for c in range(size):
-                is_tree = (r < len(puzzle) and c < len(puzzle[r]) and puzzle[r][c] == 1)
-                cx = puzzle_x + c * cell_size + cell_size // 2
-                cy = puzzle_y + r * cell_size + cell_size // 2
-
-                if is_tree:
-                    trunk_w = max(4, cell_size // 10)
-                    trunk_h = max(6, cell_size // 6)
-                    tb.fill_rect(cx - trunk_w // 2, cy + cell_size // 4 - trunk_h, trunk_w, trunk_h, color=1)
-
-                    for tier in range(3):
-                        tier_top = cy - cell_size // 3 + tier * (cell_size // 6)
-                        tier_base = tier_top + cell_size // 4
-                        half_w = (tier + 1) * (cell_size // 7)
-                        for y in range(tier_top, tier_base):
-                            prog = (y - tier_top) / float(max(1, tier_base - tier_top))
-                            cur_w = int(half_w * prog)
-                            tb.draw_hline(cx - cur_w, y, cur_w * 2 + 1, thickness=1, color=1)
+                if r < len(puzzle) and c < len(puzzle[r]) and puzzle[r][c] == 1:
+                    tx = grid_x + c * cell_size + (cell_size - 18) // 2
+                    ty = grid_y + r * cell_size + (cell_size - 21) // 2
+                    tb.draw_char(tx, ty, "T", scale=3)
 
         return tb.to_escpos()
 

@@ -151,119 +151,59 @@ class WheelPuzzle(BasePuzzle):
         hex_radius = 46
         spacing = hex_radius * math.sqrt(3)  # ~79.6px
 
-        # 6 outer hexagon angles (degrees)
+        # 6 outer hexagon centers (flat-top honeycomb)
         angles_deg = [270, 330, 30, 90, 150, 210]
         outer_coords = []
         for deg in angles_deg:
             rad = math.radians(deg)
-            px = xc + spacing * math.cos(rad)
-            py = yc + spacing * math.sin(rad)
+            px = int(round(xc + spacing * math.cos(rad)))
+            py = int(round(yc + spacing * math.sin(rad)))
             outer_coords.append((px, py))
 
-        def get_hex_polygon(center_x: float, center_y: float, r: float) -> List[Tuple[float, float]]:
-            points = []
-            for i in range(6):
-                angle = math.radians(60 * i + 30)
-                points.append((center_x + r * math.cos(angle), center_y + r * math.sin(angle)))
-            return points
+        def get_hex_polygon(cx: int, cy: int, r: int) -> List[Tuple[int, int]]:
+            h = int(round(r * 0.8660254))
+            half_r = r // 2
+            return [
+                (cx + r, cy),
+                (cx + half_r, cy + h),
+                (cx - half_r, cy + h),
+                (cx - r, cy),
+                (cx - half_r, cy - h),
+                (cx + half_r, cy - h),
+            ]
 
-        if HAS_PILLOW:
-            try:
-                font_hub = ImageFont.truetype("Courier.ttf", 36)
-                font_letter = ImageFont.truetype("Courier.ttf", 32)
-                font_label = ImageFont.truetype("Arial.ttf", 18)
-            except IOError:
-                font_hub = ImageFont.load_default()
-                font_letter = ImageFont.load_default()
-                font_label = ImageFont.load_default()
+        tb = ThermalBitmap(target_width, total_height)
 
-            img = Image.new("L", (target_width, total_height), 255)
-            draw = ImageDraw.Draw(img)
-
-            # Draw outer 6 hexagons
-            for idx, (px, py) in enumerate(outer_coords):
-                poly = get_hex_polygon(px, py, hex_radius)
-                draw.polygon(poly, outline=0, fill=255)
-                # Draw letter
-                letter_ch = outer[idx]
-                bbox = draw.textbbox((0, 0), letter_ch, font=font_letter)
-                tw = bbox[2] - bbox[0]
-                th = bbox[3] - bbox[1]
-                draw.text((px - tw / 2, py - th / 2 - 2), letter_ch, fill=0, font=font_letter)
-
-            # Draw center hexagon with double-thick frame
-            center_poly = get_hex_polygon(xc, yc, hex_radius)
-            draw.polygon(center_poly, outline=0, fill=255)
-            center_inner = get_hex_polygon(xc, yc, hex_radius - 4)
-            draw.polygon(center_inner, outline=0, fill=255)
-
-            # Draw center letter (bold)
-            bbox_c = draw.textbbox((0, 0), center, font=font_hub)
-            tw_c = bbox_c[2] - bbox_c[0]
-            th_c = bbox_c[3] - bbox_c[1]
-            draw.text((xc - tw_c / 2, yc - th_c / 2 - 3), center, fill=0, font=font_hub)
-
-            # Draw Target Benchmarks box
-            box_y = 260
-            box_h = 36
-            box_w = 420
-            box_x = (target_width - box_w) // 2
-            draw.rectangle([box_x, box_y, box_x + box_w, box_y + box_h], outline=0, width=2)
-            bench_text = f"GOOD: {b_good}    GREAT: {b_great}    GENIUS: {b_genius}+"
-            bbox_b = draw.textbbox((0, 0), bench_text, font=font_label)
-            bw = bbox_b[2] - bbox_b[0]
-            bh = bbox_b[3] - bbox_b[1]
-            draw.text((xc - bw / 2, box_y + (box_h - bh) / 2 - 2), bench_text, fill=0, font=font_label)
-
-            # Ruled lines for writing words
-            rule_y1 = 320
-            rule_y2 = 348
-            line_w = 200
-            gap_line = 36
-            x1_a = xc - line_w - gap_line // 2
-            x1_b = x1_a + line_w
-            x2_a = xc + gap_line // 2
-            x2_b = x2_a + line_w
-            draw.line([x1_a, rule_y1, x1_b, rule_y1], fill=0, width=1)
-            draw.line([x2_a, rule_y1, x2_b, rule_y1], fill=0, width=1)
-            draw.line([x1_a, rule_y2, x1_b, rule_y2], fill=0, width=1)
-            draw.line([x2_a, rule_y2, x2_b, rule_y2], fill=0, width=1)
-
-            return pil_to_escpos(img)
-
-        # Pure Python Fallback
-        bmp = ThermalBitmap(target_width, total_height)
-        cell_size = 54
-
-        # Draw outer 6 cells as framed boxes
+        # Draw outer 6 hexagons
         for idx, (px, py) in enumerate(outer_coords):
-            bx = int(px - cell_size // 2)
-            by = int(py - cell_size // 2)
-            bmp.draw_rect(bx, by, cell_size, cell_size, thickness=2, color=1)
-            bmp.draw_char(bx + cell_size // 2 - 5, by + cell_size // 2 - 7, outer[idx], scale=2, color=1)
+            poly = get_hex_polygon(px, py, hex_radius)
+            tb.draw_polygon(poly, thickness=2, color=1)
+            letter_ch = outer[idx]
+            tb.draw_char(px - 9, py - 10, letter_ch, scale=3)
 
-        # Center cell (double outline)
-        cbx = int(xc - cell_size // 2)
-        cby = int(yc - cell_size // 2)
-        bmp.draw_rect(cbx, cby, cell_size, cell_size, thickness=3, color=1)
-        bmp.draw_char(cbx + cell_size // 2 - 5, cby + cell_size // 2 - 7, center, scale=2, color=1)
+        # Draw center hexagon with double-thick frame
+        center_poly = get_hex_polygon(xc, yc, hex_radius)
+        tb.draw_polygon(center_poly, thickness=2, color=1)
+        center_inner = get_hex_polygon(xc, yc, hex_radius - 4)
+        tb.draw_polygon(center_inner, thickness=2, color=1)
+        tb.draw_char(xc - 9, yc - 10, center, scale=3)
 
-        # Benchmarks box
+        # Draw Target Benchmarks box
         box_y = 260
-        box_h = 36
+        box_h = 34
         box_w = 420
         box_x = (target_width - box_w) // 2
-        bmp.draw_rect(box_x, box_y, box_w, box_h, thickness=2, color=1)
-        bench_text = f"GOOD: {b_good}  GREAT: {b_great}  GENIUS: {b_genius}+"
-        bmp.draw_text(xc - len(bench_text) * 4, box_y + 12, bench_text, scale=1, color=1)
+        tb.draw_rect(box_x, box_y, box_w, box_h, thickness=2, color=1)
+        bench_text = f"GOOD: {b_good}   GREAT: {b_great}   GENIUS: {b_genius}+"
+        tb.draw_centered_text(box_y + 8, bench_text, scale=2, color=1)
 
-        # Ruled lines
-        bmp.draw_hline(box_x, 320, 190, thickness=1, color=1)
-        bmp.draw_hline(xc + 20, 320, 190, thickness=1, color=1)
-        bmp.draw_hline(box_x, 348, 190, thickness=1, color=1)
-        bmp.draw_hline(xc + 20, 348, 190, thickness=1, color=1)
+        # Ruled handwriting lines (2 columns)
+        tb.draw_hline(48, 315, 220, thickness=1, color=1)
+        tb.draw_hline(308, 315, 220, thickness=1, color=1)
+        tb.draw_hline(48, 345, 220, thickness=1, color=1)
+        tb.draw_hline(308, 345, 220, thickness=1, color=1)
 
-        return bmp.to_escpos()
+        return tb.to_escpos()
 
     def verify_accuracy(
         self,

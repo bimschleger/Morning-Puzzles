@@ -163,130 +163,149 @@ class JumblePuzzle(BasePuzzle):
         padding = 24
         inner_width = target_width - padding * 2
 
-        words = puzzle_data.get("words", [])
-        scrambled = puzzle_data.get("scrambled", words)
+        words_data = puzzle_data.get("words", [])
+        scrambled = puzzle_data.get("scrambled", words_data)
         circles = puzzle_data.get("circles", [])
 
-        clue_height = 44
-        cell_height = 58
-        word_gap = 16
+        clue_h = 36
+        cell_h = 48
+        word_gap = 12
+        count = min(4, len(scrambled))
 
-        if HAS_PILLOW:
-            try:
-                font_box = ImageFont.truetype("Courier.ttf", 26)
-                font_riddle = ImageFont.truetype("Arial.ttf", 20)
-                font_label = ImageFont.truetype("Arial.ttf", 16)
-            except IOError:
-                font_box = ImageFont.load_default()
-                font_riddle = ImageFont.load_default()
-                font_label = ImageFont.load_default()
+        riddle = puzzle_data.get("riddle") or puzzle_data.get("clue", "")
+        answer = puzzle_data.get("answer", "")
 
-            total_height = 900
-            img = Image.new("L", (target_width, total_height), 255)
-            draw = ImageDraw.Draw(img)
-            cur_y = 12
+        # Tokenize riddle into wrapped lines (~36 chars)
+        riddle_str = f'"{riddle}"'
+        riddle_lines = textwrap.wrap(riddle_str, width=36)
+        if not riddle_lines:
+            riddle_lines = [riddle_str]
 
-            for i in range(min(4, len(scrambled))):
-                scram = scrambled[i]
-                scram_text = scram.get("scrambled", "") if isinstance(scram, dict) else str(scram)
-                circ = scram.get("circles", []) if isinstance(scram, dict) else (circles[i] if i < len(circles) else [])
-                length = max(1, len(scram_text))
-                col_pos = [padding + int(round(c * inner_width / float(length))) for c in range(length + 1)]
+        # Tokenize answer words
+        ans_box = 34
+        word_spacing = 14
 
-                draw.rectangle([padding, cur_y, padding + inner_width, cur_y + clue_height], outline=0, width=3)
-                for c in range(length):
-                    cx0 = col_pos[c]
-                    cx1 = col_pos[c + 1]
-                    col_w = cx1 - cx0
-                    if c > 0:
-                        draw.line([cx0, cur_y, cx0, cur_y + clue_height], fill=160, width=2)
-                    draw.text((cx0 + col_w // 2 - 8, cur_y + 8), scram_text[c], fill=0, font=font_box)
+        def measure_word_w(w: str) -> int:
+            w_w = 0
+            for ch in w:
+                if "A" <= ch <= "Z":
+                    w_w += ans_box
+                elif ch in ('"', "'"):
+                    w_w += 12
+                elif ch == "-":
+                    w_w += 14
+            return w_w
 
-                ans_y = cur_y + clue_height
-                for c in range(length):
-                    cx0 = col_pos[c]
-                    cx1 = col_pos[c + 1]
-                    col_w = cx1 - cx0
-                    draw.rectangle([cx0, ans_y, cx1, ans_y + cell_height], outline=0, width=3)
-                    if c in circ:
-                        radius = min(col_w, cell_height) // 2 - 5
-                        draw.ellipse([cx0 + col_w // 2 - radius, ans_y + cell_height // 2 - radius,
-                                      cx0 + col_w // 2 + radius, ans_y + cell_height // 2 + radius], outline=0, width=3)
+        ans_words = answer.split(" ")
+        ans_lines: List[List[str]] = []
+        cur_line: List[str] = []
+        cur_w = 0
 
-                cur_y = ans_y + cell_height + word_gap
+        for w in ans_words:
+            w_w = measure_word_w(w)
+            needed = w_w if not cur_line else (word_spacing + w_w)
+            if cur_w + needed <= inner_width and cur_line:
+                cur_line.append(w)
+                cur_w += needed
+            else:
+                if cur_line:
+                    ans_lines.append(cur_line)
+                cur_line = [w]
+                cur_w = w_w
+        if cur_line:
+            ans_lines.append(cur_line)
 
-            draw.line([padding, cur_y, padding + inner_width, cur_y], fill=140, width=2)
-            cur_y += 16
-            draw.text((padding, cur_y), "RIDDLE CLUE:", fill=0, font=font_label)
-            cur_y += 24
-            riddle_text = f'"{puzzle_data.get("riddle", puzzle_data.get("clue", ""))}"'
-            draw.text((padding + 8, cur_y), riddle_text, fill=0, font=font_riddle)
-            cur_y += 32
+        # Calculate exact total height
+        total_h = (
+            12
+            + count * (clue_h + cell_h + word_gap)
+            + 20  # divider gap
+            + 20 + len(riddle_lines) * 20 + 6  # riddle
+            + 20 + 2 * 24 + 4  # scratchpad
+            + 22 + len(ans_lines) * (ans_box + 12) + 16  # answer
+        )
+        total_h = ((total_h + 7) // 8) * 8  # align to 8 dots
 
-            draw.text((padding, cur_y), "Discovered letters scratchpad:", fill=80, font=font_label)
-            cur_y += 24
-            for _ in range(2):
-                draw.line([padding, cur_y, padding + inner_width, cur_y], fill=160, width=2)
-                cur_y += 30
-
-            cur_y += 6
-            draw.text((padding, cur_y), "Answer:", fill=0, font=font_label)
-            cur_y += 24
-
-            ans_box = cell_height
-            answer_words = str(puzzle_data.get("answer", "")).split(" ")
-            for w in answer_words:
-                start_x = padding + 10
-                for c in range(len(w)):
-                    bx = start_x + c * (ans_box + 4)
-                    draw.rectangle([bx, cur_y, bx + ans_box, cur_y + ans_box], outline=0, width=3)
-                    radius = ans_box // 2 - 5
-                    draw.ellipse([bx + ans_box // 2 - radius, cur_y + ans_box // 2 - radius,
-                                  bx + ans_box // 2 + radius, cur_y + ans_box // 2 + radius], outline=0, width=3)
-                cur_y += ans_box + 14
-
-            return pil_to_escpos(img.crop((0, 0, target_width, min(cur_y + 10, total_height))))
-
-        # Pure Python Fallback
-        total_h = 750
         tb = ThermalBitmap(target_width, total_h)
         cur_y = 12
 
-        for i in range(min(4, len(scrambled))):
-            scram = scrambled[i]
-            scram_text = scram.get("scrambled", "") if isinstance(scram, dict) else str(scram)
-            circ = scram.get("circles", []) if isinstance(scram, dict) else (circles[i] if i < len(circles) else [])
+        # 1. Scrambled word clue boxes & answer row
+        for i in range(count):
+            item = scrambled[i]
+            scram_text = item.get("scrambled", "") if isinstance(item, dict) else str(item)
+            circ = item.get("circle_indices", item.get("circles", [])) if isinstance(item, dict) else (circles[i] if i < len(circles) else [])
             length = max(1, len(scram_text))
+
             col_pos = [padding + int(round(c * inner_width / float(length))) for c in range(length + 1)]
 
-            tb.draw_rect(padding, cur_y, inner_width, clue_height, thickness=3)
+            # Clue box
+            tb.draw_rect(padding, cur_y, inner_width, clue_h, thickness=2)
             for c in range(length):
                 cx0 = col_pos[c]
                 cx1 = col_pos[c + 1]
                 col_w = cx1 - cx0
                 if c > 0:
-                    tb.draw_vline(cx0, cur_y, clue_height, thickness=2)
-                tb.draw_char(cx0 + col_w // 2 - 9, cur_y + 8, scram_text[c], scale=3)
+                    tb.draw_vline(cx0, cur_y, clue_h, thickness=1)
+                char_x = cx0 + (col_w - 18) // 2
+                char_y = cur_y + (clue_h - 21) // 2
+                tb.draw_char(char_x, char_y, scram_text[c], scale=3)
 
-            ans_y = cur_y + clue_height
+            # Answer row directly below
+            ans_y = cur_y + clue_h
             for c in range(length):
                 cx0 = col_pos[c]
                 cx1 = col_pos[c + 1]
                 col_w = cx1 - cx0
-                tb.draw_rect(cx0, ans_y, col_w, cell_height, thickness=3)
+                tb.draw_rect(cx0, ans_y, col_w, cell_h, thickness=2)
                 if c in circ:
-                    radius = min(col_w, cell_height) // 2 - 5
-                    tb.draw_circle(cx0 + col_w // 2, ans_y + cell_height // 2, radius, thickness=3)
+                    r = cell_h // 2 - 4
+                    tb.draw_circle(cx0 + col_w // 2, ans_y + cell_h // 2, r, thickness=2)
 
-            cur_y = ans_y + cell_height + word_gap
+            cur_y = ans_y + cell_h + word_gap
 
-        tb.draw_hline(padding, cur_y, inner_width, thickness=2)
-        cur_y += 24
+        # 2. Dashed tear divider
+        tb.draw_dashed_hline(padding, cur_y + 2, inner_width, dash_len=6, gap_len=6, thickness=2)
+        cur_y += 16
+
+        # 3. Riddle Question
+        tb.draw_text(padding, cur_y, "RIDDLE QUESTION:", scale=2)
+        cur_y += 20
+        for r_line in riddle_lines:
+            tb.draw_text(padding + 8, cur_y, r_line, scale=2)
+            cur_y += 20
+        cur_y += 6
+
+        # 4. Scratchpad
         tb.draw_text(padding, cur_y, "SCRATCHPAD:", scale=2)
-        cur_y += 24
+        cur_y += 20
         for _ in range(2):
-            tb.draw_hline(padding, cur_y, inner_width, thickness=2)
-            cur_y += 30
+            tb.draw_dashed_hline(padding, cur_y, inner_width, dash_len=6, gap_len=6, thickness=1)
+            cur_y += 24
+        cur_y += 4
+
+        # 5. Answer layout with segmented letter circles
+        tb.draw_text(padding, cur_y, "ANSWER:", scale=2)
+        cur_y += 22
+
+        for line_words in ans_lines:
+            line_w = sum(measure_word_w(w) for w in line_words) + max(0, len(line_words) - 1) * word_spacing
+            start_x = padding + max(0, (inner_width - line_w) // 2)
+            ax = start_x
+
+            for w in line_words:
+                for ch in w:
+                    if "A" <= ch <= "Z":
+                        tb.draw_rect(ax, cur_y, ans_box, ans_box, thickness=2)
+                        tb.draw_circle(ax + ans_box // 2, cur_y + ans_box // 2, ans_box // 2 - 3, thickness=2)
+                        ax += ans_box
+                    elif ch in ('"', "'"):
+                        tb.draw_char(ax + 2, cur_y + (ans_box - 14) // 2, ch, scale=2)
+                        ax += 12
+                    elif ch == "-":
+                        tb.draw_char(ax + 3, cur_y + (ans_box - 14) // 2, "-", scale=2)
+                        ax += 14
+                ax += word_spacing
+            cur_y += ans_box + 12
 
         return tb.to_escpos()
 

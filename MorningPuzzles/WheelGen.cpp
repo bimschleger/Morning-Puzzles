@@ -90,6 +90,14 @@ void WheelGen::printToReceipt(EscPosPrinter& printer) {
     printer.println("");
 }
 
+static void drawHexCell(ThermalCanvas& canvas, int16_t cx, int16_t cy, int16_t r, uint8_t thickness = 2) {
+    int16_t h = (int16_t)round(r * 0.8660254);
+    int16_t halfR = r / 2;
+    int16_t px[6] = { (int16_t)(cx + r), (int16_t)(cx + halfR), (int16_t)(cx - halfR), (int16_t)(cx - r), (int16_t)(cx - halfR), (int16_t)(cx + halfR) };
+    int16_t py[6] = { cy, (int16_t)(cy + h), (int16_t)(cy + h), cy, (int16_t)(cy - h), (int16_t)(cy - h) };
+    canvas.drawPolygon(px, py, 6, thickness);
+}
+
 bool WheelGen::printRasterToReceipt(EscPosPrinter& printer) {
     printer.setAlign(ALIGN_CENTER);
     printer.setBold(true);
@@ -117,7 +125,7 @@ bool WheelGen::printRasterToReceipt(EscPosPrinter& printer) {
 
     const int16_t xc = 288;
     const int16_t yc = 135;
-    const int16_t cellRadius = 26;
+    const int16_t hexRadius = 46;
 
     // 6 outer honeycomb positions around (xc, yc)
     // Distance spacing ~ 80 dots
@@ -127,14 +135,14 @@ bool WheelGen::printRasterToReceipt(EscPosPrinter& printer) {
     // Draw outer 6 honeycomb cells
     for (int i = 0; i < 6; i++) {
         char ch = _outer[i] ? _outer[i] : ' ';
-        canvas.drawCircle(outerX[i], outerY[i], cellRadius, 2);
-        canvas.drawChar(outerX[i] - 7, outerY[i] - 10, ch, 3);
+        drawHexCell(canvas, outerX[i], outerY[i], hexRadius, 2);
+        canvas.drawChar(outerX[i] - 9, outerY[i] - 10, ch, 3);
     }
 
-    // Draw center cell (double ring for emphasis)
-    canvas.drawCircle(xc, yc, cellRadius + 4, 2);
-    canvas.drawCircle(xc, yc, cellRadius, 1);
-    canvas.drawChar(xc - 7, yc - 10, _center, 3);
+    // Draw center cell (double frame for emphasis)
+    drawHexCell(canvas, xc, yc, hexRadius, 2);
+    drawHexCell(canvas, xc, yc, hexRadius - 4, 2);
+    canvas.drawChar(xc - 9, yc - 10, _center, 3);
 
     // Target Benchmarks box
     const int16_t boxW = 420;

@@ -31,6 +31,7 @@ public:
 
     uint8_t getSize() const { return _size; }
     uint8_t getStarsPerUnit() const { return _starsPerUnit; }
+    int8_t getRegion(uint8_t r, uint8_t c) const { return (r < MAX_SIZE && c < MAX_SIZE) ? _regions[r][c] : -1; }
 
 private:
     uint8_t _size;

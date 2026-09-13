@@ -129,40 +129,9 @@ class SudokuPuzzle(BasePuzzle):
         puzzle_data: Union[BasePuzzleResult, Dict[str, Any]],
         target_width: int = THERMAL_WIDTH_DOTS,
     ) -> bytes:
-        board = puzzle_data.get("grid", [])
+        board = puzzle_data.get("grid") or puzzle_data.get("puzzle") or []
         padding = 24
         board_size = target_width - padding * 2
-        cell_size = board_size / 9.0
-
-        if HAS_PILLOW:
-            total_height = int(padding + board_size + padding)
-            img = Image.new("L", (target_width, total_height), 255)
-            draw = ImageDraw.Draw(img)
-
-            try:
-                font_digit = ImageFont.truetype("Courier.ttf", int(cell_size * 0.6))
-            except IOError:
-                font_digit = ImageFont.load_default()
-
-            for i in range(10):
-                pos = padding + i * cell_size
-                is_major = (i % 3 == 0)
-                w = 4 if is_major else 1
-                color = 0 if is_major else 180
-                draw.line([padding, pos, padding + board_size, pos], fill=color, width=w)
-                draw.line([pos, padding, pos, padding + board_size], fill=color, width=w)
-
-            for r in range(9):
-                for c in range(9):
-                    val = board[r][c] if r < len(board) and c < len(board[r]) else 0
-                    if val != 0:
-                        cx = padding + c * cell_size + cell_size // 2 - int(cell_size * 0.16)
-                        cy = padding + r * cell_size + cell_size // 2 - int(cell_size * 0.32)
-                        draw.text((cx, cy), str(val), fill=0, font=font_digit)
-
-            return pil_to_escpos(img)
-
-        # Pure Python ThermalBitmap Fallback
         c_size = board_size // 9
         total_h = padding + c_size * 9 + padding
         tb = ThermalBitmap(target_width, total_h)

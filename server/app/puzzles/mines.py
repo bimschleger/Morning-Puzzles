@@ -183,15 +183,15 @@ class MinesPuzzle(BasePuzzle):
         tb = ThermalBitmap(target_width, total_h)
 
         tb.draw_rect(padding, 12, inner_width, badge_h, thickness=3)
-        tb.draw_text(padding + 16, 20, f"TOTAL MINES: {total_mines}", scale=2)
+        tb.draw_centered_text(18, f"TOTAL MINES: {total_mines}", scale=2)
 
         grid_y = 12 + badge_h + 12
         tb.draw_rect(padding, grid_y, cell_size * cols, board_h, thickness=4)
 
         for c in range(1, cols):
-            tb.draw_vline(padding + c * cell_size, grid_y, board_h, thickness=2)
+            tb.draw_vline(padding + c * cell_size, grid_y, board_h, thickness=1)
         for r in range(1, rows):
-            tb.draw_hline(padding, grid_y + r * cell_size, cell_size * cols, thickness=2)
+            tb.draw_hline(padding, grid_y + r * cell_size, cell_size * cols, thickness=1)
 
         for r in range(rows):
             for c in range(cols):

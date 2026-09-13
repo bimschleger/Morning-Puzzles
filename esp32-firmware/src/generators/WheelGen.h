@@ -22,6 +22,9 @@ public:
     const char* getOuterLetters() const { return _outer; }
     const char* getPangram() const { return _pangram; }
     uint8_t getWordCount() const { return _wordCount; }
+    uint8_t getGood() const { return _good; }
+    uint8_t getGreat() const { return _great; }
+    uint8_t getGenius() const { return _genius; }
 
 private:
     char _center;

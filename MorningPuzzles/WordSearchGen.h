@@ -31,6 +31,8 @@ public:
 
     const char* getThemeName() const { return _currentTheme; }
     size_t getWordCount() const { return _placedWords.size(); }
+    char getGridChar(uint8_t r, uint8_t c) const { return _grid[r][c]; }
+    const String& getPlacedWord(size_t i) const { return _placedWords[i].word; }
 
 private:
     char _grid[GRID_SIZE][GRID_SIZE];

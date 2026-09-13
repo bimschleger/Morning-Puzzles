@@ -31,6 +31,10 @@ public:
     void drawRect(int16_t x, int16_t y, int16_t w, int16_t h, uint8_t thickness = 1, uint8_t color = 1);
     void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint8_t color = 1);
     void fillHatch(int16_t x, int16_t y, int16_t w, int16_t h, uint8_t patternId);
+    // Lines & Shapes
+    void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t thickness = 1, uint8_t color = 1);
+    void drawDashedHLine(int16_t x, int16_t y, int16_t w, uint8_t dashLen = 4, uint8_t gapLen = 4, uint8_t thickness = 1, uint8_t color = 1);
+    void drawPolygon(const int16_t* px, const int16_t* py, uint8_t numPoints, uint8_t thickness = 1, uint8_t color = 1);
 
     // Circles
     void drawCircle(int16_t cx, int16_t cy, int16_t radius, uint8_t thickness = 2, uint8_t color = 1);

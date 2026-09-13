@@ -38,6 +38,22 @@ public:
     String(unsigned long v) : std::string(std::to_string(v)) {}
 
     const char* c_str() const { return std::string::c_str(); }
+    size_t length() const { return std::string::length(); }
+    String substring(size_t from, size_t to = std::string::npos) const {
+        if (from >= length()) return String("");
+        if (to == std::string::npos || to > length()) return String(substr(from));
+        return String(substr(from, to - from));
+    }
+    void trim() {
+        while (!empty() && (front() == ' ' || front() == '\t' || front() == '\r' || front() == '\n')) erase(begin());
+        while (!empty() && (back() == ' ' || back() == '\t' || back() == '\r' || back() == '\n')) pop_back();
+    }
+    void toUpperCase() {
+        for (char& c : *this) c = (char)::toupper((unsigned char)c);
+    }
+    void toLowerCase() {
+        for (char& c : *this) c = (char)::tolower((unsigned char)c);
+    }
 };
 
 inline String operator+(const String& lhs, const String& rhs) {

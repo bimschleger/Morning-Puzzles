@@ -168,51 +168,11 @@ class StarsPuzzle(BasePuzzle):
         size = puzzle_data.get("grid_size", puzzle_data.get("size", 8))
         regions = puzzle_data.get("regions", [])
 
-        if HAS_PILLOW:
-            padding = 24
-            board_size = target_width - padding * 2
-            cell_size = board_size / float(size)
-
-            img = Image.new("L", (target_width, target_width), 255)
-            draw = ImageDraw.Draw(img)
-            tones = [255, 225, 195, 165, 135, 105, 75, 45, 15]
-
-            for r in range(size):
-                for c in range(size):
-                    reg = regions[r][c] if r < len(regions) and c < len(regions[r]) else 0
-                    tone = tones[reg % len(tones)]
-                    x0 = int(padding + c * cell_size)
-                    y0 = int(padding + r * cell_size)
-                    x1 = int(padding + (c + 1) * cell_size)
-                    y1 = int(padding + (r + 1) * cell_size)
-                    draw.rectangle([x0, y0, x1, y1], fill=tone)
-
-            for r in range(size):
-                for c in range(size):
-                    reg = regions[r][c] if r < len(regions) and c < len(regions[r]) else 0
-                    x0 = int(padding + c * cell_size)
-                    y0 = int(padding + r * cell_size)
-                    x1 = int(padding + (c + 1) * cell_size)
-                    y1 = int(padding + (r + 1) * cell_size)
-
-                    is_bottom_boundary = (r == size - 1) or (r + 1 < len(regions) and regions[r + 1][c] != reg)
-                    w = 5 if is_bottom_boundary else 1
-                    color = 0 if is_bottom_boundary else 180
-                    draw.line([x0, y1, x1, y1], fill=color, width=w)
-
-                    is_right_boundary = (c == size - 1) or (c + 1 < len(regions[r]) and regions[r][c + 1] != reg)
-                    w = 5 if is_right_boundary else 1
-                    color = 0 if is_right_boundary else 180
-                    draw.line([x1, y0, x1, y1], fill=color, width=w)
-
-            draw.rectangle([padding, padding, padding + board_size, padding + board_size], outline=0, width=5)
-            return pil_to_escpos(img)
-
-        # Pure Python ThermalBitmap Fallback
         padding = 24
         board_size = target_width - padding * 2
         cell_size = board_size // size
-        tb = ThermalBitmap(target_width, target_width)
+        total_h = padding + cell_size * size + padding
+        tb = ThermalBitmap(target_width, total_h)
 
         for r in range(size):
             for c in range(size):

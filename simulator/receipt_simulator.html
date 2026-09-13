@@ -6616,7 +6616,9 @@
       '[': [0x1E, 0x10, 0x10, 0x10, 0x10, 0x10, 0x1E],
       ']': [0x1E, 0x02, 0x02, 0x02, 0x02, 0x02, 0x1E],
       '_': [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3F],
-      ',': [0x00, 0x00, 0x00, 0x00, 0x0C, 0x04, 0x08]
+      ',': [0x00, 0x00, 0x00, 0x00, 0x0C, 0x04, 0x08],
+      '"': [0x14, 0x14, 0x14, 0x00, 0x00, 0x00, 0x00],
+      "'": [0x08, 0x08, 0x08, 0x00, 0x00, 0x00, 0x00]
     };
 
     class ThermalCanvasSimulator {
@@ -6691,6 +6693,58 @@
           for (let px = startX; px < endX; px++) {
             this.setPixel(px, py, color);
           }
+        }
+      }
+
+      drawLine(x0, y0, x1, y1, thickness = 1, color = 1) {
+        x0 = Math.round(x0); y0 = Math.round(y0); x1 = Math.round(x1); y1 = Math.round(y1);
+        const dx = Math.abs(x1 - x0);
+        const sx = x0 < x1 ? 1 : -1;
+        const dy = -Math.abs(y1 - y0);
+        const sy = y0 < y1 ? 1 : -1;
+        let err = dx + dy;
+
+        while (true) {
+          if (thickness <= 1) {
+            this.setPixel(x0, y0, color);
+          } else {
+            const halfT = Math.floor(thickness / 2);
+            for (let ty = -halfT; ty < halfT + (thickness % 2); ty++) {
+              for (let tx = -halfT; tx < halfT + (thickness % 2); tx++) {
+                this.setPixel(x0 + tx, y0 + ty, color);
+              }
+            }
+          }
+          if (x0 === x1 && y0 === y1) break;
+          const e2 = 2 * err;
+          if (e2 >= dy) {
+            err += dy;
+            x0 += sx;
+          }
+          if (e2 <= dx) {
+            err += dx;
+            y0 += sy;
+          }
+        }
+      }
+
+      drawDashedHLine(x, y, w, dashLen = 8, gapLen = 6, thickness = 1, color = 1) {
+        if (w <= 0 || dashLen <= 0) return;
+        let curX = x;
+        const endX = x + w;
+        while (curX < endX) {
+          const segW = Math.min(dashLen, endX - curX);
+          this.drawHLine(curX, y, segW, thickness, color);
+          curX += dashLen + gapLen;
+        }
+      }
+
+      drawPolygon(points, thickness = 1, color = 1) {
+        if (!points || points.length < 2) return;
+        for (let i = 0; i < points.length; i++) {
+          const p1 = points[i];
+          const p2 = points[(i + 1) % points.length];
+          this.drawLine(p1[0], p1[1], p2[0], p2[1], thickness, color);
         }
       }
 
@@ -6906,26 +6960,58 @@
 
     function renderOfflineWordSearch(canvas, wsData) {
       const padding = 24;
-      const boardSize = 576 - padding * 2; // 528
-      const cols = wsData.cols || (wsData.grid[0] ? wsData.grid[0].length : 8);
-      const rows = wsData.rows || (wsData.grid ? wsData.grid.length : 10);
-      const cellSize = Math.floor(boardSize / cols);
+      const innerWidth = 576 - padding * 2; // 528
+      const cols = wsData.cols || (wsData.grid && wsData.grid[0] ? wsData.grid[0].length : 12);
+      const rows = wsData.rows || (wsData.grid ? wsData.grid.length : 12);
+      const cellSize = Math.floor(innerWidth / cols);
       const gridH = cellSize * rows;
-      const totalH = padding + gridH + padding;
+
+      const words = wsData.words || [];
+      const checklistRows = Math.floor((words.length + 1) / 2);
+      const checklistH = 40 + checklistRows * 28;
+      const totalH = 12 + gridH + 20 + checklistH + 12;
 
       const tc = new ThermalCanvasSimulator(576, totalH);
+      const gridY = 12;
 
       // Outer border
-      tc.drawRect(padding, padding, cellSize * cols, gridH, 3);
+      tc.drawRect(padding, gridY, cellSize * cols, gridH, 4);
 
-      // Letter matrix
+      // Letter matrix & inner grid lines
       for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
-          const letter = wsData.grid[r][c];
-          const cx = padding + c * cellSize + Math.floor((cellSize - 12) / 2);
-          const cy = padding + r * cellSize + Math.floor((cellSize - 14) / 2);
-          tc.drawChar(cx, cy, letter, 2);
+          const letter = (wsData.grid && wsData.grid[r]) ? wsData.grid[r][c] : ' ';
+          const cx = padding + c * cellSize + Math.floor((cellSize - 18) / 2);
+          const cy = gridY + r * cellSize + Math.floor((cellSize - 21) / 2);
+          tc.drawChar(cx, cy, letter, 3);
+          if (c > 0) {
+            tc.drawVLine(padding + c * cellSize, gridY, gridH, 1);
+          }
         }
+        if (r > 0) {
+          tc.drawHLine(padding, gridY + r * cellSize, cellSize * cols, 1);
+        }
+      }
+
+      // Divider line
+      let curY = gridY + gridH + 16;
+      tc.drawHLine(padding, curY, innerWidth, 2);
+      curY += 18;
+
+      // Theme banner
+      const themeStr = "THEME: " + (wsData.theme || '').toUpperCase();
+      tc.drawText(padding, curY, themeStr, 2);
+      curY += 28;
+
+      // Word checklist
+      const colW = Math.floor(innerWidth / 2);
+      for (let i = 0; i < words.length; i++) {
+        const colIdx = i % 2;
+        const rowIdx = Math.floor(i / 2);
+        const ix = padding + colIdx * colW;
+        const iy = curY + rowIdx * 28;
+        tc.drawRect(ix, iy + 2, 16, 16, 2);
+        tc.drawText(ix + 24, iy + 2, words[i].toUpperCase(), 2);
       }
 
       tc.renderToCanvas(canvas);
@@ -7000,39 +7086,171 @@
 
     function renderOfflineJumble(canvas, jData) {
       const padding = 24;
-      const rowH = 48;
-      const numWords = jData.words.length;
-      const totalH = padding + numWords * rowH + padding;
+      const innerWidth = 576 - padding * 2; // 528
+      const clueH = 36;
+      const cellH = 48;
+      const wordGap = 12;
+      const count = Math.min(4, (jData.words && jData.words.length) ? jData.words.length : 0);
+
+      // Tokenize answer words
+      const ansBox = 34;
+      const wordSpacing = 14;
+
+      function measureWordW(w) {
+        let wW = 0;
+        for (let c = 0; c < w.length; c++) {
+          const ch = w[c];
+          if (ch >= 'A' && ch <= 'Z') wW += ansBox;
+          else if (ch === '"' || ch === "'") wW += 12;
+          else if (ch === '-') wW += 14;
+        }
+        return wW;
+      }
+
+      const ansWords = (jData.answer || '').toUpperCase().split(' ').filter(w => w.length > 0);
+      const ansLines = [];
+      let curLine = [];
+      let curLineW = 0;
+      for (const w of ansWords) {
+        const wW = measureWordW(w);
+        const needed = curLine.length === 0 ? wW : (wordSpacing + wW);
+        if (curLineW + needed <= innerWidth && curLine.length > 0) {
+          curLine.push(w);
+          curLineW += needed;
+        } else {
+          if (curLine.length > 0) ansLines.push(curLine);
+          curLine = [w];
+          curLineW = wW;
+        }
+      }
+      if (curLine.length > 0) ansLines.push(curLine);
+
+      // Tokenize riddle into wrapped lines (~36 chars)
+      const riddleStr = `"${jData.riddle || ''}"`;
+      const riddleLines = [];
+      let rStart = 0;
+      while (rStart < riddleStr.length) {
+        let rEnd = rStart + 36;
+        if (rEnd >= riddleStr.length) {
+          rEnd = riddleStr.length;
+        } else {
+          let lastSpace = -1;
+          for (let s = rEnd; s > rStart; s--) {
+            if (riddleStr[s] === ' ') {
+              lastSpace = s;
+              break;
+            }
+          }
+          if (lastSpace !== -1) rEnd = lastSpace;
+        }
+        const line = riddleStr.substring(rStart, rEnd).trim();
+        riddleLines.push(line);
+        rStart = (rEnd < riddleStr.length && riddleStr[rEnd] === ' ') ? rEnd + 1 : rEnd;
+      }
+
+      let totalH = (
+        12
+        + count * (clueH + cellH + wordGap)
+        + 20
+        + 20 + riddleLines.length * 20 + 6
+        + 20 + 2 * 24 + 4
+        + 22 + ansLines.length * (ansBox + 12) + 16
+      );
+      totalH = Math.floor((totalH + 7) / 8) * 8;
 
       const tc = new ThermalCanvasSimulator(576, totalH);
+      let curY = 12;
 
-      for (let i = 0; i < numWords; i++) {
-        const y = padding + i * rowH;
-        const scram = jData.scrambled[i];
-        const orig = jData.words[i];
-        const circles = jData.circles[i] || [];
+      // 1. Scrambled words and answer boxes
+      for (let i = 0; i < count; i++) {
+        const scram = (jData.scrambled && jData.scrambled[i]) ? jData.scrambled[i] : '';
+        const circ = (jData.circles && jData.circles[i]) || [];
+        const len = scram.length;
+        if (len <= 0) continue;
 
-        // Scrambled word text on left
-        tc.drawText(padding, y + 10, scram, 3);
+        // Draw clue box for scrambled word
+        tc.drawRect(padding, curY, innerWidth, clueH, 2);
+        for (let c = 0; c < len; c++) {
+          const cx0 = padding + Math.floor((c * innerWidth) / len);
+          const cx1 = padding + Math.floor(((c + 1) * innerWidth) / len);
+          const colW = cx1 - cx0;
+          if (c > 0) {
+            tc.drawVLine(cx0, curY, clueH, 1);
+          }
+          const charX = cx0 + Math.floor((colW - 18) / 2);
+          const charY = curY + Math.floor((clueH - 21) / 2);
+          tc.drawChar(charX, charY, scram[c], 3);
+        }
 
-        // Letter boxes / circles in middle
-        const slotStartX = padding + 180;
-        const boxSize = 28;
-        for (let charIdx = 0; charIdx < orig.length; charIdx++) {
-          const bx = slotStartX + charIdx * (boxSize + 8);
-          const isCircled = circles.includes(charIdx);
-          if (isCircled) {
-            tc.drawCircle(bx + Math.floor(boxSize / 2), y + 8 + Math.floor(boxSize / 2), Math.floor(boxSize / 2), 2);
-          } else {
-            tc.drawRect(bx, y + 8, boxSize, boxSize, 2);
+        // Draw answer squares directly below
+        const ansY = curY + clueH;
+        for (let c = 0; c < len; c++) {
+          const cx0 = padding + Math.floor((c * innerWidth) / len);
+          const cx1 = padding + Math.floor(((c + 1) * innerWidth) / len);
+          const colW = cx1 - cx0;
+          tc.drawRect(cx0, ansY, colW, cellH, 2);
+
+          if (circ.includes(c)) {
+            const r = Math.floor(cellH / 2) - 4;
+            tc.drawCircle(cx0 + Math.floor(colW / 2), ansY + Math.floor(cellH / 2), r, 2);
           }
         }
 
-        // Handwriting underline line on right
-        const lineStartX = slotStartX + orig.length * (boxSize + 8) + 16;
-        if (lineStartX < 576 - padding) {
-          tc.drawHLine(lineStartX, y + 36, 576 - padding - lineStartX, 2);
+        curY = ansY + cellH + wordGap;
+      }
+
+      // 2. Dashed tear divider
+      tc.drawDashedHLine(padding, curY + 2, innerWidth, 6, 6, 2);
+      curY += 16;
+
+      // 3. Riddle Question
+      tc.drawText(padding, curY, "RIDDLE QUESTION:", 2);
+      curY += 20;
+      for (const rLine of riddleLines) {
+        tc.drawText(padding + 8, curY, rLine, 2);
+        curY += 20;
+      }
+      curY += 6;
+
+      // 4. Scratchpad
+      tc.drawText(padding, curY, "SCRATCHPAD:", 2);
+      curY += 20;
+      for (let s = 0; s < 2; s++) {
+        tc.drawDashedHLine(padding, curY, innerWidth, 6, 6, 1);
+        curY += 24;
+      }
+      curY += 4;
+
+      // 5. Answer layout with segmented letter circles
+      tc.drawText(padding, curY, "ANSWER:", 2);
+      curY += 22;
+
+      for (const lineWords of ansLines) {
+        let lineTotalW = 0;
+        for (const w of lineWords) lineTotalW += measureWordW(w);
+        lineTotalW += Math.max(0, lineWords.length - 1) * wordSpacing;
+
+        let startX = padding + Math.max(0, Math.floor((innerWidth - lineTotalW) / 2));
+        let ax = startX;
+
+        for (const w of lineWords) {
+          for (let c = 0; c < w.length; c++) {
+            const ch = w[c];
+            if (ch >= 'A' && ch <= 'Z') {
+              tc.drawRect(ax, curY, ansBox, ansBox, 2);
+              tc.drawCircle(ax + Math.floor(ansBox / 2), curY + Math.floor(ansBox / 2), Math.floor(ansBox / 2) - 3, 2);
+              ax += ansBox;
+            } else if (ch === '"' || ch === "'") {
+              tc.drawChar(ax + 2, curY + Math.floor((ansBox - 14) / 2), ch, 2);
+              ax += 12;
+            } else if (ch === '-') {
+              tc.drawChar(ax + 3, curY + Math.floor((ansBox - 14) / 2), '-', 2);
+              ax += 14;
+            }
+          }
+          ax += wordSpacing;
         }
+        curY += ansBox + 12;
       }
 
       tc.renderToCanvas(canvas);
@@ -7457,21 +7675,41 @@
 
       const xc = 288;
       const yc = 135;
-      const cellRadius = 26;
+      const hexRadius = 46;
+      const spacing = 80; // 46 * sqrt(3) ~ 79.67px
 
-      const outerX = [288, 357, 357, 288, 219, 219];
-      const outerY = [ 55,  95, 175, 215, 175,  95];
+      const anglesDeg = [270, 330, 30, 90, 150, 210];
 
-      for (let i = 0; i < 6; i++) {
-        const ch = (wData.outer && wData.outer[i]) ? wData.outer[i] : ' ';
-        tc.drawCircle(outerX[i], outerY[i], cellRadius, 2);
-        tc.drawChar(outerX[i] - 7, outerY[i] - 10, ch, 3);
+      function getHexPolygon(cx, cy, r) {
+        const h = Math.round(r * 0.8660254);
+        const halfR = Math.floor(r / 2);
+        return [
+          [cx + r, cy],
+          [cx + halfR, cy + h],
+          [cx - halfR, cy + h],
+          [cx - r, cy],
+          [cx - halfR, cy - h],
+          [cx + halfR, cy - h]
+        ];
       }
 
-      tc.drawCircle(xc, yc, cellRadius + 4, 2);
-      tc.drawCircle(xc, yc, cellRadius, 1);
-      tc.drawChar(xc - 7, yc - 10, wData.center || 'A', 3);
+      // Outer 6 hexagons
+      const outer = wData.outer || [];
+      for (let i = 0; i < 6; i++) {
+        const rad = (anglesDeg[i] * Math.PI) / 180.0;
+        const px = Math.round(xc + spacing * Math.cos(rad));
+        const py = Math.round(yc + spacing * Math.sin(rad));
+        tc.drawPolygon(getHexPolygon(px, py, hexRadius), 2);
+        const ch = (outer && outer[i]) ? outer[i] : ' ';
+        tc.drawChar(px - 9, py - 10, ch, 3);
+      }
 
+      // Center hexagon with double-thick frame
+      tc.drawPolygon(getHexPolygon(xc, yc, hexRadius), 2);
+      tc.drawPolygon(getHexPolygon(xc, yc, hexRadius - 4), 2);
+      tc.drawChar(xc - 9, yc - 10, wData.center || 'A', 3);
+
+      // Benchmarks box
       const boxW = 420;
       const boxH = 34;
       const boxX = Math.floor((576 - boxW) / 2);
@@ -7481,6 +7719,7 @@
       const benchText = `GOOD: ${wData.good || 15}   GREAT: ${wData.great || 25}   GENIUS: ${wData.genius || 35}+`;
       tc.drawCenteredText(boxY + 8, benchText, 2);
 
+      // Ruled handwriting lines
       tc.drawHLine(48, 315, 220, 1);
       tc.drawHLine(308, 315, 220, 1);
       tc.drawHLine(48, 345, 220, 1);
@@ -7721,13 +7960,6 @@
             type: 'canvas',
             render: (canvas) => renderOfflineWordSearch(canvas, wsData)
           });
-          items.push({ type: 'blank', text: '' });
-          items.push({ type: 'text', text: 'Theme: ' + wsData.theme.toUpperCase() });
-          for (let i = 0; i < wsData.words.length; i += 2) {
-            const col1 = `[ ] ${wsData.words[i]}`;
-            const col2 = wsData.words[i + 1] ? `[ ] ${wsData.words[i + 1]}` : '';
-            items.push({ type: 'text', text: '  ' + keyValue(col1, col2, 44) });
-          }
         } else if (isGraphic) {
           items.push({
             type: 'canvas',
@@ -7828,9 +8060,6 @@
             type: 'canvas',
             render: (canvas) => renderOfflineJumble(canvas, jData)
           });
-          items.push({ type: 'blank', text: '' });
-          items.push({ type: 'text', text: `Q: "${jData.riddle}"` });
-          items.push({ type: 'text', text: 'A: _________________________________________' });
         } else if (isGraphic) {
           items.push({
             type: 'canvas',

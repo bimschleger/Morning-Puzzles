@@ -68,7 +68,9 @@ static const FontGlyph GLYPH_TABLE[] = {
     { '[', {0x1E, 0x10, 0x10, 0x10, 0x10, 0x10, 0x1E} },
     { ']', {0x1E, 0x02, 0x02, 0x02, 0x02, 0x02, 0x1E} },
     { '_', {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3F} },
-    { ',', {0x00, 0x00, 0x00, 0x00, 0x0C, 0x04, 0x08} }
+    { ',', {0x00, 0x00, 0x00, 0x00, 0x0C, 0x04, 0x08} },
+    { '"', {0x14, 0x14, 0x14, 0x00, 0x00, 0x00, 0x00} },
+    { '\'', {0x08, 0x08, 0x10, 0x00, 0x00, 0x00, 0x00} }
 };
 static const size_t GLYPH_COUNT = sizeof(GLYPH_TABLE) / sizeof(GLYPH_TABLE[0]);
 
@@ -206,6 +208,56 @@ void ThermalCanvas::fillHatch(int16_t x, int16_t y, int16_t w, int16_t h, uint8_
                 setPixel(px, py, 1);
             }
         }
+    }
+}
+
+void ThermalCanvas::drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t thickness, uint8_t color) {
+    int16_t dx = abs(x1 - x0);
+    int16_t sx = (x0 < x1) ? 1 : -1;
+    int16_t dy = -abs(y1 - y0);
+    int16_t sy = (y0 < y1) ? 1 : -1;
+    int16_t err = dx + dy;
+
+    while (true) {
+        if (thickness <= 1) {
+            setPixel(x0, y0, color);
+        } else {
+            int16_t halfT = thickness / 2;
+            for (int16_t ty = -halfT; ty < halfT + (thickness % 2); ty++) {
+                for (int16_t tx = -halfT; tx < halfT + (thickness % 2); tx++) {
+                    setPixel(x0 + tx, y0 + ty, color);
+                }
+            }
+        }
+        if (x0 == x1 && y0 == y1) break;
+        int16_t e2 = 2 * err;
+        if (e2 >= dy) {
+            err += dy;
+            x0 += sx;
+        }
+        if (e2 <= dx) {
+            err += dx;
+            y0 += sy;
+        }
+    }
+}
+
+void ThermalCanvas::drawDashedHLine(int16_t x, int16_t y, int16_t w, uint8_t dashLen, uint8_t gapLen, uint8_t thickness, uint8_t color) {
+    if (w <= 0 || dashLen == 0) return;
+    int16_t curX = x;
+    int16_t endX = x + w;
+    while (curX < endX) {
+        int16_t segW = min((int16_t)dashLen, (int16_t)(endX - curX));
+        drawHLine(curX, y, segW, thickness, color);
+        curX += dashLen + gapLen;
+    }
+}
+
+void ThermalCanvas::drawPolygon(const int16_t* px, const int16_t* py, uint8_t numPoints, uint8_t thickness, uint8_t color) {
+    if (numPoints < 2) return;
+    for (uint8_t i = 0; i < numPoints; i++) {
+        uint8_t next = (i + 1) % numPoints;
+        drawLine(px[i], py[i], px[next], py[next], thickness, color);
     }
 }
 

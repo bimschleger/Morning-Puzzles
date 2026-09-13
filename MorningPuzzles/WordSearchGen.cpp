@@ -154,43 +154,66 @@ bool WordSearchGen::printRasterToReceipt(EscPosPrinter& printer) {
     printer.setAlign(ALIGN_LEFT);
 
     const int16_t padding = 24;
-    const int16_t boardSize = THERMAL_CANVAS_WIDTH - padding * 2;
-    const int16_t cellSize = boardSize / GRID_SIZE;
+    const int16_t innerWidth = THERMAL_CANVAS_WIDTH - padding * 2;
+    const int16_t cellSize = innerWidth / GRID_SIZE;
     const int16_t gridH = cellSize * GRID_SIZE;
-    const int16_t totalH = padding + gridH + padding;
+
+    const int16_t checklistRows = (int16_t)((_placedWords.size() + 1) / 2);
+    const int16_t checklistH = 40 + checklistRows * 28;
+    const int16_t totalH = 12 + gridH + 20 + checklistH + 12;
 
     ThermalCanvas canvas;
     if (!canvas.begin(totalH)) {
         return false;
     }
 
-    // Outer border
-    canvas.drawRect(padding, padding, gridH, gridH, 3);
+    const int16_t gridY = 12;
 
-    // Letter matrix
+    // Outer border
+    canvas.drawRect(padding, gridY, cellSize * GRID_SIZE, gridH, 4);
+
+    // Letter matrix & inner grid lines
     for (uint8_t r = 0; r < GRID_SIZE; r++) {
         for (uint8_t c = 0; c < GRID_SIZE; c++) {
             char letter = _grid[r][c];
-            int16_t cx = padding + c * cellSize + (cellSize - 12) / 2;
-            int16_t cy = padding + r * cellSize + (cellSize - 14) / 2;
-            canvas.drawChar(cx, cy, letter, 2);
+            int16_t cx = padding + c * cellSize + (cellSize - 18) / 2;
+            int16_t cy = gridY + r * cellSize + (cellSize - 21) / 2;
+            canvas.drawChar(cx, cy, letter, 3);
+            if (c > 0) {
+                canvas.drawVLine(padding + c * cellSize, gridY, gridH, 1);
+            }
         }
+        if (r > 0) {
+            canvas.drawHLine(padding, gridY + r * cellSize, cellSize * GRID_SIZE, 1);
+        }
+    }
+
+    // Divider line
+    int16_t curY = gridY + gridH + 16;
+    canvas.drawHLine(padding, curY, innerWidth, 2);
+    curY += 18;
+
+    // Theme banner
+    String themeStr = String("THEME: ") + _currentTheme;
+    themeStr.toUpperCase();
+    canvas.drawText(padding, curY, themeStr.c_str(), 2);
+    curY += 28;
+
+    // Word checklist
+    int16_t colW = innerWidth / 2;
+    for (size_t i = 0; i < _placedWords.size(); i++) {
+        int16_t colIdx = i % 2;
+        int16_t rowIdx = i / 2;
+        int16_t ix = padding + colIdx * colW;
+        int16_t iy = curY + rowIdx * 28;
+        canvas.drawRect(ix, iy + 2, 16, 16, 2);
+        String w = _placedWords[i].word;
+        w.toUpperCase();
+        canvas.drawText(ix + 24, iy + 2, w.c_str(), 2);
     }
 
     bool ok = canvas.printTo(printer);
     canvas.end();
-
-    if (ok) {
-        printer.println("");
-        printer.println(String("Theme: ") + _currentTheme);
-        for (size_t i = 0; i < _placedWords.size(); i += 2) {
-            String col1 = "[ ] " + _placedWords[i].word;
-            String col2 = (i + 1 < _placedWords.size()) ? ("[ ] " + _placedWords[i + 1].word) : "";
-            printer.printKeyValue(col1, col2, 44);
-        }
-        printer.println("");
-    }
-
     return ok;
 }
 
