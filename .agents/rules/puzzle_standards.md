@@ -56,3 +56,12 @@ All games in Morning Puzzles must be implemented as modular, self-contained plug
 - **Registry Registration**: Every puzzle must be registered in `DEFAULT_REGISTRY` (`server/app/puzzles/registry.py`).
 - **Zero Procedural Spaghetti**: Never introduce manual `elif puzzle_id == ...` branches in `main.py`, `text_formatter.py`, or `receipt_rasterizer.py`. All routing, daily bundle assembly, and receipt composition are dynamically and polymorphically driven by the registry.
 - **Thermal Drawing Safety**: Raster graphics must be 576 dots wide, height aligned to 8 dots, with an average thermal duty cycle $\le 35\%$ and no more than 16 consecutive dense rows. Use `ThermalCanvas` primitives (`draw_grid`, `draw_rect`, `draw_circle`, `draw_text`, `draw_line`, `draw_stars`) for automatic dual-backend (Pillow + pure-Python fallback) compatibility.
+
+## 7. Arduino IDE Dual-Target Synchronization Standard
+Morning Puzzles supports both PlatformIO (`esp32-firmware/`) and native Arduino IDE (`MorningPuzzles/MorningPuzzles.ino`):
+- **Mandatory Mirroring**: Whenever any change, fix, generator, or configuration update is made to `esp32-firmware/` (including `include/config.h`, `src/generators/`, `src/printer/`, `src/time/`, or `src/main.cpp`), agents must immediately synchronize the Arduino sketch target so it compiles cleanly out of the box:
+  ```bash
+  ./scripts/sync_arduino_sketch.sh
+  ```
+- **Single-Folder Flat Includes**: In `MorningPuzzles/`, all sibling headers must use local flat `#include "Header.h"` rather than directory traversal paths (`../printer/` or `generators/`). The sync script handles this transformation automatically.
+

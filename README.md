@@ -107,15 +107,19 @@ Open [`esp32-firmware/include/config.h`](esp32-firmware/include/config.h) on you
 ### Step 3: Flash the ESP32 from your Mac / PC
 
 1. Connect the LilyGO T-ETH-Lite board to your Mac or PC using a standard USB-C data cable.
-2. Upload the firmware using **PlatformIO** or **Arduino IDE**:
-   * **Using PlatformIO (Command Line or VS Code)**:
+2. Upload the firmware using **Arduino IDE** or **PlatformIO**:
+   * **Using Arduino IDE (Recommended GUI)**:
+     1. Open Arduino IDE and select **File $\rightarrow$ Open...**
+     2. Choose `MorningPuzzles/MorningPuzzles.ino`.
+     3. Select your board (**ESP32S3 Dev Module** for LilyGO T-ETH-Lite or **ESP32 Dev Module** for standard boards) and your USB port (`/dev/cu.usbmodem...` or `/dev/cu.usbserial-...`).
+     4. Click the **Upload** arrow button ($\rightarrow$).
+     5. Upload is complete when the console displays `Hard resetting via RTS pin...` with verified hashes.
+   * **Using PlatformIO (Command Line / VS Code)**:
      ```bash
      cd esp32-firmware
      pio run -t upload
      ```
-   * **Using Arduino IDE**:
-     Open `esp32-firmware/src/main.cpp`, select your ESP32 board, and click the **Upload** arrow.
-3. Once the upload finishes (typically 10–15 seconds), unplug the board from your computer.
+3. Once the upload finishes, unplug the board from your computer.
 
 ---
 

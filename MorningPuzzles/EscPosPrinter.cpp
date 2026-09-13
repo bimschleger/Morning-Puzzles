@@ -1,0 +1,307 @@
+#include "EscPosPrinter.h"
+
+EscPosPrinter::EscPosPrinter() : 
+    _mode(ACTIVE_PRINTER_MODE), 
+    _serial(nullptr), 
+    _outputStream(nullptr) {
+}
+
+EscPosPrinter::~EscPosPrinter() {
+    disconnect();
+}
+
+bool EscPosPrinter::begin() {
+    if (_mode == PRINTER_MODE_SERIAL) {
+        _serial = &Serial2;
+        _serial->begin(PRINTER_SERIAL_BAUD, SERIAL_8N1, PRINTER_RX_PIN, PRINTER_TX_PIN);
+        _outputStream = _serial;
+        Serial.printf("[PRINTER] Initialized Serial2 on RX=%d, TX=%d @ %d baud\n", 
+                      PRINTER_RX_PIN, PRINTER_TX_PIN, PRINTER_SERIAL_BAUD);
+        init();
+        return true;
+    }
+    
+    Serial.printf("[PRINTER] Configured for Ethernet TCP: %s:%d\n", PRINTER_IP_ADDR, PRINTER_TCP_PORT);
+    return true;
+}
+
+bool EscPosPrinter::connect() {
+    if (_mode == PRINTER_MODE_SERIAL) {
+        return true; // Always connected for UART
+    }
+
+    if (_tcpClient.connected()) {
+        return true;
+    }
+
+    Serial.printf("[PRINTER] Connecting to printer at %s:%d...\n", PRINTER_IP_ADDR, PRINTER_TCP_PORT);
+    if (_tcpClient.connect(PRINTER_IP_ADDR, PRINTER_TCP_PORT, PRINTER_CONNECT_TIMEOUT)) {
+        _outputStream = &_tcpClient;
+        Serial.println("[PRINTER] Connected successfully via TCP port 9100!");
+        init();
+        return true;
+    }
+
+    Serial.println("[PRINTER] ERROR: Failed to connect to printer via TCP port 9100.");
+    _outputStream = nullptr;
+    return false;
+}
+
+void EscPosPrinter::disconnect() {
+    if (_mode == PRINTER_MODE_ETHERNET && _tcpClient.connected()) {
+        _tcpClient.flush();
+        _tcpClient.stop();
+        _outputStream = nullptr;
+        Serial.println("[PRINTER] Disconnected TCP socket.");
+    }
+}
+
+bool EscPosPrinter::isConnected() {
+    if (_mode == PRINTER_MODE_SERIAL) {
+        return (_serial != nullptr);
+    }
+    return _tcpClient.connected();
+}
+
+bool EscPosPrinter::isPrinterOnline(uint32_t timeoutMs) {
+    if (_mode == PRINTER_MODE_SERIAL) {
+        return (_serial != nullptr);
+    }
+    if (_tcpClient.connected()) {
+        return true;
+    }
+    WiFiClient probe;
+    if (probe.connect(PRINTER_IP_ADDR, PRINTER_TCP_PORT, timeoutMs)) {
+        probe.stop();
+        return true;
+    }
+    return false;
+}
+
+void EscPosPrinter::sendCommand(const uint8_t* cmd, size_t length) {
+    if (_outputStream) {
+        _outputStream->write(cmd, length);
+    }
+}
+
+void EscPosPrinter::init() {
+    const uint8_t cmd[] = { 0x1B, 0x40 }; // ESC @
+    sendCommand(cmd, sizeof(cmd));
+}
+
+void EscPosPrinter::setAlign(TextAlignment align) {
+    uint8_t val = 0;
+    if (align == ALIGN_CENTER) val = 1;
+    else if (align == ALIGN_RIGHT) val = 2;
+    
+    const uint8_t cmd[] = { 0x1B, 0x61, val }; // ESC a n
+    sendCommand(cmd, sizeof(cmd));
+}
+
+void EscPosPrinter::setBold(bool enable) {
+    const uint8_t cmd[] = { 0x1B, 0x45, (uint8_t)(enable ? 1 : 0) }; // ESC E n
+    sendCommand(cmd, sizeof(cmd));
+}
+
+void EscPosPrinter::setUnderline(uint8_t mode) {
+    const uint8_t cmd[] = { 0x1B, 0x2D, mode }; // ESC - n
+    sendCommand(cmd, sizeof(cmd));
+}
+
+void EscPosPrinter::setInvert(bool enable) {
+    const uint8_t cmd[] = { 0x1D, 0x42, (uint8_t)(enable ? 1 : 0) }; // GS B n
+    sendCommand(cmd, sizeof(cmd));
+}
+
+void EscPosPrinter::setTextSize(uint8_t widthMultiplier, uint8_t heightMultiplier) {
+    if (widthMultiplier < 1) widthMultiplier = 1;
+    if (widthMultiplier > 8) widthMultiplier = 8;
+    if (heightMultiplier < 1) heightMultiplier = 1;
+    if (heightMultiplier > 8) heightMultiplier = 8;
+
+    uint8_t n = ((widthMultiplier - 1) << 4) | (heightMultiplier - 1);
+    const uint8_t cmd[] = { 0x1D, 0x21, n }; // GS ! n
+    sendCommand(cmd, sizeof(cmd));
+}
+
+void EscPosPrinter::setFontB(bool enable) {
+    const uint8_t cmd[] = { 0x1B, 0x4D, (uint8_t)(enable ? 1 : 0) }; // ESC M n
+    sendCommand(cmd, sizeof(cmd));
+}
+
+void EscPosPrinter::print(const String& text) {
+    if (_outputStream) {
+        _outputStream->print(text);
+    }
+}
+
+void EscPosPrinter::println(const String& text) {
+    if (_outputStream) {
+        if (text.length() > 0) {
+            _outputStream->print(text);
+        }
+        _outputStream->write(0x0A); // LF
+    }
+}
+
+void EscPosPrinter::feed(uint8_t lines) {
+    const uint8_t cmd[] = { 0x1B, 0x64, lines }; // ESC d n
+    sendCommand(cmd, sizeof(cmd));
+}
+
+void EscPosPrinter::cut(bool fullCut) {
+    // Feed 3 lines then cut
+    // GS V m n (m=65 full cut, m=66 partial cut)
+    uint8_t cutType = fullCut ? 65 : 66;
+    const uint8_t cmd[] = { 0x1D, 0x56, cutType, 0x03 };
+    sendCommand(cmd, sizeof(cmd));
+}
+
+void EscPosPrinter::printHorizontalLine(char pattern) {
+    setAlign(ALIGN_LEFT);
+    String line = "";
+    for (int i = 0; i < CHARACTERS_PER_LINE_A; i++) {
+        line += pattern;
+    }
+    println(line);
+}
+
+void EscPosPrinter::printDoubleLine() {
+    printHorizontalLine('=');
+}
+
+void EscPosPrinter::printHeader(const String& title, const String& subtitle) {
+    setAlign(ALIGN_CENTER);
+    printDoubleLine();
+    
+    setBold(true);
+    setTextSize(2, 2);
+    println(title);
+    
+    setTextSize(1, 1);
+    setBold(false);
+    
+    if (subtitle.length() > 0) {
+        println(subtitle);
+    }
+    printDoubleLine();
+    setAlign(ALIGN_LEFT);
+}
+
+void EscPosPrinter::printKeyValue(const String& key, const String& value, int totalCols) {
+    setAlign(ALIGN_LEFT);
+    int keyLen = key.length();
+    int valLen = value.length();
+    int spaces = totalCols - keyLen - valLen;
+    
+    if (spaces < 1) {
+        println(key + " " + value);
+        return;
+    }
+    
+    String line = key;
+    for (int i = 0; i < spaces; i++) {
+        line += ' ';
+    }
+    line += value;
+    println(line);
+}
+
+size_t EscPosPrinter::writeRaw(const uint8_t* buffer, size_t size) {
+    if (_outputStream && size > 0) {
+        return _outputStream->write(buffer, size);
+    }
+    return 0;
+}
+
+void EscPosPrinter::printRasterBitmap(const uint8_t* bitmapData, uint16_t widthDots, uint16_t heightDots) {
+    if (!_outputStream || !bitmapData) return;
+
+    // Width must be rounded up to bytes (8 bits per byte)
+    uint16_t widthBytes = (widthDots + 7) / 8;
+    
+    // Standard ESC/POS GS v 0 command:
+    // Format: 0x1D, 0x76, 0x30, m, xL, xH, yL, yH, [data...]
+    // m = 0 (normal density)
+    uint8_t xL = widthBytes & 0xFF;
+    uint8_t xH = (widthBytes >> 8) & 0xFF;
+    uint8_t yL = heightDots & 0xFF;
+    uint8_t yH = (heightDots >> 8) & 0xFF;
+
+    const uint8_t header[] = {
+        0x1D, 0x76, 0x30, 0x00,
+        xL, xH, yL, yH
+    };
+
+    sendCommand(header, sizeof(header));
+    
+    // Stream data in chunks to prevent network socket / UART buffer overflow
+    size_t totalBytes = (size_t)widthBytes * heightDots;
+    size_t chunkSize = 512;
+    size_t sent = 0;
+
+    while (sent < totalBytes) {
+        size_t toSend = (chunkSize < totalBytes - sent) ? chunkSize : (totalBytes - sent);
+        _outputStream->write(bitmapData + sent, toSend);
+        sent += toSend;
+        delay(2); // Gentle flow-control pacing
+    }
+
+    feed(1);
+}
+
+void EscPosPrinter::printSelfTest(const String& ipAddress, const String& currentTimeStr) {
+    if (!connect()) return;
+
+    init();
+    printHeader("MORNING PUZZLES", "Thermal Printer Diagnostic Test");
+    
+    println("");
+    setBold(true);
+    println("SYSTEM STATUS:");
+    setBold(false);
+    printKeyValue("Interface:", (_mode == PRINTER_MODE_ETHERNET) ? "Ethernet TCP (Port 9100)" : "Serial UART2");
+    printKeyValue("ESP32 IP:", ipAddress);
+    printKeyValue("Printer Target:", String(PRINTER_IP_ADDR) + ":" + String(PRINTER_TCP_PORT));
+    printKeyValue("Date & Time:", currentTimeStr);
+    printKeyValue("Paper Width:", String(PAPER_WIDTH_MM) + "mm (80mm)");
+    printKeyValue("Printable Area:", String(PRINTABLE_WIDTH_DOTS) + " dots (72mm)");
+    
+    println("");
+    setBold(true);
+    println("TYPOGRAPHY & STYLES:");
+    setBold(false);
+    println("Standard Font A (48 columns per line):");
+    println("123456789012345678901234567890123456789012345678");
+    printHorizontalLine('.');
+    
+    setFontB(true);
+    println("Condensed Font B (64 columns per line):");
+    println("1234567890123456789012345678901234567890123456789012345678901234");
+    setFontB(false);
+    printHorizontalLine('.');
+
+    setBold(true);
+    println("Text Formatting: Bold active");
+    setBold(false);
+    setUnderline(1);
+    println("Text Formatting: Underline active");
+    setUnderline(0);
+
+    setInvert(true);
+    setAlign(ALIGN_CENTER);
+    println(" INVERTED WHITE-ON-BLACK BANNER ");
+    setInvert(false);
+    setAlign(ALIGN_LEFT);
+
+    println("");
+    printHorizontalLine('=');
+    setAlign(ALIGN_CENTER);
+    println("Printer self-test successful!");
+    println("Ready to fetch and print daily puzzles.");
+    printHorizontalLine('=');
+
+    feed(3);
+    cut(false); // Partial cut
+    disconnect();
+}
