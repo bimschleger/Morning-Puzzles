@@ -68,6 +68,7 @@ bool OfflinePuzzleComposer::generateAndPrintReceipt(EscPosPrinter& printer, cons
     TentsDifficulty      tDiff = (effectiveGrade == GRADE_EASY) ? TENTS_EASY : ((effectiveGrade == GRADE_HARD) ? TENTS_HARD : TENTS_MEDIUM);
     BridgesDifficulty    brDiff = (effectiveGrade == GRADE_EASY) ? BRIDGES_EASY : ((effectiveGrade == GRADE_HARD) ? BRIDGES_HARD : BRIDGES_MEDIUM);
     TangoDifficulty      tgDiff = (effectiveGrade == GRADE_EASY) ? TANGO_EASY : ((effectiveGrade == GRADE_HARD) ? TANGO_HARD : TANGO_MEDIUM);
+    LightsDifficulty     lDiff = (effectiveGrade == GRADE_EASY) ? LIGHTS_EASY : ((effectiveGrade == GRADE_HARD) ? LIGHTS_HARD : LIGHTS_MEDIUM);
 
     // 2. Generate and print Sudoku
     Serial.println("[COMPOSER] Generating Sudoku...");
@@ -127,6 +128,12 @@ bool OfflinePuzzleComposer::generateAndPrintReceipt(EscPosPrinter& printer, cons
     Serial.println("[COMPOSER] Generating Tango...");
     _tango.generate(tgDiff);
     _tango.printToReceipt(printer, tgDiff);
+    printer.printHorizontalLine('-');
+
+    // 12. Generate and print Lights
+    Serial.println("[COMPOSER] Generating Lights...");
+    _lights.generate(lDiff);
+    _lights.printToReceipt(printer, lDiff);
 
     // Footer
     printer.printDoubleLine();

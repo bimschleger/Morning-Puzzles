@@ -21,6 +21,7 @@ from .cryptogram import CryptogramPuzzle
 from .tango import TangoPuzzle
 from .ladder import LadderPuzzle
 from .wheel import WheelPuzzle
+from .lights import LightsPuzzle
 
 
 class PuzzleRegistry:
@@ -95,4 +96,5 @@ DEFAULT_REGISTRY = PuzzleRegistry([
     TangoPuzzle(),
     LadderPuzzle(),
     WheelPuzzle(),
+    LightsPuzzle(),
 ])

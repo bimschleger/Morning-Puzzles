@@ -35,6 +35,7 @@ APPROVED_TITLES = [
     "TANGO",
     "LADDER",
     "WHEEL",
+    "LIGHTS",
 ]
 
 FORBIDDEN_TITLE_PATTERNS = [
@@ -46,6 +47,8 @@ FORBIDDEN_TITLE_PATTERNS = [
     r"Hashiwokakero",
     r"Picross",
     r"Star\s*Battle",
+    r"Akari",
+    r"Light\s*Up",
 ]
 
 FORBIDDEN_JARGON_TERMS = [
@@ -265,7 +268,7 @@ def test_solution_key_spec():
         )
 
     # 4. Check safe indent (6 spaces) for grid and stacked solutions
-    for grid_title in ["SUDOKU", "NONOGRAM", "BINARY", "MINES", "KILLER", "TANGO", "STARS", "LADDER", "BRIDGES", "TENTS"]:
+    for grid_title in ["SUDOKU", "NONOGRAM", "BINARY", "MINES", "KILLER", "TANGO", "STARS", "LADDER", "BRIDGES", "TENTS", "LIGHTS"]:
         idx = clean_key_text.find(f"\n{grid_title}\n")
         assert idx != -1
         grid_section = clean_key_text[idx + len(grid_title) + 2 : idx + len(grid_title) + 200]

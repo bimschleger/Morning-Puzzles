@@ -33,6 +33,7 @@ from app.renderer.receipt_rasterizer import (
     render_tango_raster,
     render_ladder_raster,
     render_wheel_raster,
+    render_lights_raster,
     THERMAL_WIDTH_DOTS,
     THERMAL_WIDTH_BYTES,
 )
@@ -46,12 +47,12 @@ from app.renderer.text_formatter import (
 
 
 def test_bundle_completeness():
-    print("Test 1: Verifying Daily Bundle Completeness (All 14 Puzzles)...")
+    print("Test 1: Verifying Daily Bundle Completeness (All 15 Puzzles)...")
     bundle = generate_daily_bundle(difficulty="medium")
-    required_keys = ["title", "date", "difficulty", "sudoku", "wordsearch", "nonogram", "queens", "jumble", "binary", "mines", "tents", "bridges", "killer", "cryptogram", "tango", "ladder", "wheel"]
+    required_keys = ["title", "date", "difficulty", "sudoku", "wordsearch", "nonogram", "queens", "jumble", "binary", "mines", "tents", "bridges", "killer", "cryptogram", "tango", "ladder", "wheel", "lights"]
     for k in required_keys:
         assert k in bundle, f"Missing key '{k}' in generated bundle"
-    print("  -> Passed! All 14 puzzles present in daily bundle.\n")
+    print("  -> Passed! All 15 puzzles present in daily bundle.\n")
     return bundle
 
 
@@ -72,6 +73,7 @@ def test_raster_specifications(bundle):
         ("Tango", render_tango_raster, "tango"),
         ("Ladder", render_ladder_raster, "ladder"),
         ("Wheel", render_wheel_raster, "wheel"),
+        ("Lights", render_lights_raster, "lights"),
     ]
 
     for name, fn, key in rasterizers:
@@ -135,10 +137,10 @@ def test_text_receipt_format(bundle):
 
     # 4. PUZZLE_HEADER_SPEC compliance: check strict one-word titles
     receipt_text = receipt_bytes.decode("latin-1")
-    for title in ["--- SUDOKU ---", "--- SEARCH ---", "--- NONOGRAM ---", "--- STARS ---", "--- JUMBLE ---", "--- BINARY ---", "--- MINES ---", "--- TENTS ---", "--- BRIDGES ---", "--- KILLER ---", "--- CRYPTOGRAM ---", "--- TANGO ---", "--- LADDER ---"]:
+    for title in ["--- SUDOKU ---", "--- SEARCH ---", "--- NONOGRAM ---", "--- STARS ---", "--- JUMBLE ---", "--- BINARY ---", "--- MINES ---", "--- TENTS ---", "--- BRIDGES ---", "--- KILLER ---", "--- CRYPTOGRAM ---", "--- TANGO ---", "--- LADDER ---", "--- WHEEL ---", "--- LIGHTS ---"]:
         assert title in receipt_text, f"Missing canonical title '{title}' in text receipt"
 
-    print("  -> Passed! Text receipt contains all 13 canonical headers, pre-cut feeds, and cutter commands.\n")
+    print("  -> Passed! Text receipt contains all 15 canonical headers, pre-cut feeds, and cutter commands.\n")
 
 
 def test_hybrid_receipt_format(bundle):

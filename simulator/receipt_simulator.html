@@ -438,6 +438,25 @@
             </select>
           </div>
         </div>
+
+        <!-- 14. Lights Toggle -->
+        <div class="bg-slate-900 border border-slate-800/80 rounded-xl p-3.5 flex flex-col gap-2.5 transition hover:border-slate-700">
+          <div class="flex items-center justify-between">
+            <label class="flex items-center gap-2.5 cursor-pointer select-none">
+              <input type="checkbox" id="toggle-lights" checked class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
+              <span class="font-semibold text-sm text-slate-200">Lights</span>
+            </label>
+          </div>
+          <div class="flex items-center justify-between pl-6 text-xs text-slate-400">
+            <span>Difficulty:</span>
+            <select id="diff-lights" class="bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2 py-1 text-xs outline-none focus:border-amber-500">
+              <option value="easy">Easy: 6x6 Grid</option>
+              <option value="medium" selected>Medium: 8x8 Grid</option>
+              <option value="hard">Hard: 10x10 Grid</option>
+              <option value="extreme">Extreme: 12x12 Grid</option>
+            </select>
+          </div>
+        </div>
       </div>
 
     </aside>
@@ -6392,6 +6411,154 @@
       }
     }
 
+    // LIGHTS SIMULATOR & CANVAS RENDERER (Akari)
+    class LightsSimulator {
+      constructor() {
+        this.puzzles = {
+          easy: [
+            {
+              size: 6,
+              puzzle: [[-1, -1, -1, -1, -1, -1], [-1, 0, -1, -1, -1, -1], [-1, 0, -1, -1, -1, 0], [-2, -1, -1, -1, 1, -1], [-1, -1, -1, -1, 0, -1], [-1, -1, -1, -1, -1, -1]],
+              solution: [[1, 0, 0, 0, 0, 0], [0, 0, 0, 0, 1, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 1, 0, 0], [0, 0, 1, 0, 0, 0], [0, 0, 0, 0, 0, 1]],
+              totalBulbs: 5
+            },
+            {
+              size: 6,
+              puzzle: [[-1, -1, -1, -1, -1, -1], [-1, -1, -1, -1, -2, -1], [-1, -1, -1, -1, 0, 0], [0, 1, -1, -1, -1, -1], [-1, 1, -1, -1, -1, -1], [-1, -1, -1, -1, -1, -1]],
+              solution: [[0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0], [0, 1, 0, 0, 0, 0], [0, 0, 0, 1, 0, 0], [0, 0, 1, 0, 0, 0], [1, 0, 0, 0, 0, 0]],
+              totalBulbs: 6
+            }
+          ],
+          medium: [
+            {
+              size: 8,
+              puzzle: [[-1, -1, -1, -2, -1, -1, -1, 0], [-1, 0, -1, -1, -1, -1, 2, -1], [-1, -1, -1, -1, -1, -1, -1, -1], [-1, 0, -2, -1, -1, -1, -1, -1], [-1, -1, -1, -1, -1, 1, -2, -1], [-1, -1, -1, -1, -1, -1, -1, -1], [-1, 0, -1, -1, -1, -1, 0, -1], [-2, -1, -1, -1, 1, -1, -1, -1]],
+              solution: [[1, 0, 0, 0, 1, 0, 0, 0], [0, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 1, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 1, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 1, 0, 0, 0, 1]],
+              totalBulbs: 8
+            },
+            {
+              size: 8,
+              puzzle: [[-1, -1, -1, -1, 1, -1, -1, -1], [-1, 1, -1, -1, -1, -1, -2, 1], [-1, -1, -1, -1, 0, -1, -1, -1], [-1, -1, -1, -1, -1, -1, -1, 0], [-2, -1, -1, -1, -1, -1, -1, -1], [-1, -1, -1, 0, -1, -1, -1, -1], [0, 1, -1, -1, -1, -1, 0, -1], [-1, -1, -1, -2, -1, -1, -1, -1]],
+              solution: [[0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 1, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 1, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 1, 0, 0, 0], [0, 0, 1, 0, 0, 0, 0, 1]],
+              totalBulbs: 9
+            }
+          ],
+          hard: [
+            {
+              size: 10,
+              puzzle: [[-1, -1, -1, -1, -1, -1, -1, -1, -1, -1], [-2, 0, -1, -1, -1, -1, 2, -2, -1, -2], [-1, -1, -1, 0, -1, -1, -1, -2, -1, -1], [-1, -2, -1, -1, -2, -1, -1, -2, -1, -1], [-1, -1, 0, -1, -1, -1, -1, -1, -1, -1], [-1, -1, -1, -1, -1, -1, -1, 0, -1, -1], [-1, -1, -2, -1, -1, -2, -1, -1, -2, -1], [-1, -1, -2, -1, -1, -1, 0, -1, -1, -1], [-2, -1, -2, 2, -1, -1, -1, -1, 0, -2], [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1]],
+              solution: [[0, 0, 1, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 1, 0, 0, 0, 0], [1, 0, 0, 0, 0, 0, 1, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 0], [0, 1, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 1, 0, 0, 0, 0, 0, 1], [0, 0, 0, 0, 1, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 1, 0, 0]],
+              totalBulbs: 10
+            },
+            {
+              size: 10,
+              puzzle: [[-1, 2, -1, -1, -1, -1, -1, -1, -1, -1], [-1, -2, -1, 0, -1, -1, 1, -1, -1, -1], [-1, -1, -2, -1, -1, -1, -1, -1, -1, -1], [-1, -1, -2, -1, -1, -1, -1, -2, -2, 0], [-1, -1, -1, -1, -1, 4, -1, -1, -1, -2], [1, -1, -1, -1, 3, -1, -1, -1, -1, -1], [1, -2, -2, -1, -1, -1, -1, -2, -1, -1], [-1, -1, -1, -1, -1, -1, -1, 1, -1, -1], [-1, -1, -1, 1, -1, -1, 0, -1, 1, -1], [-1, -1, -1, -1, -1, -1, -1, -1, 1, -1]],
+              solution: [[1, 0, 1, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 0], [0, 0, 0, 0, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 1, 0, 1, 0, 0, 0], [0, 1, 0, 0, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 1, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 1, 0], [0, 0, 1, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 1, 0, 0]],
+              totalBulbs: 15
+            }
+          ],
+          extreme: [
+            {
+              size: 12,
+              puzzle: [[-1, -1, -2, -1, -1, 0, -1, -1, 1, -1, -1, 1], [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1], [-1, -2, -1, -1, -1, -1, -1, -1, -1, -1, -2, -1], [0, -1, -2, -1, -1, -1, -1, -1, -1, -1, -2, -2], [-1, -1, 1, -1, -1, 0, -1, 3, -1, -1, -1, -1], [-2, -1, -1, -1, -1, -2, -1, -1, -1, -1, -1, -1], [-1, -1, -1, -1, -1, -1, -2, -1, -1, -1, -1, -2], [-1, -1, -1, -1, 3, -1, 0, -1, -1, -2, -1, -1], [0, -2, -1, -1, -1, -1, -1, -1, -1, -2, -1, 0], [-1, -2, -1, -1, -1, -1, -1, -1, -1, -1, -2, -1], [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1], [-2, -1, -1, -2, -1, -1, 0, -1, -1, -2, -1, -1]],
+              solution: [[1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0], [0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0], [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0], [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1]],
+              totalBulbs: 16
+            }
+          ]
+        };
+      }
+
+      generate(diff = 'medium') {
+        const list = this.puzzles[diff] || this.puzzles.medium;
+        const p = list[Math.floor(Math.random() * list.length)];
+        return {
+          title: 'LIGHTS',
+          difficulty: diff,
+          size: p.size,
+          puzzle: p.puzzle,
+          solution: p.solution,
+          totalBulbs: p.totalBulbs
+        };
+      }
+    }
+
+    function drawLightsCanvas(canvas, lData) {
+      const totalWidth = 345;
+      const padding = 12;
+      const innerWidth = totalWidth - padding * 2;
+      const size = lData.size;
+      const cellSize = Math.floor(innerWidth / size);
+      const actualBoard = cellSize * size;
+      const startX = padding + Math.floor((innerWidth - actualBoard) / 2);
+      const startY = 12;
+      const totalH = startY * 2 + actualBoard;
+
+      canvas.width = totalWidth;
+      canvas.height = totalH;
+      const ctx = canvas.getContext('2d');
+
+      ctx.fillStyle = '#fafaf7';
+      ctx.fillRect(0, 0, totalWidth, totalH);
+
+      // Grid dividers (Tier 4: 1.0px)
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.22)';
+      ctx.lineWidth = 1.0;
+      for (let i = 1; i < size; i++) {
+        // Horizontal
+        ctx.beginPath();
+        ctx.moveTo(startX, startY + i * cellSize);
+        ctx.lineTo(startX + actualBoard, startY + i * cellSize);
+        ctx.stroke();
+        // Vertical
+        ctx.beginPath();
+        ctx.moveTo(startX + i * cellSize, startY);
+        ctx.lineTo(startX + i * cellSize, startY + actualBoard);
+        ctx.stroke();
+      }
+
+      // Barrier walls and Clues
+      const margin = Math.max(1, Math.floor(cellSize * 0.04));
+      const fontSize = Math.max(12, Math.floor(cellSize * 0.54));
+
+      for (let r = 0; r < size; r++) {
+        for (let c = 0; c < size; c++) {
+          const val = lData.puzzle[r][c];
+          const cx = startX + c * cellSize;
+          const cy = startY + r * cellSize;
+
+          if (val !== -1) {
+            // Dark barrier wall
+            ctx.fillStyle = '#111111';
+            ctx.fillRect(cx + margin, cy + margin, cellSize - margin * 2, cellSize - margin * 2);
+
+            if (val >= 0) {
+              // White bold digit clue
+              ctx.fillStyle = '#fafaf7';
+              ctx.font = `bold ${fontSize}px "Space Mono", monospace`;
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'middle';
+              ctx.fillText(val.toString(), cx + cellSize / 2, cy + cellSize / 2);
+            } else {
+              // Unnumbered wall: subtle inner ivory diagonal cross
+              ctx.strokeStyle = '#fafaf7';
+              ctx.lineWidth = 1.0;
+              ctx.beginPath();
+              ctx.moveTo(cx + margin + 3, cy + margin + 3);
+              ctx.lineTo(cx + cellSize - margin - 3, cy + cellSize - margin - 3);
+              ctx.moveTo(cx + margin + 3, cy + cellSize - margin - 3);
+              ctx.lineTo(cx + cellSize - margin - 3, cy + margin + 3);
+              ctx.stroke();
+            }
+          }
+        }
+      }
+
+      // Heavy Outer Border (Tier 1: 3.5px)
+      ctx.strokeStyle = '#111111';
+      ctx.lineWidth = 3.5;
+      ctx.strokeRect(startX, startY, actualBoard, actualBoard);
+    }
+
     // =========================================================================
     // 3. RECEIPT COMPOSER & RENDERER (Mixed Text + Dithered Canvas)
     // =========================================================================
@@ -6409,6 +6576,7 @@
     const cryptogramSim = new CryptogramSimulator();
     const tangoSim = new TangoSimulator();
     const ladderSim = new LadderSimulator();
+    const lightsSim = new LightsSimulator();
 
     let rawReceiptLines = [];
 
@@ -6438,7 +6606,8 @@
       'CRYPTOGRAM': 'Deduce the hidden phrase using the 2 letter clues and substitution logic.',
       'TANGO': 'Fill each line with three 0s and three 1s without trios; = means same, x means opposite.',
       'LADDER': 'Deduce 3 English words to link COLD to WARM, changing 1 letter each step.',
-      'WHEEL': 'Find 25+ words using center letter and outer letters, including a 7-letter pangram.'
+      'WHEEL': 'Find 25+ words using center letter and outer letters, including a 7-letter pangram.',
+      'LIGHTS': 'Place 8 bulbs to light all corridors without bulbs shining on each other or exceeding numbers.'
     };
 
     function wrapText(str, maxLen = 44) {
@@ -7122,6 +7291,52 @@
         });
       }
 
+      // 14. LIGHTS
+      if (document.getElementById('toggle-lights') && document.getElementById('toggle-lights').checked) {
+        const diff = document.getElementById('diff-lights').value;
+        const lData = lightsSim.generate(diff);
+        const lDesc = `Place ${lData.totalBulbs} bulbs to light all corridors without bulbs shining on each other or exceeding numbers.`;
+        addStandardPuzzleHeader(items, 'LIGHTS', diff, lDesc);
+
+        if (isGraphic) {
+          items.push({
+            type: 'canvas',
+            render: (canvas) => drawLightsCanvas(canvas, lData)
+          });
+        } else {
+          // Monospaced ASCII Lights
+          const size = lData.size;
+          const boxSep = '+---'.repeat(size) + '+';
+          const padLen = Math.max(0, Math.floor((COLS - (3 + boxSep.length)) / 2));
+          const indent = ' '.repeat(padLen);
+          items.push({ type: 'text', text: `TOTAL BULBS: ${lData.totalBulbs}` });
+          items.push({ type: 'blank', text: '' });
+          items.push({ type: 'text', text: `${indent}${boxSep}` });
+
+          for (let r = 0; r < size; r++) {
+            let line = `${indent}|`;
+            for (let c = 0; c < size; c++) {
+              const val = lData.puzzle[r][c];
+              if (val >= 0) line += ` ${val} |`;
+              else if (val === -2) line += ' # |';
+              else line += '   |';
+            }
+            items.push({ type: 'text', text: line });
+            items.push({ type: 'text', text: `${indent}${boxSep}` });
+          }
+        }
+
+        items.push({ type: 'blank', text: '' });
+        items.push({ type: 'rule', text: '-'.repeat(COLS) });
+
+        solutionsContent.push({
+          name: 'Lights',
+          puzzle: lData.puzzle,
+          solution: lData.solution,
+          size: lData.size
+        });
+      }
+
       // Optional Solutions Key
       if (document.getElementById('toggle-solutions').checked && solutionsContent.length > 0) {
         items.push({ type: 'rule', text: '-'.repeat(COLS) });
@@ -7241,6 +7456,18 @@
             for (const word of item.solution) {
               items.push({ type: 'text', text: '      ' + String(word).toUpperCase() });
             }
+          } else if (item.name === 'Lights') {
+            for (let r = 0; r < item.size; r++) {
+              let rowStr = '      ';
+              for (let c = 0; c < item.size; c++) {
+                const p = item.puzzle[r][c];
+                if (p >= 0) rowStr += p + ' ';
+                else if (p === -2) rowStr += '# ';
+                else if (item.solution[r][c] === 1) rowStr += '* ';
+                else rowStr += '. ';
+              }
+              items.push({ type: 'text', text: rowStr });
+            }
           }
 
           // Leave an empty line after displaying the answer
@@ -7333,7 +7560,8 @@
       'diff-killer': { easy: 'easy', medium: 'medium', hard: 'extreme' },
       'diff-cryptogram': { easy: 'easy', medium: 'medium', hard: 'hard' },
       'diff-tango': { easy: 'easy', medium: 'medium', hard: 'hard' },
-      'diff-ladder': { easy: 'easy', medium: 'medium', hard: 'hard' }
+      'diff-ladder': { easy: 'easy', medium: 'medium', hard: 'hard' },
+      'diff-lights': { easy: 'easy', medium: 'medium', hard: 'hard' }
     };
 
     function applyGlobalDifficulty(diff) {
@@ -7375,7 +7603,7 @@
       } else if (allHard) {
         globalDiffEl.value = 'hard';
       } else {
-        globalDiffEl.value = 'custom';
+        globalDiffEl.value = 'mixed';
       }
     }
 
@@ -7400,11 +7628,11 @@
       }
     });
 
-    // All 13 puzzle IDs in canonical order
+    // All 14 puzzle IDs in canonical order
     const ALL_GAMES = [
       'queens', 'sudoku', 'wordsearch', 'nonogram', 'jumble',
       'binary', 'mines', 'tents', 'bridges', 'killer',
-      'cryptogram', 'tango', 'ladder'
+      'cryptogram', 'tango', 'ladder', 'lights'
     ];
 
     function pickRandomGames(count) {
@@ -7508,6 +7736,7 @@
       'toggle-cryptogram', 'diff-cryptogram',
       'toggle-tango', 'diff-tango',
       'toggle-ladder', 'diff-ladder',
+      'toggle-lights', 'diff-lights',
       'toggle-solutions'
     ];
     inputs.forEach(id => {

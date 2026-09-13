@@ -6,7 +6,7 @@ This document provides the architectural survey, evaluation standards, and techn
 
 ## 1. Implemented Games (Active Library)
 
-The following 13 puzzles have been implemented and currently comprise the core Morning Puzzles library across the Python backend (`server/app/puzzles/`), ESP32 firmware (`esp32-firmware/src/generators/`), and web simulator (`simulator/receipt_simulator.html`):
+The following 15 puzzles have been implemented and currently comprise the core Morning Puzzles library across the Python backend (`server/app/puzzles/`), ESP32 firmware (`esp32-firmware/src/generators/`), and web simulator (`simulator/receipt_simulator.html`):
 
 | Single-Word Title | Traditional / Common Name | Genre / Category | Implementation Stack | Difficulty Scaling | Solution Key Representation |
 | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -23,6 +23,8 @@ The following 13 puzzles have been implemented and currently comprise the core M
 | **`--- CRYPTOGRAM ---`** | Monoalphabetic Substitution | Cryptographic Deduction | Python (Procedural derangement) | Easy (3 hint letters), Med (1 hint), Hard (0 hints) | Decoded quote and author |
 | **`--- TANGO ---`** | LinkedIn Tango | Parity / Edge Relations | Python + ESP32 C++ | Easy (6×6, high clues), Med (6×6), Hard (6×6) | 6-space indented Sun/Moon grid |
 | **`--- LADDER ---`** | Word Ladder / Doublets | Word & Pattern | Python (BFS Word Graph) + Dataset | Easy (4-letter, 4–5 words), Med (4-letter, 6–7), Hard (5-letter, 6–8) | Arrow word path ($\le 46$ cols) |
+| **`--- WHEEL ---`** | Word Wheel / Target Anagram | Word & Pattern | Python + ESP32 C++ | Easy (25+ words), Med (15–24 words), Hard (10–15 words) | Center letter + word list ($\le 46$ cols) |
+| **`--- LIGHTS ---`** | Akari / Light Up | Line-of-Sight & Illumination | Python (Deductive + SAT) + ESP32 C++ | Easy (6×6), Med (8×8), Hard (10×10), Extreme (12×12) | 6-space indented ASCII grid with bulbs (*) |
 
 ---
 

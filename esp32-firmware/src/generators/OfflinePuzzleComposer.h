@@ -13,6 +13,7 @@ class EscPosPrinter;
 #include "TentsGen.h"
 #include "BridgesGen.h"
 #include "TangoGen.h"
+#include "LightsGen.h"
 
 enum PuzzleGrade {
     GRADE_EASY = 0,
@@ -44,6 +45,7 @@ private:
     TentsGen      _tents;
     BridgesGen    _bridges;
     TangoGen      _tango;
+    LightsGen     _lights;
 
     PuzzleGrade   _currentGrade;
     uint8_t       _rotationIndex;
