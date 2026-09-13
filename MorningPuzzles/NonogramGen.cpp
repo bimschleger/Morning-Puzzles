@@ -110,7 +110,7 @@ void NonogramGen::printToReceipt(EscPosPrinter& printer) {
 
         String line = clueStr + " | ";
         for (uint8_t c = 0; c < _size; c++) {
-            line += " . ";
+            line += "   ";
         }
         printer.println(line);
     }
@@ -190,15 +190,7 @@ bool NonogramGen::printRasterToReceipt(EscPosPrinter& printer) {
         }
     }
 
-    // Cell center dots and major/minor grid lines
-    for (uint8_t r = 0; r < _size; r++) {
-        for (uint8_t c = 0; c < _size; c++) {
-            int16_t dotX = gridX + c * cellSize + cellSize / 2;
-            int16_t dotY = gridY + r * cellSize + cellSize / 2;
-            canvas.fillCircle(dotX, dotY, 2);
-        }
-    }
-
+    // Major/minor grid lines
     for (uint8_t i = 1; i < _size; i++) {
         bool isMajor = (i % majorInterval == 0);
         uint8_t thickness = isMajor ? 4 : 1;

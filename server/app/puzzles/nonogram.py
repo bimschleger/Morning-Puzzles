@@ -201,12 +201,6 @@ class NonogramPuzzle(BasePuzzle):
                     is_major = (r % major_interval == 0)
                     draw.line([padding, grid_y + r * cell_size, grid_x, grid_y + r * cell_size], fill=0 if is_major else 180, width=3 if is_major else 1)
 
-            for r in range(size):
-                for c in range(size):
-                    cx = grid_x + c * cell_size
-                    cy = grid_y + r * cell_size
-                    dot_r = 2
-                    draw.ellipse([cx + cell_size // 2 - dot_r, cy + cell_size // 2 - dot_r, cx + cell_size // 2 + dot_r, cy + cell_size // 2 + dot_r], fill=160)
 
             for i in range(size + 1):
                 is_major = (i % major_interval == 0) or (i == size)

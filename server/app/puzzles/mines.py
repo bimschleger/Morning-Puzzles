@@ -200,9 +200,6 @@ class MinesPuzzle(BasePuzzle):
                     cx = padding + c * cell_size + (cell_size - 18) // 2
                     cy = grid_y + r * cell_size + (cell_size - 21) // 2
                     tb.draw_char(cx, cy, str(val), scale=3)
-                else:
-                    tb.draw_circle(padding + c * cell_size + cell_size // 2,
-                                   grid_y + r * cell_size + cell_size // 2, 2, thickness=2)
 
         return tb.to_escpos()
 

@@ -351,7 +351,7 @@ bool MinesGen::printRasterToReceipt(EscPosPrinter& printer, MinesDifficulty diff
         canvas.drawVLine(padding + i * cellSize, boardY, cellSize * 8, 1);
     }
 
-    // Numbers or unrevealed dots
+    // Numbers
     for (uint8_t r = 0; r < 8; r++) {
         for (uint8_t c = 0; c < 8; c++) {
             int8_t val = _puzzle[r][c];
@@ -359,10 +359,6 @@ bool MinesGen::printRasterToReceipt(EscPosPrinter& printer, MinesDifficulty diff
                 int16_t cx = padding + c * cellSize + (cellSize - 18) / 2;
                 int16_t cy = boardY + r * cellSize + (cellSize - 21) / 2;
                 canvas.drawChar(cx, cy, '0' + val, 3);
-            } else {
-                int16_t dotX = padding + c * cellSize + cellSize / 2;
-                int16_t dotY = boardY + r * cellSize + cellSize / 2;
-                canvas.fillCircle(dotX, dotY, 2);
             }
         }
     }

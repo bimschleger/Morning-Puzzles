@@ -156,7 +156,7 @@ void TentsGen::printToReceipt(EscPosPrinter& printer, TentsDifficulty diff) {
             if (_puzzle[r][c] == 1) {
                 line += " T";
             } else {
-                line += " .";
+                line += "  ";
             }
         }
         line += " |";
@@ -219,17 +219,13 @@ bool TentsGen::printRasterToReceipt(EscPosPrinter& printer, TentsDifficulty diff
         canvas.drawText(padding + 16, cy, buf, 2);
     }
 
-    // Trees ('T') or center dots
+    // Trees ('T')
     for (uint8_t r = 0; r < _size; r++) {
         for (uint8_t c = 0; c < _size; c++) {
             if (_puzzle[r][c] == 1) {
                 int16_t tx = gridX + c * cellSize + (cellSize - 18) / 2;
                 int16_t ty = gridY + r * cellSize + (cellSize - 21) / 2;
                 canvas.drawChar(tx, ty, 'T', 3);
-            } else {
-                int16_t dotX = gridX + c * cellSize + cellSize / 2;
-                int16_t dotY = gridY + r * cellSize + cellSize / 2;
-                canvas.fillCircle(dotX, dotY, 2);
             }
         }
     }
