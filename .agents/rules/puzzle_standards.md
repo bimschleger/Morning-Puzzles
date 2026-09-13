@@ -43,6 +43,7 @@ All changes must pass the automated validation suite:
 ```bash
 python3 server/test_puzzle_standards.py
 python3 server/test_thermal_format.py
+python3 server/test_visual_consistency.py
 ```
 
 ## 6. Puzzle Plugin Architecture & Extension Standards
@@ -52,7 +53,7 @@ All games in Morning Puzzles must be implemented as modular, self-contained plug
   - Gameplay instruction generation complying with Section 3 formula ($\le 100$ characters)
   - ASCII text formatting for monospaced receipts
   - Solution key formatting (6-space pre-indented for grids, wrapped to $\le 46$ columns)
-  - 576-dot thermal raster rendering via `ThermalCanvas` primitives
+  - 576-dot thermal raster rendering via `ThermalCanvas` primitives conforming to Section 8 visual consistency
 - **Registry Registration**: Every puzzle must be registered in `DEFAULT_REGISTRY` (`server/app/puzzles/registry.py`).
 - **Zero Procedural Spaghetti**: Never introduce manual `elif puzzle_id == ...` branches in `main.py`, `text_formatter.py`, or `receipt_rasterizer.py`. All routing, daily bundle assembly, and receipt composition are dynamically and polymorphically driven by the registry.
 - **Thermal Drawing Safety**: Raster graphics must be 576 dots wide, height aligned to 8 dots, with an average thermal duty cycle $\le 35\%$ and no more than 16 consecutive dense rows. Use `ThermalCanvas` primitives (`draw_grid`, `draw_rect`, `draw_circle`, `draw_text`, `draw_line`, `draw_stars`) for automatic dual-backend (Pillow + pure-Python fallback) compatibility.
@@ -64,4 +65,30 @@ Morning Puzzles supports both PlatformIO (`esp32-firmware/`) and native Arduino 
   ./scripts/sync_arduino_sketch.sh
   ```
 - **Single-Folder Flat Includes**: In `MorningPuzzles/`, all sibling headers must use local flat `#include "Header.h"` rather than directory traversal paths (`../printer/` or `generators/`). The sync script handles this transformation automatically.
+
+## 8. On-Device vs. Off-Device Visual Consistency Standard
+All games in Morning Puzzles must deliver identical, pixel-harmonized visual experiences whether printed directly by the ESP32 microcontroller, served by the Python backend, or previewed in the Web Simulator:
+- **Strict Tri-Target Parity**: Whenever a game with visual raster generation is created or updated, all three target environments must be implemented with identical geometry:
+  1. Python server plugin (`server/app/puzzles/<game>.py`)
+  2. ESP32 firmware generator (`esp32-firmware/src/generators/<Game>Gen.cpp`, mirrored to `MorningPuzzles/`)
+  3. Web Simulator hardware emulation (`simulator/receipt_simulator.html` via `renderOffline<Game>`)
+- **Exact Coordinate & Geometry Alignment**:
+  - Canvas width must strictly be 576 dots; height must be aligned to a multiple of 8 dots.
+  - Margins, cell sizes, coordinate formulas, and bounding boxes must be identical across Python (`ThermalBitmap`), C++ (`ThermalCanvas`), and JavaScript (`ThermalCanvasSimulator`).
+- **Self-Contained Raster Output**:
+  - In raster mode, the canvas must encapsulate all puzzle content (borders, inner grid lines, clues/letters, thematic banners, dividers, checkboxes, answer boxes) rather than drawing a partial strip followed by trailing ESC/POS text outside the image.
+- **Standardized Typography & Scaling**:
+  - Monospaced 5x7 bitmap font must use identical scale multipliers:
+    - `scale=2` (10x14px glyph, 12px char width): Banners, headers, clues, instructions, scratchpad labels.
+    - `scale=3` (15x21px glyph, 18px char width): Grid letters, Sudoku digits, clue words.
+- **Standard Line Thickness Hierarchy**:
+  - **4px**: Outer canvas boundary, puzzle grid frame, major 3x3 block borders.
+  - **2px**: Secondary boxes, checkboxes, dashed tear lines, handwriting underlines.
+  - **1px**: Inner cell dividers, minor grid lines, scratchpad dashed lines.
+- **Crisp 1-Bit Geometric Hatching**:
+  - Region shading (e.g. `STARS` / Queens) must exclusively use the 8 standard 1-bit geometric hatch patterns (`fillHatch` / `fill_hatch` patterns 0–7). Never use continuous grayscale tones or Floyd-Steinberg dithering for region shading.
+- **Mandatory Visual Parity Testing**:
+  - Any new puzzle generator must be registered in `server/visual_comparator_runner.cpp`.
+  - The side-by-side comparison suite (`python3 server/test_visual_consistency.py`) must pass with $\ge 95.00\%$ pixel similarity between C++ and Python raster outputs.
+
 
