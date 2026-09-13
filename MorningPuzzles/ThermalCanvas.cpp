@@ -185,7 +185,7 @@ void ThermalCanvas::fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint8_t
 
 void ThermalCanvas::fillHatch(int16_t x, int16_t y, int16_t w, int16_t h, uint8_t patternId) {
     if (w <= 0 || h <= 0) return;
-    uint8_t pat = patternId % 8;
+    uint8_t pat = patternId % 10;
     int16_t startY = max((int16_t)0, y);
     int16_t endY = min((int16_t)_height, (int16_t)(y + h));
     int16_t startX = max((int16_t)0, x);
@@ -198,11 +198,18 @@ void ThermalCanvas::fillHatch(int16_t x, int16_t y, int16_t w, int16_t h, uint8_
                 case 0: isBurn = false; break;
                 case 1: isBurn = ((px + py) % 6 == 0); break;
                 case 2: isBurn = ((px - py + 1000) % 6 == 0); break;
-                case 3: isBurn = (px % 4 == 0 || py % 4 == 0); break;
-                case 4: isBurn = ((px + py) % 4 == 0); break;
+                case 3: isBurn = (py % 6 == 0); break;
+                case 4: isBurn = (px % 6 == 0); break;
                 case 5: isBurn = (px % 3 == 0 && py % 3 == 0); break;
-                case 6: isBurn = ((px + py) % 3 == 0 || (px - py + 1000) % 3 == 0); break;
-                case 7: isBurn = (py % 3 == 0); break;
+                case 6: isBurn = ((px + py) % 8 == 0 || (px - py + 1000) % 8 == 0); break;
+                case 7: isBurn = (px % 8 == 0 || py % 8 == 0); break;
+                case 8: {
+                    int16_t rx = px % 6;
+                    int16_t ry = py % 6;
+                    isBurn = ((rx == 3 && abs(ry - 3) <= 1) || (ry == 3 && abs(rx - 3) <= 1));
+                    break;
+                }
+                case 9: isBurn = ((px + py) % 6 == 0 && (px % 4 < 2)); break;
             }
             if (isBurn) {
                 setPixel(px, py, 1);

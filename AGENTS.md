@@ -81,7 +81,7 @@ All games in Morning Puzzles must deliver identical, pixel-harmonized visual exp
   - **2px**: Secondary boxes, checkboxes, dashed tear lines, handwriting underlines.
   - **1px**: Inner cell dividers, minor grid lines, scratchpad dashed lines.
 - **Crisp 1-Bit Geometric Hatching**:
-  - Region shading (e.g. `STARS` / Queens) must exclusively use the 8 standard 1-bit geometric hatch patterns (`fillHatch` / `fill_hatch` patterns 0–7). Never use continuous grayscale tones or Floyd-Steinberg dithering for region shading.
+  - Region shading (e.g. `STARS` / Queens) must exclusively use the 10 standard 1-bit geometric hatch patterns (`fillHatch` / `fill_hatch` patterns 0–9). Never use continuous grayscale tones or Floyd-Steinberg dithering for region shading.
 - **Mandatory Visual Parity Testing**:
   - Any new puzzle generator must be registered in `server/visual_comparator_runner.cpp`.
   - The side-by-side comparison suite (`python3 server/test_visual_consistency.py`) must pass with $\ge 95.00\%$ pixel similarity between C++ and Python raster outputs.

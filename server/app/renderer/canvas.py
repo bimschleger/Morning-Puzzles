@@ -281,7 +281,7 @@ class ThermalBitmap:
                 self.set_pixel(px, py, color)
 
     def fill_hatch(self, x: int, y: int, w: int, h: int, pattern_id: int):
-        pat = pattern_id % 8
+        pat = pattern_id % 10
         for py in range(max(0, y), min(y + h, self.height)):
             for px in range(max(0, x), min(x + w, self.width)):
                 is_burn = False
@@ -292,15 +292,21 @@ class ThermalBitmap:
                 elif pat == 2:
                     is_burn = ((px - py + 1000) % 6 == 0)
                 elif pat == 3:
-                    is_burn = (px % 4 == 0 or py % 4 == 0)
+                    is_burn = (py % 6 == 0)
                 elif pat == 4:
-                    is_burn = ((px + py) % 4 == 0)
+                    is_burn = (px % 6 == 0)
                 elif pat == 5:
                     is_burn = (px % 3 == 0 and py % 3 == 0)
                 elif pat == 6:
-                    is_burn = ((px + py) % 3 == 0 or (px - py + 1000) % 3 == 0)
+                    is_burn = ((px + py) % 8 == 0 or (px - py + 1000) % 8 == 0)
                 elif pat == 7:
-                    is_burn = (py % 3 == 0)
+                    is_burn = (px % 8 == 0 or py % 8 == 0)
+                elif pat == 8:
+                    rx = px % 6
+                    ry = py % 6
+                    is_burn = ((rx == 3 and abs(ry - 3) <= 1) or (ry == 3 and abs(rx - 3) <= 1))
+                elif pat == 9:
+                    is_burn = ((px + py) % 6 == 0 and (px % 4 < 2))
 
                 if is_burn:
                     self.set_pixel(px, py, 1)

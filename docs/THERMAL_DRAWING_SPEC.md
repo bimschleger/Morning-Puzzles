@@ -98,44 +98,52 @@ Pattern 0: CLEAR         Pattern 1: 45° FORWARD      Pattern 2: -45° BACKWARD
 │   (Unshaded)   │       │/   /   /   /   │          │   \   \   \   \│
 └────────────────┘       └────────────────┘          └────────────────┘
 
-Pattern 3: CROSSHATCH    Pattern 4: DENSE 45°        Pattern 5: STIPPLE DOTS
-┌──┼───┼───┼───┼─┐       ┌─/─/─/─/─/─/─/─/┐          ┌  ·   ·   ·   · ┐
-│──┼───┼───┼───┼─│       │/ / / / / / / / ┼          │    ·   ·   ·   │
-│──┼───┼───┼───┼─│       │ / / / / / / / /│          │  ·   ·   ·   · │
+Pattern 3: HORIZONTAL    Pattern 4: VERTICAL         Pattern 5: STIPPLE DOTS
+┌────────────────┐       ┌──│───│───│───│─┐          ┌  ·   ·   ·   · ┐
+│────────────────│       │  │   │   │   │ │          │    ·   ·   ·   │
+│────────────────│       │  │   │   │   │ │          │  ·   ·   ·   · │
 └────────────────┘       └────────────────┘          └────────────────┘
 
-Pattern 6: DIAMOND       Pattern 7: PINSTRIPES
-┌──╳───╳───╳───╳─┐       ┌────────────────┐
-│ ╳ ╳ ╳ ╳ ╳ ╳ ╳ ╳│       │────────────────│
-│╳   ╳   ╳   ╳   │       │────────────────│
-└────────────────┘       └────────────────┘
+Pattern 6: OPEN DIAMOND  Pattern 7: OPEN SQUARE      Pattern 8: PLUS MATRIX      Pattern 9: DASHED DIAG
+┌──╳───╳───╳───╳─┐       ┌──┼───┼───┼───┼─┐          ┌  +   +   +   + ┐          ┌─/── /── /── /──┐
+│ ╳ ╳   ╳   ╳    │       │──┼───┼───┼───┼─│          │    +   +   +   │          │/   /   /   /   │
+│╳   ╳   ╳   ╳   │       │──┼───┼───┼───┼─│          │  +   +   +   + │          │   /   /   /   /│
+└────────────────┘       └────────────────┘          └────────────────┘          └────────────────┘
 ```
 
 ### Mathematical Formulation Matrix
 | ID | Pattern Name | Exact Pixel Boolean Formula | Visual Density | Recommended Usage |
 | :-: | :--- | :--- | :-: | :--- |
 | **0** | **Clear White** | `false` | 0% | Region 0 / unshaded cells / high contrast |
-| **1** | **Forward Diagonal ($45^\circ$)** | `(px + py) % 6 === 0` | ~16% | Region 1 / primary diagonal territory |
-| **2** | **Backward Diagonal ($-45^\circ$)**| `(px - py + 1000) % 6 === 0` | ~16% | Region 2 / opposing diagonal territory |
-| **3** | **Square Crosshatch** | `px % 4 === 0 \|\| py % 4 === 0`| ~44% | Region 3 / high-contrast woven territory |
-| **4** | **Dense Forward ($45^\circ$)** | `(px + py) % 4 === 0` | ~25% | Region 4 / medium-dark diagonal |
+| **1** | **Forward Diagonal ($45^\circ$)** | `(px + py) % 6 === 0` | ~17% | Region 1 / primary diagonal territory |
+| **2** | **Backward Diagonal ($-45^\circ$)**| `(px - py + 1000) % 6 === 0` | ~17% | Region 2 / opposing diagonal territory |
+| **3** | **Horizontal Pinstripes** | `py % 6 === 0` | ~17% | Region 3 / linear horizontal texture |
+| **4** | **Vertical Pinstripes** | `px % 6 === 0` | ~17% | Region 4 / linear vertical texture |
 | **5** | **Dot Stipple Matrix** | `px % 3 === 0 && py % 3 === 0` | ~11% | Region 5 / subtle stippled background |
-| **6** | **Diamond Crosshatch** | `(px + py) % 3 === 0 \|\| (px - py + 1000) % 3 === 0` | ~55% | Region 6 / textured diamond fill |
-| **7** | **Horizontal Pinstripes** | `py % 3 === 0` | ~33% | Region 7 / linear directional texture |
+| **6** | **Open Diamond Mesh** | `(px + py) % 8 === 0 \|\| (px - py + 1000) % 8 === 0` | ~22% | Region 6 / textured open diamond fill |
+| **7** | **Open Square Grid** | `px % 8 === 0 \|\| py % 8 === 0` | ~23% | Region 7 / open square window grid |
+| **8** | **Plus Marks Matrix** | `(rx === 3 && Math.abs(ry - 3) <= 1) \|\| (ry === 3 && Math.abs(rx - 3) <= 1)` | ~14% | Region 8 / tiny plus signs (`rx=px%6, ry=py%6`) |
+| **9** | **Dashed Diagonal** | `(px + py) % 6 === 0 && (px % 4 < 2)` | ~8% | Region 9 / subtle dashed diagonal texture |
 
 ### Code Implementation Snippet
 ```javascript
 function getGeometricHatchPixel(patternId, px, py) {
-  const pat = patternId % 8;
+  const pat = patternId % 10;
   switch (pat) {
     case 0: return false;
     case 1: return (px + py) % 6 === 0;
     case 2: return (px - py + 1000) % 6 === 0;
-    case 3: return (px % 4 === 0 || py % 4 === 0);
-    case 4: return (px + py) % 4 === 0;
+    case 3: return py % 6 === 0;
+    case 4: return px % 6 === 0;
     case 5: return (px % 3 === 0 && py % 3 === 0);
-    case 6: return ((px + py) % 3 === 0 || (px - py + 1000) % 3 === 0);
-    case 7: return py % 3 === 0;
+    case 6: return ((px + py) % 8 === 0 || (px - py + 1000) % 8 === 0);
+    case 7: return (px % 8 === 0 || py % 8 === 0);
+    case 8: {
+      const rx = px % 6;
+      const ry = py % 6;
+      return ((rx === 3 && Math.abs(ry - 3) <= 1) || (ry === 3 && Math.abs(rx - 3) <= 1));
+    }
+    case 9: return ((px + py) % 6 === 0 && (px % 4 < 2));
     default: return false;
   }
 }

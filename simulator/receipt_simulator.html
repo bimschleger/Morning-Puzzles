@@ -3244,15 +3244,21 @@
           let isBurn = false;
           if (style === 'dithered_hatch') {
             // Geometric thermal hatch patterns
-            const pat = regId % 8;
+            const pat = regId % 10;
             if (pat === 0) isBurn = false; // white
             else if (pat === 1) isBurn = ((px + py) % 6 === 0); // 45 deg diagonal
             else if (pat === 2) isBurn = ((px - py + 1000) % 6 === 0); // -45 deg diagonal
-            else if (pat === 3) isBurn = (px % 4 === 0 || py % 4 === 0); // crosshatch grid
-            else if (pat === 4) isBurn = ((px + py) % 4 === 0); // dense diagonal
+            else if (pat === 3) isBurn = (py % 6 === 0); // horizontal pinstripes
+            else if (pat === 4) isBurn = (px % 6 === 0); // vertical pinstripes
             else if (pat === 5) isBurn = (px % 3 === 0 && py % 3 === 0); // dot stipple
-            else if (pat === 6) isBurn = ((px + py) % 3 === 0 || (px - py + 1000) % 3 === 0); // diamond cross
-            else if (pat === 7) isBurn = (py % 3 === 0); // horizontal pinstripes
+            else if (pat === 6) isBurn = ((px + py) % 8 === 0 || (px - py + 1000) % 8 === 0); // open diamond mesh
+            else if (pat === 7) isBurn = (px % 8 === 0 || py % 8 === 0); // open square grid
+            else if (pat === 8) {
+              const rx = px % 6;
+              const ry = py % 6;
+              isBurn = ((rx === 3 && Math.abs(ry - 3) <= 1) || (ry === 3 && Math.abs(rx - 3) <= 1)); // plus matrix
+            }
+            else if (pat === 9) isBurn = ((px + py) % 6 === 0 && (px % 4 < 2)); // dashed diagonal
           } else {
             // Bayer 8x8 matrix dithering (smooth halftone)
             const tone = REGION_TONES[regId % REGION_TONES.length];
@@ -6864,7 +6870,7 @@
 
       fillHatch(x, y, w, h, patternId) {
         if (w <= 0 || h <= 0) return;
-        const pat = patternId % 8;
+        const pat = patternId % 10;
         const startY = Math.max(0, y);
         const endY = Math.min(this.height, y + h);
         const startX = Math.max(0, x);
@@ -6876,11 +6882,18 @@
               case 0: isBurn = false; break;
               case 1: isBurn = ((px + py) % 6 === 0); break;
               case 2: isBurn = ((px - py + 1000) % 6 === 0); break;
-              case 3: isBurn = (px % 4 === 0 || py % 4 === 0); break;
-              case 4: isBurn = ((px + py) % 4 === 0); break;
+              case 3: isBurn = (py % 6 === 0); break;
+              case 4: isBurn = (px % 6 === 0); break;
               case 5: isBurn = (px % 3 === 0 && py % 3 === 0); break;
-              case 6: isBurn = ((px + py) % 3 === 0 || (px - py + 1000) % 3 === 0); break;
-              case 7: isBurn = (py % 3 === 0); break;
+              case 6: isBurn = ((px + py) % 8 === 0 || (px - py + 1000) % 8 === 0); break;
+              case 7: isBurn = (px % 8 === 0 || py % 8 === 0); break;
+              case 8: {
+                const rx = px % 6;
+                const ry = py % 6;
+                isBurn = ((rx === 3 && Math.abs(ry - 3) <= 1) || (ry === 3 && Math.abs(rx - 3) <= 1));
+                break;
+              }
+              case 9: isBurn = ((px + py) % 6 === 0 && (px % 4 < 2)); break;
             }
             if (isBurn) this.setPixel(px, py, 1);
           }
