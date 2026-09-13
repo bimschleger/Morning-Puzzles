@@ -59,6 +59,12 @@ public:
 #include "../src/generators/BridgesGen.h"
 #include "../src/generators/BridgesGen.cpp"
 
+#include "../src/generators/TangoGen.h"
+#include "../src/generators/TangoGen.cpp"
+
+#include "../src/generators/WheelGen.h"
+#include "../src/generators/WheelGen.cpp"
+
 #include "../src/generators/OfflinePuzzleComposer.h"
 #include "../src/generators/OfflinePuzzleComposer.cpp"
 

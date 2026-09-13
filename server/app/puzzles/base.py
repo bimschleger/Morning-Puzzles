@@ -6,7 +6,7 @@ Defines the standard contracts for all puzzle types:
 """
 
 from abc import ABC, abstractmethod
-from typing import Dict, Any, List, Optional, Union
+from typing import Dict, Any, List, Optional, Union, Tuple
 import collections.abc
 
 
@@ -151,5 +151,19 @@ class BasePuzzle(ABC):
         """
         Renders the puzzle to an ESC/POS GS v 0 1-bit raster bitmap (576 dots width).
         Must respect the 35% safe thermal duty cycle guideline.
+        """
+        pass
+
+    @abstractmethod
+    def verify_accuracy(
+        self,
+        puzzle_data: Union[BasePuzzleResult, Dict[str, Any]],
+    ) -> Tuple[bool, str]:
+        """
+        Verifies that the generated puzzle and solution strictly obey all mathematical
+        and game rules (e.g. valid cage sums, no trios, connectivity, uniqueness).
+        Returns:
+            Tuple[bool, str]: (True, "All rules satisfied") if valid,
+                              or (False, "<detailed failure reason>") if invalid.
         """
         pass

@@ -12905,8 +12905,8 @@
         "steps": 4,
         "solution": [
           "COLD",
-          "CORD",
-          "CARD",
+          "WOLD",
+          "WORD",
           "WARD",
           "WARM"
         ]
@@ -12914,13 +12914,12 @@
       {
         "start": "HEAD",
         "target": "TAIL",
-        "steps": 5,
+        "steps": 4,
         "solution": [
           "HEAD",
-          "HEAL",
+          "TEAD",
           "TEAL",
-          "TELL",
-          "TALL",
+          "TEIL",
           "TAIL"
         ]
       },
@@ -12941,21 +12940,22 @@
         "steps": 4,
         "solution": [
           "DARK",
-          "DART",
-          "DORT",
-          "MORT",
+          "DARN",
+          "DORN",
+          "MORN",
           "MOON"
         ]
       },
       {
         "start": "SHIP",
         "target": "DOCK",
-        "steps": 4,
+        "steps": 5,
         "solution": [
           "SHIP",
-          "SHOP",
-          "SHOT",
-          "SOOT",
+          "SHAP",
+          "SOAP",
+          "SOAK",
+          "SOCK",
           "DOCK"
         ]
       },
@@ -12965,45 +12965,50 @@
         "steps": 4,
         "solution": [
           "FIRE",
-          "FORE",
-          "FORK",
-          "HORK",
+          "DIRE",
+          "DORE",
+          "DOSE",
           "HOSE"
         ]
       },
       {
         "start": "PLAY",
         "target": "GAME",
-        "steps": 4,
+        "steps": 6,
         "solution": [
           "PLAY",
-          "CLAY",
-          "CLAM",
-          "CAME",
+          "PLAP",
+          "PLUP",
+          "PAUP",
+          "GAUP",
+          "GAMP",
           "GAME"
         ]
       },
       {
         "start": "BLUE",
         "target": "PINK",
-        "steps": 4,
+        "steps": 6,
         "solution": [
           "BLUE",
-          "BLUR",
-          "FLUR",
-          "FLIR",
-          "FLIK"
+          "BLEE",
+          "BLED",
+          "PLED",
+          "PIED",
+          "PIND",
+          "PINK"
         ]
       },
       {
         "start": "BIRD",
         "target": "NEST",
-        "steps": 4,
+        "steps": 5,
         "solution": [
           "BIRD",
-          "BIRT",
+          "BURD",
+          "BURT",
+          "BUST",
           "BEST",
-          "BEAT",
           "NEST"
         ]
       },
@@ -13014,67 +13019,62 @@
         "solution": [
           "LION",
           "LOON",
-          "LOOR",
-          "ROOR",
+          "ROON",
+          "ROAN",
           "ROAR"
         ]
       },
       {
         "start": "TREE",
         "target": "LEAF",
-        "steps": 4,
+        "steps": 5,
         "solution": [
           "TREE",
-          "FREE",
-          "FLEE",
-          "FLAE",
+          "TRET",
+          "TEET",
+          "LEET",
+          "LEAT",
           "LEAF"
         ]
       },
       {
         "start": "GOLD",
         "target": "IRON",
-        "steps": 4,
+        "steps": 5,
         "solution": [
           "GOLD",
-          "GORD",
-          "GIRN",
+          "GOOD",
+          "GOON",
+          "TOON",
+          "TRON",
           "IRON"
         ]
       },
       {
         "start": "FISH",
         "target": "POND",
-        "steps": 4,
+        "steps": 5,
         "solution": [
           "FISH",
-          "FIST",
-          "POST",
-          "PONT",
+          "PISH",
+          "POSH",
+          "POSE",
+          "PONE",
           "POND"
         ]
       },
       {
         "start": "WALK",
         "target": "STOP",
-        "steps": 4,
+        "steps": 6,
         "solution": [
           "WALK",
-          "WALL",
-          "TALL",
-          "TOLL",
-          "TOOL"
-        ]
-      },
-      {
-        "start": "MILK",
-        "target": "CUP",
-        "steps": 3,
-        "solution": [
-          "MILK",
-          "MICK",
-          "MUCK",
-          "BUCK"
+          "WALT",
+          "SALT",
+          "SAUT",
+          "STUT",
+          "STOT",
+          "STOP"
         ]
       },
       {
@@ -13083,102 +13083,45 @@
         "steps": 4,
         "solution": [
           "HAND",
-          "HARD",
-          "FORD",
-          "FORT",
+          "FAND",
+          "FANT",
+          "FONT",
           "FOOT"
         ]
       },
       {
         "start": "RAIN",
         "target": "SNOW",
-        "steps": 4,
+        "steps": 5,
         "solution": [
           "RAIN",
-          "ROIN",
-          "SOIN",
-          "SOON",
+          "SAIN",
+          "SAIP",
+          "SNIP",
+          "SNOP",
           "SNOW"
         ]
       },
       {
         "start": "SOUP",
         "target": "BOWL",
-        "steps": 4,
+        "steps": 3,
         "solution": [
           "SOUP",
-          "SOUR",
-          "FOUR",
-          "FOUL",
+          "SOUL",
+          "SOWL",
           "BOWL"
         ]
       },
       {
         "start": "NOON",
         "target": "DAWN",
-        "steps": 4,
+        "steps": 3,
         "solution": [
           "NOON",
-          "MOON",
-          "MOAN",
+          "DOON",
           "DOWN",
           "DAWN"
-        ]
-      },
-      {
-        "start": "CAT",
-        "target": "DOG",
-        "steps": 3,
-        "solution": [
-          "CAT",
-          "COT",
-          "COG",
-          "DOG"
-        ]
-      },
-      {
-        "start": "BOY",
-        "target": "MAN",
-        "steps": 3,
-        "solution": [
-          "BOY",
-          "BAY",
-          "MAY",
-          "MAN"
-        ]
-      },
-      {
-        "start": "APE",
-        "target": "MAN",
-        "steps": 4,
-        "solution": [
-          "APE",
-          "ARE",
-          "ARM",
-          "AIM",
-          "MAN"
-        ]
-      },
-      {
-        "start": "TEA",
-        "target": "HOT",
-        "steps": 3,
-        "solution": [
-          "TEA",
-          "HAT",
-          "HIT",
-          "HOT"
-        ]
-      },
-      {
-        "start": "DAY",
-        "target": "NIGHT",
-        "steps": 4,
-        "solution": [
-          "DAY",
-          "PAY",
-          "PAN",
-          "PIN"
         ]
       }
     ],
@@ -13186,24 +13129,24 @@
       {
         "start": "SLOW",
         "target": "FAST",
-        "steps": 5,
+        "steps": 6,
         "solution": [
           "SLOW",
-          "BLOW",
-          "BLOT",
-          "BOOT",
-          "FOOT",
+          "CLOW",
+          "CLOT",
+          "COOT",
+          "COST",
+          "CAST",
           "FAST"
         ]
       },
       {
         "start": "EAST",
         "target": "WEST",
-        "steps": 3,
+        "steps": 2,
         "solution": [
           "EAST",
-          "PAST",
-          "PEST",
+          "WAST",
           "WEST"
         ]
       },
@@ -13213,7 +13156,7 @@
         "steps": 4,
         "solution": [
           "WIND",
-          "WINE",
+          "WAND",
           "WANE",
           "GANE",
           "GALE"
@@ -13222,38 +13165,35 @@
       {
         "start": "SAND",
         "target": "DUNE",
-        "steps": 4,
+        "steps": 3,
         "solution": [
           "SAND",
-          "SANE",
+          "DAND",
           "DANE",
-          "DONE",
           "DUNE"
         ]
       },
       {
         "start": "BOOK",
         "target": "READ",
-        "steps": 5,
+        "steps": 4,
         "solution": [
           "BOOK",
-          "BOOT",
-          "BOAT",
-          "BEAT",
-          "BEAD",
+          "BOOD",
+          "ROOD",
+          "ROAD",
           "READ"
         ]
       },
       {
         "start": "WOOD",
         "target": "FIRE",
-        "steps": 5,
+        "steps": 4,
         "solution": [
           "WOOD",
-          "WORD",
-          "WORE",
-          "WIRE",
-          "HIRE",
+          "FOOD",
+          "FORD",
+          "FORE",
           "FIRE"
         ]
       },
@@ -13263,10 +13203,10 @@
         "steps": 5,
         "solution": [
           "RICE",
-          "RACE",
-          "PACE",
-          "PACK",
-          "PECK",
+          "BICE",
+          "BINE",
+          "BENE",
+          "BENN",
           "BEAN"
         ]
       },
@@ -13276,46 +13216,45 @@
         "steps": 5,
         "solution": [
           "WALL",
-          "MALL",
-          "MOLE",
-          "MORE",
-          "DORE",
+          "BALL",
+          "BOLL",
+          "BOOL",
+          "BOOR",
           "DOOR"
         ]
       },
       {
         "start": "PALE",
         "target": "DARK",
-        "steps": 5,
+        "steps": 3,
         "solution": [
           "PALE",
-          "PARK",
-          "PERK",
-          "DERE",
+          "DALE",
+          "DARE",
           "DARK"
         ]
       },
       {
         "start": "CAMP",
         "target": "TENT",
-        "steps": 4,
+        "steps": 5,
         "solution": [
           "CAMP",
           "CARP",
-          "TARP",
-          "TART",
+          "CART",
+          "CANT",
+          "CENT",
           "TENT"
         ]
       },
       {
         "start": "WAVE",
         "target": "SURF",
-        "steps": 5,
+        "steps": 4,
         "solution": [
           "WAVE",
-          "WANE",
-          "WANT",
-          "SANT",
+          "SAVE",
+          "SARE",
           "SARF",
           "SURF"
         ]
@@ -13323,32 +13262,33 @@
       {
         "start": "LAKE",
         "target": "POND",
-        "steps": 5,
+        "steps": 4,
         "solution": [
           "LAKE",
           "LANE",
-          "LONE",
-          "BONE",
-          "BOND",
+          "PANE",
+          "PAND",
           "POND"
         ]
       },
       {
         "start": "ROAD",
         "target": "PATH",
-        "steps": 5,
+        "steps": 6,
         "solution": [
           "ROAD",
-          "READ",
-          "BEAD",
-          "BATH",
+          "RAAD",
+          "RAID",
+          "RAIA",
+          "RATA",
+          "PATA",
           "PATH"
         ]
       },
       {
         "start": "LEAD",
         "target": "GOLD",
-        "steps": 4,
+        "steps": 3,
         "solution": [
           "LEAD",
           "LOAD",
@@ -13362,10 +13302,10 @@
         "steps": 5,
         "solution": [
           "POOR",
-          "BOOR",
-          "BOOK",
+          "ROOR",
           "ROOK",
           "ROCK",
+          "RICK",
           "RICH"
         ]
       }
@@ -13374,42 +13314,27 @@
       {
         "start": "BLACK",
         "target": "WHITE",
-        "steps": 6,
+        "steps": 7,
         "solution": [
           "BLACK",
-          "BLANK",
-          "BLINK",
-          "CLINK",
-          "CHINK",
-          "CHINE",
+          "CLACK",
+          "CHACK",
+          "WHACK",
+          "WHICK",
+          "WHILK",
+          "WHILE",
           "WHITE"
-        ]
-      },
-      {
-        "start": "STONE",
-        "target": "WATER",
-        "steps": 6,
-        "solution": [
-          "STONE",
-          "SHONE",
-          "SHINE",
-          "SHIRE",
-          "SHARE",
-          "WHARE",
-          "WATER"
         ]
       },
       {
         "start": "WHEAT",
         "target": "BREAD",
-        "steps": 6,
+        "steps": 4,
         "solution": [
           "WHEAT",
-          "CHEAT",
-          "CLEAT",
-          "BLEAT",
-          "BLEST",
-          "BREST",
+          "THEAT",
+          "TREAT",
+          "TREAD",
           "BREAD"
         ]
       },
@@ -13423,7 +13348,7 @@
           "STARS",
           "STARE",
           "STALE",
-          "SHALE",
+          "STILE",
           "SMILE"
         ]
       },
@@ -13442,67 +13367,6 @@
         ]
       },
       {
-        "start": "RIVER",
-        "target": "OCEAN",
-        "steps": 6,
-        "solution": [
-          "RIVER",
-          "ROVER",
-          "RAVER",
-          "EAVER",
-          "EAGLE",
-          "OCEAN"
-        ]
-      },
-      {
-        "start": "EARTH",
-        "target": "MOONS",
-        "steps": 5,
-        "solution": [
-          "EARTH",
-          "BARTH",
-          "BARNS",
-          "BURNS",
-          "HORNS",
-          "MOONS"
-        ]
-      },
-      {
-        "start": "PLANT",
-        "target": "TREES",
-        "steps": 6,
-        "solution": [
-          "PLANT",
-          "PLANE",
-          "PRANE",
-          "PRONE",
-          "TRONE",
-          "TREES"
-        ]
-      },
-      {
-        "start": "LIGHT",
-        "target": "NIGHT",
-        "steps": 1,
-        "solution": [
-          "LIGHT",
-          "NIGHT"
-        ]
-      },
-      {
-        "start": "CLOCK",
-        "target": "WATCH",
-        "steps": 6,
-        "solution": [
-          "CLOCK",
-          "CLOAK",
-          "CROAK",
-          "CRANK",
-          "TRACK",
-          "WATCH"
-        ]
-      },
-      {
         "start": "GRASS",
         "target": "GREEN",
         "steps": 5,
@@ -13511,34 +13375,21 @@
           "CRASS",
           "CRESS",
           "CREES",
+          "CREEN",
           "GREEN"
         ]
       },
       {
         "start": "BRAIN",
         "target": "THINK",
-        "steps": 6,
+        "steps": 5,
         "solution": [
           "BRAIN",
           "TRAIN",
           "TRAIK",
-          "TRACK",
-          "THACK",
-          "THICK",
+          "TRANK",
+          "THANK",
           "THINK"
-        ]
-      },
-      {
-        "start": "APPLE",
-        "target": "PEACH",
-        "steps": 6,
-        "solution": [
-          "APPLE",
-          "AMPLE",
-          "AMBLE",
-          "ABBLE",
-          "BEACH",
-          "PEACH"
         ]
       }
     ]

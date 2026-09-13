@@ -255,3 +255,41 @@ class WordSearchPuzzle(BasePuzzle):
     def _place_word(self, grid, word, r, c, dr, dc):
         for i, ch in enumerate(word):
             grid[r + dr * i][c + dc * i] = ch
+
+    def verify_accuracy(
+        self,
+        puzzle_data: Union[BasePuzzleResult, Dict[str, Any]],
+    ) -> Tuple[bool, str]:
+        grid = puzzle_data.get("grid")
+        if not grid or not isinstance(grid, list):
+            return False, "WordSearch grid missing or invalid"
+        rows = len(grid)
+        cols = len(grid[0]) if rows > 0 else 0
+        if rows < 8 or cols < 8:
+            return False, f"WordSearch grid too small: {rows}x{cols}"
+        for r in range(rows):
+            for c in range(cols):
+                if not grid[r][c] or grid[r][c] == " ":
+                    return False, f"WordSearch grid contains empty cell at ({r},{c})"
+
+        placed_words = puzzle_data.get("placed_words") or puzzle_data.get("words") or []
+        if len(placed_words) < 4:
+            return False, f"WordSearch has too few placed words: {len(placed_words)}"
+
+        placements = puzzle_data.get("placements") or {}
+        # If placements dict is provided, verify every word's coordinate and spelling
+        for word in placed_words:
+            if word in placements:
+                info = placements[word]
+                r, c, d_name = info["row"], info["col"], info["dir"]
+                if d_name not in DIRECTIONS:
+                    return False, f"WordSearch word '{word}' has invalid direction '{d_name}'"
+                dr, dc = DIRECTIONS[d_name]
+                for i, char in enumerate(word):
+                    cr, cc = r + dr * i, c + dc * i
+                    if not (0 <= cr < rows and 0 <= cc < cols):
+                        return False, f"WordSearch word '{word}' exceeds grid boundaries at index {i}"
+                    if grid[cr][cc] != char:
+                        return False, f"WordSearch word '{word}' character mismatch at ({cr},{cc}): expected '{char}', got '{grid[cr][cc]}'"
+
+        return True, "All rules satisfied"

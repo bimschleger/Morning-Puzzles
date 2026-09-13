@@ -262,3 +262,47 @@ class NonogramPuzzle(BasePuzzle):
         if count > 0:
             clues.append(count)
         return clues if clues else [0]
+
+    def verify_accuracy(
+        self,
+        puzzle_data: Union[BasePuzzleResult, Dict[str, Any]],
+    ) -> Tuple[bool, str]:
+        solution = puzzle_data.get("solution") or puzzle_data.get("board")
+        row_clues = puzzle_data.get("row_clues")
+        col_clues = puzzle_data.get("col_clues")
+
+        if not solution or not isinstance(solution, list):
+            return False, "Nonogram solution grid missing or invalid"
+        rows = len(solution)
+        cols = len(solution[0]) if rows > 0 else 0
+        if rows < 5 or cols < 5:
+            return False, f"Nonogram grid too small: {rows}x{cols}"
+        if not row_clues or len(row_clues) != rows:
+            return False, f"Nonogram row clues count ({len(row_clues) if row_clues else 0}) mismatches rows ({rows})"
+        if not col_clues or len(col_clues) != cols:
+            return False, f"Nonogram col clues count ({len(col_clues) if col_clues else 0}) mismatches cols ({cols})"
+
+        # 1. Verify row clues match solution runs
+        for r in range(rows):
+            expected = self._extract_line_clues(solution[r])
+            actual = row_clues[r]
+            if actual != expected:
+                return False, f"Nonogram row {r} clues {actual} do not match solution runs {expected}"
+
+        # 2. Verify col clues match solution runs
+        for c in range(cols):
+            col_vals = [solution[r][c] for r in range(rows)]
+            expected = self._extract_line_clues(col_vals)
+            actual = col_clues[c]
+            if actual != expected:
+                return False, f"Nonogram col {c} clues {actual} do not match solution runs {expected}"
+
+        # 3. Verify non-trivial density
+        total_cells = rows * cols
+        shaded_cells = sum(sum(row) for row in solution)
+        if shaded_cells == 0:
+            return False, "Nonogram board has 0 shaded cells (empty)"
+        if shaded_cells == total_cells:
+            return False, "Nonogram board is 100% full (trivial)"
+
+        return True, "All rules satisfied"

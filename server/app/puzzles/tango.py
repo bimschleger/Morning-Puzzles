@@ -515,3 +515,70 @@ class TangoPuzzle(BasePuzzle):
 
         backtrack(0)
         return count
+
+    def verify_accuracy(
+        self,
+        puzzle_data: Union[BasePuzzleResult, Dict[str, Any]],
+    ) -> Tuple[bool, str]:
+        puzzle = puzzle_data.get("puzzle")
+        solution = puzzle_data.get("solution")
+        edges_h = puzzle_data.get("edges_h")
+        edges_v = puzzle_data.get("edges_v")
+        n = puzzle_data.get("size", len(puzzle) if puzzle else 6)
+
+        if not puzzle or not solution or edges_h is None or edges_v is None:
+            return False, "Tango puzzle missing grid or edge data"
+        if len(solution) != n or any(len(r) != n for r in solution):
+            return False, f"Tango solution grid must be {n}x{n}"
+
+        half = n // 2
+
+        # 1. Row and Col count and trio checks
+        for r in range(n):
+            row = solution[r]
+            if row.count(0) != half or row.count(1) != half:
+                return False, f"Tango row {r} does not have equal 0s and 1s"
+            for c in range(n - 2):
+                if row[c] == row[c + 1] == row[c + 2]:
+                    return False, f"Tango row {r} has 3 consecutive identical symbols at col {c}"
+
+        for c in range(n):
+            col = [solution[r][c] for r in range(n)]
+            if col.count(0) != half or col.count(1) != half:
+                return False, f"Tango col {c} does not have equal 0s and 1s"
+            for r in range(n - 2):
+                if col[r] == col[r + 1] == col[r + 2]:
+                    return False, f"Tango col {c} has 3 consecutive identical symbols at row {r}"
+
+        # 2. Edge constraints
+        for r in range(n):
+            for c in range(n - 1):
+                e = edges_h[r][c]
+                if e == 1 and solution[r][c] != solution[r][c + 1]:
+                    return False, f"Tango '=' horizontal edge at ({r},{c}) violated: {solution[r][c]} != {solution[r][c+1]}"
+                elif e == 2 and solution[r][c] == solution[r][c + 1]:
+                    return False, f"Tango 'x' horizontal edge at ({r},{c}) violated: {solution[r][c]} == {solution[r][c+1]}"
+
+        for r in range(n - 1):
+            for c in range(n):
+                e = edges_v[r][c]
+                if e == 1 and solution[r][c] != solution[r + 1][c]:
+                    return False, f"Tango '=' vertical edge at ({r},{c}) violated: {solution[r][c]} != {solution[r+1][c]}"
+                elif e == 2 and solution[r][c] == solution[r + 1][c]:
+                    return False, f"Tango 'x' vertical edge at ({r},{c}) violated: {solution[r][c]} == {solution[r+1][c]}"
+
+        # 3. Givens match solution
+        for r in range(n):
+            for c in range(n):
+                val = puzzle[r][c]
+                if val != -1 and val != solution[r][c]:
+                    return False, f"Tango given at ({r},{c})={val} mismatches solution={solution[r][c]}"
+
+        # 4. Solvability & Uniqueness
+        sols = self._count_solutions(puzzle, edges_h, edges_v, n, limit=2)
+        if sols == 0:
+            return False, "Tango puzzle has no valid solutions"
+        if sols > 1:
+            return False, "Tango puzzle has multiple valid solutions (not unique)"
+
+        return True, "All rules satisfied"

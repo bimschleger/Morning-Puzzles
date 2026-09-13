@@ -7,7 +7,7 @@ solution key representation, and 576-dot thermal raster rendering.
 
 import os
 import textwrap
-from typing import List, Dict, Any, Optional, Union
+from typing import List, Tuple, Dict, Any, Optional, Union
 
 from .base import BasePuzzle, BasePuzzleResult
 from ..generators.ladder_gen import LadderGenerator
@@ -216,3 +216,34 @@ class LadderPuzzle(BasePuzzle):
                     bmp.draw_char(tx + tile_size // 2 - 6, ry + tile_size // 2 - 8, rung_word[c], scale=2, color=1)
 
         return bmp.to_escpos()
+
+    def verify_accuracy(
+        self,
+        puzzle_data: Union[BasePuzzleResult, Dict[str, Any]],
+    ) -> Tuple[bool, str]:
+        start_word = str(puzzle_data.get("start_word", "")).upper()
+        target_word = str(puzzle_data.get("target_word", "")).upper()
+        solution = [str(w).upper() for w in puzzle_data.get("solution", [])]
+
+        if not start_word or not target_word:
+            return False, "Ladder puzzle missing start or target word"
+        if not solution or len(solution) < 3:
+            return False, f"Ladder solution must have at least 3 rungs, got {len(solution)}"
+        if solution[0] != start_word:
+            return False, f"Ladder solution start '{solution[0]}' does not match start_word '{start_word}'"
+        if solution[-1] != target_word:
+            return False, f"Ladder solution target '{solution[-1]}' does not match target_word '{target_word}'"
+
+        word_len = len(start_word)
+        for idx, w in enumerate(solution):
+            if len(w) != word_len:
+                return False, f"Ladder rung {idx} '{w}' has length {len(w)}, expected {word_len}"
+
+        for idx in range(len(solution) - 1):
+            w1 = solution[idx]
+            w2 = solution[idx + 1]
+            diffs = sum(1 for a, b in zip(w1, w2) if a != b)
+            if diffs != 1:
+                return False, f"Ladder transition from '{w1}' to '{w2}' differs by {diffs} letters, expected exactly 1"
+
+        return True, "All rules satisfied"

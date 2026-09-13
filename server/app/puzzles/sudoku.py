@@ -224,3 +224,51 @@ class SudokuPuzzle(BasePuzzle):
                                 return count
                     return count
         return 1
+
+    def verify_accuracy(
+        self,
+        puzzle_data: Union[BasePuzzleResult, Dict[str, Any]],
+    ) -> Tuple[bool, str]:
+        puzzle = puzzle_data.get("puzzle") or puzzle_data.get("grid")
+        solution = puzzle_data.get("solution")
+        if not puzzle or len(puzzle) != 9 or any(len(r) != 9 for r in puzzle):
+            return False, "Sudoku puzzle grid must be 9x9"
+        if not solution or len(solution) != 9 or any(len(r) != 9 for r in solution):
+            return False, "Sudoku solution grid must be 9x9"
+
+        # 1. Verify solution validity
+        digits = set(range(1, 10))
+        for r in range(9):
+            if set(solution[r]) != digits:
+                return False, f"Sudoku solution row {r} does not contain digits 1-9"
+        for c in range(9):
+            col_vals = {solution[r][c] for r in range(9)}
+            if col_vals != digits:
+                return False, f"Sudoku solution col {c} does not contain digits 1-9"
+        for br in (0, 3, 6):
+            for bc in (0, 3, 6):
+                box_vals = {solution[r][c] for r in range(br, br + 3) for c in range(bc, bc + 3)}
+                if box_vals != digits:
+                    return False, f"Sudoku solution box at ({br},{bc}) does not contain digits 1-9"
+
+        # 2. Verify givens consistency
+        clue_count = 0
+        for r in range(9):
+            for c in range(9):
+                val = puzzle[r][c]
+                if val != 0:
+                    clue_count += 1
+                    if val != solution[r][c]:
+                        return False, f"Sudoku given clue at ({r},{c})={val} mismatches solution={solution[r][c]}"
+        if clue_count < 17:
+            return False, f"Sudoku has fewer than 17 clues ({clue_count}), impossible to have unique solution"
+
+        # 3. Verify unique solvability
+        test_board = [row[:] for row in puzzle]
+        sols = self._count_solutions(test_board, max_count=2)
+        if sols == 0:
+            return False, "Sudoku puzzle has no valid solutions"
+        if sols > 1:
+            return False, "Sudoku puzzle has multiple solutions (not unique)"
+
+        return True, "All rules satisfied"

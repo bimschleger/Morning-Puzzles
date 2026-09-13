@@ -298,3 +298,59 @@ class MinesPuzzle(BasePuzzle):
 
         is_solved = all(state[r][c] != -1 for r in range(rows) for c in range(cols))
         return is_solved, state
+
+    def verify_accuracy(
+        self,
+        puzzle_data: Union[BasePuzzleResult, Dict[str, Any]],
+    ) -> Tuple[bool, str]:
+        solution = puzzle_data.get("solution")
+        clues_data = puzzle_data.get("clues") or puzzle_data.get("clue_map") or {}
+        rows = puzzle_data.get("rows", len(solution) if solution else 8)
+        cols = puzzle_data.get("cols", len(solution[0]) if solution and solution[0] else 8)
+        total_mines = puzzle_data.get("total_mines") or puzzle_data.get("mines", 12)
+
+        if not solution or not isinstance(solution, list):
+            return False, "Mines solution grid missing or invalid"
+
+        # 1. Count mines in solution
+        actual_mines = sum(row.count(1) for row in solution)
+        if actual_mines != total_mines:
+            return False, f"Mines count in solution ({actual_mines}) does not match declared total ({total_mines})"
+
+        # 2. Parse clues into dict
+        clues_dict = {}
+        puzzle_grid = puzzle_data.get("puzzle")
+        if puzzle_grid:
+            for r in range(rows):
+                for c in range(cols):
+                    if puzzle_grid[r][c] >= 0:
+                        clues_dict[(r, c)] = puzzle_grid[r][c]
+        elif isinstance(clues_data, list):
+            for item in clues_data:
+                if isinstance(item, (list, tuple)) and len(item) == 3:
+                    clues_dict[(item[0], item[1])] = item[2]
+                elif isinstance(item, dict):
+                    clues_dict[(item["row"], item["col"])] = item["val"]
+        elif isinstance(clues_data, dict):
+            for k, v in clues_data.items():
+                if isinstance(k, tuple):
+                    clues_dict[k] = v
+                elif isinstance(k, str) and "," in k:
+                    parts = [int(p.strip()) for p in k.split(",")]
+                    clues_dict[(parts[0], parts[1])] = v
+
+        # 3. Check every clue
+        for (r, c), val in clues_dict.items():
+            if solution[r][c] == 1:
+                return False, f"Mines clue cell at ({r},{c}) contains a mine"
+            neighbors = self._get_neighbors(r, c, rows, cols)
+            n_mines = sum(1 for (nr, nc) in neighbors if solution[nr][nc] == 1)
+            if n_mines != val:
+                return False, f"Mines clue at ({r},{c}) is {val}, but neighbor mine count is {n_mines}"
+
+        # 4. Solvability
+        is_solved, _ = self._solve_deductive(rows, cols, clues_dict, total_mines)
+        if not is_solved:
+            return False, "Mines puzzle cannot be solved with pure logic without guessing"
+
+        return True, "All rules satisfied"

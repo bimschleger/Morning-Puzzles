@@ -2,11 +2,11 @@
 #include "EscPosPrinter.h"
 #include <string.h>
 
-static const uint8_t VALID_LINES_6[14] = {
+static const uint8_t TANGO_VALID_LINES_6[14] = {
     0x0b, 0x0d, 0x13, 0x15, 0x16, 0x19, 0x1a, 0x25, 0x26, 0x29, 0x2a, 0x2c, 0x32, 0x34
 };
 
-static const uint8_t VALID_LINES_8[34] = {
+static const uint8_t TANGO_VALID_LINES_8[34] = {
     0x2b, 0x2d, 0x33, 0x35, 0x36, 0x4b, 0x4d, 0x53, 0x55, 0x56, 0x59, 0x5a,
     0x65, 0x66, 0x69, 0x6a, 0x6c, 0x93, 0x95, 0x96, 0x99, 0x9a, 0xa5, 0xa6,
     0xa9, 0xaa, 0xac, 0xb2, 0xb4, 0xc9, 0xca, 0xcc, 0xd2, 0xd4
@@ -19,7 +19,7 @@ TangoGen::TangoGen() : _size(6), _numbersCount(0), _edgesCount(0) {
     memset(_edgesV, 0, sizeof(_edgesV));
 }
 
-static void shuffleArray(uint8_t* arr, uint8_t n) {
+static void tangoShuffleArray(uint8_t* arr, uint8_t n) {
     for (int i = n - 1; i > 0; i--) {
         int j = random(0, i + 1);
         uint8_t temp = arr[i];
@@ -29,7 +29,7 @@ static void shuffleArray(uint8_t* arr, uint8_t n) {
 }
 
 bool TangoGen::generateFullBoard() {
-    const uint8_t* valids = (_size == 6) ? VALID_LINES_6 : VALID_LINES_8;
+    const uint8_t* valids = (_size == 6) ? TANGO_VALID_LINES_6 : TANGO_VALID_LINES_8;
     const uint8_t numValids = (_size == 6) ? 14 : 34;
     const uint8_t half = _size / 2;
 
@@ -40,7 +40,7 @@ bool TangoGen::generateFullBoard() {
 
     int r = 0;
     for (uint8_t i = 0; i < numValids; i++) stack[0].order[i] = i;
-    shuffleArray(stack[0].order, numValids);
+    tangoShuffleArray(stack[0].order, numValids);
     stack[0].candIdx = 0;
 
     while (r >= 0 && r < _size) {
@@ -85,7 +85,7 @@ bool TangoGen::generateFullBoard() {
             r++;
             if (r < _size) {
                 for (uint8_t i = 0; i < numValids; i++) stack[r].order[i] = i;
-                shuffleArray(stack[r].order, numValids);
+                tangoShuffleArray(stack[r].order, numValids);
                 stack[r].candIdx = 0;
             }
         } else {

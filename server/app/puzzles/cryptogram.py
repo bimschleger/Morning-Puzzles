@@ -400,3 +400,41 @@ class CryptogramPuzzle(BasePuzzle):
             output_lines.append("")
 
         return "\n".join(output_lines)
+
+    def verify_accuracy(
+        self,
+        puzzle_data: Union[BasePuzzleResult, Dict[str, Any]],
+    ) -> Tuple[bool, str]:
+        phrase = puzzle_data.get("phrase") or puzzle_data.get("solution")
+        ciphertext = puzzle_data.get("ciphertext")
+        plain_to_cipher = puzzle_data.get("plain_to_cipher")
+        cipher_to_plain = puzzle_data.get("cipher_to_plain")
+        clues = puzzle_data.get("clues") or []
+
+        if not phrase or not isinstance(phrase, str):
+            return False, "Cryptogram phrase missing or invalid"
+        if not ciphertext or not isinstance(ciphertext, str):
+            return False, "Cryptogram ciphertext missing or invalid"
+        if not plain_to_cipher or not cipher_to_plain:
+            return False, "Cryptogram substitution mapping missing"
+
+        # 1. Verify derangement (no self-mapping) and bijection
+        for p, c in plain_to_cipher.items():
+            if p == c:
+                return False, f"Cryptogram has self-mapped letter '{p}' -> '{c}'"
+            if cipher_to_plain.get(c) != p:
+                return False, f"Cryptogram cipher mapping not bijective for '{p}' <-> '{c}'"
+
+        # 2. Verify ciphertext produces phrase
+        decrypted = "".join(cipher_to_plain.get(ch, ch) for ch in ciphertext)
+        if decrypted != phrase:
+            return False, f"Cryptogram decryption mismatch:\nDecrypted: '{decrypted}'\nExpected:  '{phrase}'"
+
+        # 3. Verify clues match
+        for cl in clues:
+            p_char = cl.get("plain")
+            c_char = cl.get("cipher")
+            if plain_to_cipher.get(p_char) != c_char:
+                return False, f"Cryptogram clue '{c_char} = {p_char}' does not match cipher mapping"
+
+        return True, "All rules satisfied"

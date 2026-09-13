@@ -450,3 +450,79 @@ class BridgesPuzzle(BasePuzzle):
 
         search(0)
         return solutions_count
+
+    def verify_accuracy(
+        self,
+        puzzle_data: Union[BasePuzzleResult, Dict[str, Any]],
+    ) -> Tuple[bool, str]:
+        islands_raw = puzzle_data.get("islands") or []
+        bridges_raw = puzzle_data.get("solution_bridges") or puzzle_data.get("bridges") or []
+        if not islands_raw or not bridges_raw:
+            return False, "Bridges puzzle missing islands or solution bridges data"
+
+        # Parse islands
+        islands: List[Tuple[int, int]] = []
+        degrees: List[int] = []
+        island_lookup: Dict[Tuple[int, int], int] = {}
+        for idx, item in enumerate(islands_raw):
+            if isinstance(item, dict):
+                r, c, cnt = item["r"], item["c"], item["count"]
+            else:
+                r, c, cnt = item[0], item[1], item[2]
+            islands.append((r, c))
+            degrees.append(cnt)
+            island_lookup[(r, c)] = idx
+
+        # Parse bridges
+        connected_degrees = [0] * len(islands)
+        adj: List[List[int]] = [[] for _ in range(len(islands))]
+
+        for b in bridges_raw:
+            if isinstance(b, dict):
+                r1, c1, r2, c2, cnt = b["r1"], b["c1"], b["r2"], b["c2"], b["count"]
+            else:
+                r1, c1, r2, c2, cnt = b[0], b[1], b[2], b[3], b[4]
+
+            if cnt not in (1, 2):
+                return False, f"Bridge between ({r1},{c1}) and ({r2},{c2}) has invalid count {cnt}"
+            if not (r1 == r2 or c1 == c2):
+                return False, f"Bridge between ({r1},{c1}) and ({r2},{c2}) is diagonal"
+            if (r1, c1) not in island_lookup or (r2, c2) not in island_lookup:
+                return False, f"Bridge endpoints ({r1},{c1}) or ({r2},{c2}) are not islands"
+
+            u = island_lookup[(r1, c1)]
+            v = island_lookup[(r2, c2)]
+            connected_degrees[u] += cnt
+            connected_degrees[v] += cnt
+            adj[u].append(v)
+            adj[v].append(u)
+
+        # 1. Degree check
+        for idx, (expected, actual) in enumerate(zip(degrees, connected_degrees)):
+            if expected != actual:
+                return False, f"Island {islands[idx]} degree mismatch: clue={expected}, connected={actual}"
+
+        # 2. Connectivity check (single connected component)
+        visited = [False] * len(islands)
+        q = [0]
+        visited[0] = True
+        count_visited = 1
+        while q:
+            curr = q.pop()
+            for neighbor in adj[curr]:
+                if not visited[neighbor]:
+                    visited[neighbor] = True
+                    count_visited += 1
+                    q.append(neighbor)
+        if count_visited != len(islands):
+            return False, f"Bridges network is disconnected: visited {count_visited}/{len(islands)} islands"
+
+        # 3. Solvability & Uniqueness
+        active_potential_edges = self._find_potential_edges(islands)
+        sol_count = self._count_solutions(islands, degrees, active_potential_edges, max_solutions=2)
+        if sol_count == 0:
+            return False, "Bridges puzzle has no valid solutions"
+        if sol_count > 1:
+            return False, "Bridges puzzle has multiple valid solutions (not unique)"
+
+        return True, "All rules satisfied"

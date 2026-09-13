@@ -298,3 +298,43 @@ class JumblePuzzle(BasePuzzle):
             if candidate != word:
                 return candidate
         return "".join(chars)
+
+    def verify_accuracy(
+        self,
+        puzzle_data: Union[BasePuzzleResult, Dict[str, Any]],
+    ) -> Tuple[bool, str]:
+        words_data = puzzle_data.get("words") or puzzle_data.get("scrambled")
+        if not words_data or not isinstance(words_data, list):
+            return False, "Jumble words data missing or invalid"
+        if len(words_data) < 2:
+            return False, f"Jumble has too few words: {len(words_data)}"
+
+        riddle = puzzle_data.get("riddle") or puzzle_data.get("clue")
+        answer = puzzle_data.get("answer")
+        if not riddle or not isinstance(riddle, str):
+            return False, "Jumble riddle/clue missing or invalid"
+        if not answer or not isinstance(answer, str):
+            return False, "Jumble answer missing or invalid"
+
+        # 1. Verify anagrams of each scrambled word
+        extracted_circled = []
+        for idx, item in enumerate(words_data):
+            orig = item.get("original", "")
+            scram = item.get("scrambled", "")
+            if not orig or not scram:
+                return False, f"Jumble word {idx} missing original or scrambled text"
+            if sorted(orig.upper()) != sorted(scram.upper()):
+                return False, f"Jumble word {idx} scrambled '{scram}' is not an anagram of '{orig}'"
+            circles = item.get("circle_indices", item.get("circles", []))
+            for c_idx in circles:
+                if 0 <= c_idx < len(orig):
+                    extracted_circled.append(orig[c_idx].upper())
+                else:
+                    return False, f"Jumble word {idx} circle index {c_idx} out of range (length {len(orig)})"
+
+        # 2. Verify circled letters can form the answer
+        clean_answer = [ch.upper() for ch in answer if ch.isalpha()]
+        if sorted(extracted_circled) != sorted(clean_answer):
+            return False, f"Jumble circled letters {sorted(extracted_circled)} do not match answer letters {sorted(clean_answer)}"
+
+        return True, "All rules satisfied"

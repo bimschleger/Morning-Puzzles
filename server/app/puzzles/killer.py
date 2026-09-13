@@ -578,3 +578,66 @@ class KillerPuzzle(BasePuzzle):
 
         solve(0, 0)
         return solutions
+
+    def verify_accuracy(
+        self,
+        puzzle_data: Union[BasePuzzleResult, Dict[str, Any]],
+    ) -> Tuple[bool, str]:
+        size = puzzle_data.get("size", 4)
+        box_r = puzzle_data.get("box_r", 2)
+        box_c = puzzle_data.get("box_c", size // 2)
+        solution = puzzle_data.get("solution")
+        cages = puzzle_data.get("cages")
+
+        if not solution or not isinstance(solution, list) or len(solution) != size:
+            return False, f"Killer solution grid must be {size}x{size}"
+        if not cages or not isinstance(cages, list):
+            return False, "Killer puzzle missing cages data"
+
+        # 1. Check Latin square / Sudoku constraints
+        digits = set(range(1, size + 1))
+        for r in range(size):
+            if set(solution[r]) != digits:
+                return False, f"Killer solution row {r} does not contain digits 1-{size}"
+        for c in range(size):
+            col_vals = {solution[r][c] for r in range(size)}
+            if col_vals != digits:
+                return False, f"Killer solution col {c} does not contain digits 1-{size}"
+        for br in range(0, size, box_r):
+            for bc in range(0, size, box_c):
+                b_vals = {solution[r][c] for r in range(br, br + box_r) for c in range(bc, bc + box_c)}
+                if b_vals != digits:
+                    return False, f"Killer solution box at ({br},{bc}) does not contain digits 1-{size}"
+
+        # 2. Check cages partition and sums
+        covered_cells = set()
+        for idx, cg in enumerate(cages):
+            c_cells = [tuple(p) for p in cg["cells"]]
+            c_sum = cg["sum"]
+            if not c_cells:
+                return False, f"Killer cage {idx} is empty"
+            cell_vals = []
+            for r, c in c_cells:
+                if not (0 <= r < size and 0 <= c < size):
+                    return False, f"Killer cage {idx} cell ({r},{c}) out of bounds"
+                if (r, c) in covered_cells:
+                    return False, f"Killer cell ({r},{c}) appears in multiple cages"
+                covered_cells.add((r, c))
+                cell_vals.append(solution[r][c])
+
+            if len(cell_vals) != len(set(cell_vals)):
+                return False, f"Killer cage {idx} has duplicate values: {cell_vals}"
+            if sum(cell_vals) != c_sum:
+                return False, f"Killer cage {idx} sum is {sum(cell_vals)}, expected {c_sum}"
+
+        if len(covered_cells) != size * size:
+            return False, f"Killer cages only cover {len(covered_cells)}/{size*size} cells"
+
+        # 3. Solvability & Uniqueness
+        sols = self._find_multiple_solutions(size, box_r, box_c, cages, max_count=2)
+        if len(sols) == 0:
+            return False, "Killer puzzle has no valid solutions"
+        if len(sols) > 1:
+            return False, "Killer puzzle has multiple valid solutions (not unique)"
+
+        return True, "All rules satisfied"

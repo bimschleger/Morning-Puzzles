@@ -32,6 +32,7 @@ from app.renderer.receipt_rasterizer import (
     render_cryptogram_raster,
     render_tango_raster,
     render_ladder_raster,
+    render_wheel_raster,
     THERMAL_WIDTH_DOTS,
     THERMAL_WIDTH_BYTES,
 )
@@ -45,12 +46,12 @@ from app.renderer.text_formatter import (
 
 
 def test_bundle_completeness():
-    print("Test 1: Verifying Daily Bundle Completeness (All 13 Puzzles)...")
+    print("Test 1: Verifying Daily Bundle Completeness (All 14 Puzzles)...")
     bundle = generate_daily_bundle(difficulty="medium")
-    required_keys = ["title", "date", "difficulty", "sudoku", "wordsearch", "nonogram", "queens", "jumble", "binary", "mines", "tents", "bridges", "killer", "cryptogram", "tango", "ladder"]
+    required_keys = ["title", "date", "difficulty", "sudoku", "wordsearch", "nonogram", "queens", "jumble", "binary", "mines", "tents", "bridges", "killer", "cryptogram", "tango", "ladder", "wheel"]
     for k in required_keys:
         assert k in bundle, f"Missing key '{k}' in generated bundle"
-    print("  -> Passed! All 13 puzzles present in daily bundle.\n")
+    print("  -> Passed! All 14 puzzles present in daily bundle.\n")
     return bundle
 
 
@@ -70,6 +71,7 @@ def test_raster_specifications(bundle):
         ("Cryptogram", render_cryptogram_raster, "cryptogram"),
         ("Tango", render_tango_raster, "tango"),
         ("Ladder", render_ladder_raster, "ladder"),
+        ("Wheel", render_wheel_raster, "wheel"),
     ]
 
     for name, fn, key in rasterizers:

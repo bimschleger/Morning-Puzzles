@@ -68,3 +68,7 @@ def render_tango_raster(tango_data: Dict[str, Any], target_width: int = THERMAL_
 
 def render_ladder_raster(ladder_data: Dict[str, Any], target_width: int = THERMAL_WIDTH_DOTS) -> bytes:
     return DEFAULT_REGISTRY.get("ladder").render_raster(ladder_data, target_width=target_width)
+
+
+def render_wheel_raster(wheel_data: Dict[str, Any], target_width: int = THERMAL_WIDTH_DOTS) -> bytes:
+    return DEFAULT_REGISTRY.get("wheel").render_raster(wheel_data, target_width=target_width)

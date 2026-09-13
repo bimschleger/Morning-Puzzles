@@ -368,3 +368,56 @@ class TentsPuzzle(BasePuzzle):
 
         search(0, num_trees)
         return solutions_found
+
+    def verify_accuracy(
+        self,
+        puzzle_data: Union[BasePuzzleResult, Dict[str, Any]],
+    ) -> Tuple[bool, str]:
+        size = puzzle_data.get("size") or puzzle_data.get("grid_size", 8)
+        trees = [tuple(p) for p in (puzzle_data.get("trees") or [])]
+        tents = [tuple(p) for p in (puzzle_data.get("tents") or puzzle_data.get("solution") or [])]
+        row_clues = puzzle_data.get("row_clues") or []
+        col_clues = puzzle_data.get("col_clues") or []
+
+        if not trees or not tents:
+            return False, "Tents puzzle missing trees or tents data"
+        if len(trees) != len(tents):
+            return False, f"Tents count ({len(tents)}) does not match trees count ({len(trees)})"
+        if len(row_clues) != size or len(col_clues) != size:
+            return False, f"Tents row/col clues length does not match grid size {size}"
+
+        # 1. No overlap between tents and trees
+        tree_set = set(trees)
+        tent_set = set(tents)
+        if len(tent_set) != len(tents):
+            return False, "Duplicate tents present in solution"
+        if tree_set.intersection(tent_set):
+            return False, "A tent is placed on top of a tree"
+
+        # 2. No two tents touch even diagonally
+        tent_list = list(tent_set)
+        for i in range(len(tent_list)):
+            r1, c1 = tent_list[i]
+            for j in range(i + 1, len(tent_list)):
+                r2, c2 = tent_list[j]
+                if max(abs(r1 - r2), abs(c1 - c2)) <= 1:
+                    return False, f"Tents at ({r1},{c1}) and ({r2},{c2}) touch orthogonally or diagonally"
+
+        # 3. Check row and col clues
+        for r in range(size):
+            r_cnt = sum(1 for (tr, tc) in tent_set if tr == r)
+            if r_cnt != row_clues[r]:
+                return False, f"Tents row {r} has {r_cnt} tents, clue is {row_clues[r]}"
+        for c in range(size):
+            c_cnt = sum(1 for (tr, tc) in tent_set if tc == c)
+            if c_cnt != col_clues[c]:
+                return False, f"Tents col {c} has {c_cnt} tents, clue is {col_clues[c]}"
+
+        # 4. Solvability & Uniqueness
+        sols = self._count_solutions(size, trees, row_clues, col_clues, max_count=2)
+        if sols == 0:
+            return False, "Tents puzzle has no valid solutions"
+        if sols > 1:
+            return False, "Tents puzzle has multiple valid solutions (not unique)"
+
+        return True, "All rules satisfied"

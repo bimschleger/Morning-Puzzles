@@ -419,3 +419,50 @@ class StarsPuzzle(BasePuzzle):
                 return False
 
         return True
+
+    def verify_accuracy(
+        self,
+        puzzle_data: Union[BasePuzzleResult, Dict[str, Any]],
+    ) -> Tuple[bool, str]:
+        regions = puzzle_data.get("regions")
+        stars = puzzle_data.get("stars_solution") or puzzle_data.get("queens") or puzzle_data.get("stars")
+        if not regions or not isinstance(regions, list):
+            return False, "Stars puzzle missing regions grid"
+        n = puzzle_data.get("grid_size", len(regions))
+        if len(regions) != n or any(len(row) != n for row in regions):
+            return False, f"Stars regions grid dimensions mismatch size {n}x{n}"
+        if not stars or not isinstance(stars, (list, set)):
+            return False, "Stars puzzle missing stars solution"
+
+        star_set = set(tuple(p) for p in stars)
+        k_stars = puzzle_data.get("stars_per_unit", 1)
+
+        # 1. Total star count
+        expected_total = n * k_stars
+        if len(star_set) != expected_total:
+            return False, f"Stars count ({len(star_set)}) does not equal expected {expected_total} ({n}x{k_stars})"
+
+        # 2. Check each row and col has exactly k_stars
+        for r in range(n):
+            row_count = sum(1 for (sr, sc) in star_set if sr == r)
+            if row_count != k_stars:
+                return False, f"Stars row {r} has {row_count} stars, expected {k_stars}"
+        for c in range(n):
+            col_count = sum(1 for (sr, sc) in star_set if sc == c)
+            if col_count != k_stars:
+                return False, f"Stars col {c} has {col_count} stars, expected {k_stars}"
+
+        # 3. Check no two stars touch (even diagonally)
+        star_list = list(star_set)
+        for i in range(len(star_list)):
+            r1, c1 = star_list[i]
+            for j in range(i + 1, len(star_list)):
+                r2, c2 = star_list[j]
+                if max(abs(r1 - r2), abs(c1 - c2)) <= 1:
+                    return False, f"Stars at ({r1},{c1}) and ({r2},{c2}) touch orthogonally or diagonally"
+
+        # 4. Check regions and validate connectivity & region star counts
+        if not self._validate_puzzle(regions, star_set, n, k_stars):
+            return False, "Stars puzzle regions fail connectivity or region star count validation"
+
+        return True, "All rules satisfied"

@@ -195,7 +195,7 @@ class BinaryPuzzle(BasePuzzle):
                 if r == n - 1:
                     col_c = [grid[pr][c] for pr in range(n - 1)] + [val]
                     for pc in range(c):
-                        col_pc = [grid[pr][pc] for pr in range(n)]
+                        col_pc = [grid[pr][pc] for pr in range(n - 1)] + [row_cand[pc]]
                         if col_c == col_pc:
                             return False
             return True
@@ -346,3 +346,62 @@ class BinaryPuzzle(BasePuzzle):
 
         is_solved = all(g[r][c] != -1 for r in range(n) for c in range(n))
         return is_solved, g, rules_used
+
+    def verify_accuracy(
+        self,
+        puzzle_data: Union[BasePuzzleResult, Dict[str, Any]],
+    ) -> Tuple[bool, str]:
+        puzzle = puzzle_data.get("puzzle")
+        solution = puzzle_data.get("solution")
+        if not puzzle or not isinstance(puzzle, list):
+            return False, "Binary puzzle grid missing or invalid"
+        if not solution or not isinstance(solution, list):
+            return False, "Binary solution grid missing or invalid"
+        n = len(puzzle)
+        if n % 2 != 0 or len(solution) != n or any(len(r) != n for r in puzzle) or any(len(r) != n for r in solution):
+            return False, f"Binary grid must be square of even size, got {n}"
+
+        half = n // 2
+
+        # 1. Verify solution counts and constraints
+        for r in range(n):
+            row = solution[r]
+            if any(val not in (0, 1) for val in row):
+                return False, f"Binary solution row {r} contains non-binary values"
+            if row.count(0) != half or row.count(1) != half:
+                return False, f"Binary solution row {r} does not have equal 0s and 1s"
+            for c in range(n - 2):
+                if row[c] == row[c + 1] == row[c + 2]:
+                    return False, f"Binary solution row {r} has 3 consecutive identical values at col {c}"
+
+        for c in range(n):
+            col = [solution[r][c] for r in range(n)]
+            if col.count(0) != half or col.count(1) != half:
+                return False, f"Binary solution col {c} does not have equal 0s and 1s"
+            for r in range(n - 2):
+                if col[r] == col[r + 1] == col[r + 2]:
+                    return False, f"Binary solution col {c} has 3 consecutive identical values at row {r}"
+
+        # 2. Row and Column uniqueness
+        row_tuples = [tuple(solution[r]) for r in range(n)]
+        if len(set(row_tuples)) != n:
+            return False, "Binary solution contains duplicate rows"
+        col_tuples = [tuple(solution[r][c] for r in range(n)) for c in range(n)]
+        if len(set(col_tuples)) != n:
+            return False, "Binary solution contains duplicate columns"
+
+        # 3. Givens match solution
+        for r in range(n):
+            for c in range(n):
+                val = puzzle[r][c]
+                if val != -1 and val != solution[r][c]:
+                    return False, f"Binary given at ({r},{c})={val} mismatches solution={solution[r][c]}"
+
+        # 4. Solvability
+        is_solved, solved_grid, _ = self._solve_deductive(puzzle, n, max_rule=3)
+        if not is_solved:
+            return False, "Binary puzzle could not be logically solved"
+        if solved_grid != solution:
+            return False, "Binary logically solved grid does not match solution"
+
+        return True, "All rules satisfied"

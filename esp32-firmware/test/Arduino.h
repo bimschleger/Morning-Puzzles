@@ -12,6 +12,9 @@
 #include <sstream>
 
 #define PROGMEM
+#define memcpy_P memcpy
+#define pgm_read_byte(addr) (*(const uint8_t*)(addr))
+#define pgm_read_word(addr) (*(const uint16_t*)(addr))
 class String : public std::string {
 public:
     String() : std::string() {}

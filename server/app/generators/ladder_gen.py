@@ -30,13 +30,7 @@ FALLBACK_LADDERS: Dict[str, List[Dict[str, Any]]] = {
             "start": "COLD",
             "target": "WARM",
             "steps": 4,
-            "solution": ["COLD", "CORD", "CARD", "WARD", "WARM"]
-        },
-        {
-            "start": "HEAD",
-            "target": "TAIL",
-            "steps": 5,
-            "solution": ["HEAD", "HEAL", "TEAL", "TELL", "TALL", "TAIL"]
+            "solution": ["COLD", "WOLD", "WORD", "WARD", "WARM"]
         },
         {
             "start": "LOVE",
@@ -45,80 +39,56 @@ FALLBACK_LADDERS: Dict[str, List[Dict[str, Any]]] = {
             "solution": ["LOVE", "HOVE", "HAVE", "HATE"]
         },
         {
-            "start": "FIRE",
-            "target": "HOSE",
-            "steps": 4,
-            "solution": ["FIRE", "FORE", "FORK", "HORK", "HOSE"]
-        },
-        {
-            "start": "PLAY",
-            "target": "GAME",
-            "steps": 4,
-            "solution": ["PLAY", "CLAY", "CLAM", "CAME", "GAME"]
-        }
-    ],
-    "medium": [
-        {
-            "start": "SLOW",
-            "target": "FAST",
-            "steps": 5,
-            "solution": ["SLOW", "BLOW", "BLOT", "BOOT", "FOOT", "FAST"]
+            "start": "LEAD",
+            "target": "GOLD",
+            "steps": 3,
+            "solution": ["LEAD", "LOAD", "GOAD", "GOLD"]
         },
         {
             "start": "EAST",
             "target": "WEST",
-            "steps": 3,
-            "solution": ["EAST", "PAST", "PEST", "WEST"]
+            "steps": 2,
+            "solution": ["EAST", "WAST", "WEST"]
+        }
+    ],
+    "medium": [
+        {
+            "start": "LAKE",
+            "target": "POND",
+            "steps": 4,
+            "solution": ["LAKE", "LANE", "PANE", "PAND", "POND"]
         },
         {
             "start": "CAMP",
             "target": "TENT",
-            "steps": 4,
-            "solution": ["CAMP", "CARP", "TARP", "TART", "TENT"]
+            "steps": 5,
+            "solution": ["CAMP", "CARP", "CART", "CANT", "CENT", "TENT"]
         },
         {
             "start": "BOOK",
             "target": "READ",
-            "steps": 5,
-            "solution": ["BOOK", "BOOT", "BOAT", "BEAT", "BEAD", "READ"]
-        },
-        {
-            "start": "ROAD",
-            "target": "PATH",
-            "steps": 5,
-            "solution": ["ROAD", "READ", "BEAD", "BATH", "PATH"]
-        }
-    ],
-    "hard": [
-        {
-            "start": "BLACK",
-            "target": "WHITE",
-            "steps": 6,
-            "solution": ["BLACK", "BLANK", "BLINK", "CLINK", "CHINK", "CHINE", "WHITE"]
-        },
-        {
-            "start": "STONE",
-            "target": "WATER",
-            "steps": 6,
-            "solution": ["STONE", "SHONE", "SHINE", "SHIRE", "SHARE", "WHARE", "WATER"]
+            "steps": 4,
+            "solution": ["BOOK", "BOOD", "ROOD", "ROAD", "READ"]
         },
         {
             "start": "WHEAT",
             "target": "BREAD",
-            "steps": 6,
-            "solution": ["WHEAT", "CHEAT", "CLEAT", "BLEAT", "BLEST", "BREST", "BREAD"]
-        },
-        {
-            "start": "TEARS",
-            "target": "SMILE",
-            "steps": 6,
-            "solution": ["TEARS", "SEARS", "STARS", "STARE", "STALE", "SHALE", "SMILE"]
-        },
+            "steps": 4,
+            "solution": ["WHEAT", "THEAT", "TREAT", "TREAD", "BREAD"]
+        }
+    ],
+    "hard": [
         {
             "start": "SLEEP",
             "target": "DREAM",
             "steps": 6,
             "solution": ["SLEEP", "BLEEP", "BLEED", "BREED", "BREAD", "DREAD", "DREAM"]
+        },
+        {
+            "start": "FOUR",
+            "target": "FIVE",
+            "steps": 5,
+            "solution": ["FOUR", "FOUD", "FOLD", "FOLE", "FILE", "FIVE"]
         }
     ]
 }

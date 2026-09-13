@@ -34,6 +34,7 @@ APPROVED_TITLES = [
     "CRYPTOGRAM",
     "TANGO",
     "LADDER",
+    "WHEEL",
 ]
 
 FORBIDDEN_TITLE_PATTERNS = [
@@ -109,7 +110,7 @@ def test_difficulty_presentation_and_theme_rules():
             )
 
     # 2. Puzzles with difficulty must have DIFFICULTY: [LEVEL] directly below title
-    difficulty_puzzles = ["SUDOKU", "NONOGRAM", "STARS", "JUMBLE", "BINARY", "MINES", "TENTS", "BRIDGES", "KILLER", "CRYPTOGRAM", "TANGO", "LADDER"]
+    difficulty_puzzles = ["SUDOKU", "NONOGRAM", "STARS", "JUMBLE", "BINARY", "MINES", "TENTS", "BRIDGES", "KILLER", "CRYPTOGRAM", "TANGO", "LADDER", "WHEEL"]
     for title in difficulty_puzzles:
         header_str = f"--- {title} ---"
         assert header_str in receipt_text, f"Missing header {header_str}"
@@ -314,7 +315,7 @@ def test_simulator_consistency():
 def test_plugin_contract_compliance():
     print("Test 6: Verifying BasePuzzle Contract & Auto-Discovery on DEFAULT_REGISTRY...")
     plugins = DEFAULT_REGISTRY.get_all()
-    assert len(plugins) == 13, f"Expected 13 registered plugins, found {len(plugins)}"
+    assert len(plugins) == len(APPROVED_TITLES), f"Expected {len(APPROVED_TITLES)} registered plugins, found {len(plugins)}"
 
     for p in plugins:
         # 1. Type validation

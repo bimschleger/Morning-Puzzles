@@ -20,6 +20,7 @@ from .killer import KillerPuzzle
 from .cryptogram import CryptogramPuzzle
 from .tango import TangoPuzzle
 from .ladder import LadderPuzzle
+from .wheel import WheelPuzzle
 
 
 class PuzzleRegistry:
@@ -93,4 +94,5 @@ DEFAULT_REGISTRY = PuzzleRegistry([
     CryptogramPuzzle(),
     TangoPuzzle(),
     LadderPuzzle(),
+    WheelPuzzle(),
 ])
