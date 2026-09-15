@@ -74,7 +74,8 @@ class PuzzleRegistry:
         """
         today_str = datetime.date.today().strftime("%A, %B %d, %Y")
         bundle: Dict[str, Any] = {
-            "title": "DAILY MORNING PUZZLES",
+            "title": "MORNING PUZZLES",
+            "header_tagline": "Enjoy your morning puzzles",
             "date": today_str,
             "difficulty": difficulty,
         }

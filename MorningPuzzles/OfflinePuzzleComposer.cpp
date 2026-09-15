@@ -169,7 +169,7 @@ void OfflinePuzzleComposer::printSinglePuzzle(EscPosPrinter& printer, OfflinePuz
     }
 }
 
-bool OfflinePuzzleComposer::generateAndPrintReceipt(EscPosPrinter& printer, const String& dateStr, PuzzleGrade grade) {
+bool OfflinePuzzleComposer::generateAndPrintReceipt(EscPosPrinter& printer, const String& subtitle, PuzzleGrade grade) {
     // 1. Reseed PRNG with ESP32 hardware True Random Number Generator + microsecond timer
     randomSeed(esp_random() ^ (uint32_t)micros());
 
@@ -196,8 +196,8 @@ bool OfflinePuzzleComposer::generateAndPrintReceipt(EscPosPrinter& printer, cons
     if (count < 1) count = 1;
 
     // 1. Receipt Header
-    String headerDate = (dateStr.length() > 0) ? dateStr : "Daily On-Demand Edition";
-    printer.printHeader("MORNING PUZZLES", headerDate);
+    String headerSubtitle = (subtitle.length() > 0) ? subtitle : "Enjoy your morning puzzles";
+    printer.printHeader("MORNING PUZZLES", headerSubtitle);
     printer.setAlign(ALIGN_CENTER);
     printer.println(String("DAILY ") + count + "-PUZZLE MIX");
     printer.println("");
@@ -242,12 +242,9 @@ bool OfflinePuzzleComposer::generateAndPrintReceipt(EscPosPrinter& printer, cons
     }
 
     // Footer
-    printer.printDoubleLine();
     printer.setAlign(ALIGN_CENTER);
-    printer.println("Printed on ESP32 80mm Thermal Receipt");
-    printer.println("Puzzles generated 100% on-device (Offline)");
-    printer.println("Good luck & have a wonderful day!");
-    printer.printDoubleLine();
+    printer.println("Enjoy your day!");
+    printer.printHorizontalLine('-');
 
     printer.feed(4);
     printer.cut(false);

@@ -62,7 +62,7 @@ class EscPosTextReceipt:
     def horizontal_rule(self, char: str = "-"):
         self.println(char * COLS_80MM)
 
-    def header(self, title: str, date_str: str):
+    def header(self, title: str, subtitle: Optional[str] = "Enjoy your morning puzzles"):
         self.align("center")
         self.horizontal_rule("=")
         self.bold(True)
@@ -70,7 +70,8 @@ class EscPosTextReceipt:
         self.println(title)
         self.double_size(False)
         self.bold(False)
-        self.println(date_str)
+        if subtitle:
+            self.println(subtitle)
         self.horizontal_rule("=")
         self.align("left")
         self.println()
@@ -133,8 +134,8 @@ class DailyReceiptComposer:
 
         # 1. Master Receipt Header
         title = daily_data.get("title", "MORNING PUZZLES")
-        date_str = daily_data.get("date", "Daily Edition")
-        r.header(title, date_str)
+        tagline = daily_data.get("header_tagline", "Enjoy your morning puzzles")
+        r.header(title, tagline)
         subtitle = daily_data.get("subtitle")
         if subtitle:
             r.align("center")
@@ -191,10 +192,9 @@ class DailyReceiptComposer:
 
         # 4. Master Receipt Footer
         r.align("center")
-        r.horizontal_rule("=")
-        r.println("Good luck! Solutions tomorrow morning.")
-        r.println("Printed on ESP32 80mm Commercial Thermal Receipt")
-        r.horizontal_rule("=")
+        r.horizontal_rule("-")
+        r.println("Enjoy your day!")
+        r.horizontal_rule("-")
 
         # Mandatory 4-line feed before cutter offset
         r.feed(4)

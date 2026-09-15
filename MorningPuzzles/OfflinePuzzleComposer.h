@@ -48,7 +48,7 @@ public:
     OfflinePuzzleComposer();
 
     // Generates a random selection of puzzles (OFFLINE_PUZZLE_COUNT) and prints directly
-    bool generateAndPrintReceipt(EscPosPrinter& printer, const String& dateStr = "", PuzzleGrade grade = GRADE_RANDOM);
+    bool generateAndPrintReceipt(EscPosPrinter& printer, const String& subtitle = "Enjoy your morning puzzles", PuzzleGrade grade = GRADE_RANDOM);
 
     void cycleGrade();
     void setGrade(PuzzleGrade grade);

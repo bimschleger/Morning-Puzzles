@@ -161,8 +161,8 @@ For daily puzzle receipts, the optimal architecture is a **Hybrid ESC/POS Pipeli
 │  [ESC @] Initialize Printer                            │
 │  [ESC a 1] Center                                      │
 │  ================================================      │ <-- ESC/POS Monospace Text Header
-│               DAILY MORNING PUZZLES                    │
-│             Monday, September 14, 2026                 │
+│                  MORNING PUZZLES                       │
+│             Enjoy your morning puzzles                 │
 │  ================================================      │
 │                                                        │
 │  --- SUDOKU ---                                        │ <-- Standard Text Title (PUZZLE_HEADER_SPEC)
@@ -177,9 +177,9 @@ For daily puzzle receipts, the optimal architecture is a **Hybrid ESC/POS Pipeli
 │                                                        │
 │  ... (Additional Puzzles: STARS, SEARCH, etc.) ...     │
 │                                                        │
-│  ================================================      │ <-- Footer Text
-│  Printed on ESP32 80mm Commercial Thermal Receipt      │
-│  ================================================      │
+│  - - - - - - - - - - - - - - - - - - - - - - - - - -   │ <-- Footer Bounded by Dashed Dividers
+│                  Enjoy your day!                       │
+│  - - - - - - - - - - - - - - - - - - - - - - - - - -   │
 │  [LF x 4] Pre-Cut Feed (15-25mm)                       │
 │  [GS V 66 3] Partial Paper Cut                         │
 └────────────────────────────────────────────────────────┘

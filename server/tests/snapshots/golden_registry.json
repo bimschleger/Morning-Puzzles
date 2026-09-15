@@ -11,42 +11,42 @@
   },
   "wordsearch": {
     "title": "SEARCH",
-    "sha256": "c1366bcdafcbec28201bd4bec261f5138972a57afff36f2c5d9f08ad7e9b2af0",
+    "sha256": "751dffa0fc60d505d362d37531875190191b29db2b75f574b8029c4846cd5a36",
     "byte_length": 52136,
     "width_dots": 576,
     "height_dots": 724,
-    "average_duty_cycle_pct": 11.65,
+    "average_duty_cycle_pct": 11.52,
     "max_consecutive_dense_lines": 4,
     "is_safe": true
   },
   "nonogram": {
     "title": "NONOGRAM",
-    "sha256": "eea587b2796637d12da48e4cd448e66968a9a47b823c8a5d354dcd1866dbd6c2",
+    "sha256": "7620753696369bf4b6b8994e4a5eec3a281470e5f7e50ca2268613561d9928b7",
     "byte_length": 38600,
     "width_dots": 576,
     "height_dots": 536,
-    "average_duty_cycle_pct": 9.08,
+    "average_duty_cycle_pct": 9.36,
     "max_consecutive_dense_lines": 6,
     "is_safe": true
   },
   "queens": {
     "title": "STARS",
-    "sha256": "4205e88ce4b08237a396f5d0560843367dbffda6231a4d74c905656dc8c1a949",
+    "sha256": "1342e9647fa7aef08fc80654a807ad7ef6e4a43e96d0cb58dc494871baf4182f",
     "byte_length": 41480,
     "width_dots": 576,
     "height_dots": 576,
-    "average_duty_cycle_pct": 29.85,
+    "average_duty_cycle_pct": 20.88,
     "max_consecutive_dense_lines": 9,
     "is_safe": true
   },
   "jumble": {
     "title": "JUMBLE",
-    "sha256": "636dc5ffb75b20abdb7ef65eef44d137b1bda62151edbdf3fe8c6ca721d96a59",
-    "byte_length": 54008,
+    "sha256": "01736ccef53e4b92ba745f5444cfaa62c9ebcc75305f26120256c7aa2c448040",
+    "byte_length": 46088,
     "width_dots": 576,
-    "height_dots": 750,
-    "average_duty_cycle_pct": 10.77,
-    "max_consecutive_dense_lines": 6,
+    "height_dots": 640,
+    "average_duty_cycle_pct": 10.65,
+    "max_consecutive_dense_lines": 4,
     "is_safe": true
   },
   "binary": {
@@ -61,21 +61,21 @@
   },
   "mines": {
     "title": "MINES",
-    "sha256": "3034c4478861e0bbc4d68dd09d6073e9658f9735aae224b12f5102493b9bde69",
+    "sha256": "781591abdb666161824704c550a80e101aeacf87bcaa2d058e04a4004607e86d",
     "byte_length": 43208,
     "width_dots": 576,
     "height_dots": 600,
-    "average_duty_cycle_pct": 8.88,
+    "average_duty_cycle_pct": 6.66,
     "max_consecutive_dense_lines": 4,
     "is_safe": true
   },
   "tents": {
     "title": "TENTS",
-    "sha256": "dd59034dd44eb58b34875ef8331a8a2434fe5ef6c52f81c0be4a4d46aab9e6e1",
-    "byte_length": 41048,
+    "sha256": "393b6ccbf2b8d2ecfe45ed7cfa444c52a8ea6fac968145364f601e1bddd5a05e",
+    "byte_length": 41480,
     "width_dots": 576,
-    "height_dots": 570,
-    "average_duty_cycle_pct": 8.16,
+    "height_dots": 576,
+    "average_duty_cycle_pct": 4.84,
     "max_consecutive_dense_lines": 4,
     "is_safe": true
   },
@@ -101,11 +101,11 @@
   },
   "cryptogram": {
     "title": "CRYPTOGRAM",
-    "sha256": "ce80b85a858ab2f35135a11567289629b8f801e6a6ce6de5a7fef3ac857f54f7",
+    "sha256": "14e9c8020051b02a2360831ad9d668d767f3d36f3f3642234b8c27fc9238cf11",
     "byte_length": 36296,
     "width_dots": 576,
     "height_dots": 504,
-    "average_duty_cycle_pct": 1.97,
+    "average_duty_cycle_pct": 1.98,
     "max_consecutive_dense_lines": 1,
     "is_safe": true
   },
@@ -131,11 +131,31 @@
   },
   "wheel": {
     "title": "WHEEL",
-    "sha256": "f74a315dafa92e04648c90565250d6df6cf07ac09d8b0874856c54f23bcbcd85",
+    "sha256": "259aafd1f29f39435a86ada47733c88ad65ea3ed23c9387d3078bf888db4aaf1",
     "byte_length": 26504,
     "width_dots": 576,
     "height_dots": 368,
-    "average_duty_cycle_pct": 3.09,
+    "average_duty_cycle_pct": 4.17,
+    "max_consecutive_dense_lines": 1,
+    "is_safe": true
+  },
+  "lights": {
+    "title": "LIGHTS",
+    "sha256": "469581f7357d66f506777de46be4ad0d068614d67c78fbd8cb7f45784923bf78",
+    "byte_length": 41480,
+    "width_dots": 576,
+    "height_dots": 576,
+    "average_duty_cycle_pct": 7.27,
+    "max_consecutive_dense_lines": 4,
+    "is_safe": true
+  },
+  "loop": {
+    "title": "LOOP",
+    "sha256": "424c16437001d272e6f96ccc2da43ec54771fd38753c5f4b72df7cef13aa22ba",
+    "byte_length": 27080,
+    "width_dots": 576,
+    "height_dots": 376,
+    "average_duty_cycle_pct": 1.94,
     "max_consecutive_dense_lines": 0,
     "is_safe": true
   }

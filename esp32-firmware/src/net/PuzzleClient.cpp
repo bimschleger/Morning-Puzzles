@@ -104,9 +104,8 @@ bool PuzzleClient::parseAndPrintJson(HTTPClient& http, EscPosPrinter& printer) {
     printer.init();
     
     // Header
-    const char* date = doc["date"] | "Daily Edition";
     const char* title = doc["title"] | "MORNING PUZZLES";
-    printer.printHeader(title, date);
+    printer.printHeader(title, "Enjoy your morning puzzles");
     printer.println("");
 
     // 1. Sudoku Section
@@ -182,11 +181,11 @@ bool PuzzleClient::parseAndPrintJson(HTTPClient& http, EscPosPrinter& printer) {
     }
 
     // Footer
-    printer.printDoubleLine();
+    printer.printHorizontalLine('-');
     printer.setAlign(ALIGN_CENTER);
-    printer.println("Have a great morning!");
-    printer.println("morningpuzzles.local");
-    printer.feed(3);
+    printer.println("Enjoy your day!");
+    printer.printHorizontalLine('-');
+    printer.feed(4);
     printer.cut(false);
     printer.disconnect();
 

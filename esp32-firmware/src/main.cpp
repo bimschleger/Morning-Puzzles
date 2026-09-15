@@ -44,7 +44,7 @@ void executePrintJob(PuzzleGrade grade = GRADE_RANDOM) {
     // 100% Offline on-device generation across OFFLINE_PUZZLE_COUNT randomly selected puzzles
     bool success = offlineComposer.generateAndPrintReceipt(
         printer, 
-        timeManager.getFormattedTime("%A, %B %d, %Y"),
+        "Enjoy your morning puzzles",
         grade
     );
 

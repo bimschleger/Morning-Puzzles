@@ -6695,11 +6695,6 @@
       const COLS = 48;
 
       // Header
-      const today = new Date();
-      const dateStr = today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
-      const timeStr = today.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-
-
       const activeCount = ALL_GAMES.filter(g => {
         const cb = document.getElementById(`toggle-${g}`);
         return cb && cb.checked;
@@ -6712,9 +6707,11 @@
       items.push({ type: 'center', text: '||| | ||||| || |||||| | |||| ||| ||||| ||' });
       items.push({ type: 'rule-double', text: '='.repeat(COLS) });
       items.push({ type: 'title', text: centerLine('MORNING PUZZLES', COLS) });
-      items.push({ type: 'subtitle', text: centerLine(subtitleText, COLS) });
-      items.push({ type: 'text', text: centerLine(dateStr + ' - ' + timeStr, COLS) });
+      items.push({ type: 'text', text: centerLine('Enjoy your morning puzzles', COLS) });
       items.push({ type: 'rule-double', text: '='.repeat(COLS) });
+      if (subtitleText) {
+        items.push({ type: 'subtitle', text: centerLine(subtitleText, COLS) });
+      }
       items.push({ type: 'blank', text: '' });
 
       const globalStyle = (document.getElementById('global-render-style') ? document.getElementById('global-render-style').value : 'graphic');
@@ -7654,11 +7651,12 @@
       }
 
       // Footer
-      items.push({ type: 'rule-double', text: '='.repeat(COLS) });
-      items.push({ type: 'center', text: centerLine('Good luck & have a great morning!', COLS) });
-      items.push({ type: 'center', text: centerLine('morningpuzzles.local - 80mm POS Receipt', COLS) });
+      if (items.length > 0 && items[items.length - 1].type !== 'rule') {
+        items.push({ type: 'rule', text: '-'.repeat(COLS) });
+      }
+      items.push({ type: 'center', text: centerLine('Enjoy your day!', COLS) });
+      items.push({ type: 'rule', text: '-'.repeat(COLS) });
       items.push({ type: 'center', text: centerLine('*** PAPER CUT ***', COLS) });
-      items.push({ type: 'rule-double', text: '='.repeat(COLS) });
 
       // Render to DOM
       rawReceiptLines = items.filter(i => i.text).map(i => i.text);
