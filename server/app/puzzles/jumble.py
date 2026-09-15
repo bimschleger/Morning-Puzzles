@@ -162,34 +162,43 @@ class JumblePuzzle(BasePuzzle):
     ) -> bytes:
         padding = 24
         inner_width = target_width - padding * 2
+        clue_size = 66
+        word_gap = 12
 
         words_data = puzzle_data.get("words", [])
         scrambled = puzzle_data.get("scrambled", words_data)
         circles = puzzle_data.get("circles", [])
-
-        clue_h = 36
-        cell_h = 48
-        word_gap = 12
         count = min(4, len(scrambled))
 
         riddle = puzzle_data.get("riddle") or puzzle_data.get("clue", "")
         answer = puzzle_data.get("answer", "")
 
-        # Tokenize riddle into wrapped lines (~36 chars)
+        # Tokenize riddle into wrapped lines (~28 chars)
         riddle_str = f'"{riddle}"'
-        riddle_lines = textwrap.wrap(riddle_str, width=36)
+        riddle_lines = textwrap.wrap(riddle_str, width=28)
         if not riddle_lines:
             riddle_lines = [riddle_str]
 
         # Tokenize answer words
-        ans_box = 34
-        word_spacing = 14
+        ans_h = 66
+        word_spacing = 16
+        line_gap = 12
+
+        def get_word_box_w(w: str) -> int:
+            num_letters = sum(1 for ch in w if "A" <= ch <= "Z")
+            if num_letters == 0:
+                return 66
+            punct_w = sum(12 if ch in ('"', "'") else (14 if ch == "-" else 0) for ch in w)
+            if num_letters * 66 + punct_w > inner_width:
+                return (inner_width - punct_w) // num_letters
+            return 66
 
         def measure_word_w(w: str) -> int:
+            box_w = get_word_box_w(w)
             w_w = 0
             for ch in w:
                 if "A" <= ch <= "Z":
-                    w_w += ans_box
+                    w_w += box_w
                 elif ch in ('"', "'"):
                     w_w += 12
                 elif ch == "-":
@@ -218,72 +227,62 @@ class JumblePuzzle(BasePuzzle):
         # Calculate exact total height
         total_h = (
             12
-            + count * (clue_h + cell_h + word_gap)
-            + 20  # divider gap
-            + 20 + len(riddle_lines) * 20 + 6  # riddle
-            + 20 + 2 * 24 + 4  # scratchpad
-            + 22 + len(ans_lines) * (ans_box + 12) + 16  # answer
+            + count * (132 + word_gap)
+            + 16  # divider gap
+            + 20 + len(riddle_lines) * 28 + 6  # riddle (scale=3)
+            + 20 + 192  # scratchpad (header + 192-dot blank writing area)
+            + 22 + len(ans_lines) * (ans_h + line_gap) + 4  # answer
         )
         total_h = ((total_h + 7) // 8) * 8  # align to 8 dots
 
         tb = ThermalBitmap(target_width, total_h)
         cur_y = 12
 
-        # 1. Scrambled word clue boxes & answer row
+        # 1. Scrambled word clue boxes & answer row (connected 2-row grid, left-aligned)
         for i in range(count):
             item = scrambled[i]
             scram_text = item.get("scrambled", "") if isinstance(item, dict) else str(item)
             circ = item.get("circle_indices", item.get("circles", [])) if isinstance(item, dict) else (circles[i] if i < len(circles) else [])
             length = max(1, len(scram_text))
+            block_w = length * clue_size
 
-            col_pos = [padding + int(round(c * inner_width / float(length))) for c in range(length + 1)]
+            # Outer frame and middle horizontal divider
+            tb.draw_rect(padding, cur_y, block_w, 132, thickness=2)
+            tb.draw_hline(padding, cur_y + 66, block_w, thickness=2)
 
-            # Clue box
-            tb.draw_rect(padding, cur_y, inner_width, clue_h, thickness=2)
+            # Vertical dividers between columns
+            for c in range(1, length):
+                tb.draw_vline(padding + c * clue_size, cur_y, 132, thickness=1)
+
+            # Scrambled letters and circles
             for c in range(length):
-                cx0 = col_pos[c]
-                cx1 = col_pos[c + 1]
-                col_w = cx1 - cx0
-                if c > 0:
-                    tb.draw_vline(cx0, cur_y, clue_h, thickness=1)
-                char_x = cx0 + (col_w - 18) // 2
-                char_y = cur_y + (clue_h - 21) // 2
+                cx0 = padding + c * clue_size
+                char_x = cx0 + (clue_size - 18) // 2
+                char_y = cur_y + (clue_size - 21) // 2
                 tb.draw_char(char_x, char_y, scram_text[c], scale=3)
 
-            # Answer row directly below
-            ans_y = cur_y + clue_h
-            for c in range(length):
-                cx0 = col_pos[c]
-                cx1 = col_pos[c + 1]
-                col_w = cx1 - cx0
-                tb.draw_rect(cx0, ans_y, col_w, cell_h, thickness=2)
                 if c in circ:
-                    r = cell_h // 2 - 4
-                    tb.draw_circle(cx0 + col_w // 2, ans_y + cell_h // 2, r, thickness=2)
+                    tb.draw_circle(cx0 + 33, cur_y + 66 + 33, 26, thickness=2)
 
-            cur_y = ans_y + cell_h + word_gap
+            cur_y += 132 + word_gap
 
         # 2. Dashed tear divider
         tb.draw_dashed_hline(padding, cur_y + 2, inner_width, dash_len=6, gap_len=6, thickness=2)
         cur_y += 16
 
-        # 3. Riddle Question
+        # 3. Riddle Question (scale=3 for quote text)
         tb.draw_text(padding, cur_y, "RIDDLE QUESTION:", scale=2)
         cur_y += 20
         for r_line in riddle_lines:
-            tb.draw_text(padding + 8, cur_y, r_line, scale=2)
-            cur_y += 20
+            tb.draw_text(padding + 4, cur_y, r_line, scale=3)
+            cur_y += 28
         cur_y += 6
 
-        # 4. Scratchpad
+        # 4. Scratchpad (192-dot blank writing area without dashed lines)
         tb.draw_text(padding, cur_y, "SCRATCHPAD:", scale=2)
-        cur_y += 20
-        for _ in range(2):
-            tb.draw_dashed_hline(padding, cur_y, inner_width, dash_len=6, gap_len=6, thickness=1)
-            cur_y += 24
-        cur_y += 4
+        cur_y += 20 + 192
 
-        # 5. Answer layout with segmented letter circles
+        # 5. Answer layout with unified word frames and thin 1px inner dividers
         tb.draw_text(padding, cur_y, "ANSWER:", scale=2)
         cur_y += 22
 
@@ -293,19 +292,32 @@ class JumblePuzzle(BasePuzzle):
             ax = start_x
 
             for w in line_words:
-                for ch in w:
+                box_w = get_word_box_w(w)
+                c = 0
+                while c < len(w):
+                    ch = w[c]
                     if "A" <= ch <= "Z":
-                        tb.draw_rect(ax, cur_y, ans_box, ans_box, thickness=2)
-                        tb.draw_circle(ax + ans_box // 2, cur_y + ans_box // 2, ans_box // 2 - 3, thickness=2)
-                        ax += ans_box
+                        start = c
+                        while c < len(w) and "A" <= w[c] <= "Z":
+                            c += 1
+                        k = c - start
+                        seg_w = k * box_w
+                        tb.draw_rect(ax, cur_y, seg_w, ans_h, thickness=2)
+                        for i in range(1, k):
+                            tb.draw_vline(ax + i * box_w, cur_y, ans_h, thickness=1)
+                        ax += seg_w
                     elif ch in ('"', "'"):
-                        tb.draw_char(ax + 2, cur_y + (ans_box - 14) // 2, ch, scale=2)
+                        tb.draw_char(ax + 2, cur_y + (ans_h - 14) // 2, ch, scale=2)
                         ax += 12
+                        c += 1
                     elif ch == "-":
-                        tb.draw_char(ax + 3, cur_y + (ans_box - 14) // 2, "-", scale=2)
+                        tb.draw_char(ax + 3, cur_y + (ans_h - 14) // 2, "-", scale=2)
                         ax += 14
+                        c += 1
+                    else:
+                        c += 1
                 ax += word_spacing
-            cur_y += ans_box + 12
+            cur_y += ans_h + line_gap
 
         return tb.to_escpos()
 

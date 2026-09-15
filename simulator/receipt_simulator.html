@@ -5913,20 +5913,37 @@
     function renderOfflineJumble(canvas, jData) {
       const padding = 24;
       const innerWidth = 576 - padding * 2; // 528
-      const clueH = 36;
-      const cellH = 48;
+      const clueSize = 66;
       const wordGap = 12;
       const count = Math.min(4, (jData.words && jData.words.length) ? jData.words.length : 0);
 
       // Tokenize answer words
-      const ansBox = 34;
-      const wordSpacing = 14;
+      const ansH = 66;
+      const wordSpacing = 16;
+      const lineGap = 12;
+
+      function getWordBoxW(w) {
+        let numLetters = 0;
+        let punctW = 0;
+        for (let c = 0; c < w.length; c++) {
+          const ch = w[c];
+          if (ch >= 'A' && ch <= 'Z') numLetters++;
+          else if (ch === '"' || ch === "'") punctW += 12;
+          else if (ch === '-') punctW += 14;
+        }
+        if (numLetters === 0) return 66;
+        if (numLetters * 66 + punctW > innerWidth) {
+          return Math.floor((innerWidth - punctW) / numLetters);
+        }
+        return 66;
+      }
 
       function measureWordW(w) {
+        const boxW = getWordBoxW(w);
         let wW = 0;
         for (let c = 0; c < w.length; c++) {
           const ch = w[c];
-          if (ch >= 'A' && ch <= 'Z') wW += ansBox;
+          if (ch >= 'A' && ch <= 'Z') wW += boxW;
           else if (ch === '"' || ch === "'") wW += 12;
           else if (ch === '-') wW += 14;
         }
@@ -5951,12 +5968,12 @@
       }
       if (curLine.length > 0) ansLines.push(curLine);
 
-      // Tokenize riddle into wrapped lines (~36 chars)
+      // Tokenize riddle into wrapped lines (~28 chars)
       const riddleStr = `"${jData.riddle || ''}"`;
       const riddleLines = [];
       let rStart = 0;
       while (rStart < riddleStr.length) {
-        let rEnd = rStart + 36;
+        let rEnd = rStart + 28;
         if (rEnd >= riddleStr.length) {
           rEnd = riddleStr.length;
         } else {
@@ -5976,78 +5993,67 @@
 
       let totalH = (
         12
-        + count * (clueH + cellH + wordGap)
-        + 20
-        + 20 + riddleLines.length * 20 + 6
-        + 20 + 2 * 24 + 4
-        + 22 + ansLines.length * (ansBox + 12) + 16
+        + count * (132 + wordGap)
+        + 16
+        + 20 + riddleLines.length * 28 + 6
+        + 20 + 192
+        + 22 + ansLines.length * (ansH + lineGap) + 4
       );
       totalH = Math.floor((totalH + 7) / 8) * 8;
 
       const tc = new ThermalCanvasSimulator(576, totalH);
       let curY = 12;
 
-      // 1. Scrambled words and answer boxes
+      // 1. Scrambled words and answer boxes (connected 2-row grid, left-aligned)
       for (let i = 0; i < count; i++) {
         const scram = (jData.scrambled && jData.scrambled[i]) ? jData.scrambled[i] : '';
         const circ = (jData.circles && jData.circles[i]) || [];
         const len = scram.length;
         if (len <= 0) continue;
+        const blockW = len * clueSize;
 
-        // Draw clue box for scrambled word
-        tc.drawRect(padding, curY, innerWidth, clueH, 2);
-        for (let c = 0; c < len; c++) {
-          const cx0 = padding + Math.floor((c * innerWidth) / len);
-          const cx1 = padding + Math.floor(((c + 1) * innerWidth) / len);
-          const colW = cx1 - cx0;
-          if (c > 0) {
-            tc.drawVLine(cx0, curY, clueH, 1);
-          }
-          const charX = cx0 + Math.floor((colW - 18) / 2);
-          const charY = curY + Math.floor((clueH - 21) / 2);
-          tc.drawChar(charX, charY, scram[c], 3);
+        // Outer frame and middle horizontal divider
+        tc.drawRect(padding, curY, blockW, 132, 2);
+        tc.drawHLine(padding, curY + 66, blockW, 2);
+
+        // Vertical dividers between columns
+        for (let c = 1; c < len; c++) {
+          tc.drawVLine(padding + c * clueSize, curY, 132, 1);
         }
 
-        // Draw answer squares directly below
-        const ansY = curY + clueH;
+        // Scrambled letters and circles
         for (let c = 0; c < len; c++) {
-          const cx0 = padding + Math.floor((c * innerWidth) / len);
-          const cx1 = padding + Math.floor(((c + 1) * innerWidth) / len);
-          const colW = cx1 - cx0;
-          tc.drawRect(cx0, ansY, colW, cellH, 2);
+          const cx0 = padding + c * clueSize;
+          const charX = cx0 + Math.floor((clueSize - 18) / 2);
+          const charY = curY + Math.floor((clueSize - 21) / 2);
+          tc.drawChar(charX, charY, scram[c], 3);
 
           if (circ.includes(c)) {
-            const r = Math.floor(cellH / 2) - 4;
-            tc.drawCircle(cx0 + Math.floor(colW / 2), ansY + Math.floor(cellH / 2), r, 2);
+            tc.drawCircle(cx0 + 33, curY + 66 + 33, 26, 2);
           }
         }
 
-        curY = ansY + cellH + wordGap;
+        curY += 132 + wordGap;
       }
 
       // 2. Dashed tear divider
       tc.drawDashedHLine(padding, curY + 2, innerWidth, 6, 6, 2);
       curY += 16;
 
-      // 3. Riddle Question
+      // 3. Riddle Question (scale=3 for quote text)
       tc.drawText(padding, curY, "RIDDLE QUESTION:", 2);
       curY += 20;
       for (const rLine of riddleLines) {
-        tc.drawText(padding + 8, curY, rLine, 2);
-        curY += 20;
+        tc.drawText(padding + 4, curY, rLine, 3);
+        curY += 28;
       }
       curY += 6;
 
-      // 4. Scratchpad
+      // 4. Scratchpad (192-dot blank writing area without dashed lines)
       tc.drawText(padding, curY, "SCRATCHPAD:", 2);
-      curY += 20;
-      for (let s = 0; s < 2; s++) {
-        tc.drawDashedHLine(padding, curY, innerWidth, 6, 6, 1);
-        curY += 24;
-      }
-      curY += 4;
+      curY += 20 + 192;
 
-      // 5. Answer layout with segmented letter circles
+      // 5. Answer layout with unified word frames and thin 1px inner dividers
       tc.drawText(padding, curY, "ANSWER:", 2);
       curY += 22;
 
@@ -6060,23 +6066,37 @@
         let ax = startX;
 
         for (const w of lineWords) {
-          for (let c = 0; c < w.length; c++) {
+          const boxW = getWordBoxW(w);
+          let c = 0;
+          while (c < w.length) {
             const ch = w[c];
             if (ch >= 'A' && ch <= 'Z') {
-              tc.drawRect(ax, curY, ansBox, ansBox, 2);
-              tc.drawCircle(ax + Math.floor(ansBox / 2), curY + Math.floor(ansBox / 2), Math.floor(ansBox / 2) - 3, 2);
-              ax += ansBox;
+              const start = c;
+              while (c < w.length && w[c] >= 'A' && w[c] <= 'Z') {
+                c++;
+              }
+              const k = c - start;
+              const segW = k * boxW;
+              tc.drawRect(ax, curY, segW, ansH, 2);
+              for (let i = 1; i < k; i++) {
+                tc.drawVLine(ax + i * boxW, curY, ansH, 1);
+              }
+              ax += segW;
             } else if (ch === '"' || ch === "'") {
-              tc.drawChar(ax + 2, curY + Math.floor((ansBox - 14) / 2), ch, 2);
+              tc.drawChar(ax + 2, curY + Math.floor((ansH - 14) / 2), ch, 2);
               ax += 12;
+              c++;
             } else if (ch === '-') {
-              tc.drawChar(ax + 3, curY + Math.floor((ansBox - 14) / 2), '-', 2);
+              tc.drawChar(ax + 3, curY + Math.floor((ansH - 14) / 2), '-', 2);
               ax += 14;
+              c++;
+            } else {
+              c++;
             }
           }
           ax += wordSpacing;
         }
-        curY += ansBox + 12;
+        curY += ansH + lineGap;
       }
 
       tc.renderToCanvas(canvas);
