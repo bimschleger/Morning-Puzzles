@@ -1,4 +1,5 @@
 #include "QueensGen.h"
+#include "StarsDataset.h"
 #include "../printer/EscPosPrinter.h"
 #include "../printer/ThermalCanvas.h"
 #include <queue>
@@ -245,25 +246,121 @@ void QueensGen::growRegions() {
     }
 }
 
-void QueensGen::generate(QueensDifficulty difficulty) {
+void QueensGen::applyTransform(uint8_t transform) {
+    uint8_t rot = transform % 4;
+    bool flip = (transform >= 4);
+
+    for (uint8_t r = 0; r < rot; r++) {
+        int8_t temp[MAX_SIZE][MAX_SIZE];
+        for (uint8_t i = 0; i < _size; i++) {
+            for (uint8_t j = 0; j < _size; j++) {
+                temp[j][_size - 1 - i] = _regions[i][j];
+            }
+        }
+        for (uint8_t i = 0; i < _size; i++) {
+            for (uint8_t j = 0; j < _size; j++) {
+                _regions[i][j] = temp[i][j];
+            }
+        }
+        for (auto& s : _stars) {
+            uint8_t oldR = s.row;
+            uint8_t oldC = s.col;
+            s.row = oldC;
+            s.col = _size - 1 - oldR;
+        }
+    }
+
+    if (flip) {
+        int8_t temp[MAX_SIZE][MAX_SIZE];
+        for (uint8_t i = 0; i < _size; i++) {
+            for (uint8_t j = 0; j < _size; j++) {
+                temp[i][_size - 1 - j] = _regions[i][j];
+            }
+        }
+        for (uint8_t i = 0; i < _size; i++) {
+            for (uint8_t j = 0; j < _size; j++) {
+                _regions[i][j] = temp[i][j];
+            }
+        }
+        for (auto& s : _stars) {
+            s.col = _size - 1 - s.col;
+        }
+    }
+}
+
+void QueensGen::generate(QueensDifficulty difficulty, uint32_t seed) {
+    if (seed == 0) {
+        seed = (uint32_t)random(800);
+    }
+    uint16_t puzzleIdx = (seed / 8) % 100;
+    uint8_t transform = seed % 8;
+
+    _stars.clear();
+
     if (difficulty == QUEENS_EASY) {
         _size = 5;
         _starsPerUnit = 1;
+        for (uint8_t r = 0; r < _size; r++) {
+            for (uint8_t c = 0; c < _size; c++) {
+                _regions[r][c] = (int8_t)pgm_read_byte(&STARS_EASY_REGIONS[puzzleIdx][r * _size + c]);
+            }
+        }
+        for (uint8_t i = 0; i < _size * _starsPerUnit; i++) {
+            StarPos s;
+            s.row = pgm_read_byte(&STARS_EASY_SOLUTIONS[puzzleIdx][i].row);
+            s.col = pgm_read_byte(&STARS_EASY_SOLUTIONS[puzzleIdx][i].col);
+            _stars.push_back(s);
+        }
     } else if (difficulty == QUEENS_HARD) {
         _size = 9;
         _starsPerUnit = 2;
+        for (uint8_t r = 0; r < _size; r++) {
+            for (uint8_t c = 0; c < _size; c++) {
+                _regions[r][c] = (int8_t)pgm_read_byte(&STARS_HARD_REGIONS[puzzleIdx][r * _size + c]);
+            }
+        }
+        for (uint8_t i = 0; i < _size * _starsPerUnit; i++) {
+            StarPos s;
+            s.row = pgm_read_byte(&STARS_HARD_SOLUTIONS[puzzleIdx][i].row);
+            s.col = pgm_read_byte(&STARS_HARD_SOLUTIONS[puzzleIdx][i].col);
+            _stars.push_back(s);
+        }
     } else if (difficulty == QUEENS_MASTER) {
         _size = 10;
         _starsPerUnit = 2;
-    } else {
+        for (uint8_t r = 0; r < _size; r++) {
+            for (uint8_t c = 0; c < _size; c++) {
+                _regions[r][c] = (int8_t)pgm_read_byte(&STARS_EXTREME_REGIONS[puzzleIdx][r * _size + c]);
+            }
+        }
+        for (uint8_t i = 0; i < _size * _starsPerUnit; i++) {
+            StarPos s;
+            s.row = pgm_read_byte(&STARS_EXTREME_SOLUTIONS[puzzleIdx][i].row);
+            s.col = pgm_read_byte(&STARS_EXTREME_SOLUTIONS[puzzleIdx][i].col);
+            _stars.push_back(s);
+        }
+    } else { // QUEENS_MEDIUM
         _size = 8;
         _starsPerUnit = 1;
+        for (uint8_t r = 0; r < _size; r++) {
+            for (uint8_t c = 0; c < _size; c++) {
+                _regions[r][c] = (int8_t)pgm_read_byte(&STARS_MEDIUM_REGIONS[puzzleIdx][r * _size + c]);
+            }
+        }
+        for (uint8_t i = 0; i < _size * _starsPerUnit; i++) {
+            StarPos s;
+            s.row = pgm_read_byte(&STARS_MEDIUM_SOLUTIONS[puzzleIdx][i].row);
+            s.col = pgm_read_byte(&STARS_MEDIUM_SOLUTIONS[puzzleIdx][i].col);
+            _stars.push_back(s);
+        }
     }
 
-    // Validation retry loop:
-    // Generate star placements and territory shapes, then immediately run validate().
-    // If validation passes (exact stars in each row, col, shape, 4-connected), return.
-    // If validation fails, regenerate and continue in the loop.
+    applyTransform(transform);
+    if (validate()) {
+        return; // Successfully loaded and transformed from curated dataset!
+    }
+
+    // Fallback procedural validation retry loop if needed
     for (int attempts = 0; attempts < 50; attempts++) {
         _stars.clear();
         uint8_t colCounts[MAX_SIZE] = {0};

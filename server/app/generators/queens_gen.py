@@ -14,9 +14,26 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import json
+import os
 import random
 from collections import deque
 from typing import List, Tuple, Dict, Any, Optional, Set
+
+DATA_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "data", "stars_dataset.json")
+_STARS_DATASET: Optional[Dict[str, List[Dict[str, Any]]]] = None
+
+
+def _get_stars_dataset() -> Optional[Dict[str, List[Dict[str, Any]]]]:
+    global _STARS_DATASET
+    if _STARS_DATASET is None and os.path.exists(DATA_PATH):
+        try:
+            with open(DATA_PATH, "r") as f:
+                _STARS_DATASET = json.load(f)
+        except Exception:
+            _STARS_DATASET = None
+    return _STARS_DATASET
+
 
 class QueensGenerator:
     """
@@ -35,6 +52,7 @@ class QueensGenerator:
     }
 
     def __init__(self, seed: Optional[int] = None):
+        self.seed = seed
         if seed is not None:
             random.seed(seed)
 
@@ -43,6 +61,52 @@ class QueensGenerator:
         cfg = self.DIFFICULTY_CONFIGS.get(difficulty, self.DIFFICULTY_CONFIGS["medium"])
         n = cfg["size"]
         k_stars = cfg["stars"]
+
+        dataset = _get_stars_dataset()
+        tier_key = "extreme" if difficulty == "master" else difficulty
+        if dataset and tier_key in dataset and dataset[tier_key]:
+            puzzles = dataset[tier_key]
+            if self.seed is not None:
+                idx = (self.seed // 8) % len(puzzles)
+                transform = self.seed % 8
+            else:
+                idx = random.randint(0, len(puzzles) - 1)
+                transform = random.randint(0, 7)
+
+            p = puzzles[idx]
+            base_regions = p["regions"]
+            base_stars = [tuple(s) for s in p["solution"]]
+
+            # Apply transform
+            rot = transform % 4
+            flip = (transform >= 4)
+            cur_reg = [row[:] for row in base_regions]
+            cur_stars = list(base_stars)
+            for _ in range(rot):
+                new_reg = [[0] * n for _ in range(n)]
+                for r in range(n):
+                    for c in range(n):
+                        new_reg[c][n - 1 - r] = cur_reg[r][c]
+                cur_reg = new_reg
+                cur_stars = [(c, n - 1 - r) for (r, c) in cur_stars]
+            if flip:
+                new_reg = [[0] * n for _ in range(n)]
+                for r in range(n):
+                    for c in range(n):
+                        new_reg[r][n - 1 - c] = cur_reg[r][c]
+                cur_reg = new_reg
+                cur_stars = [(r, n - 1 - c) for (r, c) in cur_stars]
+
+            return {
+                "type": "queens",
+                "style": f"{k_stars}-Star / Queens",
+                "difficulty": difficulty,
+                "grid_size": n,
+                "stars_per_unit": k_stars,
+                "regions": cur_reg,
+                "stars_solution": sorted(cur_stars),
+                "text": self.format_text(cur_reg, cur_stars, n)
+            }
 
         for _ in range(50):
             # 1. Place valid non-touching star positions on the N x N board

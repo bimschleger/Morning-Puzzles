@@ -4,6 +4,8 @@ Encapsulates generation, canonical instruction formatting, ASCII layout,
 solution key formatting, and 576-dot dithered thermal raster rendering.
 """
 
+import json
+import os
 import random
 import textwrap
 from collections import deque
@@ -19,6 +21,20 @@ from ..renderer.canvas import (
 
 if HAS_PILLOW:
     from PIL import Image, ImageDraw
+
+DATA_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "data", "stars_dataset.json")
+_STARS_DATASET: Optional[Dict[str, List[Dict[str, Any]]]] = None
+
+
+def _get_stars_dataset() -> Optional[Dict[str, List[Dict[str, Any]]]]:
+    global _STARS_DATASET
+    if _STARS_DATASET is None and os.path.exists(DATA_PATH):
+        try:
+            with open(DATA_PATH, "r") as f:
+                _STARS_DATASET = json.load(f)
+        except Exception:
+            _STARS_DATASET = None
+    return _STARS_DATASET
 
 
 class StarsPuzzle(BasePuzzle):
@@ -49,6 +65,36 @@ class StarsPuzzle(BasePuzzle):
     def supported_difficulties(self) -> List[str]:
         return ["easy", "medium", "hard", "master", "extreme"]
 
+    @staticmethod
+    def _transform_board(
+        regions: List[List[int]],
+        stars: List[Tuple[int, int]],
+        n: int,
+        t: int,
+    ) -> Tuple[List[List[int]], List[Tuple[int, int]]]:
+        rot = t % 4
+        flip = (t >= 4)
+        cur_reg = [row[:] for row in regions]
+        cur_stars = list(stars)
+
+        for _ in range(rot):
+            new_reg = [[0] * n for _ in range(n)]
+            for r in range(n):
+                for c in range(n):
+                    new_reg[c][n - 1 - r] = cur_reg[r][c]
+            cur_reg = new_reg
+            cur_stars = [(c, n - 1 - r) for (r, c) in cur_stars]
+
+        if flip:
+            new_reg = [[0] * n for _ in range(n)]
+            for r in range(n):
+                for c in range(n):
+                    new_reg[r][n - 1 - c] = cur_reg[r][c]
+            cur_reg = new_reg
+            cur_stars = [(r, n - 1 - c) for (r, c) in cur_stars]
+
+        return cur_reg, sorted(cur_stars)
+
     def generate(
         self,
         difficulty: str = "medium",
@@ -63,6 +109,46 @@ class StarsPuzzle(BasePuzzle):
         n = cfg["size"]
         k_stars = cfg["stars"]
 
+        # 1. Try loading from curated verified dataset
+        dataset = _get_stars_dataset()
+        tier_key = difficulty
+        if dataset and tier_key in dataset and dataset[tier_key]:
+            puzzles = dataset[tier_key]
+            if seed is not None:
+                idx = (seed // 8) % len(puzzles)
+                transform = seed % 8
+            else:
+                idx = random.randint(0, len(puzzles) - 1)
+                transform = random.randint(0, 7)
+
+            p = puzzles[idx]
+            base_regions = p["regions"]
+            base_stars = [tuple(s) for s in p["solution"]]
+            regions, stars = self._transform_board(base_regions, base_stars, n, transform)
+
+            ascii_text = self.format_ascii_puzzle({"regions": regions, "stars_solution": list(stars), "grid_size": n})
+            instruction = self.get_instruction({"difficulty": difficulty, "stars_per_unit": k_stars})
+
+            raw_data = {
+                "type": "queens",
+                "style": f"{k_stars}-Star / Queens",
+                "difficulty": difficulty,
+                "grid_size": n,
+                "stars_per_unit": k_stars,
+                "regions": regions,
+                "stars_solution": list(stars),
+                "text": ascii_text,
+            }
+
+            return BasePuzzleResult(
+                puzzle_type=self.puzzle_id,
+                title=self.title,
+                difficulty=difficulty,
+                instruction=instruction,
+                raw_data=raw_data,
+            )
+
+        # 2. Fallback procedural generation if dataset unavailable
         for _ in range(50):
             stars = self._place_stars(n, k_stars)
             if not stars:

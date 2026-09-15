@@ -23,7 +23,7 @@ public:
 
     QueensGen();
 
-    void generate(QueensDifficulty difficulty = QUEENS_MEDIUM);
+    void generate(QueensDifficulty difficulty = QUEENS_MEDIUM, uint32_t seed = 0);
     void printToReceipt(EscPosPrinter& printer);
     bool printRasterToReceipt(EscPosPrinter& printer);
 
@@ -39,6 +39,7 @@ private:
     int8_t _regions[MAX_SIZE][MAX_SIZE];
     std::vector<StarPos> _stars;
 
+    void applyTransform(uint8_t transform);
     bool placeStarsBacktrack(uint8_t row, uint8_t starsPlacedInRow, uint8_t* colCounts);
     bool canPlaceStar(uint8_t r, uint8_t c, uint8_t* colCounts);
     void growRegions();
