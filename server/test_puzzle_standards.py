@@ -362,6 +362,72 @@ def test_plugin_contract_compliance():
     print(f"  -> Passed! All {len(plugins)} plugins strictly comply with BasePuzzle contracts and standards.\n")
 
 
+def test_master_receipt_header_and_footer():
+    print("Test 7: Verifying Master Receipt Header & Footer Offline Standards across Targets...")
+    base_dir = os.path.join(os.path.dirname(__file__), "..")
+
+    # 1. Python DailyReceiptComposer output
+    bundle = generate_daily_bundle(difficulty="medium")
+    receipt_bytes = build_daily_receipt_bytes(bundle)
+    receipt_text = receipt_bytes.decode("latin-1")
+    assert "MORNING PUZZLES" in receipt_text, "Python receipt missing MORNING PUZZLES header"
+    assert "Enjoy your morning puzzles" in receipt_text, "Python receipt missing offline header tagline"
+    assert "Enjoy your day!" in receipt_text, "Python receipt missing 'Enjoy your day!' footer"
+    assert "diagnostics" not in receipt_text.lower(), "Python receipt contains forbidden diagnostics"
+
+    # 2. ESP32 Firmware OfflinePuzzleComposer.cpp
+    fw_composer = os.path.join(base_dir, "esp32-firmware", "src", "generators", "OfflinePuzzleComposer.cpp")
+    with open(fw_composer, "r") as f:
+        fw_src = f.read()
+    assert '"MORNING PUZZLES"' in fw_src, "Firmware missing MORNING PUZZLES"
+    assert '"Enjoy your morning puzzles"' in fw_src, "Firmware missing 'Enjoy your morning puzzles'"
+    assert '"Enjoy your day!"' in fw_src, "Firmware missing 'Enjoy your day!'"
+    assert "diagnostics" not in fw_src.lower(), "Firmware composer contains diagnostics"
+
+    # 3. Arduino IDE Sketch OfflinePuzzleComposer.cpp
+    ino_composer = os.path.join(base_dir, "MorningPuzzles", "OfflinePuzzleComposer.cpp")
+    with open(ino_composer, "r") as f:
+        ino_src = f.read()
+    assert '"MORNING PUZZLES"' in ino_src, "Arduino sketch missing MORNING PUZZLES"
+    assert '"Enjoy your morning puzzles"' in ino_src, "Arduino sketch missing 'Enjoy your morning puzzles'"
+    assert '"Enjoy your day!"' in ino_src, "Arduino sketch missing 'Enjoy your day!'"
+
+    # 4. Web Simulator receipt_simulator.html
+    sim_path = os.path.join(base_dir, "simulator", "receipt_simulator.html")
+    with open(sim_path, "r") as f:
+        sim_src = f.read()
+    assert "'MORNING PUZZLES'" in sim_src or '"MORNING PUZZLES"' in sim_src, "Simulator missing MORNING PUZZLES"
+    assert "Enjoy your morning puzzles" in sim_src, "Simulator missing 'Enjoy your morning puzzles'"
+    assert "Enjoy your day!" in sim_src, "Simulator missing 'Enjoy your day!'"
+
+    print("  -> Passed! Master receipt header and footer strictly adhere to offline standards across all 4 targets.\n")
+
+
+def test_playable_cells_cleanliness():
+    print("Test 8: Verifying Clean Playable Cells Standard (No Center Dots / Guide Marks)...")
+    base_dir = os.path.join(os.path.dirname(__file__), "..")
+
+    # In Mines, Nonogram, and Tents generators, empty/playable cells must not have center dots
+    files_to_check = [
+        os.path.join(base_dir, "esp32-firmware", "src", "generators", "MinesGen.cpp"),
+        os.path.join(base_dir, "esp32-firmware", "src", "generators", "NonogramGen.cpp"),
+        os.path.join(base_dir, "esp32-firmware", "src", "generators", "TentsGen.cpp"),
+        os.path.join(base_dir, "MorningPuzzles", "MinesGen.cpp"),
+        os.path.join(base_dir, "MorningPuzzles", "NonogramGen.cpp"),
+        os.path.join(base_dir, "MorningPuzzles", "TentsGen.cpp"),
+        os.path.join(base_dir, "server", "app", "puzzles", "mines.py"),
+        os.path.join(base_dir, "server", "app", "puzzles", "nonogram.py"),
+    ]
+
+    for fpath in files_to_check:
+        with open(fpath, "r") as f:
+            src = f.read()
+        assert "dotX" not in src, f"{os.path.basename(fpath)} still contains phantom dot rendering (dotX)"
+        assert "dotY" not in src, f"{os.path.basename(fpath)} still contains phantom dot rendering (dotY)"
+
+    print("  -> Passed! Empty playable cells remain clean across all targets with zero phantom dots.\n")
+
+
 if __name__ == "__main__":
     print("==================================================================")
     print("RUNNING MORNING PUZZLES PRESENTATION & AUTHORING STANDARDS TESTS")
@@ -373,7 +439,10 @@ if __name__ == "__main__":
     test_solution_key_spec()
     test_simulator_consistency()
     test_plugin_contract_compliance()
+    test_master_receipt_header_and_footer()
+    test_playable_cells_cleanliness()
 
     print("==================================================================")
-    print("ALL PRESENTATION & AUTHORING STANDARDS TESTS PASSED (6/6)!")
+    print("ALL PRESENTATION & AUTHORING STANDARDS TESTS PASSED (8/8)!")
     print("==================================================================")
+

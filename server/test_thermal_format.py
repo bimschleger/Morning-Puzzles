@@ -139,10 +139,16 @@ def test_text_receipt_format(bundle):
 
     # 4. PUZZLE_HEADER_SPEC compliance: check strict one-word titles
     receipt_text = receipt_bytes.decode("latin-1")
-    for title in ["--- SUDOKU ---", "--- SEARCH ---", "--- NONOGRAM ---", "--- STARS ---", "--- JUMBLE ---", "--- BINARY ---", "--- MINES ---", "--- TENTS ---", "--- BRIDGES ---", "--- KILLER ---", "--- CRYPTOGRAM ---", "--- TANGO ---", "--- LADDER ---", "--- WHEEL ---", "--- LIGHTS ---"]:
+    for title in ["--- SUDOKU ---", "--- SEARCH ---", "--- NONOGRAM ---", "--- STARS ---", "--- JUMBLE ---", "--- BINARY ---", "--- MINES ---", "--- TENTS ---", "--- BRIDGES ---", "--- KILLER ---", "--- CRYPTOGRAM ---", "--- TANGO ---", "--- LADDER ---", "--- WHEEL ---", "--- LIGHTS ---", "--- LOOP ---"]:
         assert title in receipt_text, f"Missing canonical title '{title}' in text receipt"
 
-    print("  -> Passed! Text receipt contains all 15 canonical headers, pre-cut feeds, and cutter commands.\n")
+    # 5. Master Receipt Header & Footer Standards (Section 9)
+    assert "MORNING PUZZLES" in receipt_text, "Missing MORNING PUZZLES in text receipt header"
+    assert "Enjoy your morning puzzles" in receipt_text, "Missing offline tagline in text receipt header"
+    assert "Enjoy your day!" in receipt_text, "Missing 'Enjoy your day!' in text receipt footer"
+    assert "diagnostics" not in receipt_text.lower(), "Receipt must not contain diagnostics information"
+
+    print("  -> Passed! Text receipt contains all 16 canonical headers, offline header/footer, pre-cut feeds, and cutter commands.\n")
 
 
 def test_hybrid_receipt_format(bundle):
