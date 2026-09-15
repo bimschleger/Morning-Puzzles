@@ -22,6 +22,8 @@ public:
     bool printRasterToReceipt(EscPosPrinter& printer);
 
     uint8_t getSize() const { return _size; }
+    const std::vector<uint8_t>& getRowClues(uint8_t r) const { return _rowClues[r]; }
+    const std::vector<uint8_t>& getColClues(uint8_t c) const { return _colClues[c]; }
 
 private:
     uint8_t _size;

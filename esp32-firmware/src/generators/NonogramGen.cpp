@@ -143,7 +143,7 @@ bool NonogramGen::printRasterToReceipt(EscPosPrinter& printer) {
     }
     const int16_t colClueItemH = max((int16_t)24, (int16_t)(cellSize * 0.55));
     const int16_t colClueHeight = max((int16_t)50, (int16_t)(maxColClues * colClueItemH + 16));
-    const int16_t totalH = 12 + colClueHeight + gridSize + 12;
+    const int16_t totalH = ((12 + colClueHeight + gridSize + 12 + 7) / 8) * 8;
 
     ThermalCanvas canvas;
     if (!canvas.begin(totalH)) {
@@ -160,13 +160,14 @@ bool NonogramGen::printRasterToReceipt(EscPosPrinter& printer) {
 
     // Column clues
     for (uint8_t c = 0; c < _size; c++) {
-        int16_t colCx = gridX + c * cellSize + cellSize / 2 - 6;
         size_t numClues = _colClues[c].size();
         for (size_t k = 0; k < numClues; k++) {
             int16_t dist = (numClues - 1 - k) * colClueItemH;
             char buf[4];
             snprintf(buf, sizeof(buf), "%d", _colClues[c][k]);
-            canvas.drawText(colCx, gridY - 18 - dist, buf, 2);
+            int16_t clueW = (strlen(buf) > 1) ? 23 : 10;
+            int16_t colCx = gridX + c * cellSize + (cellSize - clueW) / 2;
+            canvas.drawText(colCx, gridY - 26 - dist, buf, 2);
         }
         if (c > 0) {
             bool isMajor = (c % majorInterval == 0);
@@ -182,7 +183,8 @@ bool NonogramGen::printRasterToReceipt(EscPosPrinter& printer) {
             int16_t dist = (numClues - 1 - k) * 20;
             char buf[4];
             snprintf(buf, sizeof(buf), "%d", _rowClues[r][k]);
-            canvas.drawText(gridX - 16 - dist, rowCy, buf, 2);
+            int16_t charOffset = (strlen(buf) > 1) ? 13 : 0;
+            canvas.drawText(gridX - 22 - dist - charOffset, rowCy, buf, 2);
         }
         if (r > 0) {
             bool isMajor = (r % majorInterval == 0);

@@ -5856,7 +5856,7 @@
       }
       const colClueItemH = Math.max(24, Math.floor(cellSize * 0.55));
       const colClueHeight = Math.max(50, maxColClues * colClueItemH + 16);
-      const totalH = 12 + colClueHeight + gridSize + 12;
+      const totalH = Math.floor((12 + colClueHeight + gridSize + 12 + 7) / 8) * 8;
 
       const tc = new ThermalCanvasSimulator(576, totalH);
       const gridX = padding + rowClueWidth;
@@ -5869,11 +5869,13 @@
 
       // Column clues
       for (let c = 0; c < size; c++) {
-        const colCx = gridX + c * cellSize + Math.floor(cellSize / 2) - 6;
         const clues = nData.colClues[c] || [];
         for (let k = 0; k < clues.length; k++) {
           const dist = (clues.length - 1 - k) * colClueItemH;
-          tc.drawText(colCx, gridY - 18 - dist, String(clues[k]), 2);
+          const clueStr = String(clues[k]);
+          const clueW = (clueStr.length > 1) ? 23 : 10;
+          const colCx = gridX + c * cellSize + Math.floor((cellSize - clueW) / 2);
+          tc.drawText(colCx, gridY - 26 - dist, clueStr, 2);
         }
         if (c > 0) {
           const isMajor = (c % majorInterval === 0);
@@ -5887,7 +5889,9 @@
         const clues = nData.rowClues[r] || [];
         for (let k = 0; k < clues.length; k++) {
           const dist = (clues.length - 1 - k) * 20;
-          tc.drawText(gridX - 16 - dist, rowCy, String(clues[k]), 2);
+          const clueStr = String(clues[k]);
+          const charOffset = (clueStr.length > 1) ? 13 : 0;
+          tc.drawText(gridX - 22 - dist - charOffset, rowCy, clueStr, 2);
         }
         if (r > 0) {
           const isMajor = (r % majorInterval === 0);

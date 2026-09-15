@@ -152,6 +152,12 @@ def test_visual_consistency():
                 "clues": item["clues"],
                 "difficulty": item.get("difficulty", "medium")
             }
+        elif p_name == "nonogram":
+            py_data = {
+                "size": item["size"],
+                "row_clues": item["row_clues"],
+                "col_clues": item["col_clues"],
+            }
         else:
             print(f"Unknown puzzle {p_name}")
             continue

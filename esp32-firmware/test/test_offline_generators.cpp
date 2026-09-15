@@ -74,6 +74,9 @@ public:
 #include "../src/generators/LightsGen.h"
 #include "../src/generators/LightsGen.cpp"
 
+#include "../src/generators/LoopGen.h"
+#include "../src/generators/LoopGen.cpp"
+
 #include "../src/generators/OfflinePuzzleComposer.h"
 #include "../src/generators/OfflinePuzzleComposer.cpp"
 

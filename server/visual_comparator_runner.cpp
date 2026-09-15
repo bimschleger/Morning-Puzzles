@@ -38,6 +38,9 @@
 #include "../esp32-firmware/src/generators/LoopGen.h"
 #include "../esp32-firmware/src/generators/LoopGen.cpp"
 
+#include "../esp32-firmware/src/generators/NonogramGen.h"
+#include "../esp32-firmware/src/generators/NonogramGen.cpp"
+
 #include <iostream>
 #include <iomanip>
 #include <sstream>
@@ -371,6 +374,47 @@ int main(int argc, char** argv) {
             for (uint8_t c = 0; c < loopGen.getSize(); c++) {
                 if (c > 0) std::cout << ", ";
                 std::cout << (int)loopGen.getClue(r, c);
+            }
+            std::cout << "]";
+        }
+        std::cout << "],\n";
+        std::cout << "    \"raster_hex\": \"" << toHex(printer->lastBitmap) << "\"\n";
+        std::cout << "  }";
+    }
+
+    // 9. NONOGRAM
+    {
+        NonogramGen nGen;
+        nGen.generate(NONO_MEDIUM);
+        printer->lastBitmap.clear();
+        nGen.printRasterToReceipt(*printer);
+
+        printSep();
+        std::cout << "  {\n";
+        std::cout << "    \"puzzle\": \"nonogram\",\n";
+        std::cout << "    \"width\": " << printer->lastWidth << ",\n";
+        std::cout << "    \"height\": " << printer->lastHeight << ",\n";
+        std::cout << "    \"size\": " << (int)nGen.getSize() << ",\n";
+        std::cout << "    \"row_clues\": [";
+        for (uint8_t r = 0; r < nGen.getSize(); r++) {
+            if (r > 0) std::cout << ", ";
+            std::cout << "[";
+            const auto& rc = nGen.getRowClues(r);
+            for (size_t i = 0; i < rc.size(); i++) {
+                if (i > 0) std::cout << ", ";
+                std::cout << (int)rc[i];
+            }
+            std::cout << "]";
+        }
+        std::cout << "],\n";
+        std::cout << "    \"col_clues\": [";
+        for (uint8_t c = 0; c < nGen.getSize(); c++) {
+            if (c > 0) std::cout << ", ";
+            std::cout << "[";
+            const auto& cc = nGen.getColClues(c);
+            for (size_t i = 0; i < cc.size(); i++) {
+                if (i > 0) std::cout << ", ";
+                std::cout << (int)cc[i];
             }
             std::cout << "]";
         }

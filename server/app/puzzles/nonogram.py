@@ -10,13 +10,8 @@ from typing import List, Tuple, Dict, Any, Optional, Union
 from .base import BasePuzzle, BasePuzzleResult
 from ..renderer.canvas import (
     THERMAL_WIDTH_DOTS,
-    HAS_PILLOW,
-    pil_to_escpos,
     ThermalBitmap,
 )
-
-if HAS_PILLOW:
-    from PIL import Image, ImageDraw, ImageFont
 
 
 class NonogramPuzzle(BasePuzzle):
@@ -160,59 +155,8 @@ class NonogramPuzzle(BasePuzzle):
         max_col_clues = max((len(c) for c in col_clues), default=1)
         col_clue_item_h = max(24, int(cell_size * 0.55))
         col_clue_height = max(50, max_col_clues * col_clue_item_h + 16)
-        total_height = 12 + col_clue_height + grid_size + 12
+        total_height = ((12 + col_clue_height + grid_size + 12 + 7) & ~7)
 
-        if HAS_PILLOW:
-            img = Image.new("L", (target_width, total_height), 255)
-            draw = ImageDraw.Draw(img)
-
-            try:
-                font_clue = ImageFont.truetype("Courier.ttf", int(cell_size * 0.45))
-            except IOError:
-                font_clue = ImageFont.load_default()
-
-            grid_x = padding + row_clue_width
-            grid_y = 12 + col_clue_height
-
-            draw.rectangle([padding, 12, grid_x, grid_y], fill=240, outline=0, width=3)
-            draw.rectangle([grid_x, 12, grid_x + grid_size, grid_y], outline=0, width=3)
-
-            for c in range(size):
-                col_cx = grid_x + c * cell_size + cell_size // 2
-                clues = col_clues[c] if c < len(col_clues) else [0]
-                for k, val in enumerate(clues):
-                    dist_from_bottom = (len(clues) - 1 - k) * col_clue_item_h
-                    val_y = grid_y - 12 - dist_from_bottom
-                    draw.text((col_cx - 6, val_y), str(val), fill=0, font=font_clue)
-                if c > 0:
-                    is_major = (c % major_interval == 0)
-                    draw.line([grid_x + c * cell_size, 12, grid_x + c * cell_size, grid_y], fill=0 if is_major else 180, width=3 if is_major else 1)
-
-            draw.rectangle([padding, grid_y, grid_x, grid_y + grid_size], outline=0, width=3)
-            row_clue_char_w = max(18, int(cell_size * 0.45))
-            for r in range(size):
-                row_cy = grid_y + r * cell_size + cell_size // 2 - int(cell_size * 0.22)
-                clues = row_clues[r] if r < len(row_clues) else [0]
-                for k, val in enumerate(clues):
-                    dist_from_right = (len(clues) - 1 - k) * row_clue_char_w
-                    val_x = grid_x - 14 - dist_from_right
-                    draw.text((val_x, row_cy), str(val), fill=0, font=font_clue)
-                if r > 0:
-                    is_major = (r % major_interval == 0)
-                    draw.line([padding, grid_y + r * cell_size, grid_x, grid_y + r * cell_size], fill=0 if is_major else 180, width=3 if is_major else 1)
-
-
-            for i in range(size + 1):
-                is_major = (i % major_interval == 0) or (i == size)
-                w = 4 if is_major else 1
-                color = 0 if is_major else 160
-                draw.line([grid_x, grid_y + i * cell_size, grid_x + grid_size, grid_y + i * cell_size], fill=color, width=w)
-                draw.line([grid_x + i * cell_size, grid_y, grid_x + i * cell_size, grid_y + grid_size], fill=color, width=w)
-
-            draw.rectangle([padding, 12, padding + inner_width, grid_y + grid_size], outline=0, width=5)
-            return pil_to_escpos(img)
-
-        # Pure Python Fallback
         tb = ThermalBitmap(target_width, total_height)
         grid_x = padding + row_clue_width
         grid_y = 12 + col_clue_height
@@ -222,24 +166,38 @@ class NonogramPuzzle(BasePuzzle):
         tb.draw_rect(padding, grid_y, row_clue_width, grid_size, thickness=3)
         tb.draw_rect(grid_x, grid_y, grid_size, grid_size, thickness=4)
 
+        # Column clues
         for c in range(size):
-            clues = col_clues[c] if c < len(col_clues) else [0]
-            col_cx = grid_x + c * cell_size + cell_size // 2 - 6
+            clues = col_clues[c] if c < len(col_clues) else []
             for k, val in enumerate(clues):
                 dist = (len(clues) - 1 - k) * col_clue_item_h
-                tb.draw_char(col_cx, grid_y - 18 - dist, str(val), scale=2)
+                clue_str = str(val)
+                clue_w = 23 if len(clue_str) > 1 else 10
+                col_cx = grid_x + c * cell_size + (cell_size - clue_w) // 2
+                tb.draw_text(col_cx, grid_y - 26 - dist, clue_str, scale=2)
+            if c > 0:
+                is_major = (c % major_interval == 0)
+                tb.draw_vline(grid_x + c * cell_size, 12, col_clue_height, thickness=3 if is_major else 1)
 
+        # Row clues
         for r in range(size):
-            clues = row_clues[r] if r < len(row_clues) else [0]
             row_cy = grid_y + r * cell_size + cell_size // 2 - 7
+            clues = row_clues[r] if r < len(row_clues) else []
             for k, val in enumerate(clues):
-                dist = (len(clues) - 1 - k) * 16
-                tb.draw_char(grid_x - 18 - dist, row_cy, str(val), scale=2)
+                dist = (len(clues) - 1 - k) * 20
+                clue_str = str(val)
+                char_offset = 13 if len(clue_str) > 1 else 0
+                tb.draw_text(grid_x - 22 - dist - char_offset, row_cy, clue_str, scale=2)
+            if r > 0:
+                is_major = (r % major_interval == 0)
+                tb.draw_hline(padding, grid_y + r * cell_size, row_clue_width, thickness=3 if is_major else 1)
 
-        for i in range(size + 1):
+        # Major/minor grid lines
+        for i in range(1, size):
             is_maj = (i % major_interval == 0)
-            tb.draw_hline(grid_x, grid_y + i * cell_size, grid_size, thickness=3 if is_maj else 1)
-            tb.draw_vline(grid_x + i * cell_size, grid_y, grid_size, thickness=3 if is_maj else 1)
+            thickness = 4 if is_maj else 1
+            tb.draw_hline(grid_x, grid_y + i * cell_size, grid_size, thickness=thickness)
+            tb.draw_vline(grid_x + i * cell_size, grid_y, grid_size, thickness=thickness)
 
         return tb.to_escpos()
 
