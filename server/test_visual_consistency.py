@@ -158,6 +158,11 @@ def test_visual_consistency():
                 "row_clues": item["row_clues"],
                 "col_clues": item["col_clues"],
             }
+        elif p_name == "lights":
+            py_data = {
+                "size": item["size"],
+                "puzzle": item["grid"],
+            }
         else:
             print(f"Unknown puzzle {p_name}")
             continue

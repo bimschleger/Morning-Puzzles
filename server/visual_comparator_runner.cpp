@@ -41,6 +41,9 @@
 #include "../esp32-firmware/src/generators/NonogramGen.h"
 #include "../esp32-firmware/src/generators/NonogramGen.cpp"
 
+#include "../esp32-firmware/src/generators/LightsGen.h"
+#include "../esp32-firmware/src/generators/LightsGen.cpp"
+
 #include <iostream>
 #include <iomanip>
 #include <sstream>
@@ -415,6 +418,34 @@ int main(int argc, char** argv) {
             for (size_t i = 0; i < cc.size(); i++) {
                 if (i > 0) std::cout << ", ";
                 std::cout << (int)cc[i];
+            }
+            std::cout << "]";
+        }
+        std::cout << "],\n";
+        std::cout << "    \"raster_hex\": \"" << toHex(printer->lastBitmap) << "\"\n";
+        std::cout << "  }";
+    }
+
+    // 10. LIGHTS
+    {
+        LightsGen lGen;
+        lGen.generate(LIGHTS_EASY);
+        printer->lastBitmap.clear();
+        lGen.printRasterToReceipt(*printer, LIGHTS_EASY);
+
+        printSep();
+        std::cout << "  {\n";
+        std::cout << "    \"puzzle\": \"lights\",\n";
+        std::cout << "    \"width\": " << printer->lastWidth << ",\n";
+        std::cout << "    \"height\": " << printer->lastHeight << ",\n";
+        std::cout << "    \"size\": " << (int)lGen.getSize() << ",\n";
+        std::cout << "    \"grid\": [";
+        for (uint8_t r = 0; r < lGen.getSize(); r++) {
+            if (r > 0) std::cout << ", ";
+            std::cout << "[";
+            for (uint8_t c = 0; c < lGen.getSize(); c++) {
+                if (c > 0) std::cout << ", ";
+                std::cout << (int)lGen.getCell(r, c);
             }
             std::cout << "]";
         }

@@ -372,7 +372,7 @@ void LightsGen::printToReceipt(EscPosPrinter& printer, LightsDifficulty diff) {
     printer.setBold(false);
     printer.println(String("DIFFICULTY: ") + diffStr);
     printer.println(String("Place ") + String(_totalBulbs) + " bulbs to light all corridors without");
-    printer.println("bulbs shining on each other or exceeding numbers.");
+    printer.println("bulbs shining together or exceeding numbers.");
     printer.println(String("TOTAL BULBS: ") + String(_totalBulbs));
     printer.println("");
 
@@ -404,7 +404,7 @@ bool LightsGen::printRasterToReceipt(EscPosPrinter& printer, LightsDifficulty di
     printer.setBold(false);
     printer.println(String("DIFFICULTY: ") + diffStr);
     printer.println(String("Place ") + String(_totalBulbs) + " bulbs to light all corridors without");
-    printer.println("bulbs shining on each other or exceeding numbers.");
+    printer.println("bulbs shining together or exceeding numbers.");
     printer.println("");
     printer.setAlign(ALIGN_LEFT);
 
@@ -427,21 +427,23 @@ bool LightsGen::printRasterToReceipt(EscPosPrinter& printer, LightsDifficulty di
         canvas.drawVLine(padding + i * cellSize, padding, cellSize * _size, 1);
     }
 
-    // Cell contents: black wall blocks or empty
+    // Cell contents: Pattern 1 diagonal hatch (like Stars) + circular white badge with black scale-3 numeral
     for (uint8_t r = 0; r < _size; r++) {
         for (uint8_t c = 0; c < _size; c++) {
             int8_t val = _puzzle[r][c];
-            int16_t x0 = padding + c * cellSize;
-            int16_t y0 = padding + r * cellSize;
-            if (val == -2) {
-                // Black wall without number
-                canvas.fillRect(x0, y0, cellSize, cellSize, 1);
-            } else if (val >= 0) {
-                // Black wall with white number
-                canvas.fillRect(x0, y0, cellSize, cellSize, 1);
-                int16_t cx = x0 + (cellSize - 18) / 2;
-                int16_t cy = y0 + (cellSize - 21) / 2;
-                canvas.drawChar(cx, cy, '0' + val, 3, 0);
+            if (val != -1) {
+                int16_t x0 = padding + c * cellSize;
+                int16_t y0 = padding + r * cellSize;
+                canvas.fillHatch(x0, y0, cellSize, cellSize, 1);
+                if (val >= 0) {
+                    int16_t midX = x0 + cellSize / 2;
+                    int16_t midY = y0 + cellSize / 2;
+                    int16_t rRad = max((int16_t)13, min((int16_t)(cellSize / 2 - 4), (int16_t)16));
+                    canvas.fillCircle(midX, midY, rRad, 0);
+                    int16_t cx = x0 + (cellSize - 18) / 2;
+                    int16_t cy = y0 + (cellSize - 21) / 2;
+                    canvas.drawChar(cx, cy, '0' + val, 3, 1);
+                }
             }
         }
     }

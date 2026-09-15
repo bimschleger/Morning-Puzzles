@@ -11,12 +11,7 @@ from .base import BasePuzzle, BasePuzzleResult
 from ..renderer.canvas import (
     THERMAL_WIDTH_DOTS,
     ThermalBitmap,
-    HAS_PILLOW,
-    image_to_escpos_raster,
 )
-
-if HAS_PILLOW:
-    from PIL import Image, ImageDraw, ImageFont
 
 
 class LightsPuzzle(BasePuzzle):
@@ -373,85 +368,35 @@ class LightsPuzzle(BasePuzzle):
         actual_board = cell_size * size
         total_h = padding + actual_board + padding
 
-        # Pillow rendering
-        if HAS_PILLOW:
-            img = Image.new("L", (target_width, total_h), 255)
-            draw = ImageDraw.Draw(img)
-
-            # Heavy outer boundary (Tier 1: 4px)
-            draw.rectangle(
-                [padding, padding, padding + actual_board, padding + actual_board],
-                outline=0,
-                width=4,
-            )
-
-            # Internal grid dividers (Tier 4: 1px)
-            for r in range(1, size):
-                y = padding + r * cell_size
-                draw.line([padding, y, padding + actual_board, y], fill=0, width=1)
-            for c in range(1, size):
-                x = padding + c * cell_size
-                draw.line([x, padding, x, padding + actual_board], fill=0, width=1)
-
-            # Clue font
-            font_size = max(16, int(cell_size * 0.52))
-            try:
-                font_clue = ImageFont.truetype("Courier.ttf", font_size)
-            except IOError:
-                font_clue = ImageFont.load_default()
-
-            # Render barrier cells
-            margin = max(2, int(cell_size * 0.06))
-            for r in range(rows):
-                for c in range(cols):
-                    val = puzzle[r][c] if r < len(puzzle) and c < len(puzzle[r]) else -1
-                    if val != -1:
-                        x0 = padding + c * cell_size + margin
-                        y0 = padding + r * cell_size + margin
-                        x1 = padding + (c + 1) * cell_size - margin
-                        y1 = padding + (r + 1) * cell_size - margin
-
-                        draw.rectangle([x0, y0, x1, y1], fill=0)
-
-                        if val >= 0:
-                            digit_str = str(val)
-                            try:
-                                bbox = font_clue.getbbox(digit_str)
-                                tw = bbox[2] - bbox[0]
-                                th = bbox[3] - bbox[1]
-                            except AttributeError:
-                                tw, th = draw.textsize(digit_str, font=font_clue)
-
-                            tx = padding + c * cell_size + (cell_size - tw) // 2
-                            ty = padding + r * cell_size + (cell_size - th) // 2
-                            draw.text((tx, ty), digit_str, fill=255, font=font_clue)
-                        else:
-                            draw.line([x0 + 4, y0 + 4, x1 - 4, y1 - 4], fill=255, width=1)
-                            draw.line([x0 + 4, y1 - 4, x1 - 4, y0 + 4], fill=255, width=1)
-
-            # Convert 1-bit ESC/POS GS v 0
-            img_1bit = img.convert("1")
-            raw_bytes = img_1bit.tobytes()
-            return image_to_escpos_raster(raw_bytes, target_width, total_h)
-
-        # Fallback pure-Python ThermalBitmap
         tb = ThermalBitmap(target_width, total_h)
+
+        # Outer grid border (Tier 1: 4px)
         tb.draw_rect(padding, padding, actual_board, actual_board, thickness=4)
 
+        # Internal grid dividers (Tier 4: 1px)
         for r in range(1, size):
             tb.draw_hline(padding, padding + r * cell_size, actual_board, thickness=1)
         for c in range(1, size):
             tb.draw_vline(padding + c * cell_size, padding, actual_board, thickness=1)
 
+        # Render barrier cells: Pattern 1 diagonal hatch (like Stars) + circular white badge with black scale-3 numeral
         for r in range(rows):
             for c in range(cols):
                 val = puzzle[r][c] if r < len(puzzle) and c < len(puzzle[r]) else -1
                 if val != -1:
-                    cx = padding + c * cell_size
-                    cy = padding + r * cell_size
-                    tb.draw_rect(cx + 2, cy + 2, cell_size - 4, cell_size - 4, thickness=2)
+                    x0 = padding + c * cell_size
+                    y0 = padding + r * cell_size
+                    tb.fill_hatch(x0, y0, cell_size, cell_size, 1)
+
                     if val >= 0:
-                        tb.draw_char(cx + (cell_size - 18) // 2, cy + (cell_size - 21) // 2, str(val), scale=2)
+                        mid_x = x0 + cell_size // 2
+                        mid_y = y0 + cell_size // 2
+                        r_rad = max(13, min(cell_size // 2 - 4, 16))
+                        tb.fill_circle(mid_x, mid_y, r_rad, color=0)
+
+                        cx = x0 + (cell_size - 18) // 2
+                        cy = y0 + (cell_size - 21) // 2
+                        tb.draw_char(cx, cy, str(val), scale=3, color=1)
 
         return tb.to_escpos()
 
