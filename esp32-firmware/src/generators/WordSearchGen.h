@@ -21,6 +21,7 @@ struct PlacedWord {
 
 class WordSearchGen {
 public:
+    static const uint8_t MAX_GRID_SIZE = 12;
     static const uint8_t GRID_SIZE = 12;
 
     WordSearchGen();
@@ -31,11 +32,13 @@ public:
 
     const char* getThemeName() const { return _currentTheme; }
     size_t getWordCount() const { return _placedWords.size(); }
+    uint8_t getGridSize() const { return _gridSize; }
     char getGridChar(uint8_t r, uint8_t c) const { return _grid[r][c]; }
     const String& getPlacedWord(size_t i) const { return _placedWords[i].word; }
 
 private:
-    char _grid[GRID_SIZE][GRID_SIZE];
+    uint8_t _gridSize;
+    char _grid[MAX_GRID_SIZE][MAX_GRID_SIZE];
     std::vector<PlacedWord> _placedWords;
     const char* _currentTheme;
 

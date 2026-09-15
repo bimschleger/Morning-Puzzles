@@ -52,7 +52,7 @@ class WordSearchPuzzle(BasePuzzle):
         difficulty: str = "medium",
         words: Optional[List[str]] = None,
         theme: Optional[str] = None,
-        grid_size: int = 12,
+        grid_size: Optional[int] = None,
         seed: Optional[int] = None,
         **kwargs,
     ) -> BasePuzzleResult:
@@ -61,11 +61,20 @@ class WordSearchPuzzle(BasePuzzle):
 
         difficulty = difficulty.lower()
         if difficulty == "easy":
-            allowed_dirs = ["E", "S"]
+            allowed_dirs = ["E"]
+            target_words = 6
+            if grid_size is None:
+                grid_size = 10
         elif difficulty == "hard":
             allowed_dirs = list(DIRECTIONS.keys())
+            target_words = 10
+            if grid_size is None:
+                grid_size = 12
         else:
-            allowed_dirs = ["E", "S", "SE", "NE"]
+            allowed_dirs = ["E", "W", "S"]
+            target_words = 8
+            if grid_size is None:
+                grid_size = 12
 
         if not words:
             if theme:
@@ -90,7 +99,7 @@ class WordSearchPuzzle(BasePuzzle):
             placements = {}
 
             for word in clean_words:
-                if len(placed_words) >= 8:
+                if len(placed_words) >= target_words:
                     break
                 shuffled_dirs = list(allowed_dirs)
                 random.shuffle(shuffled_dirs)
@@ -113,7 +122,7 @@ class WordSearchPuzzle(BasePuzzle):
                 best_placed = placed_words
                 best_grid = [row[:] for row in grid]
                 best_placements = placements
-                if len(best_placed) >= 7:
+                if len(best_placed) >= target_words:
                     break
 
         grid = best_grid or [[" " for _ in range(grid_size)] for _ in range(grid_size)]
@@ -199,9 +208,9 @@ class WordSearchPuzzle(BasePuzzle):
         rows = len(grid)
         cols = len(grid[0]) if rows > 0 else 12
 
-        padding = 24
-        inner_width = target_width - padding * 2
-        cell_size = inner_width // cols
+        cell_size = (target_width - 48) // cols
+        inner_width = cell_size * cols
+        padding = (target_width - inner_width) // 2
         grid_h = cell_size * rows
 
         checklist_rows = (len(words) + 1) // 2

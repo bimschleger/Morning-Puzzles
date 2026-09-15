@@ -34,8 +34,8 @@ def test_dataset_integrity():
     print("Test 1: Verifying Dataset Theme Counts and Word Length Constraints...")
     tiers = [
         ("Easy", WORDSEARCH_THEMES_EASY, 4, 6),
-        ("Medium", WORDSEARCH_THEMES_MEDIUM, 5, 8),
-        ("Hard", WORDSEARCH_THEMES_HARD, 7, 11),
+        ("Medium", WORDSEARCH_THEMES_MEDIUM, 4, 8),
+        ("Hard", WORDSEARCH_THEMES_HARD, 5, 10),
     ]
 
     total_themes = 0
@@ -86,9 +86,19 @@ def test_puzzle_generation():
     gen = WordSearchGenerator(seed=42)
 
     expected_dirs = {
-        "easy": {"E", "S"},
-        "medium": {"E", "S", "SE", "NE"},
+        "easy": {"E"},
+        "medium": {"E", "W", "S"},
         "hard": set(DIRECTIONS.keys()),
+    }
+    expected_grid_sizes = {
+        "easy": 10,
+        "medium": 12,
+        "hard": 12,
+    }
+    expected_word_counts = {
+        "easy": 6,
+        "medium": 8,
+        "hard": 10,
     }
 
     for diff in ["easy", "medium", "hard"]:
@@ -96,10 +106,9 @@ def test_puzzle_generation():
         for i in range(30):
             res = gen.generate(difficulty=diff)
             assert res["type"] == "wordsearch"
-            assert res["grid_size"] == 12
+            assert res["grid_size"] == expected_grid_sizes[diff]
             assert res["difficulty"] == diff
-            assert len(res["words"]) >= 6, f"Too few words placed: {len(res['words'])}"
-            assert len(res["words"]) <= 8, f"More than 8 words placed: {len(res['words'])}"
+            assert len(res["words"]) == expected_word_counts[diff], f"Expected {expected_word_counts[diff]} words, got {len(res['words'])}"
             assert res["theme"] in THEMES_BY_DIFFICULTY[diff], f"Theme '{res['theme']}' not in {diff} pool"
             selected_themes.add(res["theme"])
 

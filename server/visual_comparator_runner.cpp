@@ -255,7 +255,7 @@ int main(int argc, char** argv) {
         std::cout << "  }";
     }
 
-    // 6. WORD SEARCH
+    // 6. WORD SEARCH (Medium, 12x12)
     {
         WordSearchGen wsGen;
         wsGen.generate(WS_MEDIUM, 0);
@@ -275,12 +275,46 @@ int main(int argc, char** argv) {
         }
         std::cout << "],\n";
         std::cout << "    \"grid\": [";
-        for (uint8_t r = 0; r < WordSearchGen::GRID_SIZE; r++) {
+        for (uint8_t r = 0; r < wsGen.getGridSize(); r++) {
             if (r > 0) std::cout << ", ";
             std::cout << "[";
-            for (uint8_t c = 0; c < WordSearchGen::GRID_SIZE; c++) {
+            for (uint8_t c = 0; c < wsGen.getGridSize(); c++) {
                 if (c > 0) std::cout << ", ";
                 std::cout << "\"" << wsGen.getGridChar(r, c) << "\"";
+            }
+            std::cout << "]";
+        }
+        std::cout << "],\n";
+        std::cout << "    \"raster_hex\": \"" << toHex(printer->lastBitmap) << "\"\n";
+        std::cout << "  }";
+    }
+
+    // 6b. WORD SEARCH (Easy, 10x10)
+    {
+        WordSearchGen wsGenEasy;
+        wsGenEasy.generate(WS_EASY, 0);
+        printer->lastBitmap.clear();
+        wsGenEasy.printRasterToReceipt(*printer);
+
+        printSep();
+        std::cout << "  {\n";
+        std::cout << "    \"puzzle\": \"wordsearch_easy\",\n";
+        std::cout << "    \"width\": " << printer->lastWidth << ",\n";
+        std::cout << "    \"height\": " << printer->lastHeight << ",\n";
+        std::cout << "    \"theme\": \"" << wsGenEasy.getThemeName() << "\",\n";
+        std::cout << "    \"words\": [";
+        for (size_t i = 0; i < wsGenEasy.getWordCount(); i++) {
+            if (i > 0) std::cout << ", ";
+            std::cout << "\"" << wsGenEasy.getPlacedWord(i) << "\"";
+        }
+        std::cout << "],\n";
+        std::cout << "    \"grid\": [";
+        for (uint8_t r = 0; r < wsGenEasy.getGridSize(); r++) {
+            if (r > 0) std::cout << ", ";
+            std::cout << "[";
+            for (uint8_t c = 0; c < wsGenEasy.getGridSize(); c++) {
+                if (c > 0) std::cout << ", ";
+                std::cout << "\"" << wsGenEasy.getGridChar(r, c) << "\"";
             }
             std::cout << "]";
         }

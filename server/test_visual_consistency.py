@@ -90,7 +90,12 @@ def test_visual_consistency():
         cpp_raw = bytes.fromhex(item["raster_hex"])
 
         # Map to python plugin
-        plugin_id = "queens" if p_name == "stars" else p_name
+        if p_name == "stars":
+            plugin_id = "queens"
+        elif p_name.startswith("wordsearch"):
+            plugin_id = "wordsearch"
+        else:
+            plugin_id = p_name
         plugin = DEFAULT_REGISTRY.get(plugin_id)
         assert plugin is not None, f"Plugin {plugin_id} not found in registry"
 
@@ -131,7 +136,7 @@ def test_visual_consistency():
                 "grid_size": item["size"],
                 "regions": item["regions"]
             }
-        elif p_name == "wordsearch":
+        elif p_name in ("wordsearch", "wordsearch_easy"):
             py_data = {
                 "grid": item["grid"],
                 "words": item["words"],

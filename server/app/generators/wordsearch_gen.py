@@ -54,22 +54,31 @@ class WordSearchGenerator:
     def generate(self, 
                  words: Optional[List[str]] = None, 
                  theme: Optional[str] = None,
-                 grid_size: int = 12, 
+                 grid_size: Optional[int] = None, 
                  difficulty: str = "medium") -> Dict[str, Any]:
         """
         Generates a Word Search grid.
         Difficulty tiers:
-          - easy:   Horizontal & Vertical forward only (E, S)
-          - medium: Forward directions (E, S, SE, NE)
-          - hard:   All 8 directions including backwards (E, S, SE, NE, W, N, SW, NW)
+          - easy:   Left-to-Right only (E), 10x10 grid, 6 words
+          - medium: Left-to-Right, Right-to-Left, Top-to-Bottom (E, W, S), 12x12 grid, 8 words
+          - hard:   All 8 directions including backwards, 12x12 grid, 10 words
         """
         difficulty = difficulty.lower()
         if difficulty == "easy":
-            allowed_dirs = ["E", "S"]
+            allowed_dirs = ["E"]
+            target_words = 6
+            if grid_size is None:
+                grid_size = 10
         elif difficulty == "hard":
             allowed_dirs = list(DIRECTIONS.keys())
+            target_words = 10
+            if grid_size is None:
+                grid_size = 12
         else:
-            allowed_dirs = ["E", "S", "SE", "NE"]
+            allowed_dirs = ["E", "W", "S"]
+            target_words = 8
+            if grid_size is None:
+                grid_size = 12
 
         if not words:
             if theme:
@@ -86,7 +95,7 @@ class WordSearchGenerator:
         best_placed = []
         best_placements = {}
 
-        # Attempt generation with up to 5 restarts to achieve 7-8 placed words
+        # Attempt generation with up to 5 restarts
         for retry in range(5):
             clean_words = list(raw_words)
             random.shuffle(clean_words)
@@ -97,7 +106,7 @@ class WordSearchGenerator:
             placements = {}
 
             for word in clean_words:
-                if len(placed_words) >= 8:
+                if len(placed_words) >= target_words:
                     break
                 placed = False
                 attempts = 0
@@ -138,7 +147,7 @@ class WordSearchGenerator:
                 best_placed = placed_words
                 best_placements = placements
 
-            if len(best_placed) >= 8:
+            if len(best_placed) >= target_words:
                 break
 
         grid = best_grid or [[" " for _ in range(grid_size)] for _ in range(grid_size)]
