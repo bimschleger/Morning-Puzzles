@@ -65,6 +65,8 @@ public:
     void setAlign(TextAlignment) {}
     void print(const String&) {}
     void println(const String& = "") {}
+    void print(const char*) {}
+    void println(const char* = "") {}
     void feed(uint8_t = 1) {}
     void cut(bool = false) {}
 

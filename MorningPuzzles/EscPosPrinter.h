@@ -31,28 +31,30 @@ public:
     bool isPrinterOnline(uint32_t timeoutMs = 300);
 
     // Basic ESC/POS Formatting
-    void init();
-    void setAlign(TextAlignment align);
-    void setBold(bool enable);
-    void setUnderline(uint8_t mode = 1);  // 0=off, 1=1-dot, 2=2-dot
-    void setInvert(bool enable);
-    void setTextSize(uint8_t widthMultiplier = 1, uint8_t heightMultiplier = 1); // 1 to 8
-    void setFontB(bool enable);           // true = Font B (64 chars/line), false = Font A (48 chars/line)
+    virtual void init();
+    virtual void setAlign(TextAlignment align);
+    virtual void setBold(bool enable);
+    virtual void setUnderline(uint8_t mode = 1);  // 0=off, 1=1-dot, 2=2-dot
+    virtual void setInvert(bool enable);
+    virtual void setTextSize(uint8_t widthMultiplier = 1, uint8_t heightMultiplier = 1); // 1 to 8
+    virtual void setFontB(bool enable);           // true = Font B (64 chars/line), false = Font A (48 chars/line)
 
     // Printing primitives
-    void print(const String& text);
-    void println(const String& text = "");
-    void feed(uint8_t lines = 1);
-    void cut(bool fullCut = false);
+    virtual void print(const String& text);
+    virtual void println(const String& text = "");
+    virtual void print(const char* text);
+    virtual void println(const char* text = "");
+    virtual void feed(uint8_t lines = 1);
+    virtual void cut(bool fullCut = false);
 
     // Decorative / Receipt elements
-    void printHorizontalLine(char pattern = '-');
-    void printDoubleLine();
-    void printHeader(const String& title, const String& subtitle = "");
-    void printKeyValue(const String& key, const String& value, int totalCols = 48);
+    virtual void printHorizontalLine(char pattern = '-');
+    virtual void printDoubleLine();
+    virtual void printHeader(const String& title, const String& subtitle = "");
+    virtual void printKeyValue(const String& key, const String& value, int totalCols = 48);
 
     // Raw byte stream & Raster Graphics
-    size_t writeRaw(const uint8_t* buffer, size_t size);
+    virtual size_t writeRaw(const uint8_t* buffer, size_t size);
     virtual void printRasterBitmap(const uint8_t* bitmapData, uint16_t widthDots, uint16_t heightDots);
 
     // Diagnostic Self Test

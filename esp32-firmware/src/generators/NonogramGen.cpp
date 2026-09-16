@@ -59,16 +59,6 @@ void NonogramGen::generate(NonogramDifficulty difficulty) {
 }
 
 void NonogramGen::printToReceipt(EscPosPrinter& printer) {
-    const char* diffStr = (_size <= 5) ? "EASY" : ((_size <= 8) ? "MEDIUM" : "HARD");
-
-    printer.setBold(true);
-    printer.println("--- NONOGRAM ---");
-    printer.setBold(false);
-    printer.println(String("DIFFICULTY: ") + diffStr);
-    printer.println("Shade blocks of cells matching each clue in");
-    printer.println("order, separated by at least one empty cell.");
-    printer.println("");
-
     // Find maximum depth of column clues
     size_t maxColClues = 1;
     for (uint8_t c = 0; c < _size; c++) {
@@ -118,18 +108,6 @@ void NonogramGen::printToReceipt(EscPosPrinter& printer) {
 }
 
 bool NonogramGen::printRasterToReceipt(EscPosPrinter& printer) {
-    const char* diffStr = (_size == 5) ? "EASY" : ((_size == 8) ? "MEDIUM" : "HARD");
-
-    printer.setAlign(ALIGN_CENTER);
-    printer.setBold(true);
-    printer.println("--- NONOGRAM ---");
-    printer.setBold(false);
-    printer.println(String("DIFFICULTY: ") + diffStr);
-    printer.println("Shade blocks of cells matching each clue in");
-    printer.println("order, separated by at least one empty cell.");
-    printer.println("");
-    printer.setAlign(ALIGN_LEFT);
-
     const int16_t padding = 24;
     const int16_t innerWidth = THERMAL_CANVAS_WIDTH - padding * 2;
     const int16_t cellSize = (_size <= 5) ? 76 : ((_size <= 8) ? 50 : 40);

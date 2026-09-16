@@ -1,16 +1,8 @@
 #include "MinesGen.h"
+#include "GeneratorUtils.h"
 #include "EscPosPrinter.h"
 #include "ThermalCanvas.h"
 #include <string.h>
-
-static void shuffleCoords(uint8_t* arr, uint8_t n) {
-    for (int i = n - 1; i > 0; i--) {
-        int j = random(0, i + 1);
-        uint8_t temp = arr[i];
-        arr[i] = arr[j];
-        arr[j] = temp;
-    }
-}
 
 static uint8_t getNeighbors(uint8_t r, uint8_t c, uint8_t nRow[8], uint8_t nCol[8]) {
     uint8_t count = 0;
@@ -31,7 +23,6 @@ static uint8_t getNeighbors(uint8_t r, uint8_t c, uint8_t nRow[8], uint8_t nCol[
 
 MinesGen::MinesGen() : _totalMines(12), _cluesCount(0) {
     memset(_puzzle, -1, sizeof(_puzzle));
-    memset(_solution, 0, sizeof(_solution));
 }
 
 bool MinesGen::solveDeductive(int8_t puz[8][8], uint8_t totalMines) {
@@ -226,10 +217,10 @@ void MinesGen::generate(MinesDifficulty difficulty) {
     for (uint8_t i = 0; i < 64; i++) allCoords[i] = i;
 
     for (uint8_t attempt = 0; attempt < 50; attempt++) {
-        shuffleCoords(allCoords, 64);
-        memset(_solution, 0, sizeof(_solution));
+        mp_shuffle(allCoords, 64);
+        int8_t solution[8][8] = {0};
         for (uint8_t i = 0; i < _totalMines; i++) {
-            _solution[allCoords[i] / 8][allCoords[i] % 8] = 1;
+            solution[allCoords[i] / 8][allCoords[i] % 8] = 1;
         }
 
         // Full clues for all non-mine cells
@@ -237,12 +228,12 @@ void MinesGen::generate(MinesDifficulty difficulty) {
         memset(fullClues, -1, sizeof(fullClues));
         for (uint8_t r = 0; r < 8; r++) {
             for (uint8_t c = 0; c < 8; c++) {
-                if (_solution[r][c] == 0) {
+                if (solution[r][c] == 0) {
                     uint8_t nRow[8], nCol[8];
                     uint8_t nCount = getNeighbors(r, c, nRow, nCol);
                     uint8_t mineCount = 0;
                     for (uint8_t i = 0; i < nCount; i++) {
-                        if (_solution[nRow[i]][nCol[i]] == 1) mineCount++;
+                        if (solution[nRow[i]][nCol[i]] == 1) mineCount++;
                     }
                     fullClues[r][c] = mineCount;
                 }
@@ -260,7 +251,7 @@ void MinesGen::generate(MinesDifficulty difficulty) {
         for (uint8_t i = _totalMines; i < 64; i++) {
             nonMineCoords[nonMineCount++] = allCoords[i];
         }
-        shuffleCoords(nonMineCoords, nonMineCount);
+        mp_shuffle(nonMineCoords, nonMineCount);
 
         _cluesCount = nonMineCount;
         for (uint8_t i = 0; i < nonMineCount; i++) {
@@ -281,15 +272,7 @@ void MinesGen::generate(MinesDifficulty difficulty) {
     }
 }
 
-void MinesGen::printToReceipt(EscPosPrinter& printer, MinesDifficulty diff) {
-    const char* diffStr = (diff == MINES_EASY) ? "EASY" : ((diff == MINES_HARD) ? "HARD" : "MEDIUM");
-
-    printer.setBold(true);
-    printer.println("--- MINES ---");
-    printer.setBold(false);
-    printer.println(String("DIFFICULTY: ") + diffStr);
-    printer.println(String("Deduce all ") + String(_totalMines) + " hidden mines using");
-    printer.println("the adjacent numbered clues.");
+void MinesGen::printToReceipt(EscPosPrinter& printer, MinesDifficulty /*diff*/) {
     printer.println(String("TOTAL MINES: ") + String(_totalMines));
     printer.println("");
 
@@ -309,19 +292,7 @@ void MinesGen::printToReceipt(EscPosPrinter& printer, MinesDifficulty diff) {
     printer.println("");
 }
 
-bool MinesGen::printRasterToReceipt(EscPosPrinter& printer, MinesDifficulty diff) {
-    const char* diffStr = (diff == MINES_EASY) ? "EASY" : ((diff == MINES_HARD) ? "HARD" : "MEDIUM");
-
-    printer.setAlign(ALIGN_CENTER);
-    printer.setBold(true);
-    printer.println("--- MINES ---");
-    printer.setBold(false);
-    printer.println(String("DIFFICULTY: ") + diffStr);
-    printer.println(String("Deduce all ") + String(_totalMines) + " hidden mines using");
-    printer.println("the adjacent numbered clues.");
-    printer.println("");
-    printer.setAlign(ALIGN_LEFT);
-
+bool MinesGen::printRasterToReceipt(EscPosPrinter& printer, MinesDifficulty /*diff*/) {
     const int16_t padding = 24;
     const int16_t innerWidth = THERMAL_CANVAS_WIDTH - padding * 2;
     const int16_t cellSize = innerWidth / 8;

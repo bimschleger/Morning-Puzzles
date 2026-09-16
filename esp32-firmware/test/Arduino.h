@@ -54,6 +54,9 @@ public:
     void toLowerCase() {
         for (char& c : *this) c = (char)::tolower((unsigned char)c);
     }
+    long toInt() const {
+        try { return std::stol(*this); } catch (...) { return 0; }
+    }
 };
 
 class IPAddress {
@@ -97,10 +100,23 @@ inline unsigned long millis() { return (unsigned long)(clock() * 1000 / CLOCKS_P
 inline unsigned long micros() { return (unsigned long)(clock() * 1000000 / CLOCKS_PER_SEC); }
 inline void delay(int ms) {}
 
+#define HIGH 1
+#define LOW 0
+#define INPUT 0
+#define OUTPUT 1
+#define INPUT_PULLUP 2
+
+inline void pinMode(int pin, int mode) {}
+inline void digitalWrite(int pin, int val) {}
+inline int digitalRead(int pin) { return HIGH; }
+
 typedef uint8_t byte;
 
 class SerialMock {
 public:
+    void begin(unsigned long baud) {}
+    int available() { return 0; }
+    int read() { return -1; }
     void print(const String& s) { std::cout << s; }
     void println(const String& s = "") { std::cout << s << std::endl; }
     template<typename... Args>

@@ -39,10 +39,15 @@
 #define OFFLINE_PRINT_STYLE         STYLE_HYBRID
 
 // -----------------------------------------------------------------------------
-// 3. Daily Cron Schedule Settings (Every morning at 7:00 AM)
+// 3. Daily Cron Schedule Settings (Default: Every morning at 7:00 AM)
 // -----------------------------------------------------------------------------
-#define DAILY_PRINT_HOUR        7       // 7:00 AM
-#define DAILY_PRINT_MINUTE      0
+#define DAILY_PRINT_ENABLED_DEFAULT  true    // Daily recurring schedule active by default
+#define DAILY_PRINT_HOUR_DEFAULT     7       // Default 7:00 AM
+#define DAILY_PRINT_MINUTE_DEFAULT   0
+
+// Backward-compatible fallback aliases
+#define DAILY_PRINT_HOUR             DAILY_PRINT_HOUR_DEFAULT
+#define DAILY_PRINT_MINUTE           DAILY_PRINT_MINUTE_DEFAULT
 
 // Timezone string (for internal POSIX time sync)
 #define TIMEZONE_SPEC           "CST6CDT,M3.2.0,M11.1.0"

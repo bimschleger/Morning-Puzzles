@@ -1,16 +1,8 @@
 #include "BridgesGen.h"
+#include "GeneratorUtils.h"
 #include "../printer/EscPosPrinter.h"
 #include "../printer/ThermalCanvas.h"
 #include <string.h>
-
-static void shuffleInts(uint8_t* arr, uint8_t n) {
-    for (int i = n - 1; i > 0; i--) {
-        int j = random(0, i + 1);
-        uint8_t temp = arr[i];
-        arr[i] = arr[j];
-        arr[j] = temp;
-    }
-}
 
 static bool edgesCrossLocal(uint8_t r1a, uint8_t c1a, uint8_t r1b, uint8_t c1b,
                            uint8_t r2a, uint8_t c2a, uint8_t r2b, uint8_t c2b) {
@@ -37,9 +29,8 @@ static bool edgesCrossLocal(uint8_t r1a, uint8_t c1a, uint8_t r1b, uint8_t c1b,
     return (vRMin < hR && hR < vRMax) && (hCMin < vC && vC < hCMax);
 }
 
-BridgesGen::BridgesGen() : _size(8), _islandCount(10), _bridgeCount(0) {
+BridgesGen::BridgesGen() : _size(8), _islandCount(10) {
     memset(_islands, 0, sizeof(_islands));
-    memset(_bridges, 0, sizeof(_bridges));
 }
 
 void BridgesGen::generate(BridgesDifficulty diff) {
@@ -63,7 +54,7 @@ void BridgesGen::generate(BridgesDifficulty diff) {
     for (uint8_t i = 0; i < maxCells; i++) allCells[i] = i;
 
     for (uint8_t attempt = 0; attempt < 80; attempt++) {
-        shuffleInts(allCells, maxCells);
+        mp_shuffle(allCells, maxCells);
 
         for (uint8_t i = 0; i < _islandCount; i++) {
             _islands[i].r = allCells[i] / _size;
@@ -116,7 +107,7 @@ void BridgesGen::generate(BridgesDifficulty diff) {
         // Shuffle potential edges
         uint8_t edgeOrder[64];
         for (uint8_t i = 0; i < potCount; i++) edgeOrder[i] = i;
-        shuffleInts(edgeOrder, potCount);
+        mp_shuffle(edgeOrder, potCount);
 
         // Build Spanning Tree with Union-Find
         uint8_t parent[16];
@@ -128,15 +119,16 @@ void BridgesGen::generate(BridgesDifficulty diff) {
             return root;
         };
 
-        _bridgeCount = 0;
+        BridgeEdge bridges[32];
+        uint8_t bridgeCount = 0;
         for (uint8_t idx = 0; idx < potCount; idx++) {
             uint8_t e = edgeOrder[idx];
             uint8_t u = potU[e], v = potV[e];
 
             bool crosses = false;
-            for (uint8_t b = 0; b < _bridgeCount; b++) {
+            for (uint8_t b = 0; b < bridgeCount; b++) {
                 if (edgesCrossLocal(_islands[u].r, _islands[u].c, _islands[v].r, _islands[v].c,
-                                    _bridges[b].r1, _bridges[b].c1, _bridges[b].r2, _bridges[b].c2)) {
+                                    bridges[b].r1, bridges[b].c1, bridges[b].r2, bridges[b].c2)) {
                     crosses = true;
                     break;
                 }
@@ -147,12 +139,12 @@ void BridgesGen::generate(BridgesDifficulty diff) {
                 uint8_t rv = findRoot(v);
                 if (ru != rv) {
                     parent[ru] = rv;
-                    _bridges[_bridgeCount].r1 = _islands[u].r;
-                    _bridges[_bridgeCount].c1 = _islands[u].c;
-                    _bridges[_bridgeCount].r2 = _islands[v].r;
-                    _bridges[_bridgeCount].c2 = _islands[v].c;
-                    _bridges[_bridgeCount].count = 1;
-                    _bridgeCount++;
+                    bridges[bridgeCount].r1 = _islands[u].r;
+                    bridges[bridgeCount].c1 = _islands[u].c;
+                    bridges[bridgeCount].r2 = _islands[v].r;
+                    bridges[bridgeCount].c2 = _islands[v].c;
+                    bridges[bridgeCount].count = 1;
+                    bridgeCount++;
                     _islands[u].count++;
                     _islands[v].count++;
                 }
@@ -172,15 +164,15 @@ void BridgesGen::generate(BridgesDifficulty diff) {
         if (!allConnected) continue;
 
         // Randomly double some bridge counts
-        for (uint8_t b = 0; b < _bridgeCount; b++) {
+        for (uint8_t b = 0; b < bridgeCount; b++) {
             uint8_t u = 0, v = 0;
             for (uint8_t i = 0; i < _islandCount; i++) {
-                if (_islands[i].r == _bridges[b].r1 && _islands[i].c == _bridges[b].c1) u = i;
-                if (_islands[i].r == _bridges[b].r2 && _islands[i].c == _bridges[b].c2) v = i;
+                if (_islands[i].r == bridges[b].r1 && _islands[i].c == bridges[b].c1) u = i;
+                if (_islands[i].r == bridges[b].r2 && _islands[i].c == bridges[b].c2) v = i;
             }
             if (_islands[u].count < maxDegree && _islands[v].count < maxDegree) {
                 if (random(0, 100) < 35) {
-                    _bridges[b].count = 2;
+                    bridges[b].count = 2;
                     _islands[u].count++;
                     _islands[v].count++;
                 }
@@ -191,17 +183,7 @@ void BridgesGen::generate(BridgesDifficulty diff) {
     }
 }
 
-void BridgesGen::printToReceipt(EscPosPrinter& printer, BridgesDifficulty diff) {
-    const char* diffStr = (diff == BRIDGES_EASY) ? "EASY" : ((diff == BRIDGES_HARD) ? "HARD" : "MEDIUM");
-
-    printer.setBold(true);
-    printer.println("--- BRIDGES ---");
-    printer.setBold(false);
-    printer.println(String("DIFFICULTY: ") + diffStr);
-    printer.println("Connect all islands into one network using");
-    printer.println("1 or 2 lines matching each island's number.");
-    printer.println("");
-
+void BridgesGen::printToReceipt(EscPosPrinter& printer, BridgesDifficulty /*diff*/) {
     uint8_t gridH = 2 * _size - 1;
     uint8_t gridW = 2 * _size - 1;
     char charGrid[16][16];
@@ -224,19 +206,7 @@ void BridgesGen::printToReceipt(EscPosPrinter& printer, BridgesDifficulty diff) 
     printer.println("");
 }
 
-bool BridgesGen::printRasterToReceipt(EscPosPrinter& printer, BridgesDifficulty diff) {
-    const char* diffStr = (diff == BRIDGES_EASY) ? "EASY" : ((diff == BRIDGES_HARD) ? "HARD" : "MEDIUM");
-
-    printer.setAlign(ALIGN_CENTER);
-    printer.setBold(true);
-    printer.println("--- BRIDGES ---");
-    printer.setBold(false);
-    printer.println(String("DIFFICULTY: ") + diffStr);
-    printer.println("Connect all islands into one network using");
-    printer.println("1 or 2 lines matching each island's number.");
-    printer.println("");
-    printer.setAlign(ALIGN_LEFT);
-
+bool BridgesGen::printRasterToReceipt(EscPosPrinter& printer, BridgesDifficulty /*diff*/) {
     const int16_t padding = 32;
     const int16_t boardSize = THERMAL_CANVAS_WIDTH - padding * 2;
     const int16_t step = (_size > 1) ? (boardSize / (_size - 1)) : boardSize;

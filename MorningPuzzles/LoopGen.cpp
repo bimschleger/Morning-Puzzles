@@ -1,30 +1,12 @@
 #include "LoopGen.h"
+#include "GeneratorUtils.h"
 #include "EscPosPrinter.h"
 #include "ThermalCanvas.h"
-
-static void shuffleLoopIndices(uint8_t* arr, uint8_t n) {
-    for (uint8_t i = n - 1; i > 0; i--) {
-        uint8_t j = (uint8_t)random(i + 1);
-        uint8_t tmp = arr[i];
-        arr[i] = arr[j];
-        arr[j] = tmp;
-    }
-}
 
 LoopGen::LoopGen() : _size(7) {
     for (uint8_t r = 0; r < 9; r++) {
         for (uint8_t c = 0; c < 9; c++) {
             _clues[r][c] = -1;
-        }
-    }
-    for (uint8_t r = 0; r < 10; r++) {
-        for (uint8_t c = 0; c < 9; c++) {
-            _solutionH[r][c] = 0;
-        }
-    }
-    for (uint8_t r = 0; r < 9; r++) {
-        for (uint8_t c = 0; c < 10; c++) {
-            _solutionV[r][c] = 0;
         }
     }
 }
@@ -148,23 +130,25 @@ bool LoopGen::generatePolyominoLoop(uint8_t n) {
 
         if (SCount >= targetCount / 2 && SCount >= 3) {
             // Build H and V
+            uint8_t solH[10][9] = {0};
+            uint8_t solV[9][10] = {0};
             for (uint8_t r = 0; r <= n; r++) {
                 for (uint8_t c = 0; c < n; c++) {
                     uint8_t top = (r > 0) ? grid[r - 1][c] : 0;
                     uint8_t bot = (r < n) ? grid[r][c] : 0;
-                    _solutionH[r][c] = (top != bot) ? 1 : 0;
+                    solH[r][c] = (top != bot) ? 1 : 0;
                 }
             }
             for (uint8_t r = 0; r < n; r++) {
                 for (uint8_t c = 0; c <= n; c++) {
                     uint8_t left = (c > 0) ? grid[r][c - 1] : 0;
                     uint8_t right = (c < n) ? grid[r][c] : 0;
-                    _solutionV[r][c] = (left != right) ? 1 : 0;
+                    solV[r][c] = (left != right) ? 1 : 0;
                 }
             }
             for (uint8_t r = 0; r < n; r++) {
                 for (uint8_t c = 0; c < n; c++) {
-                    _clues[r][c] = _solutionH[r][c] + _solutionH[r + 1][c] + _solutionV[r][c] + _solutionV[r][c + 1];
+                    _clues[r][c] = solH[r][c] + solH[r + 1][c] + solV[r][c] + solV[r + 1][c];
                 }
             }
 
@@ -172,7 +156,7 @@ bool LoopGen::generatePolyominoLoop(uint8_t n) {
             uint8_t deg[10][10] = {0};
             for (uint8_t r = 0; r <= n; r++) {
                 for (uint8_t c = 0; c < n; c++) {
-                    if (_solutionH[r][c]) {
+                    if (solH[r][c]) {
                         deg[r][c]++;
                         deg[r][c + 1]++;
                     }
@@ -180,7 +164,7 @@ bool LoopGen::generatePolyominoLoop(uint8_t n) {
             }
             for (uint8_t r = 0; r < n; r++) {
                 for (uint8_t c = 0; c <= n; c++) {
-                    if (_solutionV[r][c]) {
+                    if (solV[r][c]) {
                         deg[r][c]++;
                         deg[r + 1][c]++;
                     }
@@ -310,7 +294,7 @@ void LoopGen::generate(LoopDifficulty difficulty) {
         // Thin clues
         uint8_t cellCoords[81];
         for (uint8_t i = 0; i < _size * _size; i++) cellCoords[i] = i;
-        shuffleLoopIndices(cellCoords, _size * _size);
+        mp_shuffle(cellCoords, _size * _size);
 
         float retainPct = (difficulty == LOOP_EASY) ? 0.58f : ((difficulty == LOOP_HARD) ? 0.38f : 0.48f);
         uint8_t targetClues = (uint8_t)(_size * _size * retainPct);
@@ -335,18 +319,7 @@ void LoopGen::generate(LoopDifficulty difficulty) {
 }
 
 void LoopGen::printToReceipt(EscPosPrinter& printer, LoopDifficulty diff) {
-    const char* diffStr = (diff == LOOP_EASY) ? "EASY" : ((diff == LOOP_HARD) ? "HARD" : "MEDIUM");
-
-    printer.setAlign(ALIGN_CENTER);
-    printer.setBold(true);
-    printer.println("--- LOOP ---");
-    printer.setBold(false);
-    printer.println(String("DIFFICULTY: ") + diffStr);
-    printer.println("Draw a single continuous closed loop connecting dots");
-    printer.println("so each number matches its edge count.");
-    printer.println("");
-    printer.setAlign(ALIGN_LEFT);
-
+    (void)diff;
     for (uint8_t r = 0; r < _size; r++) {
         String dotLine = "      ";
         for (uint8_t c = 0; c < _size; c++) dotLine += ".   ";
@@ -370,18 +343,7 @@ void LoopGen::printToReceipt(EscPosPrinter& printer, LoopDifficulty diff) {
 }
 
 bool LoopGen::printRasterToReceipt(EscPosPrinter& printer, LoopDifficulty diff) {
-    const char* diffStr = (diff == LOOP_EASY) ? "EASY" : ((diff == LOOP_HARD) ? "HARD" : "MEDIUM");
-
-    printer.setAlign(ALIGN_CENTER);
-    printer.setBold(true);
-    printer.println("--- LOOP ---");
-    printer.setBold(false);
-    printer.println(String("DIFFICULTY: ") + diffStr);
-    printer.println("Draw a single continuous closed loop connecting dots");
-    printer.println("so each number matches its edge count.");
-    printer.println("");
-    printer.setAlign(ALIGN_LEFT);
-
+    (void)diff;
     int16_t cellSize = (_size == 6) ? 54 : ((_size == 9) ? 36 : 46);
     int16_t padding = (_size == 7) ? 27 : 26;
     int16_t boardSize = cellSize * _size;

@@ -1,22 +1,13 @@
 #include "TentsGen.h"
+#include "GeneratorUtils.h"
 #include "../printer/EscPosPrinter.h"
 #include "../printer/ThermalCanvas.h"
 #include <string.h>
-
-static void shuffleIndices(uint8_t* arr, uint8_t n) {
-    for (int i = n - 1; i > 0; i--) {
-        int j = random(0, i + 1);
-        uint8_t temp = arr[i];
-        arr[i] = arr[j];
-        arr[j] = temp;
-    }
-}
 
 TentsGen::TentsGen() : _size(8), _treeCount(8) {
     memset(_rowClues, 0, sizeof(_rowClues));
     memset(_colClues, 0, sizeof(_colClues));
     memset(_puzzle, 0, sizeof(_puzzle));
-    memset(_solution, 0, sizeof(_solution));
 }
 
 void TentsGen::generate(TentsDifficulty diff) {
@@ -36,7 +27,7 @@ void TentsGen::generate(TentsDifficulty diff) {
     for (uint8_t i = 0; i < maxCells; i++) allCells[i] = i;
 
     for (uint8_t attempt = 0; attempt < 100; attempt++) {
-        shuffleIndices(allCells, maxCells);
+        mp_shuffle(allCells, maxCells);
 
         uint8_t tentR[16], tentC[16];
         uint8_t placedTents = 0;
@@ -113,31 +104,18 @@ void TentsGen::generate(TentsDifficulty diff) {
         memset(_rowClues, 0, sizeof(_rowClues));
         memset(_colClues, 0, sizeof(_colClues));
         memset(_puzzle, 0, sizeof(_puzzle));
-        memset(_solution, 0, sizeof(_solution));
 
         for (uint8_t i = 0; i < placedTents; i++) {
             _rowClues[tentR[i]]++;
             _colClues[tentC[i]]++;
             _puzzle[treeR[i]][treeC[i]] = 1;     // 1 = tree
-            _solution[treeR[i]][treeC[i]] = 1;   // 1 = tree
-            _solution[tentR[i]][tentC[i]] = 2;   // 2 = tent
         }
 
         return; // Success!
     }
 }
 
-void TentsGen::printToReceipt(EscPosPrinter& printer, TentsDifficulty diff) {
-    const char* diffStr = (diff == TENTS_EASY) ? "EASY" : ((diff == TENTS_HARD) ? "HARD" : "MEDIUM");
-
-    printer.setBold(true);
-    printer.println("--- TENTS ---");
-    printer.setBold(false);
-    printer.println(String("DIFFICULTY: ") + diffStr);
-    printer.println(String("Pitch ") + _treeCount + " tents next to trees without tents");
-    printer.println("touching, matching row and column counts.");
-    printer.println("");
-
+void TentsGen::printToReceipt(EscPosPrinter& printer, TentsDifficulty /*diff*/) {
     // Col clues header
     String colHeader = "       ";
     for (uint8_t c = 0; c < _size; c++) {
@@ -166,19 +144,7 @@ void TentsGen::printToReceipt(EscPosPrinter& printer, TentsDifficulty diff) {
     printer.println("");
 }
 
-bool TentsGen::printRasterToReceipt(EscPosPrinter& printer, TentsDifficulty diff) {
-    const char* diffStr = (diff == TENTS_EASY) ? "EASY" : ((diff == TENTS_HARD) ? "HARD" : "MEDIUM");
-
-    printer.setAlign(ALIGN_CENTER);
-    printer.setBold(true);
-    printer.println("--- TENTS ---");
-    printer.setBold(false);
-    printer.println(String("DIFFICULTY: ") + diffStr);
-    printer.println(String("Pitch ") + _treeCount + " tents next to trees without tents");
-    printer.println("touching, matching row and column counts.");
-    printer.println("");
-    printer.setAlign(ALIGN_LEFT);
-
+bool TentsGen::printRasterToReceipt(EscPosPrinter& printer, TentsDifficulty /*diff*/) {
     const int16_t padding = 24;
     const int16_t innerWidth = THERMAL_CANVAS_WIDTH - padding * 2;
     const int16_t marginW = 48;

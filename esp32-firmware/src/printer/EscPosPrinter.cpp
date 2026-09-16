@@ -253,6 +253,21 @@ void EscPosPrinter::println(const String& text) {
     }
 }
 
+void EscPosPrinter::print(const char* text) {
+    if (_outputStream && text) {
+        _outputStream->print(text);
+    }
+}
+
+void EscPosPrinter::println(const char* text) {
+    if (_outputStream) {
+        if (text && text[0] != '\0') {
+            _outputStream->print(text);
+        }
+        _outputStream->write(0x0A); // LF
+    }
+}
+
 void EscPosPrinter::feed(uint8_t lines) {
     const uint8_t cmd[] = { 0x1B, 0x64, lines }; // ESC d n
     sendCommand(cmd, sizeof(cmd));
@@ -268,10 +283,9 @@ void EscPosPrinter::cut(bool fullCut) {
 
 void EscPosPrinter::printHorizontalLine(char pattern) {
     setAlign(ALIGN_LEFT);
-    String line = "";
-    for (int i = 0; i < CHARACTERS_PER_LINE_A; i++) {
-        line += pattern;
-    }
+    char line[CHARACTERS_PER_LINE_A + 1];
+    memset(line, pattern, CHARACTERS_PER_LINE_A);
+    line[CHARACTERS_PER_LINE_A] = '\0';
     println(line);
 }
 
@@ -304,16 +318,19 @@ void EscPosPrinter::printKeyValue(const String& key, const String& value, int to
     int spaces = totalCols - keyLen - valLen;
     
     if (spaces < 1) {
-        println(key + " " + value);
+        print(key);
+        print(" ");
+        println(value);
         return;
     }
     
-    String line = key;
-    for (int i = 0; i < spaces; i++) {
-        line += ' ';
+    print(key);
+    if (_outputStream) {
+        for (int i = 0; i < spaces; i++) {
+            _outputStream->write(' ');
+        }
     }
-    line += value;
-    println(line);
+    println(value);
 }
 
 size_t EscPosPrinter::writeRaw(const uint8_t* buffer, size_t size) {

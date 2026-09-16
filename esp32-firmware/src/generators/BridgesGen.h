@@ -33,15 +33,11 @@ public:
     uint8_t getSize() const { return _size; }
     uint8_t getIslandCount() const { return _islandCount; }
     IslandInfo getIsland(uint8_t i) const { return _islands[i]; }
-    uint8_t getBridgeCount() const { return _bridgeCount; }
-    BridgeEdge getBridge(uint8_t i) const { return _bridges[i]; }
 
 private:
     uint8_t _size;
     uint8_t _islandCount;
     IslandInfo _islands[16];
-    uint8_t _bridgeCount;
-    BridgeEdge _bridges[32];
 };
 
 #endif // BRIDGES_GEN_H

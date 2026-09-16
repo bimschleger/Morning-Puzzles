@@ -1,16 +1,8 @@
 #include "LightsGen.h"
+#include "GeneratorUtils.h"
 #include "EscPosPrinter.h"
 #include "ThermalCanvas.h"
 #include <string.h>
-
-static void shuffleLightsIndices(uint8_t* arr, uint8_t n) {
-    for (int i = n - 1; i > 0; i--) {
-        int j = random(0, i + 1);
-        uint8_t temp = arr[i];
-        arr[i] = arr[j];
-        arr[j] = temp;
-    }
-}
 
 static uint8_t getOrthogonal(uint8_t r, uint8_t c, uint8_t size, uint8_t nR[4], uint8_t nC[4]) {
     uint8_t count = 0;
@@ -30,7 +22,6 @@ static uint8_t getOrthogonal(uint8_t r, uint8_t c, uint8_t size, uint8_t nR[4], 
 
 LightsGen::LightsGen() : _size(8), _totalBulbs(0) {
     memset(_puzzle, -1, sizeof(_puzzle));
-    memset(_solution, 0, sizeof(_solution));
 }
 
 bool LightsGen::solveDeductive(int8_t puz[12][12], uint8_t size, int8_t sol[12][12]) {
@@ -205,7 +196,7 @@ void LightsGen::generate(LightsDifficulty difficulty) {
 
     for (uint8_t attempt = 0; attempt < 50; attempt++) {
         memset(_puzzle, -1, sizeof(_puzzle));
-        memset(_solution, 0, sizeof(_solution));
+        int8_t solution[12][12] = {0};
 
         // 1. Symmetrical barrier placement
         uint8_t numPairs = targetWalls / 2;
@@ -213,7 +204,7 @@ void LightsGen::generate(LightsDifficulty difficulty) {
         uint8_t coords[144];
         uint8_t totalCells = _size * _size;
         for (uint8_t i = 0; i < totalCells; i++) coords[i] = i;
-        shuffleLightsIndices(coords, totalCells);
+        mp_shuffle(coords, totalCells);
 
         for (uint8_t i = 0; i < totalCells && placed < numPairs; i++) {
             uint8_t r = coords[i] / _size;
@@ -243,7 +234,7 @@ void LightsGen::generate(LightsDifficulty difficulty) {
         }
         if (whiteCount < (_size * _size * 65) / 100) continue;
 
-        shuffleLightsIndices(whiteCoords, whiteCount);
+        mp_shuffle(whiteCoords, whiteCount);
 
         for (uint8_t i = 0; i < whiteCount; i++) {
             uint8_t r = whiteCoords[i] / _size;
@@ -327,7 +318,7 @@ void LightsGen::generate(LightsDifficulty difficulty) {
         }
 
         // 4. Test deductive solvability
-        if (!solveDeductive(_puzzle, _size, _solution)) continue;
+        if (!solveDeductive(_puzzle, _size, solution)) continue;
 
         // 5. Clue thinning
         uint8_t wallCoords[144];
@@ -337,7 +328,7 @@ void LightsGen::generate(LightsDifficulty difficulty) {
                 if (_puzzle[r][c] >= 0) wallCoords[wallCount++] = r * _size + c;
             }
         }
-        shuffleLightsIndices(wallCoords, wallCount);
+        mp_shuffle(wallCoords, wallCount);
 
         float retainPct = (difficulty == LIGHTS_EASY) ? 0.85f : ((difficulty == LIGHTS_HARD) ? 0.45f : ((difficulty == LIGHTS_EXTREME) ? 0.35f : 0.65f));
         uint8_t targetClues = (uint8_t)(wallCount * retainPct);
@@ -350,7 +341,7 @@ void LightsGen::generate(LightsDifficulty difficulty) {
             int8_t saved = _puzzle[r][c];
             _puzzle[r][c] = -2; // unnumbered
 
-            if (solveDeductive(_puzzle, _size, _solution)) {
+            if (solveDeductive(_puzzle, _size, solution)) {
                 currentClues--;
             } else {
                 _puzzle[r][c] = saved;
@@ -358,22 +349,17 @@ void LightsGen::generate(LightsDifficulty difficulty) {
         }
 
         // Final verification
-        if (solveDeductive(_puzzle, _size, _solution)) {
+        if (solveDeductive(_puzzle, _size, solution)) {
             return; // Successfully generated
         }
     }
 }
 
 void LightsGen::printToReceipt(EscPosPrinter& printer, LightsDifficulty diff) {
-    const char* diffStr = (diff == LIGHTS_EASY) ? "EASY" : ((diff == LIGHTS_HARD) ? "HARD" : ((diff == LIGHTS_EXTREME) ? "EXTREME" : "MEDIUM"));
-
-    printer.setBold(true);
-    printer.println("--- LIGHTS ---");
-    printer.setBold(false);
-    printer.println(String("DIFFICULTY: ") + diffStr);
-    printer.println(String("Place ") + String(_totalBulbs) + " bulbs to light all corridors without");
-    printer.println("bulbs shining together or exceeding numbers.");
-    printer.println(String("TOTAL BULBS: ") + String(_totalBulbs));
+    (void)diff;
+    char bulbsBuf[32];
+    snprintf(bulbsBuf, sizeof(bulbsBuf), "TOTAL BULBS: %d", (int)_totalBulbs);
+    printer.println(bulbsBuf);
     printer.println("");
 
     String sep = "   ";
@@ -396,18 +382,7 @@ void LightsGen::printToReceipt(EscPosPrinter& printer, LightsDifficulty diff) {
 }
 
 bool LightsGen::printRasterToReceipt(EscPosPrinter& printer, LightsDifficulty diff) {
-    const char* diffStr = (diff == LIGHTS_EASY) ? "EASY" : ((diff == LIGHTS_HARD) ? "HARD" : ((diff == LIGHTS_EXTREME) ? "EXTREME" : "MEDIUM"));
-
-    printer.setAlign(ALIGN_CENTER);
-    printer.setBold(true);
-    printer.println("--- LIGHTS ---");
-    printer.setBold(false);
-    printer.println(String("DIFFICULTY: ") + diffStr);
-    printer.println(String("Place ") + String(_totalBulbs) + " bulbs to light all corridors without");
-    printer.println("bulbs shining together or exceeding numbers.");
-    printer.println("");
-    printer.setAlign(ALIGN_LEFT);
-
+    (void)diff;
     const int16_t padding = 24;
     const int16_t innerWidth = THERMAL_CANVAS_WIDTH - padding * 2;
     const int16_t cellSize = innerWidth / _size;

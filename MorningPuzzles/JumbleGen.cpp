@@ -1,8 +1,8 @@
 #include "JumbleGen.h"
 #include "JumbleDataset.h"
+#include "GeneratorUtils.h"
 #include "EscPosPrinter.h"
 #include "ThermalCanvas.h"
-#include <vector>
 
 JumbleGen::JumbleGen() : _numWords(0), _riddle(""), _answer(""), _difficulty(JUMBLE_MEDIUM) {}
 
@@ -13,12 +13,7 @@ String JumbleGen::scrambleWord(const char* word) {
     buf[sizeof(buf) - 1] = '\0';
 
     for (int attempts = 0; attempts < 20; attempts++) {
-        for (int i = len - 1; i > 0; i--) {
-            int j = random(i + 1);
-            char tmp = buf[i];
-            buf[i] = buf[j];
-            buf[j] = tmp;
-        }
+        mp_shuffle(buf, len);
         if (strcmp(buf, word) != 0) {
             return String(buf);
         }
@@ -48,33 +43,34 @@ void JumbleGen::generate(JumbleDifficulty difficulty) {
     _riddle = chosen.riddle;
     _answer = chosen.answer;
 
+    // Parse space-delimited words and unpack bitmask circles
+    const char* p = chosen.words;
     for (uint8_t i = 0; i < _numWords; i++) {
-        _words[i].original = chosen.words[i];
-        _words[i].scrambled = scrambleWord(chosen.words[i]);
-        _words[i].numCircles = chosen.numCircles[i];
-        for (uint8_t c = 0; c < chosen.numCircles[i] && c < 4; c++) {
-            _words[i].circleIndices[c] = chosen.circles[i][c];
+        while (*p == ' ') p++;
+        const char* start = p;
+        while (*p != ' ' && *p != '\0') p++;
+        int wLen = p - start;
+        char wBuf[16];
+        if (wLen >= (int)sizeof(wBuf)) wLen = sizeof(wBuf) - 1;
+        memcpy(wBuf, start, wLen);
+        wBuf[wLen] = '\0';
+
+        _words[i].original = String(wBuf);
+        _words[i].scrambled = scrambleWord(wBuf);
+
+        uint8_t mask = chosen.circleMasks[i];
+        _words[i].numCircles = 0;
+        for (uint8_t bit = 0; bit < 8; bit++) {
+            if (mask & (1 << bit)) {
+                if (_words[i].numCircles < 4) {
+                    _words[i].circleIndices[_words[i].numCircles++] = bit;
+                }
+            }
         }
     }
 }
 
 void JumbleGen::printToReceipt(EscPosPrinter& printer) {
-    printer.setAlign(ALIGN_CENTER);
-    printer.setBold(true);
-    printer.println("--- JUMBLE ---");
-    printer.setBold(false);
-    if (_difficulty == JUMBLE_EASY) {
-        printer.println("DIFFICULTY: EASY");
-    } else if (_difficulty == JUMBLE_HARD) {
-        printer.println("DIFFICULTY: HARD");
-    } else {
-        printer.println("DIFFICULTY: MEDIUM");
-    }
-    printer.println("Unscramble each word, then use the circled");
-    printer.println("letters to solve the riddle.");
-    printer.println("");
-    printer.setAlign(ALIGN_LEFT);
-
     for (uint8_t i = 0; i < _numWords; i++) {
         const JumbleItem& item = _words[i];
         String left = "  " + item.scrambled;
@@ -100,29 +96,34 @@ void JumbleGen::printToReceipt(EscPosPrinter& printer) {
     }
 
     printer.println("");
-    printer.println("Arrange the circled letters to answer this riddle:");
-    printer.println(String("Q: \"") + _riddle + "\"");
-    printer.println("A: _________________________________________");
+    printer.println("Riddle:");
+    printer.println(String("  \"") + _riddle + "\"");
+    printer.println("");
+    printer.println("Answer:");
+
+    // Print blank slots matching answer format (preserving punctuation)
+    String ansLine = "  ";
+    for (size_t i = 0; i < strlen(_answer); i++) {
+        char ch = _answer[i];
+        if (ch == ' ') {
+            ansLine += "   ";
+        } else if (ch == '"' || ch == '\'' || ch == '-' || ch == '?' || ch == '!') {
+            ansLine += ch;
+            ansLine += ' ';
+        } else {
+            ansLine += "_ ";
+        }
+    }
+    printer.println(ansLine);
     printer.println("");
 }
 
-bool JumbleGen::printRasterToReceipt(EscPosPrinter& printer) {
-    printer.setAlign(ALIGN_CENTER);
-    printer.setBold(true);
-    printer.println("--- JUMBLE ---");
-    printer.setBold(false);
-    if (_difficulty == JUMBLE_EASY) {
-        printer.println("DIFFICULTY: EASY");
-    } else if (_difficulty == JUMBLE_HARD) {
-        printer.println("DIFFICULTY: HARD");
-    } else {
-        printer.println("DIFFICULTY: MEDIUM");
-    }
-    printer.println("Unscramble each word, then use the circled");
-    printer.println("letters to solve the riddle.");
-    printer.println("");
-    printer.setAlign(ALIGN_LEFT);
+struct JumbleLineSpan {
+    uint8_t startIdx;
+    uint8_t count;
+};
 
+bool JumbleGen::printRasterToReceipt(EscPosPrinter& printer) {
     const int16_t padding = 24;
     const int16_t innerWidth = THERMAL_CANVAS_WIDTH - padding * 2;
     const int16_t clueSize = 66;
@@ -134,13 +135,14 @@ bool JumbleGen::printRasterToReceipt(EscPosPrinter& printer) {
     const int16_t wordSpacing = 16;
     const int16_t lineGap = 12;
 
-    std::vector<String> ansWords;
+    String ansWords[8];
+    uint8_t numAnsWords = 0;
     String ansStr = _answer ? _answer : "";
     int16_t aStart = 0;
     for (int16_t i = 0; i <= (int16_t)ansStr.length(); i++) {
         if (i == (int16_t)ansStr.length() || ansStr[i] == ' ') {
-            if (i > aStart) {
-                ansWords.push_back(ansStr.substring(aStart, i));
+            if (i > aStart && numAnsWords < 8) {
+                ansWords[numAnsWords++] = ansStr.substring(aStart, i);
             }
             aStart = i + 1;
         }
@@ -174,29 +176,37 @@ bool JumbleGen::printRasterToReceipt(EscPosPrinter& printer) {
         return wWidth;
     };
 
-    std::vector<std::vector<String>> ansLines;
-    std::vector<String> curLine;
+    JumbleLineSpan ansLines[4];
+    uint8_t numAnsLines = 0;
+    uint8_t curLineStart = 0;
+    uint8_t curLineCount = 0;
     int16_t curLineW = 0;
 
-    for (const auto& w : ansWords) {
-        int16_t wW = measureWordW(w);
-        int16_t needed = curLine.empty() ? wW : (wordSpacing + wW);
-        if (curLineW + needed <= innerWidth && !curLine.empty()) {
-            curLine.push_back(w);
+    for (uint8_t i = 0; i < numAnsWords; i++) {
+        int16_t wW = measureWordW(ansWords[i]);
+        int16_t needed = (curLineCount == 0) ? wW : (wordSpacing + wW);
+        if (curLineW + needed <= innerWidth && curLineCount > 0) {
+            curLineCount++;
             curLineW += needed;
         } else {
-            if (!curLine.empty()) ansLines.push_back(curLine);
-            curLine = {w};
+            if (curLineCount > 0 && numAnsLines < 4) {
+                ansLines[numAnsLines++] = {curLineStart, curLineCount};
+            }
+            curLineStart = i;
+            curLineCount = 1;
             curLineW = wW;
         }
     }
-    if (!curLine.empty()) ansLines.push_back(curLine);
+    if (curLineCount > 0 && numAnsLines < 4) {
+        ansLines[numAnsLines++] = {curLineStart, curLineCount};
+    }
 
     // Format riddle into wrapped lines (~28 chars)
     String riddleStr = String("\"") + _riddle + "\"";
-    std::vector<String> riddleLines;
+    String riddleLines[8];
+    uint8_t numRiddleLines = 0;
     int16_t rStart = 0;
-    while (rStart < (int16_t)riddleStr.length()) {
+    while (rStart < (int16_t)riddleStr.length() && numRiddleLines < 8) {
         int16_t rEnd = rStart + 28;
         if (rEnd >= (int16_t)riddleStr.length()) {
             rEnd = riddleStr.length();
@@ -212,7 +222,7 @@ bool JumbleGen::printRasterToReceipt(EscPosPrinter& printer) {
         }
         String line = riddleStr.substring(rStart, rEnd);
         line.trim();
-        riddleLines.push_back(line);
+        riddleLines[numRiddleLines++] = line;
         rStart = (rEnd < (int16_t)riddleStr.length() && riddleStr[rEnd] == ' ') ? rEnd + 1 : rEnd;
     }
 
@@ -220,9 +230,9 @@ bool JumbleGen::printRasterToReceipt(EscPosPrinter& printer) {
         12
         + count * (132 + wordGap)
         + 16
-        + 20 + riddleLines.size() * 28 + 6
+        + 20 + numRiddleLines * 28 + 6
         + 20 + 192
-        + 22 + ansLines.size() * (ansH + lineGap) + 4
+        + 22 + numAnsLines * (ansH + lineGap) + 4
     );
     totalH = ((totalH + 7) / 8) * 8;
 
@@ -249,7 +259,7 @@ bool JumbleGen::printRasterToReceipt(EscPosPrinter& printer) {
             canvas.drawVLine(padding + c * clueSize, curY, 132, 1);
         }
 
-        // Scrambled letters and circles
+        // Draw scrambled letters (top row) and circles for marked indices (bottom row)
         for (int16_t c = 0; c < len; c++) {
             int16_t cx0 = padding + c * clueSize;
             int16_t charX = cx0 + (clueSize - 18) / 2;
@@ -278,8 +288,8 @@ bool JumbleGen::printRasterToReceipt(EscPosPrinter& printer) {
     // 3. Riddle Question (scale=3 for quote text)
     canvas.drawText(padding, curY, "RIDDLE QUESTION:", 2);
     curY += 20;
-    for (const auto& rLine : riddleLines) {
-        canvas.drawText(padding + 4, curY, rLine.c_str(), 3);
+    for (uint8_t r = 0; r < numRiddleLines; r++) {
+        canvas.drawText(padding + 4, curY, riddleLines[r].c_str(), 3);
         curY += 28;
     }
     curY += 6;
@@ -292,16 +302,18 @@ bool JumbleGen::printRasterToReceipt(EscPosPrinter& printer) {
     canvas.drawText(padding, curY, "ANSWER:", 2);
     curY += 22;
 
-    for (const auto& lineWords : ansLines) {
+    for (uint8_t l = 0; l < numAnsLines; l++) {
+        const JumbleLineSpan& span = ansLines[l];
         int16_t lineTotalW = 0;
-        for (size_t i = 0; i < lineWords.size(); i++) {
-            lineTotalW += measureWordW(lineWords[i]);
+        for (uint8_t i = 0; i < span.count; i++) {
+            lineTotalW += measureWordW(ansWords[span.startIdx + i]);
             if (i > 0) lineTotalW += wordSpacing;
         }
         int16_t startX = padding + (innerWidth - lineTotalW) / 2;
         int16_t ax = startX;
 
-        for (const auto& w : lineWords) {
+        for (uint8_t i = 0; i < span.count; i++) {
+            const String& w = ansWords[span.startIdx + i];
             int16_t boxW = getWordBoxW(w);
             size_t c = 0;
             while (c < w.length()) {
@@ -314,8 +326,8 @@ bool JumbleGen::printRasterToReceipt(EscPosPrinter& printer) {
                     int16_t k = c - start;
                     int16_t segW = k * boxW;
                     canvas.drawRect(ax, curY, segW, ansH, 2);
-                    for (int16_t i = 1; i < k; i++) {
-                        canvas.drawVLine(ax + i * boxW, curY, ansH, 1);
+                    for (int16_t seg = 1; seg < k; seg++) {
+                        canvas.drawVLine(ax + seg * boxW, curY, ansH, 1);
                     }
                     ax += segW;
                 } else if (ch == '"' || ch == '\'') {
@@ -339,4 +351,3 @@ bool JumbleGen::printRasterToReceipt(EscPosPrinter& printer) {
     canvas.end();
     return ok;
 }
-

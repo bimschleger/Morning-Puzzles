@@ -26,13 +26,11 @@ public:
     uint8_t getCols() const { return 8; }
     uint8_t getTotalMines() const { return _totalMines; }
     uint8_t getCluesCount() const { return _cluesCount; }
-    bool isMine(uint8_t r, uint8_t c) const { return _solution[r][c] == 1; }
 
 private:
     uint8_t _totalMines;
     uint8_t _cluesCount;
     int8_t _puzzle[8][8];   // -1 = unrevealed, 0..8 = clue count
-    int8_t _solution[8][8]; // 0 = safe, 1 = mine
 
     bool solveDeductive(int8_t puzzle[8][8], uint8_t totalMines);
 };

@@ -437,11 +437,6 @@ def write_cpp_header(dataset: Dict[str, List[Dict[str, Any]]], output_path: str)
         "",
         "#include <Arduino.h>",
         "",
-        "struct StarPosCoord {",
-        "    uint8_t row;",
-        "    uint8_t col;",
-        "};",
-        "",
         f"static const size_t NUM_STARS_EASY = {len(dataset['easy'])};",
         f"static const size_t NUM_STARS_MEDIUM = {len(dataset['medium'])};",
         f"static const size_t NUM_STARS_HARD = {len(dataset['hard'])};",
@@ -458,19 +453,25 @@ def write_cpp_header(dataset: Dict[str, List[Dict[str, Any]]], output_path: str)
         puzzles = dataset[tier.lower()]
         total_cells = size * size
         total_stars = size * stars
+        packed_region_bytes = (total_cells + 1) // 2
 
         lines.append(f"// --- {tier} ({size}x{size}, {stars}-Star) ---")
-        lines.append(f"static const uint8_t STARS_{tier}_REGIONS[{count}][{total_cells}] PROGMEM = {{")
+        lines.append(f"static const uint8_t STARS_{tier}_REGIONS[{count}][{packed_region_bytes}] PROGMEM = {{")
         for p in puzzles:
             flat = [p["regions"][r][c] for r in range(size) for c in range(size)]
-            lines.append("    {" + ", ".join(map(str, flat)) + "},")
+            packed_regions = []
+            for i in range(0, total_cells, 2):
+                high = flat[i] & 0x0F
+                low = (flat[i + 1] & 0x0F) if i + 1 < total_cells else 0
+                packed_regions.append((high << 4) | low)
+            lines.append("    {" + ", ".join(map(str, packed_regions)) + "},")
         lines.append("};")
         lines.append("")
 
-        lines.append(f"static const StarPosCoord STARS_{tier}_SOLUTIONS[{count}][{total_stars}] PROGMEM = {{")
+        lines.append(f"static const uint8_t STARS_{tier}_SOLUTIONS[{count}][{total_stars}] PROGMEM = {{")
         for p in puzzles:
-            sol_str = ", ".join(f"{{{s[0]}, {s[1]}}}" for s in p["solution"])
-            lines.append(f"    {{{sol_str}}},")
+            packed_solutions = [f"0x{(s[0] << 4) | (s[1] & 0x0F):02X}" for s in p["solution"]]
+            lines.append(f"    {{{', '.join(packed_solutions)}}},")
         lines.append("};")
         lines.append("")
 
@@ -519,20 +520,12 @@ def main():
             pass
 
     dataset: Dict[str, List[Dict[str, Any]]] = {}
-    dataset["easy"] = generate_tier("easy", 5, 1, TARGET_PER_TIER)
-    dataset["medium"] = generate_tier("medium", 8, 1, TARGET_PER_TIER)
-
-    if "hard" in existing and len(existing["hard"]) == TARGET_PER_TIER:
-        print(f"Reusing {len(existing['hard'])} verified HARD puzzles from existing dataset.")
-        dataset["hard"] = existing["hard"]
-    else:
-        dataset["hard"] = generate_tier("hard", 9, 2, TARGET_PER_TIER)
-
-    if "extreme" in existing and len(existing["extreme"]) == TARGET_PER_TIER:
-        print(f"Reusing {len(existing['extreme'])} verified EXTREME puzzles from existing dataset.")
-        dataset["extreme"] = existing["extreme"]
-    else:
-        dataset["extreme"] = generate_tier("extreme", 10, 2, TARGET_PER_TIER)
+    for tier, size, stars in [("easy", 5, 1), ("medium", 8, 1), ("hard", 9, 2), ("extreme", 10, 2)]:
+        if tier in existing and len(existing[tier]) == TARGET_PER_TIER:
+            print(f"Reusing {len(existing[tier])} verified {tier.upper()} puzzles from existing dataset.")
+            dataset[tier] = existing[tier]
+        else:
+            dataset[tier] = generate_tier(tier, size, stars, TARGET_PER_TIER)
 
     dataset["master"] = dataset["extreme"]
 

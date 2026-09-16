@@ -1,7 +1,6 @@
 #include "ThermalCanvas.h"
 #include "EscPosPrinter.h"
 #include "qrcode.h"
-#include <algorithm>
 #include <cstdlib>
 
 #ifndef min
@@ -358,14 +357,8 @@ bool ThermalCanvas::drawQrCode(int16_t cx, int16_t cy, const char* text, uint8_t
     if (!text || moduleScale == 0 || !_buffer) return false;
 
     QRCode qrcode;
-    uint8_t qrcodeData[512]; // Up to version 10
-    int8_t status = -1;
-    uint8_t version = 1;
-
-    for (version = 1; version <= 10; version++) {
-        status = qrcode_initText(&qrcode, qrcodeData, version, ECC_LOW, text);
-        if (status == 0) break;
-    }
+    uint8_t qrcodeData[106]; // Version 3 buffer
+    int8_t status = qrcode_initText(&qrcode, qrcodeData, 3, ECC_LOW, text);
     if (status != 0) return false;
 
     int16_t qrPx = (int16_t)qrcode.size * moduleScale;

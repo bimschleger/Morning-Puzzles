@@ -8,7 +8,7 @@
 #include <time.h>
 #include <sys/time.h>
 #include <Wire.h>
-#include "../config.h"
+#include "config.h"
 
 // Forward declarations
 class EscPosPrinter;
@@ -42,6 +42,7 @@ public:
     void setSystemTime(time_t epoch, int tzOffsetMinutes = 0);
 
     // Optional DS3231 Hardware RTC
+    bool isDs3231Present() const { return _ds3231Present; }
     bool checkAndSyncFromDs3231();
     bool writeToDs3231(const struct tm& t);
 
@@ -62,7 +63,6 @@ private:
     DNSServer _dnsServer;
 
     void setupWebRoutes();
-    String buildWebPageHtml();
 
     // I2C DS3231 Helpers (Address 0x68)
     static const uint8_t DS3231_I2C_ADDR = 0x68;

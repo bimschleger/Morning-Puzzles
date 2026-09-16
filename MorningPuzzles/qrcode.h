@@ -62,7 +62,7 @@ static const bool true = 1;
 // If set to non-zero, this library can ONLY produce QR codes at that version
 // This saves a lot of dynamic memory, as the codeword tables are skipped
 #ifndef LOCK_VERSION
-#define LOCK_VERSION       0
+#define LOCK_VERSION       3
 #endif
 
 

@@ -1,19 +1,10 @@
 #include "SudokuGen.h"
+#include "GeneratorUtils.h"
 #include "../printer/EscPosPrinter.h"
 #include "../printer/ThermalCanvas.h"
 
 SudokuGen::SudokuGen() : _cluesCount(81) {
-    memset(_solution, 0, sizeof(_solution));
     memset(_puzzle, 0, sizeof(_puzzle));
-}
-
-void SudokuGen::shuffleArray(uint8_t* arr, uint8_t n) {
-    for (uint8_t i = n - 1; i > 0; i--) {
-        uint8_t j = random(i + 1);
-        uint8_t temp = arr[i];
-        arr[i] = arr[j];
-        arr[j] = temp;
-    }
 }
 
 bool SudokuGen::isValid(uint8_t board[9][9], uint8_t row, uint8_t col, uint8_t num) {
@@ -39,7 +30,7 @@ bool SudokuGen::fillBoard(uint8_t board[9][9]) {
         for (uint8_t c = 0; c < 9; c++) {
             if (board[r][c] == 0) {
                 uint8_t nums[9] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-                shuffleArray(nums, 9);
+                mp_shuffle(nums, 9);
                 for (uint8_t i = 0; i < 9; i++) {
                     uint8_t num = nums[i];
                     if (isValid(board, r, c, num)) {
@@ -85,16 +76,16 @@ void SudokuGen::generate(SudokuDifficulty difficulty) {
     else if (difficulty == SUDOKU_HARD) targetClues = 25;
 
     // 1. Fill random solved board
-    memset(_solution, 0, sizeof(_solution));
-    fillBoard(_solution);
+    uint8_t solution[9][9] = {0};
+    fillBoard(solution);
 
     // 2. Clone to puzzle
-    memcpy(_puzzle, _solution, sizeof(_puzzle));
+    memcpy(_puzzle, solution, sizeof(_puzzle));
 
     // 3. Prepare list of 81 coordinates
     uint8_t cells[81];
     for (uint8_t i = 0; i < 81; i++) cells[i] = i;
-    shuffleArray(cells, 81);
+    mp_shuffle(cells, 81);
 
     _cluesCount = 81;
     for (uint8_t i = 0; i < 81; i++) {
@@ -116,17 +107,7 @@ void SudokuGen::generate(SudokuDifficulty difficulty) {
     }
 }
 
-void SudokuGen::printToReceipt(EscPosPrinter& printer, SudokuDifficulty diff) {
-    const char* diffStr = (diff == SUDOKU_EASY) ? "EASY" : ((diff == SUDOKU_HARD) ? "HARD" : "MEDIUM");
-
-    printer.setBold(true);
-    printer.println("--- SUDOKU ---");
-    printer.setBold(false);
-    printer.println(String("DIFFICULTY: ") + diffStr);
-    printer.println("Fill every row, column, and 3x3 box with digits");
-    printer.println("1-9 without repeating.");
-    printer.println("");
-
+void SudokuGen::printToReceipt(EscPosPrinter& printer, SudokuDifficulty /*diff*/) {
     printer.println("   +-------+-------+-------+");
     for (uint8_t r = 0; r < 9; r++) {
         String line = "   | ";
@@ -147,19 +128,7 @@ void SudokuGen::printToReceipt(EscPosPrinter& printer, SudokuDifficulty diff) {
     printer.println("");
 }
 
-bool SudokuGen::printRasterToReceipt(EscPosPrinter& printer, SudokuDifficulty diff) {
-    const char* diffStr = (diff == SUDOKU_EASY) ? "EASY" : ((diff == SUDOKU_HARD) ? "HARD" : "MEDIUM");
-
-    printer.setAlign(ALIGN_CENTER);
-    printer.setBold(true);
-    printer.println("--- SUDOKU ---");
-    printer.setBold(false);
-    printer.println(String("DIFFICULTY: ") + diffStr);
-    printer.println("Fill every row, column, and 3x3 box with digits");
-    printer.println("1-9 without repeating.");
-    printer.println("");
-    printer.setAlign(ALIGN_LEFT);
-
+bool SudokuGen::printRasterToReceipt(EscPosPrinter& printer, SudokuDifficulty /*diff*/) {
     const int16_t padding = 24;
     const int16_t boardSize = THERMAL_CANVAS_WIDTH - padding * 2; // 528
     const int16_t cellSize = boardSize / 9; // 58

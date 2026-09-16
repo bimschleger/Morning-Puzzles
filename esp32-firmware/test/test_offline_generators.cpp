@@ -11,25 +11,27 @@ class ConsoleEscPosPrinter : public EscPosPrinter {
 public:
     bool connect() { return true; }
     void disconnect() {}
-    void init() { std::cout << "[PRINTER: INIT]" << std::endl; }
-    void setBold(bool b) {}
-    void setAlign(TextAlignment a) {}
-    void print(const String& s) { std::cout << s; }
-    void println(const String& s = "") { std::cout << s << std::endl; }
-    void printHorizontalLine(char c = '-') { std::cout << std::string(48, c) << std::endl; }
-    void printDoubleLine() { std::cout << std::string(48, '=') << std::endl; }
-    void printHeader(const String& t, const String& d = "") {
+    void init() override { std::cout << "[PRINTER: INIT]" << std::endl; }
+    void setBold(bool b) override {}
+    void setAlign(TextAlignment a) override {}
+    void print(const String& s) override { std::cout << s; }
+    void println(const String& s = "") override { std::cout << s << std::endl; }
+    void print(const char* s) override { std::cout << s; }
+    void println(const char* s = "") override { std::cout << s << std::endl; }
+    void printHorizontalLine(char c = '-') override { std::cout << std::string(48, c) << std::endl; }
+    void printDoubleLine() override { std::cout << std::string(48, '=') << std::endl; }
+    void printHeader(const String& t, const String& d = "") override {
         printDoubleLine();
         std::cout << "  " << t << " (" << d << ")" << std::endl;
         printDoubleLine();
     }
-    void printKeyValue(const String& k, const String& v, int total = 48) {
+    void printKeyValue(const String& k, const String& v, int total = 48) override {
         int spaces = total - (int)k.length() - (int)v.length();
         if (spaces < 1) spaces = 1;
         std::cout << k << std::string(spaces, ' ') << v << std::endl;
     }
-    void feed(uint8_t n = 1) {}
-    void cut(bool) { std::cout << "[PRINTER: CUT PAPER]" << std::endl; }
+    void feed(uint8_t n = 1) override {}
+    void cut(bool) override { std::cout << "[PRINTER: CUT PAPER]" << std::endl; }
     void printRasterBitmap(const uint8_t* bitmapData, uint16_t widthDots, uint16_t heightDots) override {
         std::cout << "[PRINTER: RASTER BITMAP " << widthDots << "x" << heightDots << " dots (" << ((widthDots + 7) / 8 * heightDots) << " bytes)]" << std::endl;
     }

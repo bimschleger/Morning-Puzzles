@@ -1,3 +1,12 @@
+// ==============================================================================
+// Morning Puzzles - 100% Offline Standalone Daily Receipt Printer Firmware
+// 
+// Arduino IDE Configuration:
+//   Board: "ESP32 Dev Module" or "ESP32S3 Dev Module" (e.g. LilyGO T-ETH-Lite)
+//   Partition Scheme: "Huge APP (3MB No OTA / 1MB SPIFFS)" (CRITICAL for flash headroom)
+//   Upload Speed: 921600
+// ==============================================================================
+
 #include <Arduino.h>
 #include "config.h"
 #include "printer/EscPosPrinter.h"
@@ -176,7 +185,13 @@ void handleSerialCommands() {
 #else
             Serial.printf("Printer:      Wi-Fi TCP (%s:%d)\n", PRINTER_IP_ADDR, PRINTER_TCP_PORT);
 #endif
-            Serial.printf("Daily Cron:   %02d:%02d every morning\n", DAILY_PRINT_HOUR, DAILY_PRINT_MINUTE);
+            if (configManager.isDailyScheduleEnabled()) {
+                Serial.printf("Daily Cron:   %s every day (%02d:%02d)\n", 
+                              configManager.getDailyScheduleTimeString().c_str(),
+                              configManager.getDailyScheduleHour(), configManager.getDailyScheduleMinute());
+            } else {
+                Serial.println("Daily Cron:   Disabled (Manual / Power-on trigger only)");
+            }
             Serial.printf("Hotspot:      %s\n", timeManager.isPortalActive() ? "Active (Morning-Puzzles-Setup)" : "Inactive");
             Serial.println("Controls:     [P]rint | [W]i-Fi Setup | [S]tatus");
             Serial.println("-------------------------------\n");
@@ -244,7 +259,12 @@ void setup() {
     Serial.println("\n--- CONTROLS & HOW TO USE ---");
     Serial.println("1. BOOT Button: Short Press (<2.5s) -> Instantly generates & prints active puzzle mix!");
     Serial.println("2. BOOT Button: Long Press (>=2.5s)  -> Activates Wi-Fi Setup Portal + prints Dual QR slip!");
-    Serial.printf("3. Daily scheduled auto-print        -> Every morning at %02d:%02d\n", DAILY_PRINT_HOUR, DAILY_PRINT_MINUTE);
+    if (configManager.isDailyScheduleEnabled()) {
+        Serial.printf("3. Daily scheduled auto-print        -> %s every day\n", 
+                      configManager.getDailyScheduleTimeString().c_str());
+    } else {
+        Serial.println("3. Daily scheduled auto-print        -> Disabled (Manual / Power-on trigger only)");
+    }
     Serial.println("4. Auto-print on Printer Power-ON    -> Flip printer switch ON to print automatically!");
     Serial.println("5. Serial Monitor (115200 baud)      -> [P]rint | [W]i-Fi Setup | [S]tatus\n");
 
@@ -404,9 +424,11 @@ void loop() {
     // 3. Monitor Serial console commands
     handleSerialCommands();
 
-    // 4. Check for daily morning 7:00 AM cron trigger
-    if (timeManager.isCronTriggerTime(DAILY_PRINT_HOUR, DAILY_PRINT_MINUTE)) {
-        Serial.println("[MAIN] 7:00 AM Morning Cron Trigger! Starting daily print job...");
+    // 4. Check for daily scheduled cron trigger
+    if (configManager.isDailyScheduleEnabled() &&
+        timeManager.isCronTriggerTime(configManager.getDailyScheduleHour(), configManager.getDailyScheduleMinute())) {
+        Serial.printf("[MAIN] Scheduled Daily Cron Trigger (%s)! Starting daily print job...\n",
+                      configManager.getDailyScheduleTimeString().c_str());
         executePrintJob();
     }
 

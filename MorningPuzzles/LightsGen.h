@@ -25,13 +25,11 @@ public:
     int8_t getCell(uint8_t r, uint8_t c) const { return _puzzle[r][c]; }
     uint8_t getSize() const { return _size; }
     uint8_t getTotalBulbs() const { return _totalBulbs; }
-    bool isBulb(uint8_t r, uint8_t c) const { return _solution[r][c] == 1; }
 
 private:
     uint8_t _size;
     uint8_t _totalBulbs;
     int8_t  _puzzle[12][12];   // -1 = white cell, -2 = unnumbered wall, 0..4 = numbered wall
-    int8_t  _solution[12][12]; // 1 = bulb, 0 = no bulb
 
     bool solveDeductive(int8_t puz[12][12], uint8_t size, int8_t sol[12][12]);
 };

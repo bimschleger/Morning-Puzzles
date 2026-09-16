@@ -25,14 +25,12 @@ public:
     uint8_t getCluesCount() const { return _cluesCount; }
 
 private:
-    uint8_t _solution[9][9];
     uint8_t _puzzle[9][9];
     uint8_t _cluesCount;
 
     bool isValid(uint8_t board[9][9], uint8_t row, uint8_t col, uint8_t num);
     bool fillBoard(uint8_t board[9][9]);
     uint8_t countSolutions(uint8_t board[9][9], uint8_t maxCount = 2);
-    void shuffleArray(uint8_t* arr, uint8_t n);
 };
 
 #endif // SUDOKU_GEN_H

@@ -1,9 +1,13 @@
 #include "OfflineConfigManager.h"
+#include "config.h"
 
 OfflineConfigManager::OfflineConfigManager() :
     _gameMask(0x1FFF),
     _puzzleCount(5),
-    _puzzleGrade(GRADE_ESCALATING) {
+    _puzzleGrade(GRADE_ESCALATING),
+    _dailyScheduleEnabled(DAILY_PRINT_ENABLED_DEFAULT),
+    _dailyScheduleHour(DAILY_PRINT_HOUR_DEFAULT),
+    _dailyScheduleMinute(DAILY_PRINT_MINUTE_DEFAULT) {
 }
 
 void OfflineConfigManager::begin() {
@@ -12,6 +16,9 @@ void OfflineConfigManager::begin() {
     _puzzleCount = _prefs.getUChar("count", 5);
     uint8_t savedGrade = _prefs.getUChar("grade", (uint8_t)GRADE_ESCALATING);
     _puzzleGrade = (PuzzleGrade)savedGrade;
+    _dailyScheduleEnabled = _prefs.getBool("daily_en", DAILY_PRINT_ENABLED_DEFAULT);
+    _dailyScheduleHour = _prefs.getUChar("daily_hr", DAILY_PRINT_HOUR_DEFAULT);
+    _dailyScheduleMinute = _prefs.getUChar("daily_min", DAILY_PRINT_MINUTE_DEFAULT);
 
     // Validate mask (ensure at least 1 game is enabled)
     if ((_gameMask & 0x1FFF) == 0) {
@@ -27,18 +34,28 @@ void OfflineConfigManager::begin() {
     if (_puzzleGrade > GRADE_EXTREME) {
         _puzzleGrade = GRADE_ESCALATING;
     }
+
+    // Validate daily schedule
+    if (_dailyScheduleHour > 23) _dailyScheduleHour = DAILY_PRINT_HOUR_DEFAULT;
+    if (_dailyScheduleMinute > 59) _dailyScheduleMinute = DAILY_PRINT_MINUTE_DEFAULT;
 }
 
 void OfflineConfigManager::save() {
     _prefs.putUShort("mask", _gameMask);
     _prefs.putUChar("count", _puzzleCount);
     _prefs.putUChar("grade", (uint8_t)_puzzleGrade);
+    _prefs.putBool("daily_en", _dailyScheduleEnabled);
+    _prefs.putUChar("daily_hr", _dailyScheduleHour);
+    _prefs.putUChar("daily_min", _dailyScheduleMinute);
 }
 
 void OfflineConfigManager::resetToDefaults() {
     _gameMask = 0x1FFF;
     _puzzleCount = 5;
     _puzzleGrade = GRADE_ESCALATING;
+    _dailyScheduleEnabled = DAILY_PRINT_ENABLED_DEFAULT;
+    _dailyScheduleHour = DAILY_PRINT_HOUR_DEFAULT;
+    _dailyScheduleMinute = DAILY_PRINT_MINUTE_DEFAULT;
     save();
 }
 
@@ -88,6 +105,34 @@ void OfflineConfigManager::setPuzzleGrade(PuzzleGrade grade) {
     _puzzleGrade = grade;
 }
 
+void OfflineConfigManager::setDailyScheduleEnabled(bool enabled) {
+    _dailyScheduleEnabled = enabled;
+}
+
+void OfflineConfigManager::setDailyScheduleHour(uint8_t hour) {
+    if (hour > 23) hour = 23;
+    _dailyScheduleHour = hour;
+}
+
+void OfflineConfigManager::setDailyScheduleMinute(uint8_t min) {
+    if (min > 59) min = 59;
+    _dailyScheduleMinute = min;
+}
+
+String OfflineConfigManager::getDailyScheduleTimeString() const {
+    if (!_dailyScheduleEnabled) {
+        return "Disabled";
+    }
+    uint8_t h = _dailyScheduleHour;
+    uint8_t m = _dailyScheduleMinute;
+    const char* ampm = (h >= 12) ? "PM" : "AM";
+    uint8_t displayH = h % 12;
+    if (displayH == 0) displayH = 12;
+    char buf[16];
+    snprintf(buf, sizeof(buf), "%02d:%02d %s", displayH, m, ampm);
+    return String(buf);
+}
+
 uint8_t OfflineConfigManager::getEnabledGameCount() const {
     uint8_t count = 0;
     for (uint8_t i = 0; i < (uint8_t)OFFLINE_PUZZLE_TOTAL; i++) {
@@ -110,38 +155,19 @@ uint8_t OfflineConfigManager::getEnabledPuzzles(OfflinePuzzleType* outBuffer, ui
 const char* OfflineConfigManager::getPuzzleName(OfflinePuzzleType type) const {
     switch (type) {
         case PUZZLE_SUDOKU:     return "Sudoku";
-        case PUZZLE_WORDSEARCH: return "Word Search";
+        case PUZZLE_WORDSEARCH: return "Search";
         case PUZZLE_NONOGRAM:   return "Nonogram";
-        case PUZZLE_QUEENS:     return "Queens";
-        case PUZZLE_JUMBLE:     return "Daily Jumble";
-        case PUZZLE_BINARY:     return "Binary Grid";
-        case PUZZLE_MINES:      return "Minesweeper";
-        case PUZZLE_TENTS:      return "Tents & Trees";
+        case PUZZLE_QUEENS:     return "Stars";
+        case PUZZLE_JUMBLE:     return "Jumble";
+        case PUZZLE_BINARY:     return "Binary";
+        case PUZZLE_MINES:      return "Mines";
+        case PUZZLE_TENTS:      return "Tents";
         case PUZZLE_BRIDGES:    return "Bridges";
         case PUZZLE_TANGO:      return "Tango";
-        case PUZZLE_WHEEL:      return "Word Wheel";
-        case PUZZLE_LIGHTS:     return "Lights Out";
-        case PUZZLE_LOOP:       return "Numberlink Loop";
+        case PUZZLE_WHEEL:      return "Wheel";
+        case PUZZLE_LIGHTS:     return "Lights";
+        case PUZZLE_LOOP:       return "Loop";
         default:                return "Unknown Puzzle";
-    }
-}
-
-const char* OfflineConfigManager::getPuzzleCategory(OfflinePuzzleType type) const {
-    switch (type) {
-        case PUZZLE_SUDOKU:     return "Number Placement";
-        case PUZZLE_WORDSEARCH: return "Word Puzzle";
-        case PUZZLE_NONOGRAM:   return "Picture Logic";
-        case PUZZLE_QUEENS:     return "Grid Logic";
-        case PUZZLE_JUMBLE:     return "Word Puzzle";
-        case PUZZLE_BINARY:     return "Binary Logic";
-        case PUZZLE_MINES:      return "Deduction";
-        case PUZZLE_TENTS:      return "Grid Logic";
-        case PUZZLE_BRIDGES:    return "Network Logic";
-        case PUZZLE_TANGO:      return "Grid Logic";
-        case PUZZLE_WHEEL:      return "Word Puzzle";
-        case PUZZLE_LIGHTS:     return "Illumination";
-        case PUZZLE_LOOP:       return "Path Puzzle";
-        default:                return "Logic";
     }
 }
 

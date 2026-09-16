@@ -587,14 +587,11 @@ def emit_cpp_progmem(puzzles, filepath):
     lines.append("#define JUMBLE_DATASET_H")
     lines.append("")
     lines.append("#include <Arduino.h>")
-    lines.append('#include "JumbleGen.h"')
     lines.append("")
     lines.append("struct CompactRiddleSet {")
-    lines.append("    JumbleDifficulty diff;")
     lines.append("    uint8_t numWords;")
-    lines.append("    const char* words[6];")
-    lines.append("    uint8_t circles[6][4];")
-    lines.append("    uint8_t numCircles[6];")
+    lines.append("    uint8_t circleMasks[6];")
+    lines.append("    const char* words;")
     lines.append("    const char* riddle;")
     lines.append("    const char* answer;")
     lines.append("};")
@@ -603,35 +600,28 @@ def emit_cpp_progmem(puzzles, filepath):
     lines.append("static const CompactRiddleSet JUMBLE_DATASET[] PROGMEM = {")
 
     for p in puzzles:
-        diff_enum = "JUMBLE_EASY" if p["diff"] == "easy" else ("JUMBLE_MEDIUM" if p["diff"] == "medium" else "JUMBLE_HARD")
         num_words = len(p["words"])
-        
-        words_padded = p["words"] + [""] * (6 - num_words)
-        words_c = "{" + ", ".join(f'"{w}"' for w in words_padded) + "}"
+        words_str = " ".join(p["words"])
 
-        circles_array = []
-        num_circles_array = []
+        circle_masks = []
         for w_idx in range(6):
             if w_idx < num_words:
-                circ = p["circles"][w_idx]
-                num_circles_array.append(str(len(circ)))
-                padded_circ = circ + [0] * (4 - len(circ))
-                circles_array.append("{" + ", ".join(str(c) for c in padded_circ) + "}")
+                mask = 0
+                for c in p["circles"][w_idx]:
+                    mask |= (1 << c)
+                circle_masks.append(f"0x{mask:02X}")
             else:
-                num_circles_array.append("0")
-                circles_array.append("{0, 0, 0, 0}")
+                circle_masks.append("0x00")
 
-        circles_c = "{" + ", ".join(circles_array) + "}"
-        num_circles_c = "{" + ", ".join(num_circles_array) + "}"
+        circles_c = "{" + ", ".join(circle_masks) + "}"
 
         riddle_escaped = p['riddle'].replace('\\', '\\\\').replace('"', '\\"')
         answer_escaped = p['answer'].replace('\\', '\\\\').replace('"', '\\"')
 
         lines.append("    {")
-        lines.append(f"        {diff_enum}, {num_words},")
-        lines.append(f"        {words_c},")
+        lines.append(f"        {num_words},")
         lines.append(f"        {circles_c},")
-        lines.append(f"        {num_circles_c},")
+        lines.append(f'        "{words_str}",')
         lines.append(f'        "{riddle_escaped}",')
         lines.append(f'        "{answer_escaped}"')
         lines.append("    },")
@@ -646,8 +636,14 @@ def emit_cpp_progmem(puzzles, filepath):
     print(f"Emitted C++ PROGMEM header to {filepath}")
 
 if __name__ == "__main__":
-    puzzles = generate_all_puzzles()
+    import os
+    if os.path.exists("server/data/jumbles.json"):
+        with open("server/data/jumbles.json", "r", encoding="utf-8") as f:
+            puzzles = json.load(f)
+        print(f"Loaded {len(puzzles)} verified jumble puzzles from server/data/jumbles.json")
+    else:
+        puzzles = generate_all_puzzles()
+        emit_json(puzzles, "server/data/jumbles.json")
     assert len(puzzles) == 300, f"Expected 300 puzzles, got {len(puzzles)}"
-    emit_json(puzzles, "server/data/jumbles.json")
     emit_cpp_progmem(puzzles, "esp32-firmware/src/generators/JumbleDataset.h")
     print("All 300 puzzles successfully generated and mathematically verified!")

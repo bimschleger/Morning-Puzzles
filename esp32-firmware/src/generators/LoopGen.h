@@ -22,14 +22,10 @@ public:
 
     uint8_t getSize() const { return _size; }
     int8_t  getClue(uint8_t r, uint8_t c) const { return _clues[r][c]; }
-    uint8_t getH(uint8_t r, uint8_t c) const { return _solutionH[r][c]; }
-    uint8_t getV(uint8_t r, uint8_t c) const { return _solutionV[r][c]; }
 
 private:
     uint8_t _size;
     int8_t  _clues[9][9];       // -1 = unhinted, 0..3 = edge count clue
-    uint8_t _solutionH[10][9];  // (size + 1) x size horizontal loop segments
-    uint8_t _solutionV[9][10];  // size x (size + 1) vertical loop segments
 
     bool generatePolyominoLoop(uint8_t n);
     bool solveDeductive(int8_t clues[9][9], uint8_t n, int8_t H[10][9], int8_t V[9][10]);

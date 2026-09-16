@@ -23,7 +23,6 @@ public:
     uint8_t getRowClue(uint8_t r) const { return _rowClues[r]; }
     uint8_t getColClue(uint8_t c) const { return _colClues[c]; }
     bool isTree(uint8_t r, uint8_t c) const { return _puzzle[r][c] == 1; }
-    bool isTent(uint8_t r, uint8_t c) const { return _solution[r][c] == 2; }
 
 private:
     uint8_t _size;
@@ -31,7 +30,6 @@ private:
     uint8_t _rowClues[8];
     uint8_t _colClues[8];
     int8_t  _puzzle[8][8];   // 0 = empty, 1 = tree
-    int8_t  _solution[8][8]; // 0 = empty, 1 = tree, 2 = tent
 };
 
 #endif // TENTS_GEN_H

@@ -20,7 +20,6 @@ public:
 
     char getCenterLetter() const { return _center; }
     const char* getOuterLetters() const { return _outer; }
-    const char* getPangram() const { return _pangram; }
     uint8_t getWordCount() const { return _wordCount; }
     uint8_t getGood() const { return _good; }
     uint8_t getGreat() const { return _great; }
@@ -29,13 +28,10 @@ public:
 private:
     char _center;
     char _outer[7];
-    const char* _pangram;
     uint8_t _wordCount;
     uint8_t _good;
     uint8_t _great;
     uint8_t _genius;
-    const char* _sampleWords[16];
-    uint8_t _numSampleWords;
     WheelDifficulty _difficulty;
 };
 

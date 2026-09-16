@@ -112,8 +112,9 @@ Open [`esp32-firmware/include/config.h`](esp32-firmware/include/config.h) on you
      1. Open Arduino IDE and select **File $\rightarrow$ Open...**
      2. Choose `MorningPuzzles/MorningPuzzles.ino`.
      3. Select your board (**ESP32S3 Dev Module** for LilyGO T-ETH-Lite or **ESP32 Dev Module** for standard boards) and your USB port (`/dev/cu.usbmodem...` or `/dev/cu.usbserial-...`).
-     4. Click the **Upload** arrow button ($\rightarrow$).
-     5. Upload is complete when the console displays `Hard resetting via RTS pin...` with verified hashes.
+     4. Under **Tools $\rightarrow$ Partition Scheme**, select **"Huge APP (3MB No OTA / 1MB SPIFFS)"**.
+     5. Click the **Upload** arrow button ($\rightarrow$).
+     6. Upload is complete when the console displays `Hard resetting via RTS pin...` with verified hashes.
    * **Using PlatformIO (Command Line / VS Code)**:
      ```bash
      cd esp32-firmware

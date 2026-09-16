@@ -2,7 +2,6 @@
 #define QUEENS_GEN_H
 
 #include <Arduino.h>
-#include <vector>
 class EscPosPrinter;
 
 enum QueensDifficulty {
@@ -27,8 +26,6 @@ public:
     void printToReceipt(EscPosPrinter& printer);
     bool printRasterToReceipt(EscPosPrinter& printer);
 
-    bool validate();
-
     uint8_t getSize() const { return _size; }
     uint8_t getStarsPerUnit() const { return _starsPerUnit; }
     int8_t getRegion(uint8_t r, uint8_t c) const { return (r < MAX_SIZE && c < MAX_SIZE) ? _regions[r][c] : -1; }
@@ -37,12 +34,10 @@ private:
     uint8_t _size;
     uint8_t _starsPerUnit;
     int8_t _regions[MAX_SIZE][MAX_SIZE];
-    std::vector<StarPos> _stars;
+    StarPos _stars[20];
+    uint8_t _numStars;
 
     void applyTransform(uint8_t transform);
-    bool placeStarsBacktrack(uint8_t row, uint8_t starsPlacedInRow, uint8_t* colCounts);
-    bool canPlaceStar(uint8_t r, uint8_t c, uint8_t* colCounts);
-    void growRegions();
 };
 
 #endif // QUEENS_GEN_H

@@ -3,8 +3,9 @@
 #include "EscPosPrinter.h"
 #include "ThermalCanvas.h"
 
-WordSearchGen::WordSearchGen() : _gridSize(12), _currentTheme("General") {
+WordSearchGen::WordSearchGen() : _gridSize(12), _numPlacedWords(0), _currentTheme("General") {
     memset(_grid, ' ', sizeof(_grid));
+    _wordsBuf[0] = '\0';
 }
 
 bool WordSearchGen::tryPlaceWord(const char* word, const int8_t dirs[][2], uint8_t numDirs) {
@@ -36,7 +37,9 @@ bool WordSearchGen::tryPlaceWord(const char* word, const int8_t dirs[][2], uint8
                 for (int i = 0; i < len; i++) {
                     _grid[rStart + dr * i][cStart + dc * i] = word[i];
                 }
-                _placedWords.push_back({String(word), (uint8_t)rStart, (uint8_t)cStart, dr, dc});
+                if (_numPlacedWords < 12) {
+                    _placedWords[_numPlacedWords++] = word;
+                }
                 return true;
             }
         }
@@ -47,7 +50,7 @@ bool WordSearchGen::tryPlaceWord(const char* word, const int8_t dirs[][2], uint8
 void WordSearchGen::generate(WordSearchDifficulty difficulty, int themeIndex) {
     _gridSize = (difficulty == WS_EASY) ? 10 : 12;
     memset(_grid, ' ', sizeof(_grid));
-    _placedWords.clear();
+    _numPlacedWords = 0;
 
     size_t poolCount = 0;
     const ThemeDef* pool = getWordSearchPool(difficulty, poolCount);
@@ -94,37 +97,58 @@ void WordSearchGen::generate(WordSearchDifficulty difficulty, int themeIndex) {
         targetWords = 8;
     }
 
-    // Sort words by length descending to place longer words first on empty grid
+    // Tokenize chosenTheme.words into _wordsBuf
+    strncpy(_wordsBuf, chosenTheme.words, sizeof(_wordsBuf));
+    _wordsBuf[sizeof(_wordsBuf) - 1] = '\0';
+
     const char* sortedWords[12];
+    char* p = _wordsBuf;
     for (int i = 0; i < 12; i++) {
-        sortedWords[i] = chosenTheme.words[i];
+        while (*p == ' ') p++;
+        sortedWords[i] = p;
+        while (*p != ' ' && *p != '\0') p++;
+        if (*p == ' ') {
+            *p = '\0';
+            p++;
+        }
     }
-    std::sort(sortedWords, sortedWords + 12, [](const char* a, const char* b) {
-        return strlen(a) > strlen(b);
-    });
+
+    // Insertion sort descending by length (matches std::sort stability)
+    for (uint8_t i = 1; i < 12; i++) {
+        const char* key = sortedWords[i];
+        int8_t j = i - 1;
+        while (j >= 0 && strlen(sortedWords[j]) < strlen(key)) {
+            sortedWords[j + 1] = sortedWords[j];
+            j--;
+        }
+        sortedWords[j + 1] = key;
+    }
 
     char bestGrid[MAX_GRID_SIZE][MAX_GRID_SIZE];
-    std::vector<PlacedWord> bestPlaced;
+    const char* bestPlaced[12];
+    uint8_t bestCount = 0;
 
     for (int retry = 0; retry < 5; retry++) {
         memset(_grid, ' ', sizeof(_grid));
-        _placedWords.clear();
+        _numPlacedWords = 0;
 
         for (int i = 0; i < 12; i++) {
-            if (_placedWords.size() >= targetWords) break;
+            if (_numPlacedWords >= targetWords) break;
             tryPlaceWord(sortedWords[i], dirs, numDirs);
         }
 
-        if (_placedWords.size() > bestPlaced.size()) {
+        if (_numPlacedWords > bestCount) {
             memcpy(bestGrid, _grid, sizeof(_grid));
-            bestPlaced = _placedWords;
+            memcpy(bestPlaced, _placedWords, _numPlacedWords * sizeof(const char*));
+            bestCount = _numPlacedWords;
         }
 
-        if (bestPlaced.size() >= targetWords) break;
+        if (bestCount >= targetWords) break;
     }
 
     memcpy(_grid, bestGrid, sizeof(_grid));
-    _placedWords = bestPlaced;
+    memcpy(_placedWords, bestPlaced, bestCount * sizeof(const char*));
+    _numPlacedWords = bestCount;
 
     // Fill remaining blank cells with random uppercase letters
     for (uint8_t r = 0; r < _gridSize; r++) {
@@ -137,12 +161,6 @@ void WordSearchGen::generate(WordSearchDifficulty difficulty, int themeIndex) {
 }
 
 void WordSearchGen::printToReceipt(EscPosPrinter& printer) {
-    printer.setBold(true);
-    printer.println("--- SEARCH ---");
-    printer.setBold(false);
-    printer.println(String("Find all ") + _placedWords.size() + " hidden words listed below.");
-    printer.println("");
-
     // Print grid centered
     for (uint8_t r = 0; r < _gridSize; r++) {
         String line = (_gridSize == 10) ? "      " : "    ";
@@ -157,29 +175,21 @@ void WordSearchGen::printToReceipt(EscPosPrinter& printer) {
     printer.println(String("Theme: ") + _currentTheme);
 
     // Print word list in 2 columns
-    for (size_t i = 0; i < _placedWords.size(); i += 2) {
-        String col1 = "[ ] " + _placedWords[i].word;
-        String col2 = (i + 1 < _placedWords.size()) ? ("[ ] " + _placedWords[i + 1].word) : "";
+    for (size_t i = 0; i < _numPlacedWords; i += 2) {
+        String col1 = String("[ ] ") + _placedWords[i];
+        String col2 = (i + 1 < _numPlacedWords) ? (String("[ ] ") + _placedWords[i + 1]) : "";
         printer.printKeyValue(col1, col2, 44);
     }
     printer.println("");
 }
 
 bool WordSearchGen::printRasterToReceipt(EscPosPrinter& printer) {
-    printer.setAlign(ALIGN_CENTER);
-    printer.setBold(true);
-    printer.println("--- SEARCH ---");
-    printer.setBold(false);
-    printer.println(String("Find all ") + _placedWords.size() + " hidden words listed below.");
-    printer.println("");
-    printer.setAlign(ALIGN_LEFT);
-
     const int16_t cellSize = (THERMAL_CANVAS_WIDTH - 48) / _gridSize;
     const int16_t innerWidth = cellSize * _gridSize;
     const int16_t padding = (THERMAL_CANVAS_WIDTH - innerWidth) / 2;
     const int16_t gridH = cellSize * _gridSize;
 
-    const int16_t checklistRows = (int16_t)((_placedWords.size() + 1) / 2);
+    const int16_t checklistRows = (int16_t)((_numPlacedWords + 1) / 2);
     const int16_t checklistH = 40 + checklistRows * 28;
     const int16_t totalH = 12 + gridH + 20 + checklistH + 12;
 
@@ -222,13 +232,13 @@ bool WordSearchGen::printRasterToReceipt(EscPosPrinter& printer) {
 
     // Word checklist
     int16_t colW = innerWidth / 2;
-    for (size_t i = 0; i < _placedWords.size(); i++) {
+    for (size_t i = 0; i < _numPlacedWords; i++) {
         int16_t colIdx = i % 2;
         int16_t rowIdx = i / 2;
         int16_t ix = padding + colIdx * colW;
         int16_t iy = curY + rowIdx * 28;
         canvas.drawRect(ix, iy + 2, 16, 16, 2);
-        String w = _placedWords[i].word;
+        String w = _placedWords[i];
         w.toUpperCase();
         canvas.drawText(ix + 24, iy + 2, w.c_str(), 2);
     }
@@ -237,4 +247,3 @@ bool WordSearchGen::printRasterToReceipt(EscPosPrinter& printer) {
     canvas.end();
     return ok;
 }
-

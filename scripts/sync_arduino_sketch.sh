@@ -22,7 +22,9 @@ cp "$FW_DIR/src/main.cpp" "$SKETCH_DIR/MorningPuzzles.ino"
 
 # Flatten relative include paths for Arduino IDE single-folder compilation
 if [[ "$OSTYPE" == "darwin"* ]]; then
+  sed -i '' 's|#include "../printer/EscPosPrinter.h"|#include "EscPosPrinter.h"|g' "$SKETCH_DIR"/*.h
   sed -i '' 's|#include "../printer/EscPosPrinter.h"|#include "EscPosPrinter.h"|g' "$SKETCH_DIR"/*.cpp
+  sed -i '' 's|#include "../printer/ThermalCanvas.h"|#include "ThermalCanvas.h"|g' "$SKETCH_DIR"/*.h
   sed -i '' 's|#include "../printer/ThermalCanvas.h"|#include "ThermalCanvas.h"|g' "$SKETCH_DIR"/*.cpp
   sed -i '' 's|#include "../config/OfflineConfigManager.h"|#include "OfflineConfigManager.h"|g' "$SKETCH_DIR"/*.h
   sed -i '' 's|#include "../config/OfflineConfigManager.h"|#include "OfflineConfigManager.h"|g' "$SKETCH_DIR"/*.cpp
@@ -33,7 +35,9 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   sed -i '' 's|#include "config/OfflineConfigManager.h"|#include "OfflineConfigManager.h"|g' "$SKETCH_DIR"/MorningPuzzles.ino
   sed -i '' 's|#include "generators/OfflinePuzzleComposer.h"|#include "OfflinePuzzleComposer.h"|g' "$SKETCH_DIR"/MorningPuzzles.ino
 else
+  sed -i 's|#include "../printer/EscPosPrinter.h"|#include "EscPosPrinter.h"|g' "$SKETCH_DIR"/*.h
   sed -i 's|#include "../printer/EscPosPrinter.h"|#include "EscPosPrinter.h"|g' "$SKETCH_DIR"/*.cpp
+  sed -i 's|#include "../printer/ThermalCanvas.h"|#include "ThermalCanvas.h"|g' "$SKETCH_DIR"/*.h
   sed -i 's|#include "../printer/ThermalCanvas.h"|#include "ThermalCanvas.h"|g' "$SKETCH_DIR"/*.cpp
   sed -i 's|#include "../config/OfflineConfigManager.h"|#include "OfflineConfigManager.h"|g' "$SKETCH_DIR"/*.h
   sed -i 's|#include "../config/OfflineConfigManager.h"|#include "OfflineConfigManager.h"|g' "$SKETCH_DIR"/*.cpp

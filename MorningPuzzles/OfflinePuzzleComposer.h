@@ -39,20 +39,6 @@ public:
 private:
     void printSinglePuzzle(EscPosPrinter& printer, OfflinePuzzleType type, bool useRaster, PuzzleGrade grade = GRADE_MEDIUM);
 
-    SudokuGen     _sudoku;
-    WordSearchGen _wordSearch;
-    NonogramGen   _nonogram;
-    QueensGen     _queens;
-    JumbleGen     _jumble;
-    BinaryGen     _binary;
-    MinesGen      _mines;
-    TentsGen      _tents;
-    BridgesGen    _bridges;
-    TangoGen      _tango;
-    WheelGen      _wheel;
-    LightsGen     _lights;
-    LoopGen       _loop;
-
     PuzzleGrade   _currentGrade;
     uint8_t       _rotationIndex;
 };

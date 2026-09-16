@@ -2,21 +2,12 @@
 #define WORD_SEARCH_GEN_H
 
 #include <Arduino.h>
-#include <vector>
 class EscPosPrinter;
 
 enum WordSearchDifficulty {
     WS_EASY   = 0, // Horizontal & Vertical forward
     WS_MEDIUM = 1, // Forward directions + diagonals
     WS_HARD   = 2  // All 8 directions including backwards
-};
-
-struct PlacedWord {
-    String word;
-    uint8_t row;
-    uint8_t col;
-    int8_t dr;
-    int8_t dc;
 };
 
 class WordSearchGen {
@@ -31,15 +22,18 @@ public:
     bool printRasterToReceipt(EscPosPrinter& printer);
 
     const char* getThemeName() const { return _currentTheme; }
-    size_t getWordCount() const { return _placedWords.size(); }
+    size_t getWordCount() const { return _numPlacedWords; }
     uint8_t getGridSize() const { return _gridSize; }
     char getGridChar(uint8_t r, uint8_t c) const { return _grid[r][c]; }
-    const String& getPlacedWord(size_t i) const { return _placedWords[i].word; }
+    String getPlacedWord(size_t i) const { return (i < _numPlacedWords) ? String(_placedWords[i]) : String(""); }
+    const char* getPlacedWordRaw(size_t i) const { return (i < _numPlacedWords) ? _placedWords[i] : ""; }
 
 private:
     uint8_t _gridSize;
     char _grid[MAX_GRID_SIZE][MAX_GRID_SIZE];
-    std::vector<PlacedWord> _placedWords;
+    char _wordsBuf[128];
+    const char* _placedWords[12];
+    uint8_t _numPlacedWords;
     const char* _currentTheme;
 
     bool tryPlaceWord(const char* word, const int8_t dirs[][2], uint8_t numDirs);
