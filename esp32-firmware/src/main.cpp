@@ -31,6 +31,7 @@ unsigned long g_bootTimeMs = 0;
 // Button timing state
 bool          lastBtnState = HIGH;
 unsigned long btnPressStartMs = 0;
+bool          btnLongPressActive = false;
 
 void blinkStatusLed(int count, int delayMs = 100) {
     for (int i = 0; i < count; i++) {
@@ -77,20 +78,47 @@ void handleButtonPress() {
     int btnState = digitalRead(BUTTON_TRIGGER_PIN);
     unsigned long now = millis();
 
-    // Button down
+    // Button down (transition HIGH -> LOW)
     if (btnState == LOW && lastBtnState == HIGH) {
         btnPressStartMs = now;
-        delay(50); // debounce
+        btnLongPressActive = false;
+        delay(BUTTON_DEBOUNCE_MS);
     }
-    // Button released
+    // Button held down (remains LOW)
+    else if (btnState == LOW && lastBtnState == LOW) {
+        if (!btnLongPressActive && (now - btnPressStartMs >= BUTTON_LONG_PRESS_MS)) {
+            btnLongPressActive = true;
+            // Visual indicator: solid ON status LED indicates setup threshold reached
+            digitalWrite(STATUS_LED_PIN, HIGH);
+            Serial.println("[BTN] Long-press threshold reached (>= 2.5s). Release button to activate Wi-Fi Setup Mode.");
+        }
+    }
+    // Button released (transition LOW -> HIGH)
     else if (btnState == HIGH && lastBtnState == LOW) {
+        digitalWrite(STATUS_LED_PIN, LOW);
         unsigned long duration = now - btnPressStartMs;
-        if (duration > 50) {
-            // Instant On-Demand Print using active configuration
-            Serial.println("[BTN] Hardware BOOT button pressed -> Generating & printing puzzle mix!");
+
+        if (btnLongPressActive || duration >= BUTTON_LONG_PRESS_MS) {
+            // Long press released -> Enter or toggle Wi-Fi Setup Mode
+            Serial.println("\n[BTN] >>> LONG PRESS CONFIRMED! ENTERING WI-FI SETUP MODE <<<");
+            blinkStatusLed(3, 100);
+
+            if (timeManager.isPortalActive()) {
+                Serial.println("[BTN] Setup portal already active -> stopping portal.");
+                timeManager.stopSetupPortal();
+            } else {
+                timeManager.startSetupPortal();
+                timeManager.printSetupTicket(printer);
+            }
+        } else if (duration > BUTTON_DEBOUNCE_MS) {
+            // Short press released -> Instant On-Demand Print
+            Serial.println("[BTN] Short press detected -> Generating & printing active puzzle mix!");
+            blinkStatusLed(1, 150);
             executePrintJob();
         }
-        delay(50); // debounce
+
+        btnLongPressActive = false;
+        delay(BUTTON_DEBOUNCE_MS);
     }
 
     lastBtnState = btnState;
@@ -131,7 +159,7 @@ void handleSerialCommands() {
                           configManager.getPuzzleCount(), configManager.getEnabledGameCount());
             Serial.printf("Difficulty:   %s\n", configManager.getGradeName(configManager.getPuzzleGrade()));
             Serial.printf("Time:         %s\n", timeManager.getFormattedTime().c_str());
-            Serial.printf("Time Set:     %s\n", timeManager.isTimeSet() ? "Yes" : "No (Hold BOOT or power-cycle 3x to set)");
+            Serial.printf("Time Set:     %s\n", timeManager.isTimeSet() ? "Yes" : "No (Hold BOOT button >= 2.5s to set)");
 #if (ACTIVE_PRINTER_MODE == PRINTER_MODE_W5500_ETH)
             Serial.printf("Printer:      Direct W5500 RJ45 Ethernet (ESP32: %s -> %s:%d)\n", ESP32_STATIC_IP, PRINTER_IP_ADDR, PRINTER_TCP_PORT);
 #elif (ACTIVE_PRINTER_MODE == PRINTER_MODE_SERIAL)
@@ -205,11 +233,11 @@ void setup() {
                   configManager.getGradeName(configManager.getPuzzleGrade()));
 
     Serial.println("\n--- CONTROLS & HOW TO USE ---");
-    Serial.println("1. Press BOOT button (GPIO 0)       -> Instantly generates & prints current configured puzzle mix!");
-    Serial.println("2. Power-cycle printer or ESP32 3x  -> Activates Setup Hotspot with Dual QR code receipt ticket!");
-    Serial.printf("3. Daily scheduled auto-print       -> Every morning at %02d:%02d\n", DAILY_PRINT_HOUR, DAILY_PRINT_MINUTE);
-    Serial.println("4. Auto-print on Printer Power-ON   -> Flip printer switch ON to print automatically (5s dwell)!");
-    Serial.println("5. Serial Monitor (115200 baud)     -> [P]rint | [W]i-Fi Setup | [S]tatus\n");
+    Serial.println("1. BOOT Button: Short Press (<2.5s) -> Instantly generates & prints active puzzle mix!");
+    Serial.println("2. BOOT Button: Long Press (>=2.5s)  -> Activates Wi-Fi Setup Portal + prints Dual QR slip!");
+    Serial.printf("3. Daily scheduled auto-print        -> Every morning at %02d:%02d\n", DAILY_PRINT_HOUR, DAILY_PRINT_MINUTE);
+    Serial.println("4. Auto-print on Printer Power-ON    -> Flip printer switch ON to print automatically!");
+    Serial.println("5. Serial Monitor (115200 baud)      -> [P]rint | [W]i-Fi Setup | [S]tatus\n");
 
     // -------------------------------------------------------------------------
     // Hardware Power-Cycle Gesture Detection (Across ESP32 boots / power cuts)
@@ -255,7 +283,7 @@ void setup() {
 
 #if AUTO_PRINT_ON_PRINTER_POWER
 void checkPrinterPowerTransition() {
-    // If setup portal is already active, do not trigger auto-print or re-trigger setup
+    // If setup portal is already active, do not trigger auto-print
     if (timeManager.isPortalActive()) {
         return;
     }
@@ -263,11 +291,8 @@ void checkPrinterPowerTransition() {
     static unsigned long lastPollMs = 0;
     static bool lastPrinterOnline = false;
     static bool initializedState = false;
-
-    static int powerCycleCount = 0;
-    static unsigned long lastToggleMs = 0;
     static unsigned long steadyOnStartMs = 0;
-    static bool setupModeTriggered = false;
+    static bool printJobFiredForThisPowerCycle = false;
 
     unsigned long now = millis();
     if (now - lastPollMs < PRINTER_POLL_INTERVAL_MS) {
@@ -280,67 +305,33 @@ void checkPrinterPowerTransition() {
     if (!initializedState) {
         lastPrinterOnline = isOnline;
         initializedState = true;
-        if (isOnline) steadyOnStartMs = now;
+        if (isOnline) {
+            steadyOnStartMs = now;
+            printJobFiredForThisPowerCycle = true; // Handled by boot dwell if AUTO_PRINT_ON_BOOT
+        }
         return;
     }
 
     // 1. Detected transition from OFF -> ON!
     if (isOnline && !lastPrinterOnline) {
-        // Sliding inter-toggle window: allow up to 4000ms since the last toggle
-        if (powerCycleCount == 0 || (now - lastToggleMs > 4000)) {
-            powerCycleCount = 1;
-        } else {
-            powerCycleCount++;
-        }
-        lastToggleMs = now;
         steadyOnStartMs = now;
-        setupModeTriggered = false;
-        Serial.printf("\n[PRINTER] Power ON transition #%d detected! (Time since last toggle: %lu ms)\n", 
-                      powerCycleCount, (powerCycleCount == 1) ? 0 : (now - lastToggleMs));
+        printJobFiredForThisPowerCycle = false;
+        Serial.println("\n[PRINTER] Printer power ON detected! Waiting for printer mechanism to settle...");
     }
     // 2. Detected transition from ON -> OFF!
     else if (!isOnline && lastPrinterOnline) {
         Serial.println("[PRINTER] Printer powered OFF.");
         steadyOnStartMs = 0;
-        lastToggleMs = now;
+        printJobFiredForThisPowerCycle = false;
     }
 
     // 3. Steady state processing while printer remains ON
-    if (isOnline) {
-        // Did user perform 3 toggles?
-        if (powerCycleCount >= 3) {
-            // Wait for 2.0 seconds of steady ON to confirm user is finished toggling
-            if (!setupModeTriggered && (now - steadyOnStartMs >= 2000)) {
-                setupModeTriggered = true;
-                Serial.println("\n[PRINTER] >>> 3-CYCLE GESTURE CONFIRMED! ENTERING SETUP MODE <<<");
-                powerCycleCount = 0;
-
-                // Start Wi-Fi hotspot immediately (broadcasts in ~150ms)
-                timeManager.startSetupPortal();
-
-                // Print setup ticket with dual stacked QR codes
-                timeManager.printSetupTicket(printer);
-            }
-        }
-        // Normal single power-on: require 5.0 seconds of steady uninterrupted ON
-        // before firing auto-print. If user turns it off within 5.0s, it advances
-        // to cycle #2 without printing daily puzzles!
-        else if (powerCycleCount == 1) {
-            if (now - steadyOnStartMs >= 5000) {
-                if (!g_bootAutoPrintPending) {
-                    Serial.println("\n[PRINTER] Normal power-on confirmed (5s steady ON). Starting automatic daily print job...");
-                    powerCycleCount = 0;
-                    executePrintJob();
-                } else {
-                    powerCycleCount = 0;
-                }
-            }
-        }
-        // Incomplete 2-toggle sequence: if more than 4 seconds elapsed since last toggle and steady for 5s, reset
-        else if (powerCycleCount == 2) {
-            if (now - lastToggleMs > 4000 && now - steadyOnStartMs >= 5000) {
-                Serial.println("[PRINTER] Incomplete power-cycle sequence. Resetting toggle counter.");
-                powerCycleCount = 0;
+    if (isOnline && !printJobFiredForThisPowerCycle) {
+        if (now - steadyOnStartMs >= PRINTER_READY_SETTLE_MS) {
+            printJobFiredForThisPowerCycle = true;
+            if (!g_bootAutoPrintPending) {
+                Serial.println("\n[PRINTER] Printer ready (2s settle elapsed). Executing automatic daily print job...");
+                executePrintJob();
             }
         }
     }
@@ -350,11 +341,11 @@ void checkPrinterPowerTransition() {
 #endif
 
 void loop() {
-    // 0. Settle boot dwell: after 6.0 seconds of steady uptime without power loss,
+    // 0. Settle boot dwell: after 2.5 seconds of steady uptime without power loss,
     // clear the NVS boot cycle counter confirming a stable boot.
     static bool bootDwellCompleted = false;
     if (!bootDwellCompleted && !g_setupModeTriggeredAtBoot) {
-        if (millis() - g_bootTimeMs >= 6000) {
+        if (millis() - g_bootTimeMs >= 2500) {
             bootDwellCompleted = true;
             bootPrefs.begin("mp_boot", false);
             bootPrefs.putUChar("b_count", 0);
@@ -376,7 +367,7 @@ void loop() {
     // 1. Handle SoftAP captive portal requests if user opened setup mode
     timeManager.handleClient();
 
-    // 2. Monitor physical BOOT button (simple on-demand print)
+    // 2. Monitor physical BOOT button (short = print, hold >= 2.5s = setup)
     handleButtonPress();
 
     // 3. Monitor Serial console commands
@@ -389,7 +380,7 @@ void loop() {
     }
 
 #if AUTO_PRINT_ON_PRINTER_POWER
-    // 5. Monitor printer power switch (auto-print or rapid 3x toggle setup trigger)
+    // 5. Monitor printer power switch (auto-print when printer is turned ON)
     checkPrinterPowerTransition();
 #endif
 

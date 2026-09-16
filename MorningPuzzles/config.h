@@ -113,9 +113,11 @@
 // 6. Hardware Pins & User Interaction
 // -----------------------------------------------------------------------------
 // Built-in BOOT button on standard ESP32 boards (GPIO 0, active LOW)
-//   - Short press (< 1.5s): Instantly generates and prints a random puzzle set!
-//   - Long press (> 3.0s):  Launches SoftAP time-sync portal ("Morning-Puzzles-Setup")
+//   - Short press (< 2.5s): Instantly generates and prints active configured puzzle mix!
+//   - Long press (>= 2.5s): Launches SoftAP setup portal ("Morning-Puzzles-Setup") + prints QR slip
 #define BUTTON_TRIGGER_PIN      0
+#define BUTTON_LONG_PRESS_MS    2500    // Hold >= 2.5s to enter Wi-Fi Setup Mode
+#define BUTTON_DEBOUNCE_MS      50      // 50ms button debounce
 
 // Built-in status LED (GPIO 2 on most ESP32 DevKit modules)
 #define STATUS_LED_PIN          2
