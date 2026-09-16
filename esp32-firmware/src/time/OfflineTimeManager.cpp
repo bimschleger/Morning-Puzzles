@@ -146,8 +146,13 @@ void OfflineTimeManager::markPrintedToday() {
 // -----------------------------------------------------------------------------
 void OfflineTimeManager::startSetupPortal() {
     Serial.println("\n[PORTAL] Starting SoftAP Web Configurator...");
-    WiFi.softAP("Morning-Puzzles-Setup"); // Open network (zero password)
-    IPAddress myIP = WiFi.softAPIP();
+    WiFi.mode(WIFI_AP);
+    WiFi.setSleep(false); // Keep Wi-Fi radio fully active so beacons broadcast continuously
+    IPAddress myIP(192, 168, 4, 1);
+    IPAddress gateway(192, 168, 4, 1);
+    IPAddress subnet(255, 255, 255, 0);
+    WiFi.softAPConfig(myIP, gateway, subnet);
+    WiFi.softAP("Morning-Puzzles-Setup", nullptr, 1, 0, 4);
     Serial.printf("[PORTAL] Hotspot started! SSID: Morning-Puzzles-Setup (Open Network)\n");
     Serial.printf("[PORTAL] Connect phone and visit: http://%s\n", myIP.toString().c_str());
 
@@ -166,6 +171,7 @@ void OfflineTimeManager::stopSetupPortal() {
         _server.stop();
         _dnsServer.stop();
         WiFi.softAPdisconnect(true);
+        WiFi.mode(WIFI_OFF);
         _portalActive = false;
         _pendingExit = false;
         Serial.println("[PORTAL] SoftAP Setup Portal closed.");
@@ -218,9 +224,9 @@ void OfflineTimeManager::printSetupTicket(EscPosPrinter& printer) {
     printer.setBold(false);
 
     ThermalCanvas canvas;
-    if (canvas.begin(224)) {
+    if (canvas.begin(240)) {
         canvas.clear(0);
-        canvas.drawQrCode(288, 112, "WIFI:S:Morning-Puzzles-Setup;T:nopass;;", 6);
+        canvas.drawQrCode(288, 120, "WIFI:T:nopass;S:Morning-Puzzles-Setup;;", 6);
         canvas.printTo(printer);
         canvas.end();
     }
@@ -234,9 +240,9 @@ void OfflineTimeManager::printSetupTicket(EscPosPrinter& printer) {
     printer.println("[ STEP 2: SCAN TO OPEN SETTINGS ]");
     printer.setBold(false);
 
-    if (canvas.begin(192)) {
+    if (canvas.begin(216)) {
         canvas.clear(0);
-        canvas.drawQrCode(288, 96, "http://192.168.4.1", 6);
+        canvas.drawQrCode(288, 108, "http://192.168.4.1", 6);
         canvas.printTo(printer);
         canvas.end();
     }

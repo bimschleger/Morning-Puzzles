@@ -220,7 +220,9 @@ static void bb_initGrid(BitBucket *bitGrid, uint8_t *data, uint8_t size) {
 static void bb_appendBits(BitBucket *bitBuffer, uint32_t val, uint8_t length) {
     uint32_t offset = bitBuffer->bitOffsetOrWidth;
     for (int8_t i = length - 1; i >= 0; i--, offset++) {
-        bitBuffer->data[offset >> 3] |= ((val >> i) & 1) << (7 - (offset & 7));
+        if ((offset >> 3) < bitBuffer->capacityBytes) {
+            bitBuffer->data[offset >> 3] |= ((val >> i) & 1) << (7 - (offset & 7));
+        }
     }
     bitBuffer->bitOffsetOrWidth = offset;
 }
@@ -809,6 +811,7 @@ int8_t qrcode_initBytes(QRCode *qrcode, uint8_t *modules, uint8_t version, uint8
     int8_t mode = encodeDataCodewords(&codewords, data, length, version);
     
     if (mode < 0) { return -1; }
+    if (codewords.bitOffsetOrWidth > (dataCapacity * 8)) { return -1; }
     qrcode->mode = mode;
     
     // Add terminator and pad up to a byte if applicable
