@@ -217,10 +217,16 @@ void OfflineTimeManager::printSetupTicket(EscPosPrinter& printer) {
     printer.printDoubleLine();
     printer.println("");
 
+    // Instructions intro
+    printer.setAlign(ALIGN_CENTER);
+    printer.println("Follow the instructions below to get your");
+    printer.println("Morning Puzzles ready to go:");
+    printer.println("");
+
     // Step 1: Wi-Fi
     printer.setAlign(ALIGN_CENTER);
     printer.setBold(true);
-    printer.println("[ STEP 1: SCAN TO JOIN WI-FI ]");
+    printer.println("[ STEP 1: SCAN TO JOIN THE NETWORK ]");
     printer.setBold(false);
 
     ThermalCanvas canvas;
@@ -237,7 +243,7 @@ void OfflineTimeManager::printSetupTicket(EscPosPrinter& printer) {
 
     // Step 2: Settings URL
     printer.setBold(true);
-    printer.println("[ STEP 2: SCAN TO OPEN SETTINGS ]");
+    printer.println("[ STEP 2: SCAN TO VIEW SETTINGS ]");
     printer.setBold(false);
 
     if (canvas.begin(216)) {
@@ -249,6 +255,25 @@ void OfflineTimeManager::printSetupTicket(EscPosPrinter& printer) {
     printer.setAlign(ALIGN_CENTER);
     printer.println("URL: http://192.168.4.1");
     printer.println("");
+
+    // Step 3: Choose Games
+    printer.setBold(true);
+    printer.println("[ STEP 3: CHOOSE GAMES ]");
+    printer.setBold(false);
+    printer.println("In your browser, customize your device:");
+    printer.setAlign(ALIGN_LEFT);
+    printer.println("      * Select which games to get");
+    printer.println("      * How many games to print");
+    printer.println("      * Choose your difficulty level");
+    printer.println("      * Set if you want daily prints");
+    printer.println("");
+
+    // Save Instruction & Notices
+    printer.setAlign(ALIGN_CENTER);
+    printer.setBold(true);
+    printer.println("Click Save to apply your settings.");
+    printer.setBold(false);
+    printer.println("(A confirmation ticket prints automatically)");
     printer.println("(Hotspot auto-closes after 5 minutes)");
     printer.printHorizontalLine('-');
 

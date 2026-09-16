@@ -27,24 +27,20 @@ If you simply want a fresh puzzle receipt whenever you want:
 
 Because an ESP32 loses its time when unplugged if no internet connection is available for NTP, we provide two easy ways to set and keep accurate time offline:
 
-### Method A: Wi-Fi SoftAP One-Tap Phone Sync (Zero Extra Hardware)
+### Method A: Wi-Fi SoftAP One-Tap Phone Sync & Settings (Zero Extra Hardware)
 
-You can sync the exact time from your phone in under 15 seconds without an internet connection:
+You can configure your puzzle preferences and sync the exact clock from your phone in under 30 seconds without an internet connection:
 
 1. **Enter Setup Mode**:
-   - **Press and hold the `BOOT` button (GPIO 0) for 3 seconds** (or type `'W'` in the Serial monitor).
-   - The status LED will blink, and the ESP32 will launch a local Wi-Fi network:
-     - **SSID**: `Morning-Puzzles-Setup`
-     - **Password**: `puzzles123`
-2. **Connect**:
-   - On your smartphone (iPhone or Android) or laptop, connect to the `Morning-Puzzles-Setup` Wi-Fi network.
-3. **One-Tap Sync**:
-   - Open your browser to `http://192.168.4.1` (a captive portal popup may appear automatically).
-   - Tap the big button: **"Sync Time from This Phone"**.
-   - Your browser's JavaScript immediately reads the exact date, time, and timezone from your phone and sets the ESP32's internal real-time clock!
-4. **Exit**:
-   - Tap **"Save & Exit Setup"**.
-   - The hotspot shuts down, and the ESP32 is now armed to print every morning at **7:00 AM** automatically!
+   - **Press and hold the `BOOT` button (GPIO 0) for 2.5 seconds** (or type `'W'` in the Serial monitor).
+   - The thermal printer automatically prints a **SETUP MODE** instruction ticket with dual QR codes!
+2. **Follow the 3 Ticket Steps**:
+   - **Step 1: Scan to Join the Network**: Scan the Wi-Fi QR code (or manually connect to SSID `Morning-Puzzles-Setup` - Open Network, no password).
+   - **Step 2: Scan to View Settings**: Scan the URL QR code (or navigate to `http://192.168.4.1`).
+   - **Step 3: Choose Games & Settings**: In your browser, pick which games you want, how many to print, your difficulty level, and your daily morning print schedule.
+3. **Save & Confirm**:
+   - Tap **"Save Settings & Exit Setup"**.
+   - The printer immediately prints a **CONFIGURATION SAVED** ticket summarizing all your active settings, the hotspot turns off, and your printer is ready to go!
 
 ---
 
