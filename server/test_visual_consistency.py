@@ -186,6 +186,23 @@ def test_visual_consistency():
                 "solution": item["solution"],
                 "difficulty": item.get("difficulty", "easy"),
             }
+        elif p_name == "binary":
+            py_data = {
+                "size": item["size"],
+                "puzzle": item["grid"],
+            }
+        elif p_name == "bridges":
+            py_data = {
+                "size": item["size"],
+                "islands": item["islands"],
+            }
+        elif p_name == "tango":
+            py_data = {
+                "size": item["size"],
+                "puzzle": item["grid"],
+                "edges_h": item["edges_h"],
+                "edges_v": item["edges_v"],
+            }
         else:
             print(f"Unknown puzzle {p_name}")
             continue

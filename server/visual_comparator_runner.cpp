@@ -57,6 +57,12 @@
 #include "../esp32-firmware/src/generators/LadderGen.h"
 #include "../esp32-firmware/src/generators/LadderGen.cpp"
 
+#include "../esp32-firmware/src/generators/BridgesGen.h"
+#include "../esp32-firmware/src/generators/BridgesGen.cpp"
+
+#include "../esp32-firmware/src/generators/TangoGen.h"
+#include "../esp32-firmware/src/generators/TangoGen.cpp"
+
 #include <iostream>
 #include <iomanip>
 #include <sstream>
@@ -547,6 +553,108 @@ int main(int argc, char** argv) {
         for (uint8_t i = 0; i < ladderGen.getTotalWords(); i++) {
             if (i > 0) std::cout << ", ";
             std::cout << "\"" << ladderGen.getWord(i) << "\"";
+        }
+        std::cout << "],\n";
+        std::cout << "    \"raster_hex\": \"" << toHex(printer->lastBitmap) << "\"\n";
+        std::cout << "  }";
+    }
+
+    // 14. BINARY
+    {
+        BinaryGen bGen;
+        bGen.generate(BINARY_MEDIUM);
+        printer->lastBitmap.clear();
+        bGen.printRasterToReceipt(*printer, BINARY_MEDIUM);
+
+        printSep();
+        std::cout << "  {\n";
+        std::cout << "    \"puzzle\": \"binary\",\n";
+        std::cout << "    \"width\": " << printer->lastWidth << ",\n";
+        std::cout << "    \"height\": " << printer->lastHeight << ",\n";
+        std::cout << "    \"size\": " << (int)bGen.getSize() << ",\n";
+        std::cout << "    \"grid\": [";
+        for (uint8_t r = 0; r < bGen.getSize(); r++) {
+            if (r > 0) std::cout << ", ";
+            std::cout << "[";
+            for (uint8_t c = 0; c < bGen.getSize(); c++) {
+                if (c > 0) std::cout << ", ";
+                std::cout << (int)bGen.getCell(r, c);
+            }
+            std::cout << "]";
+        }
+        std::cout << "],\n";
+        std::cout << "    \"raster_hex\": \"" << toHex(printer->lastBitmap) << "\"\n";
+        std::cout << "  }";
+    }
+
+    // 15. BRIDGES
+    {
+        BridgesGen brGen;
+        brGen.generate(BRIDGES_MEDIUM);
+        printer->lastBitmap.clear();
+        brGen.printRasterToReceipt(*printer, BRIDGES_MEDIUM);
+
+        printSep();
+        std::cout << "  {\n";
+        std::cout << "    \"puzzle\": \"bridges\",\n";
+        std::cout << "    \"width\": " << printer->lastWidth << ",\n";
+        std::cout << "    \"height\": " << printer->lastHeight << ",\n";
+        std::cout << "    \"size\": " << (int)brGen.getSize() << ",\n";
+        std::cout << "    \"islands\": [\n";
+        for (uint8_t i = 0; i < brGen.getIslandCount(); i++) {
+            if (i > 0) std::cout << ",\n";
+            IslandInfo isl = brGen.getIsland(i);
+            std::cout << "      {\"r\": " << (int)isl.r << ", \"c\": " << (int)isl.c << ", \"count\": " << (int)isl.count << "}";
+        }
+        std::cout << "\n    ],\n";
+        std::cout << "    \"raster_hex\": \"" << toHex(printer->lastBitmap) << "\"\n";
+        std::cout << "  }";
+    }
+
+    // 16. TANGO
+    {
+        TangoGen tgGen;
+        tgGen.generate(TANGO_MEDIUM);
+        printer->lastBitmap.clear();
+        tgGen.printRasterToReceipt(*printer, TANGO_MEDIUM);
+
+        printSep();
+        std::cout << "  {\n";
+        std::cout << "    \"puzzle\": \"tango\",\n";
+        std::cout << "    \"width\": " << printer->lastWidth << ",\n";
+        std::cout << "    \"height\": " << printer->lastHeight << ",\n";
+        std::cout << "    \"size\": " << (int)tgGen.getSize() << ",\n";
+        std::cout << "    \"grid\": [";
+        for (uint8_t r = 0; r < tgGen.getSize(); r++) {
+            if (r > 0) std::cout << ", ";
+            std::cout << "[";
+            for (uint8_t c = 0; c < tgGen.getSize(); c++) {
+                if (c > 0) std::cout << ", ";
+                std::cout << (int)tgGen.getCell(r, c);
+            }
+            std::cout << "]";
+        }
+        std::cout << "],\n";
+        std::cout << "    \"edges_h\": [";
+        for (uint8_t r = 0; r < tgGen.getSize(); r++) {
+            if (r > 0) std::cout << ", ";
+            std::cout << "[";
+            for (uint8_t c = 0; c < tgGen.getSize() - 1; c++) {
+                if (c > 0) std::cout << ", ";
+                std::cout << (int)tgGen.getEdgeH(r, c);
+            }
+            std::cout << "]";
+        }
+        std::cout << "],\n";
+        std::cout << "    \"edges_v\": [";
+        for (uint8_t r = 0; r < tgGen.getSize() - 1; r++) {
+            if (r > 0) std::cout << ", ";
+            std::cout << "[";
+            for (uint8_t c = 0; c < tgGen.getSize(); c++) {
+                if (c > 0) std::cout << ", ";
+                std::cout << (int)tgGen.getEdgeV(r, c);
+            }
+            std::cout << "]";
         }
         std::cout << "],\n";
         std::cout << "    \"raster_hex\": \"" << toHex(printer->lastBitmap) << "\"\n";

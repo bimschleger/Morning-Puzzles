@@ -19,9 +19,9 @@ Runs **100% On-Device and Offline** on an **ESP32** in native C++ with zero clou
 
 ---
 
-## 🧩 Featured Games (All 10 Included)
+## 🧩 Featured Games (All 16 Included)
 
-Every print job generates a randomized, unique daily edition featuring all 10 open-source (Apache 2.0 / MIT) puzzle types conforming to strict presentation standards:
+Every print job generates a randomized, unique daily edition featuring all 16 open-source (Apache 2.0 / MIT) puzzle types conforming to strict presentation standards:
 
 1. **Sudoku**: 9x9 grid with standard 3x3 block hierarchy, generated with a backtracking solver mathematically guaranteed to have exactly one unique solution.
 2. **Search** *(Word Search)*: Dynamic letter matrix with randomized hidden words (horizontal, vertical, diagonal) across curated themes (Morning, Space, Animals, Nature, Tech), complete with checkbox tracking. Theme-driven with no difficulty line.
@@ -33,6 +33,12 @@ Every print job generates a randomized, unique daily edition featuring all 10 op
 8. **Tents** *(Tents & Trees)*: Bipartite matching puzzle where each tree is paired with a tent next to it, tents never touch even diagonally, and margin numbers indicate line totals.
 9. **Bridges** *(Hashiwokakero)*: Connect numbered circular islands with horizontal and vertical single/double bridges to form a single continuous spanning network without crossings.
 10. **Killer** *(Killer Sudoku)*: Cage-sum deduction puzzle (4x4 on Easy/Medium, 6x6 on Extreme) combining Latin-square non-repeating digits with dashed cage arithmetic sums.
+11. **Cryptogram**: Monoalphabetic substitution cipher featuring famous quotes, riddles, and proverbs with letter hint scaffolding.
+12. **Tango**: Sun and Moon parity logic grid with edge equality (`=`) and opposite (`x`) constraints.
+13. **Ladder** *(Word Ladder / Doublets)*: Deduce intermediate words linking a start word to a target word, changing exactly one letter per step.
+14. **Wheel** *(Word Wheel / Target Anagram)*: 7-letter hexagonal honeycomb anagram challenge requiring words formed with a mandatory center letter and a 7-letter pangram.
+15. **Lights** *(Akari / Light Up)*: Line-of-sight illumination puzzle placing light bulbs to light up all corridors without shining on one another or exceeding wall clue limits.
+16. **Loop** *(Slitherlink / Fences)*: Loop deduction drawing a single continuous closed circuit where cell numbers indicate the exact number of surrounding loop segments.
 
 > [!NOTE]
 > All puzzle presentation formatting (single-word uppercase titles, $\le 100$-character one-sentence descriptions, centered difficulty placement, and 48-column ASCII solution keys) strictly adheres to [`docs/PUZZLE_HEADER_SPEC.md`](docs/PUZZLE_HEADER_SPEC.md), [`docs/PUZZLE_DESCRIPTION_GUIDELINES.md`](docs/PUZZLE_DESCRIPTION_GUIDELINES.md), and [`docs/PUZZLE_SOLUTION_KEY_SPEC.md`](docs/PUZZLE_SOLUTION_KEY_SPEC.md), verified by `python3 server/test_puzzle_standards.py`.

@@ -477,6 +477,24 @@
             </select>
           </div>
         </div>
+
+        <!-- 16. Wheel Toggle -->
+        <div class="bg-slate-900 border border-slate-800/80 rounded-xl p-3.5 flex flex-col gap-2.5 transition hover:border-slate-700">
+          <div class="flex items-center justify-between">
+            <label class="flex items-center gap-2.5 cursor-pointer select-none">
+              <input type="checkbox" id="toggle-wheel" checked class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
+              <span class="font-semibold text-sm text-slate-200">Wheel</span>
+            </label>
+          </div>
+          <div class="flex items-center justify-between pl-6 text-xs text-slate-400">
+            <span>Difficulty:</span>
+            <select id="diff-wheel" class="bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2 py-1 text-xs outline-none focus:border-amber-500">
+              <option value="easy">Easy (35+ words)</option>
+              <option value="medium" selected>Medium (25+ words)</option>
+              <option value="hard">Hard (15+ words)</option>
+            </select>
+          </div>
+        </div>
       </div>
 
     </aside>
@@ -5353,6 +5371,96 @@
       }
     }
 
+    // WHEEL SIMULATOR (Word Wheel / Honeycomb)
+    class WheelSimulator {
+      constructor() {
+        this.puzzles = {
+          easy: [
+            { center: "E", outer: ["A", "N", "P", "R", "S", "T"], pangram: "PARENTS", wordCount: 38, good: 13, great: 24, genius: 32 },
+            { center: "E", outer: ["A", "D", "G", "N", "R", "S"], pangram: "GARDENS", wordCount: 38, good: 13, great: 24, genius: 32 },
+            { center: "E", outer: ["F", "L", "O", "R", "S", "W"], pangram: "FLOWERS", wordCount: 38, good: 13, great: 24, genius: 32 },
+            { center: "E", outer: ["A", "B", "K", "L", "N", "T"], pangram: "BLANKET", wordCount: 38, good: 13, great: 24, genius: 32 },
+            { center: "E", outer: ["A", "B", "C", "I", "N", "T"], pangram: "CABINET", wordCount: 38, good: 13, great: 24, genius: 32 },
+            { center: "E", outer: ["A", "I", "P", "R", "S", "T"], pangram: "PIRATES", wordCount: 38, good: 13, great: 24, genius: 32 },
+            { center: "E", outer: ["A", "D", "O", "R", "S", "T"], pangram: "ROASTED", wordCount: 38, good: 13, great: 24, genius: 32 },
+            { center: "E", outer: ["A", "G", "H", "I", "N", "T"], pangram: "HEATING", wordCount: 38, good: 13, great: 24, genius: 32 },
+            { center: "E", outer: ["G", "H", "I", "L", "N", "P"], pangram: "HELPING", wordCount: 38, good: 13, great: 24, genius: 32 },
+            { center: "E", outer: ["A", "D", "I", "N", "P", "T"], pangram: "PAINTED", wordCount: 38, good: 13, great: 24, genius: 32 },
+            { center: "E", outer: ["I", "N", "O", "P", "R", "T"], pangram: "POINTER", wordCount: 38, good: 13, great: 24, genius: 32 },
+            { center: "E", outer: ["M", "N", "O", "R", "S", "T"], pangram: "MONSTER", wordCount: 38, good: 13, great: 24, genius: 32 },
+            { center: "E", outer: ["D", "N", "O", "R", "S", "W"], pangram: "WONDERS", wordCount: 38, good: 13, great: 24, genius: 32 },
+            { center: "E", outer: ["H", "N", "R", "S", "T", "U"], pangram: "HUNTERS", wordCount: 38, good: 13, great: 24, genius: 32 },
+            { center: "E", outer: ["A", "D", "L", "O", "P", "R"], pangram: "LEOPARD", wordCount: 38, good: 13, great: 24, genius: 32 },
+            { center: "E", outer: ["A", "H", "N", "P", "R", "T"], pangram: "PANTHER", wordCount: 38, good: 13, great: 24, genius: 32 },
+            { center: "E", outer: ["A", "C", "I", "L", "N", "P"], pangram: "PELICAN", wordCount: 38, good: 13, great: 24, genius: 32 },
+            { center: "E", outer: ["A", "H", "R", "S", "T", "V"], pangram: "HARVEST", wordCount: 38, good: 13, great: 24, genius: 32 },
+            { center: "E", outer: ["C", "I", "N", "O", "S", "T"], pangram: "SECTION", wordCount: 38, good: 13, great: 24, genius: 32 },
+            { center: "E", outer: ["B", "L", "O", "R", "S", "T"], pangram: "LOBSTER", wordCount: 38, good: 13, great: 24, genius: 32 }
+          ],
+          medium: [
+            { center: "A", outer: ["G", "I", "L", "N", "P", "Y"], pangram: "PLAYING", wordCount: 26, good: 9, great: 16, genius: 22 },
+            { center: "A", outer: ["G", "I", "K", "L", "N", "W"], pangram: "WALKING", wordCount: 26, good: 9, great: 16, genius: 22 },
+            { center: "O", outer: ["A", "B", "G", "I", "N", "T"], pangram: "BOATING", wordCount: 26, good: 9, great: 16, genius: 22 },
+            { center: "I", outer: ["F", "G", "N", "R", "S", "U"], pangram: "SURFING", wordCount: 26, good: 9, great: 16, genius: 22 },
+            { center: "I", outer: ["A", "C", "G", "M", "N", "P"], pangram: "CAMPING", wordCount: 26, good: 9, great: 16, genius: 22 },
+            { center: "I", outer: ["A", "F", "G", "M", "N", "R"], pangram: "FARMING", wordCount: 26, good: 9, great: 16, genius: 22 },
+            { center: "A", outer: ["C", "E", "L", "N", "R", "T"], pangram: "CENTRAL", wordCount: 26, good: 9, great: 16, genius: 22 },
+            { center: "O", outer: ["C", "E", "J", "P", "R", "T"], pangram: "PROJECT", wordCount: 26, good: 9, great: 16, genius: 22 },
+            { center: "O", outer: ["A", "B", "C", "L", "N", "Y"], pangram: "BALCONY", wordCount: 26, good: 9, great: 16, genius: 22 },
+            { center: "I", outer: ["C", "E", "H", "M", "N", "Y"], pangram: "CHIMNEY", wordCount: 26, good: 9, great: 16, genius: 22 },
+            { center: "A", outer: ["C", "L", "R", "S", "T", "Y"], pangram: "CRYSTAL", wordCount: 26, good: 9, great: 16, genius: 22 },
+            { center: "O", outer: ["E", "J", "N", "R", "U", "Y"], pangram: "JOURNEY", wordCount: 26, good: 9, great: 16, genius: 22 },
+            { center: "A", outer: ["E", "J", "M", "S", "T", "Y"], pangram: "MAJESTY", wordCount: 26, good: 9, great: 16, genius: 22 },
+            { center: "O", outer: ["F", "I", "M", "N", "R", "U"], pangram: "UNIFORM", wordCount: 26, good: 9, great: 16, genius: 22 },
+            { center: "A", outer: ["E", "I", "M", "P", "R", "V"], pangram: "VAMPIRE", wordCount: 26, good: 9, great: 16, genius: 22 },
+            { center: "O", outer: ["E", "F", "N", "R", "T", "U"], pangram: "FORTUNE", wordCount: 26, good: 9, great: 16, genius: 22 },
+            { center: "I", outer: ["C", "E", "L", "N", "P", "S"], pangram: "PENCILS", wordCount: 26, good: 9, great: 16, genius: 22 },
+            { center: "A", outer: ["C", "E", "F", "N", "R", "U"], pangram: "FURNACE", wordCount: 26, good: 9, great: 16, genius: 22 },
+            { center: "O", outer: ["A", "C", "E", "G", "R", "U"], pangram: "COURAGE", wordCount: 26, good: 9, great: 16, genius: 22 },
+            { center: "A", outer: ["B", "I", "N", "O", "R", "W"], pangram: "RAINBOW", wordCount: 26, good: 9, great: 16, genius: 22 }
+          ],
+          hard: [
+            { center: "H", outer: ["D", "I", "L", "N", "O", "P"], pangram: "DOLPHIN", wordCount: 16, good: 5, great: 10, genius: 13 },
+            { center: "U", outer: ["H", "I", "M", "P", "R", "T"], pangram: "TRIUMPH", wordCount: 16, good: 5, great: 10, genius: 13 },
+            { center: "H", outer: ["I", "M", "P", "R", "T", "U"], pangram: "TRIUMPH", wordCount: 16, good: 5, great: 10, genius: 13 },
+            { center: "K", outer: ["D", "G", "I", "M", "N", "O"], pangram: "KINGDOM", wordCount: 16, good: 5, great: 10, genius: 13 },
+            { center: "W", outer: ["B", "E", "G", "I", "N", "R"], pangram: "BREWING", wordCount: 16, good: 5, great: 10, genius: 13 },
+            { center: "U", outer: ["C", "G", "I", "L", "N", "R"], pangram: "CURLING", wordCount: 16, good: 5, great: 10, genius: 13 },
+            { center: "G", outer: ["D", "E", "H", "I", "L", "T"], pangram: "DELIGHT", wordCount: 16, good: 5, great: 10, genius: 13 },
+            { center: "U", outer: ["E", "F", "G", "I", "R", "S"], pangram: "FIGURES", wordCount: 16, good: 5, great: 10, genius: 13 },
+            { center: "V", outer: ["A", "F", "L", "O", "R", "S"], pangram: "FLAVORS", wordCount: 16, good: 5, great: 10, genius: 13 },
+            { center: "W", outer: ["A", "D", "G", "I", "N", "R"], pangram: "DRAWING", wordCount: 16, good: 5, great: 10, genius: 13 },
+            { center: "B", outer: ["A", "I", "N", "O", "S", "T"], pangram: "BASTION", wordCount: 16, good: 5, great: 10, genius: 13 },
+            { center: "M", outer: ["A", "C", "E", "I", "N", "S"], pangram: "CINEMAS", wordCount: 16, good: 5, great: 10, genius: 13 },
+            { center: "D", outer: ["A", "C", "E", "I", "L", "T"], pangram: "CITADEL", wordCount: 16, good: 5, great: 10, genius: 13 },
+            { center: "U", outer: ["C", "L", "M", "N", "O", "S"], pangram: "COLUMNS", wordCount: 16, good: 5, great: 10, genius: 13 },
+            { center: "D", outer: ["C", "E", "I", "N", "R", "S"], pangram: "CINDERS", wordCount: 16, good: 5, great: 10, genius: 13 },
+            { center: "V", outer: ["A", "C", "E", "L", "O", "S"], pangram: "ALCOVES", wordCount: 16, good: 5, great: 10, genius: 13 },
+            { center: "C", outer: ["A", "E", "I", "L", "R", "S"], pangram: "ECLAIRS", wordCount: 16, good: 5, great: 10, genius: 13 },
+            { center: "G", outer: ["A", "E", "O", "R", "T", "U"], pangram: "OUTRAGE", wordCount: 16, good: 5, great: 10, genius: 13 },
+            { center: "M", outer: ["B", "E", "L", "O", "P", "R"], pangram: "PROBLEM", wordCount: 16, good: 5, great: 10, genius: 13 },
+            { center: "Z", outer: ["A", "C", "D", "I", "O", "S"], pangram: "ZODIACS", wordCount: 16, good: 5, great: 10, genius: 13 }
+          ]
+        };
+      }
+
+      generate(diff = 'medium') {
+        const list = this.puzzles[diff] || this.puzzles.medium;
+        const p = list[Math.floor(Math.random() * list.length)];
+        return {
+          title: 'WHEEL',
+          difficulty: diff,
+          center: p.center,
+          outer: [...p.outer],
+          pangram: p.pangram,
+          wordCount: p.wordCount,
+          good: p.good,
+          great: p.great,
+          genius: p.genius
+        };
+      }
+    }
+
     function drawLightsCanvas(canvas, lData) {
       const totalWidth = 345;
       const padding = 12;
@@ -6729,6 +6837,7 @@
     const ladderSim = new LadderSimulator();
     const lightsSim = new LightsSimulator();
     const loopSim = new LoopSimulator();
+    const wheelSim = new WheelSimulator();
 
     let rawReceiptLines = [];
 
@@ -7607,6 +7716,49 @@
         });
       };
 
+      // 16. WHEEL
+      PUZZLE_RENDERERS['wheel'] = () => {
+        const diff = document.getElementById('diff-wheel').value;
+        const wData = wheelSim.generate(diff);
+        const wheelDesc = `Find ${wData.wordCount}+ words using center letter ${wData.center} and outer letters, including a 7-letter pangram.`;
+        addStandardPuzzleHeader(items, 'WHEEL', diff, wheelDesc);
+
+        if (isOfflineRaster || isGraphic) {
+          items.push({
+            type: 'canvas',
+            render: (canvas) => renderOfflineWheel(canvas, wData)
+          });
+        } else {
+          // Monospaced ASCII Wheel
+          const o = wData.outer;
+          const c = wData.center;
+          items.push({ type: 'text', text: '                  +---+---+' });
+          items.push({ type: 'text', text: `                  | ${o[0]} | ${o[1]} |` });
+          items.push({ type: 'text', text: '              +---+===+===+---+' });
+          items.push({ type: 'text', text: `              | ${o[2]} | [${c}] | ${o[3]} |` });
+          items.push({ type: 'text', text: '              +---+===+===+---+' });
+          items.push({ type: 'text', text: `                  | ${o[4]} | ${o[5]} |` });
+          items.push({ type: 'text', text: '                  +---+---+' });
+          items.push({ type: 'text', text: '' });
+          items.push({ type: 'text', text: '   TARGET BENCHMARKS:' });
+          items.push({ type: 'text', text: `     Good: ${wData.good} words  |  Great: ${wData.great} words  |  Genius: ${wData.genius}+ words` });
+          items.push({ type: 'text', text: '' });
+          items.push({ type: 'text', text: `   WORDS FOUND (Must include central letter ${c}):` });
+          items.push({ type: 'text', text: '   _________________        _________________' });
+          items.push({ type: 'text', text: '   _________________        _________________' });
+          items.push({ type: 'text', text: '   _________________        _________________' });
+          items.push({ type: 'text', text: '   _________________        _________________' });
+        }
+
+        items.push({ type: 'blank', text: '' });
+        items.push({ type: 'rule', text: '-'.repeat(COLS) });
+
+        solutionsContent.push({
+          name: 'Wheel',
+          data: wData
+        });
+      };
+
       // Render active puzzles in progressive/configured order
       const renderOrder = [];
       activeGameOrder.forEach(id => {
@@ -7760,6 +7912,11 @@
             for (const line of solLines) {
               items.push({ type: 'text', text: line });
             }
+          } else if (item.name === 'Wheel') {
+            if (item.data.pangram) {
+              items.push({ type: 'text', text: `PANGRAM: ${item.data.pangram}` });
+            }
+            items.push({ type: 'text', text: `TOTAL WORDS: ${item.data.wordCount}` });
           }
 
           // Leave an empty line after displaying the answer
@@ -7870,7 +8027,8 @@
       'diff-tango': { easy: 'easy', medium: 'medium', hard: 'hard' },
       'diff-ladder': { easy: 'easy', medium: 'medium', hard: 'hard' },
       'diff-lights': { easy: 'easy', medium: 'medium', hard: 'hard', extreme: 'extreme' },
-      'diff-loop': { easy: 'easy', medium: 'medium', hard: 'hard' }
+      'diff-loop': { easy: 'easy', medium: 'medium', hard: 'hard' },
+      'diff-wheel': { easy: 'easy', medium: 'medium', hard: 'hard' }
     };
 
     function applyGlobalDifficulty(diff) {
@@ -7937,11 +8095,11 @@
       }
     });
 
-    // All 15 puzzle IDs in canonical order
+    // All 16 puzzle IDs in canonical order
     const ALL_GAMES = [
       'queens', 'sudoku', 'wordsearch', 'nonogram', 'jumble',
       'binary', 'mines', 'tents', 'bridges', 'killer',
-      'cryptogram', 'tango', 'ladder', 'lights', 'loop'
+      'cryptogram', 'tango', 'ladder', 'lights', 'loop', 'wheel'
     ];
 
     let activeGameOrder = [...ALL_GAMES];
@@ -8091,6 +8249,7 @@
       'toggle-ladder', 'diff-ladder',
       'toggle-lights', 'diff-lights',
       'toggle-loop', 'diff-loop',
+      'toggle-wheel', 'diff-wheel',
       'toggle-solutions'
     ];
     inputs.forEach(id => {
