@@ -46,6 +46,9 @@
 #include "../esp32-firmware/src/generators/LightsGen.h"
 #include "../esp32-firmware/src/generators/LightsGen.cpp"
 
+#include "../esp32-firmware/src/generators/KillerGen.h"
+#include "../esp32-firmware/src/generators/KillerGen.cpp"
+
 #include <iostream>
 #include <iomanip>
 #include <sstream>
@@ -454,6 +457,43 @@ int main(int argc, char** argv) {
             std::cout << "]";
         }
         std::cout << "],\n";
+        std::cout << "    \"raster_hex\": \"" << toHex(printer->lastBitmap) << "\"\n";
+        std::cout << "  }";
+    }
+
+    // 11. KILLER
+    {
+        KillerGen kGen;
+        kGen.generate(KILLER_MEDIUM, 42);
+        printer->lastBitmap.clear();
+        kGen.printRasterToReceipt(*printer);
+
+        printSep();
+        std::cout << "  {\n";
+        std::cout << "    \"puzzle\": \"killer\",\n";
+        std::cout << "    \"difficulty\": \"medium\",\n";
+        std::cout << "    \"width\": " << printer->lastWidth << ",\n";
+        std::cout << "    \"height\": " << printer->lastHeight << ",\n";
+        std::cout << "    \"size\": " << (int)kGen.getSize() << ",\n";
+        std::cout << "    \"box_rows\": " << (int)kGen.getBoxRows() << ",\n";
+        std::cout << "    \"box_cols\": " << (int)kGen.getBoxCols() << ",\n";
+        std::cout << "    \"cages\": [\n";
+        for (uint8_t i = 0; i < kGen.getNumCages(); i++) {
+            if (i > 0) std::cout << ",\n";
+            std::cout << "      {\"id\": " << (int)i << ", \"sum\": " << (int)kGen.getCageSum(i) << ", \"cells\": [";
+            bool firstCell = true;
+            for (uint8_t r = 0; r < kGen.getSize(); r++) {
+                for (uint8_t c = 0; c < kGen.getSize(); c++) {
+                    if (kGen.getCage(r, c) == i) {
+                        if (!firstCell) std::cout << ", ";
+                        std::cout << "[" << (int)r << ", " << (int)c << "]";
+                        firstCell = false;
+                    }
+                }
+            }
+            std::cout << "]}";
+        }
+        std::cout << "\n    ],\n";
         std::cout << "    \"raster_hex\": \"" << toHex(printer->lastBitmap) << "\"\n";
         std::cout << "  }";
     }

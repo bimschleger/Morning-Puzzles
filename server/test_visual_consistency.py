@@ -163,6 +163,13 @@ def test_visual_consistency():
                 "size": item["size"],
                 "puzzle": item["grid"],
             }
+        elif p_name == "killer":
+            py_data = {
+                "size": item["size"],
+                "box_rows": item["box_rows"],
+                "box_cols": item["box_cols"],
+                "cages": item["cages"],
+            }
         else:
             print(f"Unknown puzzle {p_name}")
             continue

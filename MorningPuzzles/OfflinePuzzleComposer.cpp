@@ -43,7 +43,7 @@ PuzzleGrade OfflinePuzzleComposer::getGradeForSlot(uint8_t index, uint8_t totalC
 }
 
 bool OfflinePuzzleComposer::supportsExtreme(OfflinePuzzleType type) const {
-    return (type == PUZZLE_LIGHTS || type == PUZZLE_QUEENS);
+    return (type == PUZZLE_LIGHTS || type == PUZZLE_QUEENS || type == PUZZLE_KILLER);
 }
 
 void OfflinePuzzleComposer::printSinglePuzzle(EscPosPrinter& printer, OfflinePuzzleType type, bool useRaster, PuzzleGrade grade) {
@@ -233,6 +233,21 @@ void OfflinePuzzleComposer::printSinglePuzzle(EscPosPrinter& printer, OfflinePuz
                               "so each number matches its edge count.");
             if (!useRaster || !loop.printRasterToReceipt(printer, diff)) {
                 loop.printToReceipt(printer, diff);
+            }
+            break;
+        }
+        case PUZZLE_KILLER: {
+            KillerDifficulty diff = (grade == GRADE_EASY) ? KILLER_EASY : ((grade == GRADE_EXTREME) ? KILLER_EXTREME : KILLER_MEDIUM);
+            const char* diffStr = (diff == KILLER_EASY) ? "EASY" : ((diff == KILLER_EXTREME) ? "EXTREME" : "MEDIUM");
+            Serial.println("[COMPOSER] Generating Killer Sudoku...");
+            KillerGen killer;
+            killer.generate(diff);
+            const char* rangeStr = (diff == KILLER_EXTREME) ? "1-6" : "1-4";
+            char killerInstr[100];
+            snprintf(killerInstr, sizeof(killerInstr), "Fill every row, column, and box with digits %s, matching cage sums without repeats.", rangeStr);
+            printPuzzleHeader(printer, "KILLER", diffStr, killerInstr);
+            if (!useRaster || !killer.printRasterToReceipt(printer)) {
+                killer.printToReceipt(printer);
             }
             break;
         }

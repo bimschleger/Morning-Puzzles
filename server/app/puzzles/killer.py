@@ -4,6 +4,8 @@ Encapsulates generation, canonical instruction formatting, ASCII layout,
 solution key formatting, and 576-dot thermal raster rendering.
 """
 
+import os
+import json
 import random
 from collections import defaultdict
 from typing import List, Tuple, Dict, Any, Optional, Set, Union
@@ -18,6 +20,20 @@ from ..renderer.canvas import (
 
 if HAS_PILLOW:
     from PIL import Image, ImageDraw, ImageFont
+
+DATA_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data", "killer_dataset.json")
+_KILLER_DATASET = None
+
+
+def _get_killer_dataset():
+    global _KILLER_DATASET
+    if _KILLER_DATASET is None and os.path.exists(DATA_PATH):
+        try:
+            with open(DATA_PATH, "r") as f:
+                _KILLER_DATASET = json.load(f)
+        except Exception:
+            _KILLER_DATASET = None
+    return _KILLER_DATASET
 
 
 class KillerPuzzle(BasePuzzle):
@@ -56,6 +72,41 @@ class KillerPuzzle(BasePuzzle):
             random.seed(seed)
 
         diff_key = difficulty.lower()
+        dataset = _get_killer_dataset()
+        tier_key = "extreme" if diff_key in ("extreme", "hard") else ("easy" if diff_key == "easy" else "medium")
+
+        if dataset and tier_key in dataset and len(dataset[tier_key]) > 0:
+            tier_puzzles = dataset[tier_key]
+            seed_val = seed if seed is not None else random.randint(0, 799)
+            p_idx = (seed_val // 8) % len(tier_puzzles)
+            base_p = tier_puzzles[p_idx]
+            size = base_p["size"]
+            box_r = base_p["box_rows"]
+            box_c = base_p["box_cols"]
+            t = (seed_val % 4) * 2 if (box_r != box_c) else (seed_val % 8)
+
+            cages, solution = self._transform_puzzle(base_p["cages"], base_p["solution"], size, t)
+            raw_data = {
+                "type": "killer",
+                "title": "KILLER",
+                "difficulty": difficulty.upper(),
+                "size": size,
+                "box_rows": box_r,
+                "box_cols": box_c,
+                "cages": cages,
+                "solution": solution,
+            }
+            ascii_text = self.format_ascii_puzzle(raw_data)
+            raw_data["text"] = ascii_text
+            instruction = self.get_instruction(raw_data)
+            return BasePuzzleResult(
+                puzzle_type=self.puzzle_id,
+                title=self.title,
+                difficulty=difficulty,
+                instruction=instruction,
+                raw_data=raw_data,
+            )
+
         cfg = self.DIFFICULTY_SETTINGS.get(diff_key, self.DIFFICULTY_SETTINGS["medium"])
         size = cfg["size"]
         box_r = cfg["box_r"]
@@ -389,6 +440,49 @@ class KillerPuzzle(BasePuzzle):
             tb.draw_text(tx, ty, str(cg.get("sum", "")), scale=2, color=1)
 
         return tb.to_escpos()
+
+    @staticmethod
+    def _transform_puzzle(
+        cages: List[Dict[str, Any]],
+        solution: List[List[int]],
+        size: int,
+        transform: int,
+    ) -> Tuple[List[Dict[str, Any]], List[List[int]]]:
+        rot = transform % 4
+        flip = (transform >= 4)
+        cur_sol = [row[:] for row in solution]
+        for _ in range(rot):
+            nxt_sol = [[0] * size for _ in range(size)]
+            for r in range(size):
+                for c in range(size):
+                    nxt_sol[c][size - 1 - r] = cur_sol[r][c]
+            cur_sol = nxt_sol
+        if flip:
+            nxt_sol = [[0] * size for _ in range(size)]
+            for r in range(size):
+                for c in range(size):
+                    nxt_sol[r][size - 1 - c] = cur_sol[r][c]
+            cur_sol = nxt_sol
+
+        letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        new_cages = []
+        for i, cg in enumerate(cages):
+            cells = []
+            for cell in cg["cells"]:
+                r, c = cell[0], cell[1]
+                tr, tc = r, c
+                for _ in range(rot):
+                    tr, tc = tc, size - 1 - tr
+                if flip:
+                    tc = size - 1 - tc
+                cells.append((tr, tc))
+            new_cages.append({
+                "id": i,
+                "label": letters[i % len(letters)],
+                "cells": sorted(cells),
+                "sum": cg["sum"],
+            })
+        return new_cages, cur_sol
 
     def _generate_solved_board(self, size: int, box_r: int, box_c: int) -> List[List[int]]:
         board = [[0] * size for _ in range(size)]

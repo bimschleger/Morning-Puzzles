@@ -83,6 +83,9 @@ public:
 #include "../src/generators/LoopGen.h"
 #include "../src/generators/LoopGen.cpp"
 
+#include "../src/generators/KillerGen.h"
+#include "../src/generators/KillerGen.cpp"
+
 #include "../src/generators/OfflinePuzzleComposer.h"
 #include "../src/generators/OfflinePuzzleComposer.cpp"
 

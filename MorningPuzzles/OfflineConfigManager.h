@@ -28,6 +28,7 @@ enum OfflinePuzzleType : uint8_t {
     PUZZLE_WHEEL,
     PUZZLE_LIGHTS,
     PUZZLE_LOOP,
+    PUZZLE_KILLER,
     OFFLINE_PUZZLE_TOTAL
 };
 
