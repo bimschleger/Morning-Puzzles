@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Morning Puzzles Setup</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    background-color: #0f172a;
+    color: #f8fafc;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    overflow-x: hidden;
+    width: 100%;
+  }
+  .app-container {
+    width: 100%;
+    max-width: 460px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding-bottom: 24px;
+  }
+  .header {
+    background: #020617;
+    border: 1px solid #1e293b;
+    border-radius: 16px;
+    padding: 20px 18px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+  .header-title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #f8fafc;
+    letter-spacing: 0.03em;
+    text-align: center;
+  }
+  .card {
+    background: #020617;
+    border: 1px solid #1e293b;
+    border-radius: 16px;
+    padding: 18px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+  }
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .card-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #f1f5f9;
+    letter-spacing: 0.01em;
+  }
+  .card-subtitle {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    margin-bottom: 12px;
+  }
+
+  /* Switch Toggle */
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 28px;
+    flex-shrink: 0;
+  }
+  .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+  }
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #334155;
+    transition: 0.2s;
+    border-radius: 28px;
+  }
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 22px;
+    width: 22px;
+    left: 3px;
+    bottom: 3px;
+    background-color: #f8fafc;
+    transition: 0.2s;
+    border-radius: 50%;
+  }
+  input:checked + .slider {
+    background-color: #f59e0b;
+  }
+  input:checked + .slider:before {
+    transform: translateX(22px);
+    background-color: #020617;
+  }
+
+  /* Stepper Row & Chunky Buttons */
+  .stepper-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    margin: 8px 0;
+  }
+  .btn-step {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: #1e293b;
+    border: 1px solid #334155;
+    color: #f8fafc;
+    font-size: 1.5rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .btn-step:active { background: #334155; transform: scale(0.96); }
+  .count-display {
+    font-size: 2.4rem;
+    font-weight: 800;
+    color: #f59e0b;
+    min-width: 60px;
+    text-align: center;
+  }
+
+  /* Schedule Time Stepper Container */
+  .sched-time-container {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 12px;
+    padding: 14px;
+    margin-top: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    transition: opacity 0.2s;
+  }
+  .sched-time-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .time-display {
+    font-size: 2.1rem;
+    font-weight: 800;
+    color: #f59e0b;
+    min-width: 170px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Difficulty Selector */
+  .diff-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .diff-option {
+    border: 1px solid #1e293b;
+    background: #0f172a;
+    border-radius: 12px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: border 0.15s, background 0.15s;
+  }
+  .diff-option.active {
+    border-color: #f59e0b;
+    background: rgba(245, 158, 11, 0.08);
+  }
+  .diff-name { font-weight: 600; font-size: 0.9rem; color: #f8fafc; }
+  .diff-desc { font-size: 0.75rem; color: #94a3b8; }
+  .diff-radio {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid #475569;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .diff-option.active .diff-radio {
+    border-color: #f59e0b;
+    background: #f59e0b;
+  }
+
+  /* Game Selection List */
+  .quick-actions {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .btn-quick {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #f59e0b;
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.25);
+    padding: 4px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  .games-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .game-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.15s, border 0.15s;
+    min-height: 48px;
+  }
+  .game-row.active {
+    border-color: rgba(245, 158, 11, 0.4);
+  }
+  .game-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .game-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #f1f5f9;
+  }
+  .custom-checkbox {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    border: 2px solid #475569;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .game-row.active .custom-checkbox {
+    background: #f59e0b;
+    border-color: #f59e0b;
+  }
+  .custom-checkbox::after {
+    content: "";
+    width: 6px;
+    height: 10px;
+    border: solid #020617;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    display: none;
+    margin-bottom: 2px;
+  }
+  .game-row.active .custom-checkbox::after {
+    display: block;
+  }
+
+  /* Big Chunky Save & Exit Button */
+  .btn-primary {
+    width: 100%;
+    background: #f59e0b;
+    color: #020617;
+    border: none;
+    padding: 20px 16px;
+    min-height: 60px;
+    border-radius: 16px;
+    font-size: 1.15rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(245, 158, 11, 0.3);
+    transition: transform 0.1s, background 0.15s;
+  }
+  .btn-primary:active { transform: scale(0.98); background: #d97706; }
+
+  /* Toast Notification */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #22c55e;
+    color: #020617;
+    font-weight: 700;
+    padding: 12px 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    display: none;
+    z-index: 1000;
+    text-align: center;
+    max-width: 90vw;
+    width: max-content;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+<div class="app-container">
+  
+  <!-- Header -->
+  <div class="header">
+    <div class="header-title">Morning Puzzles</div>
+  </div>
+
+  <!-- Daily Schedule -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Daily Schedule</div>
+      <label class="switch">
+        <input type="checkbox" id="schedToggle" checked onchange="toggleSchedule(this.checked)">
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div class="card-subtitle">Automatically generate and print a fresh puzzle receipt every morning.</div>
+    <div id="schedTimeContainer" class="sched-time-container">
+      <div class="sched-time-label">Print Time</div>
+      <div class="stepper-row">
+        <button class="btn-step" onclick="changeTime(-15)" aria-label="Subtract 15 minutes">-</button>
+        <div class="time-display" id="timeDisplay">7:00 AM</div>
+        <button class="btn-step" onclick="changeTime(15)" aria-label="Add 15 minutes">+</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Daily Puzzle Count -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Daily Puzzle Count</div>
+      <div id="countSub" style="font-size:0.8rem; color:#94a3b8;">Max: 16</div>
+    </div>
+    <div class="card-subtitle">Number of games to randomly draw and print per daily mix receipt.</div>
+    <div class="stepper-row">
+      <button class="btn-step" onclick="changeCount(-1)">-</button>
+      <div class="count-display" id="countDisplay">5</div>
+      <button class="btn-step" onclick="changeCount(1)">+</button>
+    </div>
+  </div>
+
+  <!-- Puzzle Difficulty -->
+  <div class="card">
+    <div class="card-title">Puzzle Difficulty</div>
+    <div class="card-subtitle">Select progression curve or uniform difficulty for all selected puzzles.</div>
+    <div class="diff-grid">
+      <div class="diff-option active" id="diff-opt-3" onclick="setDiff(3)">
+        <div>
+          <div class="diff-name">Escalating (Easy &rarr; Hard)</div>
+          <div class="diff-desc">Starts easy, scales progressively, ending with hard/extreme</div>
+        </div>
+        <div class="diff-radio"></div>
+      </div>
+      <div class="diff-option" id="diff-opt-0" onclick="setDiff(0)">
+        <div>
+          <div class="diff-name">Easy</div>
+          <div class="diff-desc">All selected games generated at Easy difficulty</div>
+        </div>
+        <div class="diff-radio"></div>
+      </div>
+      <div class="diff-option" id="diff-opt-1" onclick="setDiff(1)">
+        <div>
+          <div class="diff-name">Medium</div>
+          <div class="diff-desc">All selected games generated at Medium difficulty</div>
+        </div>
+        <div class="diff-radio"></div>
+      </div>
+      <div class="diff-option" id="diff-opt-2" onclick="setDiff(2)">
+        <div>
+          <div class="diff-name">Hard</div>
+          <div class="diff-desc">All selected games generated at Hard difficulty</div>
+        </div>
+        <div class="diff-radio"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Eligible Games -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Eligible Games (<span id="enabledNum">16</span>/16)</div>
+      <div class="quick-actions">
+        <button class="btn-quick" onclick="selectAllGames(true)">All</button>
+        <button class="btn-quick" onclick="selectAllGames(false)">None</button>
+      </div>
+    </div>
+    <div class="card-subtitle">Uncheck games to disable them from the daily receipt draw.</div>
+    <div class="games-list" id="gamesList"></div>
+  </div>
+
+  <!-- Save Button -->
+  <button class="btn-primary" onclick="saveAndExit()">Save Settings & Exit Setup</button>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const GAMES = [
+  { id: 0,  name: "Sudoku" },
+  { id: 1,  name: "Search" },
+  { id: 2,  name: "Nonogram" },
+  { id: 3,  name: "Stars" },
+  { id: 4,  name: "Jumble" },
+  { id: 5,  name: "Binary" },
+  { id: 6,  name: "Mines" },
+  { id: 7,  name: "Tents" },
+  { id: 8,  name: "Bridges" },
+  { id: 9,  name: "Tango" },
+  { id: 10, name: "Wheel" },
+  { id: 11, name: "Lights" },
+  { id: 12, name: "Loop" },
+  { id: 13, name: "Killer" },
+  { id: 14, name: "Cryptogram" },
+  { id: 15, name: "Ladder" }
+];
+
+let currentMask = 0xFFFF;
+let currentCount = 5;
+let currentGrade = 3;
+let currentSchedEnabled = true;
+let currentSchedHour = 7;
+let currentSchedMinute = 0;
+
+function renderGames() {
+  const list = document.getElementById("gamesList");
+  list.innerHTML = "";
+  let enabledTotal = 0;
+
+  GAMES.forEach(g => {
+    const isChecked = (currentMask & (1 << g.id)) !== 0;
+    if (isChecked) enabledTotal++;
+
+    const row = document.createElement("div");
+    row.className = "game-row" + (isChecked ? " active" : "");
+    row.onclick = () => toggleGame(g.id);
+    row.innerHTML = `
+      <div class="game-left">
+        <div class="custom-checkbox"></div>
+        <div class="game-title">${g.name}</div>
+      </div>
+    `;
+    list.appendChild(row);
+  });
+
+  document.getElementById("enabledNum").innerText = enabledTotal;
+  document.getElementById("countSub").innerText = "Max: " + enabledTotal;
+  if (currentCount > enabledTotal) currentCount = Math.max(1, enabledTotal);
+  document.getElementById("countDisplay").innerText = currentCount;
+}
+
+function toggleGame(id) {
+  const willDisable = (currentMask & (1 << id)) !== 0;
+  let newMask = willDisable ? (currentMask & ~(1 << id)) : (currentMask | (1 << id));
+  if ((newMask & 0xFFFF) === 0) return; // Prevent disabling all games
+  currentMask = newMask;
+  renderGames();
+}
+
+function selectAllGames(selectAll) {
+  currentMask = selectAll ? 0xFFFF : 0x0001; // Keep at least Sudoku if none
+  renderGames();
+}
+
+function changeCount(delta) {
+  const maxAllowed = parseInt(document.getElementById("enabledNum").innerText, 10) || 16;
+  let next = currentCount + delta;
+  if (next < 1) next = 1;
+  if (next > maxAllowed) next = maxAllowed;
+  currentCount = next;
+  document.getElementById("countDisplay").innerText = currentCount;
+}
+
+function setDiff(g) {
+  currentGrade = g;
+  [3, 0, 1, 2].forEach(id => {
+    const el = document.getElementById("diff-opt-" + id);
+    if (el) el.className = "diff-option" + (id === g ? " active" : "");
+  });
+}
+
+function formatTime12h(hour, minute) {
+  const ampm = hour >= 12 ? "PM" : "AM";
+  let h = hour % 12;
+  if (h === 0) h = 12;
+  const m = minute < 10 ? "0" + minute : minute;
+  return `${h}:${m} ${ampm}`;
+}
+
+function updateTimeDisplay() {
+  const el = document.getElementById("timeDisplay");
+  if (el) {
+    el.innerText = formatTime12h(currentSchedHour, currentSchedMinute);
+  }
+}
+
+function changeTime(deltaMinutes) {
+  let totalMins = currentSchedHour * 60 + currentSchedMinute;
+  totalMins = (totalMins + deltaMinutes) % (24 * 60);
+  if (totalMins < 0) totalMins += 24 * 60;
+  currentSchedHour = Math.floor(totalMins / 60);
+  currentSchedMinute = totalMins % 60;
+  updateTimeDisplay();
+}
+
+function toggleSchedule(enabled) {
+  currentSchedEnabled = enabled;
+  const container = document.getElementById("schedTimeContainer");
+  if (container) {
+    container.style.display = enabled ? "flex" : "none";
+  }
+}
+
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.innerText = msg;
+  t.style.display = "block";
+  setTimeout(() => { t.style.display = "none"; }, 3000);
+}
+
+function saveAndExit() {
+  showToast("Saving settings & printing confirmation...");
+  const now = new Date();
+  const epoch = Math.floor(now.getTime() / 1000);
+  const tz = now.getTimezoneOffset();
+  const schedEnVal = currentSchedEnabled ? 1 : 0;
+
+  fetch(`/api/save-config?mask=${currentMask}&count=${currentCount}&grade=${currentGrade}&schedEnabled=${schedEnVal}&schedHour=${currentSchedHour}&schedMinute=${currentSchedMinute}&epoch=${epoch}&tz=${tz}`)
+    .then(r => r.json())
+    .then(d => {
+      document.body.innerHTML = `
+        <div style="max-width:420px;margin:50px auto;text-align:center;color:#f8fafc;padding:24px;background:#020617;border:1px solid #1e293b;border-radius:16px;">
+          <h2 style="color:#22c55e;margin-bottom:12px;">&#10003; Configuration Saved!</h2>
+          <p style="color:#94a3b8;margin-bottom:16px;">Your receipt printer is now printing your confirmation ticket.</p>
+          <p style="color:#64748b;font-size:0.85rem;">The setup hotspot is shutting down. You can now close this browser tab.</p>
+        </div>
+      `;
+    })
+    .catch(e => {
+      showToast("Error saving configuration.");
+    });
+}
+
+// Initial fetch from device
+fetch("/api/config")
+  .then(r => r.json())
+  .then(d => {
+    currentMask = d.mask || 0xFFFF;
+    currentCount = d.count || 5;
+    currentGrade = (d.grade !== undefined) ? d.grade : 3;
+    currentSchedEnabled = (d.schedEnabled !== undefined) ? d.schedEnabled : true;
+    currentSchedHour = (d.schedHour !== undefined) ? d.schedHour : 7;
+    currentSchedMinute = (d.schedMinute !== undefined) ? d.schedMinute : 0;
+
+    // Round minute to nearest 15
+    currentSchedMinute = Math.round(currentSchedMinute / 15) * 15;
+    if (currentSchedMinute >= 60) {
+      currentSchedMinute = 0;
+      currentSchedHour = (currentSchedHour + 1) % 24;
+    }
+
+    updateTimeDisplay();
+
+    const toggleEl = document.getElementById("schedToggle");
+    if (toggleEl) {
+      toggleEl.checked = currentSchedEnabled;
+    }
+    toggleSchedule(currentSchedEnabled);
+
+    setDiff(currentGrade);
+    renderGames();
+  })
+  .catch(() => {
+    updateTimeDisplay();
+    toggleSchedule(currentSchedEnabled);
+    renderGames();
+  });
+</script>
+</body>
+</html>
