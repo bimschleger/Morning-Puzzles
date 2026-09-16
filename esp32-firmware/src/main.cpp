@@ -31,15 +31,14 @@ OfflineTimeManager     timeManager;
 OfflineConfigManager   configManager;
 OfflinePuzzleComposer  offlineComposer;
 
-// Boot-cycle tracking across hardware power cuts (NVS namespace "mp_boot")
-Preferences   bootPrefs;
+// Setup mode and boot timing state
 bool          g_setupModeTriggeredAtBoot = false;
 bool          g_bootAutoPrintPending = false;
 unsigned long g_bootTimeMs = 0;
 
 // Coordinated print state & refractory cooldown across all triggers
 unsigned long g_lastPrintCompletedMs = 0;
-bool          g_autoPrintSatisfiedThisCycle = false;
+bool          g_autoPrintSatisfiedThisCycle = true; // Default true so cold boots stay quiet
 
 // Button timing state
 bool          lastBtnState = HIGH;
@@ -257,57 +256,48 @@ void setup() {
                   configManager.getGradeName(configManager.getPuzzleGrade()));
 
     Serial.println("\n--- CONTROLS & HOW TO USE ---");
-    Serial.println("1. BOOT Button: Short Press (<2.5s) -> Instantly generates & prints active puzzle mix!");
-    Serial.println("2. BOOT Button: Long Press (>=2.5s)  -> Activates Wi-Fi Setup Portal + prints Dual QR slip!");
+    Serial.println("1. Setup Mode: Leave printer ON & replug ESP32 power -> Launches Setup Portal + QR slip");
+    Serial.println("2. On-Demand Print: Flip printer switch OFF, wait 3s, then ON -> Prints active puzzle mix!");
     if (configManager.isDailyScheduleEnabled()) {
         Serial.printf("3. Daily scheduled auto-print        -> %s every day\n", 
                       configManager.getDailyScheduleTimeString().c_str());
     } else {
-        Serial.println("3. Daily scheduled auto-print        -> Disabled (Manual / Power-on trigger only)");
+        Serial.println("3. Daily scheduled auto-print        -> Disabled (Manual / Power switch trigger only)");
     }
-    Serial.println("4. Auto-print on Printer Power-ON    -> Flip printer switch ON to print automatically!");
-    Serial.println("5. Serial Monitor (115200 baud)      -> [P]rint | [W]i-Fi Setup | [S]tatus\n");
+    Serial.println("4. BOOT Button (Dev Fallback): Short press = print, Hold >= 2.5s = setup portal");
+    Serial.println("5. Serial Monitor (115200 baud): [P]rint | [W]i-Fi Setup | [S]tatus\n");
 
     // -------------------------------------------------------------------------
-    // Hardware Power-Cycle Gesture Detection (Across ESP32 boots / power cuts)
+    // Zero-Button Power Gesture: Check if printer is already online at boot
     // -------------------------------------------------------------------------
-    bootPrefs.begin("mp_boot", false);
-    uint8_t bootCount = bootPrefs.getUChar("b_count", 0);
-    bootCount++;
-    bootPrefs.putUChar("b_count", bootCount);
-    bootPrefs.end();
-
-    Serial.printf("[MAIN] Boot sequence #%d detected (NVS 'mp_boot')\n", bootCount);
-
-    if (bootCount >= 3) {
+#if SETUP_MODE_ON_PRINTER_ONLINE_BOOT
+    Serial.printf("[MAIN] Checking for printer-first boot gesture (window: %d ms)...\n", PRINTER_BOOT_PROBE_WINDOW_MS);
+    if (printer.isPrinterOnline(PRINTER_BOOT_PROBE_WINDOW_MS)) {
         Serial.println("\n************************************************************");
-        Serial.println("* >>> 3x RAPID HARDWARE BOOT DETECTED! ENTERING SETUP MODE <<< *");
+        Serial.println("* >>> PRINTER-FIRST BOOT DETECTED! ENTERING SETUP MODE <<< *");
         Serial.println("************************************************************\n");
 
-        // Reset boot count immediately so subsequent normal boots start clean
-        bootPrefs.begin("mp_boot", false);
-        bootPrefs.putUChar("b_count", 0);
-        bootPrefs.end();
-
         g_setupModeTriggeredAtBoot = true;
+        g_autoPrintSatisfiedThisCycle = true;
 
         // Start Wi-Fi hotspot immediately (broadcasts in ~150ms)
         timeManager.startSetupPortal();
 
         // Print setup ticket with dual stacked QR codes
-        // Give printer up to 2.5 seconds to settle if it was just powered on with ESP32
-        unsigned long settleStart = millis();
-        while (!printer.isPrinterOnline(100) && (millis() - settleStart < 2500)) {
-            delay(100);
-        }
         timeManager.printSetupTicket(printer);
     } else {
-        // Normal boot or incomplete sequence: start dwell timer
-        g_bootTimeMs = millis();
-#if AUTO_PRINT_ON_BOOT
-        g_bootAutoPrintPending = true;
-#endif
+        Serial.println("[MAIN] Printer not online at boot (Normal / Simultaneous start).");
+        g_setupModeTriggeredAtBoot = false;
+        g_autoPrintSatisfiedThisCycle = true; // Stay quiet until scheduled daily cron or switch toggle
     }
+#else
+    g_autoPrintSatisfiedThisCycle = true;
+#endif
+
+    g_bootTimeMs = millis();
+#if AUTO_PRINT_ON_BOOT
+    g_bootAutoPrintPending = true;
+#endif
 }
 
 #if AUTO_PRINT_ON_PRINTER_POWER
@@ -331,20 +321,22 @@ void checkPrinterPowerTransition() {
 
     bool isOnline = printer.isPrinterOnline(100);
 
+    // Initial state detection on boot
     if (!initializedState) {
         lastPrinterOnline = isOnline;
         initializedState = true;
         if (isOnline) {
             steadyOnStartMs = now;
-            // If already online at boot, mark satisfied if AUTO_PRINT_ON_BOOT will handle or has handled it
-            #if AUTO_PRINT_ON_BOOT
-            g_autoPrintSatisfiedThisCycle = true;
-            #endif
         } else {
             steadyOffStartMs = now;
         }
         return;
     }
+
+    // Guard against power outage recovery / simultaneous cold boots:
+    // If ESP32 booted with printer offline, give the printer up to 5 seconds
+    // to finish its hardware/Ethernet boot without re-arming an on-demand print.
+    bool inBootGracePeriod = (now - g_bootTimeMs < 5000);
 
     // 1. Detected transition from OFF -> ON!
     if (isOnline && !lastPrinterOnline) {
@@ -360,7 +352,7 @@ void checkPrinterPowerTransition() {
         // Require continuous offline duration (PRINTER_OFFLINE_DEBOUNCE_MS, 3.0s)
         // to filter out socket teardown, cutter cycling, and transient network jitter.
         if (now - steadyOffStartMs >= PRINTER_OFFLINE_DEBOUNCE_MS) {
-            Serial.println("[PRINTER] Printer powered OFF confirmed (debounced). Auto-print re-armed for next power-on.");
+            Serial.println("[PRINTER] Printer powered OFF confirmed (debounced). On-demand print re-armed for next power-on.");
             lastPrinterOnline = false;
             steadyOnStartMs = 0;
             steadyOffStartMs = 0;
@@ -375,13 +367,13 @@ void checkPrinterPowerTransition() {
     }
 
     // 3. Steady state processing while printer remains ON
-    if (isOnline && !g_autoPrintSatisfiedThisCycle) {
+    if (isOnline && !g_autoPrintSatisfiedThisCycle && !inBootGracePeriod) {
         // Enforce post-print refractory cooldown period (15 seconds)
         bool inCooldown = (g_lastPrintCompletedMs > 0) && (now - g_lastPrintCompletedMs < PRINTER_POST_PRINT_COOLDOWN_MS);
 
         if (!inCooldown && (now - steadyOnStartMs >= PRINTER_READY_SETTLE_MS)) {
             if (!g_bootAutoPrintPending) {
-                Serial.println("\n[PRINTER] Printer ready (settle elapsed). Executing automatic daily print job...");
+                Serial.println("\n[PRINTER] Printer ready (settle elapsed). Executing on-demand print job...");
                 executePrintJob();
             }
         }
@@ -392,33 +384,27 @@ void checkPrinterPowerTransition() {
 #endif
 
 void loop() {
-    // 0. Settle boot dwell: after 2.5 seconds of steady uptime without power loss,
-    // clear the NVS boot cycle counter confirming a stable boot.
+#if AUTO_PRINT_ON_BOOT
+    // Optional boot auto-print if enabled in config.h
     static bool bootDwellCompleted = false;
     if (!bootDwellCompleted && !g_setupModeTriggeredAtBoot) {
         if (millis() - g_bootTimeMs >= 2500) {
             bootDwellCompleted = true;
-            bootPrefs.begin("mp_boot", false);
-            bootPrefs.putUChar("b_count", 0);
-            bootPrefs.end();
-            Serial.println("[MAIN] Stable boot confirmed (dwell timer elapsed). Reset boot cycle counter.");
-
             if (g_bootAutoPrintPending) {
                 g_bootAutoPrintPending = false;
-                if (!g_autoPrintSatisfiedThisCycle && printer.isPrinterOnline(200)) {
+                if (printer.isPrinterOnline(200)) {
                     Serial.println("[MAIN] Auto-print on boot trigger! Executing daily print job...");
                     executePrintJob();
-                } else if (!g_autoPrintSatisfiedThisCycle) {
-                    Serial.println("[MAIN] Printer not reachable yet at boot dwell. Will auto-print when printer switch is turned ON.");
                 }
             }
         }
     }
+#endif
 
     // 1. Handle SoftAP captive portal requests if user opened setup mode
     timeManager.handleClient();
 
-    // 2. Monitor physical BOOT button (short = print, hold >= 2.5s = setup)
+    // 2. Monitor physical BOOT button (short = print, hold >= 2.5s = setup) [Dev Fallback]
     handleButtonPress();
 
     // 3. Monitor Serial console commands
@@ -433,7 +419,7 @@ void loop() {
     }
 
 #if AUTO_PRINT_ON_PRINTER_POWER
-    // 5. Monitor printer power switch (auto-print when printer is turned ON)
+    // 5. Monitor printer power switch (on-demand print when printer is flipped OFF then ON)
     checkPrinterPowerTransition();
 #endif
 

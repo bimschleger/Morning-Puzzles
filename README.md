@@ -8,11 +8,14 @@ Runs **100% On-Device and Offline** on an **ESP32** in native C++ with zero clou
 
 ## 🌟 Key Features
 
-* **100% Standalone & Air-Gapped**: All 9 puzzle algorithms run locally on the ESP32 microcontroller in **<50 milliseconds**. No Wi-Fi, no cloud subscriptions, and no external servers required.
-* **Auto-Print on Startup / Power-On**: Flip your printer's power switch ON in the morning, and the dispenser automatically senses the printer, generates a brand-new randomized edition, prints the receipt, and cuts the paper.
-* **On-Demand Extra Copies with On-Device Button**: Need another copy or want a different difficulty tier? Simply press the onboard **`BOOT`** button (or an external arcade button) on the device to immediately generate and print a fresh set!
+* **100% Standalone & Air-Gapped**: All 16 puzzle algorithms run locally on the ESP32 microcontroller in **<50 milliseconds**. No Wi-Fi, no cloud subscriptions, and no external servers required.
+* **Zero-Button Power Gestures**: Completely eliminates the need for exposed buttons. Use standard power switches for all everyday actions:
+  * **Setup Mode**: Leave printer ON, plug in ESP32 $\rightarrow$ Senses printer online, prints dual-QR setup slip, and opens web setup portal.
+  * **On-Demand Print**: Flip printer switch OFF, wait 3s, then ON $\rightarrow$ Prints a fresh puzzle bundle immediately.
+  * **Scheduled Daily Prints**: Leave both ON $\rightarrow$ Operates silently in the background until your configured morning print time.
+* **Smart Power-Outage Protection**: If household power blips or both devices power on together, the ESP32 detects simultaneous startup, stays quiet, and waits for scheduled prints without printing in the middle of the night.
 * **Targeted for 80mm Commercial Receipt Printers**: Designed for standard 80mm receipt rolls at 203 DPI (**576 dots per line / 72 bytes per scanline**), using standard ESC/POS protocol (`GS v 0`), safe thermal duty cycles ($\le 35\%$), and automatic partial cutting.
-* **Optional Daily 7:00 AM Cron Timer**: Supports scheduled daily morning printing via an offline phone sync web portal (hold `BOOT` for 3 seconds) or battery-backed DS3231 RTC module.
+* **Optional RTC & 1-Click Phone Time Sync**: Built-in SoftAP web portal syncs clock from your phone in 1 click, with optional battery-backed DS3231 I2C RTC support for power-loss resilience.
 
 ---
 
@@ -96,10 +99,11 @@ Open [`esp32-firmware/include/config.h`](esp32-firmware/include/config.h) on you
   #define PRINTER_IP_ADDR         "192.168.123.100"
   #define PRINTER_TCP_PORT        9100
   ```
-* **Verify Auto-Print Settings**: Confirm startup and power-on printing are active:
+* **Verify Zero-Button Power Settings**: Confirm power gesture triggers in `config.h`:
   ```cpp
-  #define AUTO_PRINT_ON_BOOT             true   // Print when ESP32 powers up
-  #define AUTO_PRINT_ON_PRINTER_POWER    true   // Print when printer switch turns ON
+  #define SETUP_MODE_ON_PRINTER_ONLINE_BOOT true // Enter setup mode if printer is ON at ESP32 boot
+  #define AUTO_PRINT_ON_PRINTER_POWER    true    // Print on-demand when printer switch is flipped OFF then ON
+  #define AUTO_PRINT_ON_BOOT             false   // Cold boots stay quiet and wait for scheduled daily cron
   ```
 
 ---
@@ -148,17 +152,28 @@ Connect the devices directly together—no router, switch, or Wi-Fi network need
 
 ---
 
-### Step 5: Test & Use!
+### Step 5: Everyday Controls & Daily Use (Zero-Button Gestures)
 
-1. **Automatic Print on Power-ON**:
-   * Flip the printer's power switch **ON**.
-   * The green/yellow Ethernet link LEDs will light up.
-   * Within 2 seconds, the ESP32 senses the printer, generates a randomized daily edition, streams the 576-dot receipt, and cuts the paper automatically!
-2. **Print Extra Copies Anytime (On-Device Button)**:
-   * With the printer on, short-press the small **`BOOT`** button located right on the ESP32 board.
-   * A brand-new randomized edition prints immediately!
-3. **Optional External Slam Button**:
-   * If you prefer a big arcade button, connect 2 jumper wires between the arcade microswitch terminals and the ESP32's `GND` and `GPIO 4` pins (zero soldering needed).
+Morning Puzzles is designed to be tucked away inside an enclosure behind or underneath your printer. You never need to touch the micro-sized `BOOT` button on the board:
+
+1. **Initial Setup (or Re-Entering Setup Mode)**:
+   * Leave the printer **ON**.
+   * Plug in (or unplug and replug) the ESP32 power cable.
+   * Because the printer is already online at boot, the ESP32 immediately launches the `Morning-Puzzles-Setup` Wi-Fi hotspot and prints the dual-QR setup slip.
+   * Scan the QR code with your phone to choose your games, puzzle count, difficulty, and daily morning print time.
+2. **Daily Scheduled Morning Prints**:
+   * Leave both the printer and ESP32 **ON**.
+   * The appliance operates silently in the background and prints fresh puzzles every day at your scheduled time (e.g. 7:00 AM), cutting the paper automatically.
+3. **On-Demand Extra Prints Anytime**:
+   * With the ESP32 powered, flip the printer's power switch **OFF**, wait 3 seconds, then flip it **ON**.
+   * Within 2 seconds of settling, the ESP32 prints a fresh puzzle mix following your settings.
+   * On-demand prints are independent and never cancel or interfere with your scheduled morning prints!
+4. **Power Outage & Simultaneous Power Recovery**:
+   * If household power drops or both devices are switched on together from a shared power strip, the printer takes 2–3 seconds to initialize motors and network PHY.
+   * Because the printer is offline during the ESP32's initial 500ms boot window, the ESP32 recognizes simultaneous power restoration, skips Setup Mode, stays quiet, and waits for scheduled prints.
+5. **Developer & External Button Fallback**:
+   * The onboard `BOOT` button on GPIO 0 remains functional for bench testing (short press = on-demand print, hold $\ge 2.5\text{s}$ = toggle setup portal).
+   * If you prefer a big physical arcade button, you can wire a microswitch to `GND` and `GPIO 4`.
 
 ---
 

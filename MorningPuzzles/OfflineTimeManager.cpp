@@ -275,6 +275,12 @@ void OfflineTimeManager::printSetupTicket(EscPosPrinter& printer) {
     printer.setBold(false);
     printer.println("(A confirmation ticket prints automatically)");
     printer.println("(Hotspot auto-closes after 5 minutes)");
+    printer.println("");
+    printer.setBold(true);
+    printer.println("[ QUICK CONTROLS ]");
+    printer.setBold(false);
+    printer.println("Print on demand: Flip printer switch OFF then ON");
+    printer.println("Setup mode: Leave printer ON and replug power");
     printer.printHorizontalLine('-');
 
     printer.feed(4);
@@ -322,6 +328,12 @@ void OfflineTimeManager::printConfigSavedTicket(EscPosPrinter& printer, const Of
     printer.printHorizontalLine('-');
     printer.setAlign(ALIGN_CENTER);
     printer.println("Setup complete. Ready for printing!");
+    printer.println("");
+    printer.setBold(true);
+    printer.println("[ QUICK CONTROLS ]");
+    printer.setBold(false);
+    printer.println("Print on demand: Flip printer switch OFF then ON");
+    printer.println("Setup mode: Leave printer ON and replug power");
     printer.printHorizontalLine('-');
 
     printer.feed(4);
