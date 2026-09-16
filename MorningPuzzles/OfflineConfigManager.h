@@ -29,6 +29,7 @@ enum OfflinePuzzleType : uint8_t {
     PUZZLE_LIGHTS,
     PUZZLE_LOOP,
     PUZZLE_KILLER,
+    PUZZLE_CRYPTOGRAM,
     OFFLINE_PUZZLE_TOTAL
 };
 

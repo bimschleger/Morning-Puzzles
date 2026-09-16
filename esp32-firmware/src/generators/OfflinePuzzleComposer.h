@@ -18,6 +18,7 @@ class EscPosPrinter;
 #include "LightsGen.h"
 #include "LoopGen.h"
 #include "KillerGen.h"
+#include "CryptogramGen.h"
 
 class OfflinePuzzleComposer {
 public:

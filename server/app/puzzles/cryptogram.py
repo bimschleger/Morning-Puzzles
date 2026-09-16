@@ -173,7 +173,7 @@ class CryptogramPuzzle(BasePuzzle):
         target_width: int = THERMAL_WIDTH_DOTS,
     ) -> bytes:
         padding = 24
-        inner_width = target_width - padding * 2
+        inner_width = target_width - padding * 2  # 528
         ciphertext = str(puzzle_data.get("ciphertext", "")).strip()
         author = str(puzzle_data.get("author", "")).strip()
 
@@ -198,77 +198,16 @@ class CryptogramPuzzle(BasePuzzle):
         tracker_height = 80
         scratchpad_height = 140
         total_h = header_gap + len(lines) * (row_height + row_gap) + author_height + tracker_height + scratchpad_height + 40
+        total_h = ((total_h + 7) // 8) * 8  # Multiple of 8 dots
 
-        if HAS_PILLOW:
-            try:
-                font_cipher = ImageFont.truetype("Courier.ttf", 26)
-                font_label = ImageFont.truetype("Arial.ttf", 16)
-                font_author = ImageFont.truetype("Arial.ttf", 18)
-                font_tracker = ImageFont.truetype("Courier.ttf", 15)
-            except IOError:
-                font_cipher = ImageFont.load_default()
-                font_label = ImageFont.load_default()
-                font_author = ImageFont.load_default()
-                font_tracker = ImageFont.load_default()
-
-            img = Image.new("L", (target_width, total_h), 255)
-            draw = ImageDraw.Draw(img)
-            cur_y = 16
-
-            for line_str in lines:
-                line_len = len(line_str)
-                char_w = inner_width / max(1, line_len)
-                char_w = min(char_w, 24.0)
-
-                start_x = padding + (inner_width - line_len * char_w) / 2.0
-                slot_y = cur_y + 26
-                char_y = cur_y + 36
-
-                for idx, ch in enumerate(line_str):
-                    cx = start_x + idx * char_w
-                    if ch.isalpha():
-                        draw.line([cx + 3, slot_y, cx + char_w - 3, slot_y], fill=120, width=2)
-                    draw.text((cx + char_w / 2.0 - 7, char_y), ch, fill=0, font=font_cipher)
-
-                cur_y += row_height + row_gap
-
-            if author:
-                draw.text((padding + 12, cur_y), f"-- {author}", fill=0, font=font_author)
-                cur_y += author_height
-
-            for dx in range(padding, padding + inner_width, 8):
-                draw.line([dx, cur_y, min(dx + 4, padding + inner_width), cur_y], fill=140, width=2)
-            cur_y += 18
-
-            draw.text((padding, cur_y), "ALPHABET TRACKER:", fill=0, font=font_label)
-            cur_y += 22
-
-            letters_az = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-            col_w = inner_width / 26.0
-            for i, let in enumerate(letters_az):
-                lx = padding + i * col_w
-                draw.text((lx + col_w / 2.0 - 5, cur_y), let, fill=0, font=font_tracker)
-                draw.line([lx + 1, cur_y + 22, lx + col_w - 2, cur_y + 22], fill=140, width=2)
-
-            cur_y += 38
-            draw.text((padding, cur_y), "SCRATCHPAD:", fill=80, font=font_label)
-            cur_y += 24
-            for _ in range(4):
-                for dx in range(padding, padding + inner_width, 10):
-                    draw.line([dx, cur_y, min(dx + 5, padding + inner_width), cur_y], fill=160, width=2)
-                cur_y += 26
-
-            return pil_to_escpos(img.crop((0, 0, target_width, min(cur_y + 10, total_h))))
-
-        # Pure Python Fallback
         tb = ThermalBitmap(target_width, total_h)
         cur_y = 16
 
+        # 1. Ciphertext rows with handwriting slot underlines
         for line_str in lines:
             line_len = len(line_str)
-            char_w = int(inner_width / max(1, line_len))
-            char_w = min(char_w, 24)
-            start_x = padding + int((inner_width - line_len * char_w) / 2)
+            char_w = min(24, inner_width // max(1, line_len))
+            start_x = padding + (inner_width - line_len * char_w) // 2
 
             slot_y = cur_y + 24
             char_y = cur_y + 34
@@ -276,35 +215,44 @@ class CryptogramPuzzle(BasePuzzle):
             for idx, ch in enumerate(line_str):
                 cx = start_x + idx * char_w
                 if ch.isalpha():
-                    tb.draw_hline(cx + 3, slot_y, max(1, char_w - 6), thickness=2)
-                tb.draw_text(cx + 4, char_y, ch, scale=2, color=1)
+                    bar_w = max(1, char_w - 6)
+                    tb.draw_hline(cx + 3, slot_y, bar_w, thickness=2)
+                tb.draw_char(cx + 4, char_y, ch, scale=2, color=1)
 
             cur_y += row_height + row_gap
 
+        # 2. Author line
         if author:
-            tb.draw_text(padding + 12, cur_y, f"-- {author}", scale=1, color=1)
+            auth_str = f"-- {author}"
+            tb.draw_text(padding + 12, cur_y, auth_str, scale=2, color=1)
             cur_y += author_height
 
+        # 3. Dashed divider
         for dx in range(padding, padding + inner_width, 8):
-            tb.draw_hline(dx, cur_y, 4, thickness=2)
+            w = 4 if dx + 4 <= padding + inner_width else padding + inner_width - dx
+            tb.draw_hline(dx, cur_y, w, thickness=2)
         cur_y += 18
 
-        tb.draw_text(padding, cur_y, "ALPHABET TRACKER:", scale=1, color=1)
+        # 4. Alphabet Tracker
+        tb.draw_text(padding, cur_y, "ALPHABET TRACKER:", scale=2, color=1)
         cur_y += 20
-        col_w = int(inner_width / 26)
-        letters_az = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        for i, let in enumerate(letters_az):
+        col_w = inner_width // 26  # 20 dots per letter
+        for i in range(26):
             lx = padding + i * col_w
-            tb.draw_text(lx + 2, cur_y, let, scale=1, color=1)
-            tb.draw_hline(lx + 1, cur_y + 16, max(1, col_w - 2), thickness=1)
+            tb.draw_char(lx + 4, cur_y, chr(ord('A') + i), scale=2, color=1)
+            bar_w = max(1, col_w - 4)
+            tb.draw_hline(lx + 2, cur_y + 18, bar_w, thickness=2)
 
         cur_y += 32
-        tb.draw_text(padding, cur_y, "SCRATCHPAD:", scale=1, color=1)
+
+        # 5. Scratchpad (4 handwriting dashed lines)
+        tb.draw_text(padding, cur_y, "SCRATCHPAD:", scale=2, color=1)
         cur_y += 22
         for _ in range(4):
             for dx in range(padding, padding + inner_width, 10):
-                tb.draw_hline(dx, cur_y, 5, thickness=1)
-            cur_y += 24
+                w = 5 if dx + 5 <= padding + inner_width else padding + inner_width - dx
+                tb.draw_hline(dx, cur_y, w, thickness=1)
+            cur_y += 26
 
         return tb.to_escpos()
 

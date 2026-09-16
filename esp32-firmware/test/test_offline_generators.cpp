@@ -86,6 +86,10 @@ public:
 #include "../src/generators/KillerGen.h"
 #include "../src/generators/KillerGen.cpp"
 
+#include "../src/generators/CryptogramDataset.h"
+#include "../src/generators/CryptogramGen.h"
+#include "../src/generators/CryptogramGen.cpp"
+
 #include "../src/generators/OfflinePuzzleComposer.h"
 #include "../src/generators/OfflinePuzzleComposer.cpp"
 

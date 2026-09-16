@@ -170,6 +170,13 @@ def test_visual_consistency():
                 "box_cols": item["box_cols"],
                 "cages": item["cages"],
             }
+        elif p_name == "cryptogram":
+            py_data = {
+                "phrase": item["phrase"],
+                "author": item["author"],
+                "ciphertext": item["ciphertext"],
+                "difficulty": item.get("difficulty", "easy"),
+            }
         else:
             print(f"Unknown puzzle {p_name}")
             continue

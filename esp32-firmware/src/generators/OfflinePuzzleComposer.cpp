@@ -251,6 +251,22 @@ void OfflinePuzzleComposer::printSinglePuzzle(EscPosPrinter& printer, OfflinePuz
             }
             break;
         }
+        case PUZZLE_CRYPTOGRAM: {
+            CryptogramDifficulty diff = (grade == GRADE_EASY) ? CRYPTO_EASY : ((grade == GRADE_HARD || grade == GRADE_EXTREME) ? CRYPTO_HARD : CRYPTO_MEDIUM);
+            const char* diffStr = (diff == CRYPTO_EASY) ? "EASY" : ((diff == CRYPTO_HARD) ? "HARD" : "MEDIUM");
+            Serial.println("[COMPOSER] Generating Cryptogram...");
+            CryptogramGen cryptogram;
+            cryptogram.generate(diff);
+            uint8_t clueCnt = cryptogram.getClueCount();
+            char cryptoInstr[100];
+            snprintf(cryptoInstr, sizeof(cryptoInstr), "Deduce the hidden phrase using the %s and substitution logic.",
+                     (clueCnt == 1) ? "1 letter clue" : (clueCnt == 3 ? "3 letter clues" : "2 letter clues"));
+            printPuzzleHeader(printer, "CRYPTOGRAM", diffStr, cryptoInstr);
+            if (!useRaster || !cryptogram.printRasterToReceipt(printer)) {
+                cryptogram.printToReceipt(printer);
+            }
+            break;
+        }
         default:
             break;
     }

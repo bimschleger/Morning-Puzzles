@@ -2,7 +2,7 @@
 #include "config.h"
 
 OfflineConfigManager::OfflineConfigManager() :
-    _gameMask(0x3FFF),
+    _gameMask(0x7FFF),
     _puzzleCount(5),
     _puzzleGrade(GRADE_ESCALATING),
     _dailyScheduleEnabled(DAILY_PRINT_ENABLED_DEFAULT),
@@ -12,7 +12,7 @@ OfflineConfigManager::OfflineConfigManager() :
 
 void OfflineConfigManager::begin() {
     _prefs.begin("mp_config", false);
-    _gameMask = _prefs.getUShort("mask", 0x3FFF);
+    _gameMask = _prefs.getUShort("mask", 0x7FFF);
     _puzzleCount = _prefs.getUChar("count", 5);
     uint8_t savedGrade = _prefs.getUChar("grade", (uint8_t)GRADE_ESCALATING);
     _puzzleGrade = (PuzzleGrade)savedGrade;
@@ -21,8 +21,8 @@ void OfflineConfigManager::begin() {
     _dailyScheduleMinute = _prefs.getUChar("daily_min", DAILY_PRINT_MINUTE_DEFAULT);
 
     // Validate mask (ensure at least 1 game is enabled)
-    if ((_gameMask & 0x3FFF) == 0) {
-        _gameMask = 0x3FFF;
+    if ((_gameMask & 0x7FFF) == 0) {
+        _gameMask = 0x7FFF;
     }
 
     // Validate count
@@ -50,7 +50,7 @@ void OfflineConfigManager::save() {
 }
 
 void OfflineConfigManager::resetToDefaults() {
-    _gameMask = 0x3FFF;
+    _gameMask = 0x7FFF;
     _puzzleCount = 5;
     _puzzleGrade = GRADE_ESCALATING;
     _dailyScheduleEnabled = DAILY_PRINT_ENABLED_DEFAULT;
@@ -72,7 +72,7 @@ void OfflineConfigManager::setGameEnabled(OfflinePuzzleType type, bool enabled) 
         _gameMask &= ~(1 << (uint8_t)type);
     }
     // Guard against all disabled
-    if ((_gameMask & 0x3FFF) == 0) {
+    if ((_gameMask & 0x7FFF) == 0) {
         _gameMask = (1 << (uint8_t)type);
     }
     // Re-clamp puzzle count
@@ -83,8 +83,8 @@ void OfflineConfigManager::setGameEnabled(OfflinePuzzleType type, bool enabled) 
 }
 
 void OfflineConfigManager::setGameMask(uint16_t mask) {
-    uint16_t validMask = mask & 0x3FFF;
-    if (validMask == 0) validMask = 0x3FFF;
+    uint16_t validMask = mask & 0x7FFF;
+    if (validMask == 0) validMask = 0x7FFF;
     _gameMask = validMask;
 
     uint8_t enabledCount = getEnabledGameCount();
@@ -168,6 +168,7 @@ const char* OfflineConfigManager::getPuzzleName(OfflinePuzzleType type) const {
         case PUZZLE_LIGHTS:     return "Lights";
         case PUZZLE_LOOP:       return "Loop";
         case PUZZLE_KILLER:     return "Killer";
+        case PUZZLE_CRYPTOGRAM: return "Cryptogram";
         default:                return "Unknown Puzzle";
     }
 }

@@ -2,274 +2,274 @@
   {
     "id": "easy_001",
     "diff": "easy",
-    "phrase": "A JOURNEY OF A THOUSAND MILES BEGINS WITH A SINGLE STEP.",
-    "author": "LAO TZU",
-    "category": "Wisdom"
-  },
-  {
-    "id": "easy_002",
-    "diff": "easy",
     "phrase": "ACTIONS SPEAK LOUDER THAN WORDS.",
     "author": "PROVERB",
     "category": "Proverb"
   },
   {
-    "id": "easy_003",
+    "id": "easy_002",
     "diff": "easy",
     "phrase": "WHERE THERE IS A WILL, THERE IS A WAY.",
     "author": "PROVERB",
     "category": "Proverb"
   },
   {
-    "id": "easy_004",
+    "id": "easy_003",
     "diff": "easy",
     "phrase": "ALL THAT GLITTERS IS NOT GOLD.",
     "author": "WILLIAM SHAKESPEARE",
     "category": "Literature"
   },
   {
-    "id": "easy_005",
-    "diff": "easy",
-    "phrase": "A BIRD IN THE HAND IS WORTH TWO IN THE BUSH.",
-    "author": "PROVERB",
-    "category": "Proverb"
-  },
-  {
-    "id": "easy_006",
+    "id": "easy_004",
     "diff": "easy",
     "phrase": "BETTER LATE THAN NEVER.",
     "author": "PROVERB",
     "category": "Proverb"
   },
   {
-    "id": "easy_007",
+    "id": "easy_005",
     "diff": "easy",
     "phrase": "PRACTICE MAKES PERFECT.",
     "author": "PROVERB",
     "category": "Proverb"
   },
   {
-    "id": "easy_008",
+    "id": "easy_006",
     "diff": "easy",
     "phrase": "THE EARLY BIRD CATCHES THE WORM.",
     "author": "PROVERB",
     "category": "Proverb"
   },
   {
-    "id": "easy_009",
-    "diff": "easy",
-    "phrase": "FORTUNE FAVORS THE BOLD.",
-    "author": "VIRGIL",
-    "category": "Wisdom"
-  },
-  {
-    "id": "easy_010",
-    "diff": "easy",
-    "phrase": "HONESTY IS THE BEST POLICY.",
-    "author": "BENJAMIN FRANKLIN",
-    "category": "Proverb"
-  },
-  {
-    "id": "easy_011",
-    "diff": "easy",
-    "phrase": "KNOWLEDGE IS POWER.",
-    "author": "FRANCIS BACON",
-    "category": "Philosophy"
-  },
-  {
-    "id": "easy_012",
-    "diff": "easy",
-    "phrase": "TIME FLIES WHEN YOU ARE HAVING FUN.",
-    "author": "PROVERB",
-    "category": "Proverb"
-  },
-  {
-    "id": "easy_013",
-    "diff": "easy",
-    "phrase": "A PENNY SAVED IS A PENNY EARNED.",
-    "author": "BENJAMIN FRANKLIN",
-    "category": "Wisdom"
-  },
-  {
-    "id": "easy_014",
-    "diff": "easy",
-    "phrase": "WHEN IN ROME, DO AS THE ROMANS DO.",
-    "author": "PROVERB",
-    "category": "Proverb"
-  },
-  {
-    "id": "easy_015",
-    "diff": "easy",
-    "phrase": "TWO HEADS ARE BETTER THAN ONE.",
-    "author": "PROVERB",
-    "category": "Proverb"
-  },
-  {
-    "id": "easy_016",
-    "diff": "easy",
-    "phrase": "LAUGHTER IS THE BEST MEDICINE.",
-    "author": "PROVERB",
-    "category": "Proverb"
-  },
-  {
-    "id": "easy_017",
-    "diff": "easy",
-    "phrase": "BIRDS OF A FEATHER FLOCK TOGETHER.",
-    "author": "PROVERB",
-    "category": "Proverb"
-  },
-  {
-    "id": "easy_018",
-    "diff": "easy",
-    "phrase": "BE THE CHANGE YOU WISH TO SEE IN THE WORLD.",
-    "author": "MAHATMA GANDHI",
-    "category": "Inspiration"
-  },
-  {
-    "id": "easy_019",
-    "diff": "easy",
-    "phrase": "EVERY CLOUD HAS A SILVER LINING.",
-    "author": "PROVERB",
-    "category": "Proverb"
-  },
-  {
-    "id": "easy_020",
-    "diff": "easy",
-    "phrase": "STRIKE WHILE THE IRON IS HOT.",
-    "author": "PROVERB",
-    "category": "Proverb"
-  },
-  {
-    "id": "easy_021",
+    "id": "easy_007",
     "diff": "easy",
     "phrase": "A PICTURE IS WORTH A THOUSAND WORDS.",
     "author": "PROVERB",
     "category": "Proverb"
   },
   {
-    "id": "easy_022",
-    "diff": "easy",
-    "phrase": "LOOK BEFORE YOU LEAP.",
-    "author": "AESOP",
-    "category": "Wisdom"
-  },
-  {
-    "id": "easy_023",
-    "diff": "easy",
-    "phrase": "YOU CANNOT JUDGE A BOOK BY ITS COVER.",
-    "author": "PROVERB",
-    "category": "Proverb"
-  },
-  {
-    "id": "easy_024",
-    "diff": "easy",
-    "phrase": "HOPE SPRINGS ETERNAL IN THE HUMAN BREAST.",
-    "author": "ALEXANDER POPE",
-    "category": "Poetry"
-  },
-  {
-    "id": "easy_025",
-    "diff": "easy",
-    "phrase": "NECESSITY IS THE MOTHER OF INVENTION.",
-    "author": "PLATO",
-    "category": "Philosophy"
-  },
-  {
-    "id": "easy_026",
-    "diff": "easy",
-    "phrase": "TOO MANY COOKS SPOIL THE BROTH.",
-    "author": "PROVERB",
-    "category": "Proverb"
-  },
-  {
-    "id": "easy_027",
-    "diff": "easy",
-    "phrase": "EASY COME, EASY GO.",
-    "author": "PROVERB",
-    "category": "Proverb"
-  },
-  {
-    "id": "easy_028",
-    "diff": "easy",
-    "phrase": "THE PEN IS MIGHTIER THAN THE SWORD.",
-    "author": "EDWARD BULWER-LYTTON",
-    "category": "Wisdom"
-  },
-  {
-    "id": "easy_029",
-    "diff": "easy",
-    "phrase": "CLEANLINESS IS NEXT TO GODLINESS.",
-    "author": "JOHN WESLEY",
-    "category": "Proverb"
-  },
-  {
-    "id": "easy_030",
+    "id": "easy_008",
     "diff": "easy",
     "phrase": "BEAUTY IS IN THE EYE OF THE BEHOLDER.",
-    "author": "MARGARET WOLFE HUNGERFORD",
-    "category": "Wisdom"
-  },
-  {
-    "id": "easy_031",
-    "diff": "easy",
-    "phrase": "BEGGARS CANNOT BE CHOOSERS.",
-    "author": "JOHN HEYWOOD",
-    "category": "Proverb"
-  },
-  {
-    "id": "easy_032",
-    "diff": "easy",
-    "phrase": "DON'T BITE THE HAND THAT FEEDS YOU.",
-    "author": "EDMUND BURKE",
-    "category": "Wisdom"
-  },
-  {
-    "id": "easy_033",
-    "diff": "easy",
-    "phrase": "GOOD THINGS COME TO THOSE WHO WAIT.",
     "author": "PROVERB",
     "category": "Proverb"
   },
   {
-    "id": "easy_034",
+    "id": "easy_009",
     "diff": "easy",
-    "phrase": "IF IT AIN'T BROKE, DON'T FIX IT.",
-    "author": "BERT LANCE",
-    "category": "Idiom"
+    "phrase": "BE THE CHANGE YOU WISH TO SEE.",
+    "author": "MAHATMA GANDHI",
+    "category": "Inspiration"
   },
   {
-    "id": "easy_035",
+    "id": "easy_010",
+    "diff": "easy",
+    "phrase": "FORTUNE FAVORS THE BOLD.",
+    "author": "VIRGIL",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_011",
+    "diff": "easy",
+    "phrase": "HONESTY IS THE BEST POLICY.",
+    "author": "BENJAMIN FRANKLIN",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_012",
+    "diff": "easy",
+    "phrase": "KNOWLEDGE IS POWER.",
+    "author": "FRANCIS BACON",
+    "category": "Wisdom"
+  },
+  {
+    "id": "easy_013",
+    "diff": "easy",
+    "phrase": "LAUGHTER IS THE BEST MEDICINE.",
+    "author": "PROVERB",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_014",
+    "diff": "easy",
+    "phrase": "LOOK BEFORE YOU LEAP.",
+    "author": "PROVERB",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_015",
     "diff": "easy",
     "phrase": "NO PAIN, NO GAIN.",
     "author": "PROVERB",
     "category": "Proverb"
   },
   {
-    "id": "easy_036",
+    "id": "easy_016",
     "diff": "easy",
     "phrase": "OUT OF SIGHT, OUT OF MIND.",
     "author": "PROVERB",
     "category": "Proverb"
   },
   {
+    "id": "easy_017",
+    "diff": "easy",
+    "phrase": "SLOW AND STEADY WINS THE RACE.",
+    "author": "AESOP",
+    "category": "Fable"
+  },
+  {
+    "id": "easy_018",
+    "diff": "easy",
+    "phrase": "STRIKE WHILE THE IRON IS HOT.",
+    "author": "PROVERB",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_019",
+    "diff": "easy",
+    "phrase": "TIME IS MONEY.",
+    "author": "BENJAMIN FRANKLIN",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_020",
+    "diff": "easy",
+    "phrase": "TOO MANY COOKS SPOIL THE BROTH.",
+    "author": "PROVERB",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_021",
+    "diff": "easy",
+    "phrase": "WHEN IN ROME, DO AS THE ROMANS DO.",
+    "author": "PROVERB",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_022",
+    "diff": "easy",
+    "phrase": "BIRDS OF A FEATHER FLOCK TOGETHER.",
+    "author": "PROVERB",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_023",
+    "diff": "easy",
+    "phrase": "CLEANLINESS IS NEXT TO GODLINESS.",
+    "author": "PROVERB",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_024",
+    "diff": "easy",
+    "phrase": "DO NOT BITE THE HAND THAT FEEDS YOU.",
+    "author": "PROVERB",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_025",
+    "diff": "easy",
+    "phrase": "EASY COME, EASY GO.",
+    "author": "PROVERB",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_026",
+    "diff": "easy",
+    "phrase": "EVERY CLOUD HAS A SILVER LINING.",
+    "author": "PROVERB",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_027",
+    "diff": "easy",
+    "phrase": "HASTE MAKES WASTE.",
+    "author": "PROVERB",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_028",
+    "diff": "easy",
+    "phrase": "IGNORANCE IS BLISS.",
+    "author": "THOMAS GRAY",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_029",
+    "diff": "easy",
+    "phrase": "LEAVE NO STONE UNTURNED.",
+    "author": "EURIPIDES",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_030",
+    "diff": "easy",
+    "phrase": "MISERY LOVES COMPANY.",
+    "author": "PROVERB",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_031",
+    "diff": "easy",
+    "phrase": "NECESSITY IS THE MOTHER OF INVENTION.",
+    "author": "PLATO",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_032",
+    "diff": "easy",
+    "phrase": "NO NEWS IS GOOD NEWS.",
+    "author": "PROVERB",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_033",
+    "diff": "easy",
+    "phrase": "OPPOSITES ATTRACT.",
+    "author": "PROVERB",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_034",
+    "diff": "easy",
+    "phrase": "ROME WAS NOT BUILT IN A DAY.",
+    "author": "PROVERB",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_035",
+    "diff": "easy",
+    "phrase": "SEEING IS BELIEVING.",
+    "author": "PROVERB",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_036",
+    "diff": "easy",
+    "phrase": "SILENCE IS GOLDEN.",
+    "author": "PROVERB",
+    "category": "Proverb"
+  },
+  {
     "id": "easy_037",
     "diff": "easy",
-    "phrase": "THE GRASS IS ALWAYS GREENER ON THE OTHER SIDE.",
-    "author": "PROVERB",
+    "phrase": "THE PEN IS MIGHTIER THAN THE SWORD.",
+    "author": "EDWARD BULWER-LYTTON",
     "category": "Proverb"
   },
   {
     "id": "easy_038",
     "diff": "easy",
-    "phrase": "THERE IS NO PLACE LIKE HOME.",
-    "author": "L. FRANK BAUM",
-    "category": "Literature"
+    "phrase": "TWO HEADS ARE BETTER THAN ONE.",
+    "author": "PROVERB",
+    "category": "Proverb"
   },
   {
     "id": "easy_039",
     "diff": "easy",
-    "phrase": "WHAT GOES UP MUST COME DOWN.",
-    "author": "PROVERB",
+    "phrase": "VARIETY IS THE SPICE OF LIFE.",
+    "author": "WILLIAM COWPER",
     "category": "Proverb"
   },
   {
@@ -282,425 +282,1123 @@
   {
     "id": "easy_041",
     "diff": "easy",
-    "phrase": "GREAT MINDS THINK ALIKE.",
-    "author": "PROVERB",
+    "phrase": "A PENNY SAVED IS A PENNY EARNED.",
+    "author": "BENJAMIN FRANKLIN",
     "category": "Proverb"
   },
   {
     "id": "easy_042",
     "diff": "easy",
-    "phrase": "HASTE MAKES WASTE.",
-    "author": "JOHN HEYWOOD",
-    "category": "Wisdom"
+    "phrase": "BE CURIOUS, NOT JUDGMENTAL.",
+    "author": "WALT WHITMAN",
+    "category": "Poetry"
   },
   {
     "id": "easy_043",
     "diff": "easy",
-    "phrase": "SILENCE IS GOLDEN.",
-    "author": "PROVERB",
-    "category": "Proverb"
+    "phrase": "WISDOM BEGINS IN WONDER.",
+    "author": "SOCRATES",
+    "category": "Philosophy"
   },
   {
     "id": "easy_044",
     "diff": "easy",
-    "phrase": "SLOW AND STEADY WINS THE RACE.",
-    "author": "AESOP",
-    "category": "Fable"
+    "phrase": "I THINK, THEREFORE I AM.",
+    "author": "RENE DESCARTES",
+    "category": "Philosophy"
   },
   {
     "id": "easy_045",
     "diff": "easy",
-    "phrase": "THE BEST THINGS IN LIFE ARE FREE.",
-    "author": "PROVERB",
-    "category": "Proverb"
+    "phrase": "COURAGE IS GRACE UNDER PRESSURE.",
+    "author": "ERNEST HEMINGWAY",
+    "category": "Literature"
   },
   {
     "id": "easy_046",
     "diff": "easy",
-    "phrase": "TIME HEALS ALL WOUNDS.",
-    "author": "PROVERB",
-    "category": "Proverb"
+    "phrase": "DOUBT IS THE ORIGIN OF WISDOM.",
+    "author": "RENE DESCARTES",
+    "category": "Philosophy"
   },
   {
     "id": "easy_047",
     "diff": "easy",
-    "phrase": "LIVE AND LET LIVE.",
+    "phrase": "NOT ALL WHO WANDER ARE LOST.",
+    "author": "J. R. R. TOLKIEN",
+    "category": "Literature"
+  },
+  {
+    "id": "easy_048",
+    "diff": "easy",
+    "phrase": "PEACE BEGINS WITH A SMILE.",
+    "author": "MOTHER TERESA",
+    "category": "Wisdom"
+  },
+  {
+    "id": "easy_049",
+    "diff": "easy",
+    "phrase": "TURN YOUR WOUNDS INTO WISDOM.",
+    "author": "OPRAH WINFREY",
+    "category": "Inspiration"
+  },
+  {
+    "id": "easy_050",
+    "diff": "easy",
+    "phrase": "DIE WITH MEMORIES, NOT DREAMS.",
+    "author": "PROVERB",
+    "category": "Wisdom"
+  },
+  {
+    "id": "easy_051",
+    "diff": "easy",
+    "phrase": "ASPIRE TO INSPIRE BEFORE WE EXPIRE.",
+    "author": "PROVERB",
+    "category": "Rhyme"
+  },
+  {
+    "id": "easy_052",
+    "diff": "easy",
+    "phrase": "EVERYTHING YOU CAN IMAGINE IS REAL.",
+    "author": "PABLO PICASSO",
+    "category": "Art"
+  },
+  {
+    "id": "easy_053",
+    "diff": "easy",
+    "phrase": "WHAT WE THINK, WE BECOME.",
+    "author": "BUDDHA",
+    "category": "Philosophy"
+  },
+  {
+    "id": "easy_054",
+    "diff": "easy",
+    "phrase": "ALL LIMITATIONS ARE SELF IMPOSED.",
+    "author": "OLIVER WENDELL HOLMES",
+    "category": "Mindset"
+  },
+  {
+    "id": "easy_055",
+    "diff": "easy",
+    "phrase": "ONE DAY OR DAY ONE. YOU DECIDE.",
+    "author": "PROVERB",
+    "category": "Focus"
+  },
+  {
+    "id": "easy_056",
+    "diff": "easy",
+    "phrase": "WHEN WORDS FAIL, MUSIC SPEAKS.",
+    "author": "HANS CHRISTIAN ANDERSEN",
+    "category": "Music"
+  },
+  {
+    "id": "easy_057",
+    "diff": "easy",
+    "phrase": "LIMIT YOUR ALWAYS AND YOUR NEVERS.",
+    "author": "AMY POEHLER",
+    "category": "Humor"
+  },
+  {
+    "id": "easy_058",
+    "diff": "easy",
+    "phrase": "JOY IS NOT IN THINGS; IT IS IN US.",
+    "author": "RICHARD WAGNER",
+    "category": "Philosophy"
+  },
+  {
+    "id": "easy_059",
+    "diff": "easy",
+    "phrase": "THE BEST WAY OUT IS ALWAYS THROUGH.",
+    "author": "ROBERT FROST",
+    "category": "Poetry"
+  },
+  {
+    "id": "easy_060",
+    "diff": "easy",
+    "phrase": "WHATEVER YOU ARE, BE A GOOD ONE.",
+    "author": "ABRAHAM LINCOLN",
+    "category": "Wisdom"
+  },
+  {
+    "id": "easy_061",
+    "diff": "easy",
+    "phrase": "EVERY MOMENT IS A FRESH BEGINNING.",
+    "author": "T. S. ELIOT",
+    "category": "Poetry"
+  },
+  {
+    "id": "easy_062",
+    "diff": "easy",
+    "phrase": "SIMPLICITY IS THE ULTIMATE SOPHISTICATION.",
+    "author": "LEONARDO DA VINCI",
+    "category": "Wisdom"
+  },
+  {
+    "id": "easy_063",
+    "diff": "easy",
+    "phrase": "A FRIEND TO ALL IS A FRIEND TO NONE.",
+    "author": "ARISTOTLE",
+    "category": "Philosophy"
+  },
+  {
+    "id": "easy_064",
+    "diff": "easy",
+    "phrase": "AN APPLE A DAY KEEPS THE DOCTOR AWAY.",
     "author": "PROVERB",
     "category": "Proverb"
   },
   {
-    "id": "easy_048",
+    "id": "easy_065",
+    "diff": "easy",
+    "phrase": "BARK IS WORSE THAN THE BITE.",
+    "author": "PROVERB",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_066",
+    "diff": "easy",
+    "phrase": "BLOOD IS THICKER THAN WATER.",
+    "author": "PROVERB",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_067",
+    "diff": "easy",
+    "phrase": "CURIOSITY KILLED THE CAT.",
+    "author": "PROVERB",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_068",
+    "diff": "easy",
+    "phrase": "DON'T PUT ALL YOUR EGGS IN ONE BASKET.",
+    "author": "PROVERB",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_069",
+    "diff": "easy",
+    "phrase": "GOOD THINGS COME TO THOSE WHO WAIT.",
+    "author": "PROVERB",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_070",
+    "diff": "easy",
+    "phrase": "IF IT IS NOT BROKE, DO NOT FIX IT.",
+    "author": "PROVERB",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_071",
+    "diff": "easy",
+    "phrase": "LET SLEEPING DOGS LIE.",
+    "author": "PROVERB",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_072",
+    "diff": "easy",
+    "phrase": "MAKE HAY WHILE THE SUN SHINES.",
+    "author": "PROVERB",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_073",
+    "diff": "easy",
+    "phrase": "NO MAN IS AN ISLAND.",
+    "author": "JOHN DONNE",
+    "category": "Literature"
+  },
+  {
+    "id": "easy_074",
+    "diff": "easy",
+    "phrase": "OLD HABITS DIE HARD.",
+    "author": "PROVERB",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_075",
+    "diff": "easy",
+    "phrase": "PENNY WISE, POUND FOOLISH.",
+    "author": "PROVERB",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_076",
+    "diff": "easy",
+    "phrase": "THE BUCK STOPS HERE.",
+    "author": "HARRY S. TRUMAN",
+    "category": "History"
+  },
+  {
+    "id": "easy_077",
+    "diff": "easy",
+    "phrase": "THE SQUEAKY WHEEL GETS THE GREASE.",
+    "author": "PROVERB",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_078",
+    "diff": "easy",
+    "phrase": "THERE IS NO TIME LIKE THE PRESENT.",
+    "author": "PROVERB",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_079",
+    "diff": "easy",
+    "phrase": "TWO WRONGS DO NOT MAKE A RIGHT.",
+    "author": "PROVERB",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_080",
+    "diff": "easy",
+    "phrase": "YOU CANNOT JUDGE A BOOK BY ITS COVER.",
+    "author": "PROVERB",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_081",
+    "diff": "easy",
+    "phrase": "ALL IS FAIR IN LOVE AND WAR.",
+    "author": "PROVERB",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_082",
+    "diff": "easy",
+    "phrase": "BEG PARDON BEFORE TAKING LEAVE.",
+    "author": "PROVERB",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_083",
+    "diff": "easy",
+    "phrase": "BETTER SAFE THAN SORRY.",
+    "author": "PROVERB",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_084",
+    "diff": "easy",
+    "phrase": "CHARITY BEGINS AT HOME.",
+    "author": "PROVERB",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_085",
+    "diff": "easy",
+    "phrase": "DON'T COUNT YOUR CHICKENS EARLY.",
+    "author": "PROVERB",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_086",
+    "diff": "easy",
+    "phrase": "EVERY DOG HAS ITS DAY.",
+    "author": "PROVERB",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_087",
+    "diff": "easy",
+    "phrase": "GREAT MINDS THINK ALIKE.",
+    "author": "PROVERB",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_088",
+    "diff": "easy",
+    "phrase": "HOPE SPRINGS ETERNAL.",
+    "author": "ALEXANDER POPE",
+    "category": "Literature"
+  },
+  {
+    "id": "easy_089",
     "diff": "easy",
     "phrase": "LIKE FATHER, LIKE SON.",
     "author": "PROVERB",
     "category": "Proverb"
   },
   {
-    "id": "easy_049",
+    "id": "easy_090",
     "diff": "easy",
-    "phrase": "LOVE CONQUERS ALL.",
-    "author": "VIRGIL",
-    "category": "Wisdom"
-  },
-  {
-    "id": "easy_050",
-    "diff": "easy",
-    "phrase": "A FRIEND IN NEED IS A FRIEND INDEED.",
+    "phrase": "LIVE AND LET LIVE.",
     "author": "PROVERB",
     "category": "Proverb"
   },
-
   {
-    "id": "medium_001",
-    "diff": "medium",
-    "phrase": "THE FUTURE BELONGS TO THOSE WHO BELIEVE IN THE BEAUTY OF THEIR DREAMS.",
-    "author": "ELEANOR ROOSEVELT",
-    "category": "Inspiration"
+    "id": "easy_091",
+    "diff": "easy",
+    "phrase": "MONEY DOES NOT GROW ON TREES.",
+    "author": "PROVERB",
+    "category": "Proverb"
   },
   {
-    "id": "medium_002",
-    "diff": "medium",
-    "phrase": "IT DOES NOT MATTER HOW SLOWLY YOU GO AS LONG AS YOU DO NOT STOP.",
-    "author": "CONFUCIUS",
+    "id": "easy_092",
+    "diff": "easy",
+    "phrase": "NO SMOKE WITHOUT FIRE.",
+    "author": "PROVERB",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_093",
+    "diff": "easy",
+    "phrase": "ONE GOOD TURN DESERVES ANOTHER.",
+    "author": "PROVERB",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_094",
+    "diff": "easy",
+    "phrase": "OUT OF THE FRYING PAN INTO THE FIRE.",
+    "author": "PROVERB",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_095",
+    "diff": "easy",
+    "phrase": "PENNIES MAKE POUNDS.",
+    "author": "PROVERB",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_096",
+    "diff": "easy",
+    "phrase": "STILL WATERS RUN DEEP.",
+    "author": "PROVERB",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_097",
+    "diff": "easy",
+    "phrase": "TIME HEALS ALL WOUNDS.",
+    "author": "PROVERB",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_098",
+    "diff": "easy",
+    "phrase": "WELL BEGUN IS HALF DONE.",
+    "author": "ARISTOTLE",
     "category": "Philosophy"
   },
   {
-    "id": "medium_003",
+    "id": "easy_099",
+    "diff": "easy",
+    "phrase": "WHAT GOES UP MUST COME DOWN.",
+    "author": "PROVERB",
+    "category": "Proverb"
+  },
+  {
+    "id": "easy_100",
+    "diff": "easy",
+    "phrase": "WHERE WORDS FAIL, TEARS SPEAK.",
+    "author": "PROVERB",
+    "category": "Wisdom"
+  },
+  {
+    "id": "medium_001",
     "diff": "medium",
     "phrase": "IN THE MIDDLE OF EVERY DIFFICULTY LIES OPPORTUNITY.",
     "author": "ALBERT EINSTEIN",
     "category": "Wisdom"
   },
   {
-    "id": "medium_004",
-    "diff": "medium",
-    "phrase": "WHAT YOU GET BY ACHIEVING YOUR GOALS IS NOT AS IMPORTANT AS WHAT YOU BECOME.",
-    "author": "ZIG ZIGLAR",
-    "category": "Motivation"
-  },
-  {
-    "id": "medium_005",
-    "diff": "medium",
-    "phrase": "HAPPINESS IS NOT SOMETHING READY MADE. IT COMES FROM YOUR OWN ACTIONS.",
-    "author": "DALAI LAMA",
-    "category": "Philosophy"
-  },
-  {
-    "id": "medium_006",
+    "id": "medium_002",
     "diff": "medium",
     "phrase": "THE ONLY WAY TO DO GREAT WORK IS TO LOVE WHAT YOU DO.",
     "author": "STEVE JOBS",
-    "category": "Inspiration"
+    "category": "Motivation"
   },
   {
-    "id": "medium_007",
-    "diff": "medium",
-    "phrase": "WHATEVER YOU ARE, BE A GOOD ONE.",
-    "author": "ABRAHAM LINCOLN",
-    "category": "Wisdom"
-  },
-  {
-    "id": "medium_008",
+    "id": "medium_003",
     "diff": "medium",
     "phrase": "THE SECRET OF GETTING AHEAD IS GETTING STARTED.",
     "author": "MARK TWAIN",
-    "category": "Motivation"
-  },
-  {
-    "id": "medium_009",
-    "diff": "medium",
-    "phrase": "DO NOT GO WHERE THE PATH MAY LEAD, GO INSTEAD WHERE THERE IS NO PATH.",
-    "author": "RALPH WALDO EMERSON",
     "category": "Inspiration"
   },
   {
-    "id": "medium_010",
-    "diff": "medium",
-    "phrase": "EVERY STRIKE BRINGS ME CLOSER TO THE NEXT HOME RUN.",
-    "author": "BABE RUTH",
-    "category": "Sports"
-  },
-  {
-    "id": "medium_011",
-    "diff": "medium",
-    "phrase": "LIFE IS WHAT HAPPENS WHEN YOU ARE BUSY MAKING OTHER PLANS.",
-    "author": "JOHN LENNON",
-    "category": "Wisdom"
-  },
-  {
-    "id": "medium_012",
-    "diff": "medium",
-    "phrase": "AN INVESTMENT IN KNOWLEDGE PAYS THE BEST INTEREST.",
-    "author": "BENJAMIN FRANKLIN",
-    "category": "Wisdom"
-  },
-  {
-    "id": "medium_013",
-    "diff": "medium",
-    "phrase": "NOTHING IS IMPOSSIBLE, THE WORD ITSELF SAYS I'M POSSIBLE!",
-    "author": "AUDREY HEPBURN",
-    "category": "Inspiration"
-  },
-  {
-    "id": "medium_014",
-    "diff": "medium",
-    "phrase": "PEACE BEGINS WITH A SMILE.",
-    "author": "MOTHER TERESA",
-    "category": "Wisdom"
-  },
-  {
-    "id": "medium_015",
-    "diff": "medium",
-    "phrase": "WE MAY ENCOUNTER MANY DEFEATS BUT WE MUST NOT BE DEFEATED.",
-    "author": "MAYA ANGELOU",
-    "category": "Motivation"
-  },
-  {
-    "id": "medium_016",
-    "diff": "medium",
-    "phrase": "SIMPLICITY IS THE ULTIMATE SOPHISTICATION.",
-    "author": "LEONARDO DA VINCI",
-    "category": "Art"
-  },
-  {
-    "id": "medium_017",
-    "diff": "medium",
-    "phrase": "TURN YOUR WOUNDS INTO WISDOM.",
-    "author": "OPRAH WINFREY",
-    "category": "Inspiration"
-  },
-  {
-    "id": "medium_018",
+    "id": "medium_004",
     "diff": "medium",
     "phrase": "BELIEVE YOU CAN AND YOU ARE HALFWAY THERE.",
     "author": "THEODORE ROOSEVELT",
     "category": "Motivation"
   },
   {
+    "id": "medium_005",
+    "diff": "medium",
+    "phrase": "LIFE IS WHAT HAPPENS WHEN YOU ARE BUSY MAKING OTHER PLANS.",
+    "author": "JOHN LENNON",
+    "category": "Life"
+  },
+  {
+    "id": "medium_006",
+    "diff": "medium",
+    "phrase": "IT DOES NOT MATTER HOW SLOWLY YOU GO AS LONG AS YOU DO NOT STOP.",
+    "author": "CONFUCIUS",
+    "category": "Philosophy"
+  },
+  {
+    "id": "medium_007",
+    "diff": "medium",
+    "phrase": "DO WHAT YOU CAN, WITH WHAT YOU HAVE, WHERE YOU ARE.",
+    "author": "THEODORE ROOSEVELT",
+    "category": "Motivation"
+  },
+  {
+    "id": "medium_008",
+    "diff": "medium",
+    "phrase": "THE PURPOSE OF OUR LIVES IS TO BE HAPPY.",
+    "author": "DALAI LAMA",
+    "category": "Happiness"
+  },
+  {
+    "id": "medium_009",
+    "diff": "medium",
+    "phrase": "WE ACCEPT THE LOVE WE THINK WE DESERVE.",
+    "author": "STEPHEN CHBOSKY",
+    "category": "Love"
+  },
+  {
+    "id": "medium_010",
+    "diff": "medium",
+    "phrase": "NOBODY CAN HURT ME WITHOUT MY PERMISSION.",
+    "author": "MAHATMA GANDHI",
+    "category": "Strength"
+  },
+  {
+    "id": "medium_011",
+    "diff": "medium",
+    "phrase": "TO KNOW THYSELF IS THE BEGINNING OF WISDOM.",
+    "author": "SOCRATES",
+    "category": "Wisdom"
+  },
+  {
+    "id": "medium_012",
+    "diff": "medium",
+    "phrase": "THE UNEXAMINED LIFE IS NOT WORTH LIVING.",
+    "author": "SOCRATES",
+    "category": "Philosophy"
+  },
+  {
+    "id": "medium_013",
+    "diff": "medium",
+    "phrase": "HE WHO HAS A WHY TO LIVE CAN BEAR ALMOST ANY HOW.",
+    "author": "FRIEDRICH NIETZSCHE",
+    "category": "Philosophy"
+  },
+  {
+    "id": "medium_014",
+    "diff": "medium",
+    "phrase": "WHATEVER IS BEGUN IN ANGER ENDS IN SHAME.",
+    "author": "BENJAMIN FRANKLIN",
+    "category": "Temperament"
+  },
+  {
+    "id": "medium_015",
+    "diff": "medium",
+    "phrase": "WELL DONE IS BETTER THAN WELL SAID.",
+    "author": "BENJAMIN FRANKLIN",
+    "category": "Action"
+  },
+  {
+    "id": "medium_016",
+    "diff": "medium",
+    "phrase": "EVERY MAN DIES. NOT EVERY MAN REALLY LIVES.",
+    "author": "WILLIAM WALLACE",
+    "category": "Courage"
+  },
+  {
+    "id": "medium_017",
+    "diff": "medium",
+    "phrase": "I CAN RESIST EVERYTHING EXCEPT TEMPTATION.",
+    "author": "OSCAR WILDE",
+    "category": "Wit"
+  },
+  {
+    "id": "medium_018",
+    "diff": "medium",
+    "phrase": "A DAY WITHOUT SUNSHINE IS LIKE, YOU KNOW, NIGHT.",
+    "author": "STEVE MARTIN",
+    "category": "Humor"
+  },
+  {
     "id": "medium_019",
     "diff": "medium",
-    "phrase": "IF YOU WANT TO LIFT YOURSELF UP, LIFT UP SOMEONE ELSE.",
-    "author": "BOOKER T. WASHINGTON",
-    "category": "Wisdom"
+    "phrase": "THE ROAD TO SUCCESS IS ALWAYS UNDER CONSTRUCTION.",
+    "author": "LILY TOMLIN",
+    "category": "Wit"
   },
   {
     "id": "medium_020",
     "diff": "medium",
-    "phrase": "SUCCESS IS NOT FINAL, FAILURE IS NOT FATAL: IT IS THE COURAGE TO CONTINUE.",
-    "author": "WINSTON CHURCHILL",
-    "category": "Leadership"
+    "phrase": "EXPERIENCE IS SIMPLY THE NAME WE GIVE OUR MISTAKES.",
+    "author": "OSCAR WILDE",
+    "category": "Wit"
   },
   {
     "id": "medium_021",
     "diff": "medium",
-    "phrase": "YOU MISS ONE HUNDRED PERCENT OF THE SHOTS YOU DO NOT TAKE.",
-    "author": "WAYNE GRETZKY",
-    "category": "Sports"
+    "phrase": "A JOURNEY OF A THOUSAND MILES BEGINS WITH A SINGLE STEP.",
+    "author": "LAO TZU",
+    "category": "Wisdom"
   },
   {
     "id": "medium_022",
     "diff": "medium",
-    "phrase": "TRY TO BE A RAINBOW IN SOMEONE'S CLOUD.",
-    "author": "MAYA ANGELOU",
-    "category": "Kindness"
+    "phrase": "A BIRD IN THE HAND IS WORTH TWO IN THE BUSH.",
+    "author": "PROVERB",
+    "category": "Proverb"
   },
   {
     "id": "medium_023",
     "diff": "medium",
-    "phrase": "EVERY MOMENT IS A FRESH BEGINNING.",
-    "author": "T. S. ELIOT",
-    "category": "Poetry"
+    "phrase": "THE GRASS IS ALWAYS GREENER ON THE OTHER SIDE.",
+    "author": "PROVERB",
+    "category": "Proverb"
   },
   {
     "id": "medium_024",
     "diff": "medium",
-    "phrase": "NEVER REGRET ANYTHING THAT MADE YOU SMILE.",
-    "author": "MARK TWAIN",
-    "category": "Humor"
+    "phrase": "TRY TO BE A RAINBOW IN SOMEONE ELSE'S CLOUD.",
+    "author": "MAYA ANGELOU",
+    "category": "Inspiration"
   },
   {
     "id": "medium_025",
     "diff": "medium",
-    "phrase": "DIE WITH MEMORIES, NOT DREAMS.",
-    "author": "PROVERB",
-    "category": "Wisdom"
+    "phrase": "YOU MUST BE THE CHANGE YOU WISH TO SEE IN THE WORLD.",
+    "author": "MAHATMA GANDHI",
+    "category": "Inspiration"
   },
   {
     "id": "medium_026",
     "diff": "medium",
-    "phrase": "ASPIRE TO INSPIRE BEFORE WE EXPIRE.",
-    "author": "PROVERB",
-    "category": "Rhyme"
+    "phrase": "NOTHING IS IMPOSSIBLE, THE WORD ITSELF SAYS I'M POSSIBLE.",
+    "author": "AUDREY HEPBURN",
+    "category": "Inspiration"
   },
   {
     "id": "medium_027",
     "diff": "medium",
-    "phrase": "EVERYTHING YOU CAN IMAGINE IS REAL.",
-    "author": "PABLO PICASSO",
-    "category": "Art"
+    "phrase": "IF YOU TELL THE TRUTH, YOU DON'T HAVE TO REMEMBER ANYTHING.",
+    "author": "MARK TWAIN",
+    "category": "Wit"
   },
   {
     "id": "medium_028",
     "diff": "medium",
-    "phrase": "MAY YOUR CHOICES REFLECT YOUR HOPES, NOT YOUR FEARS.",
-    "author": "NELSON MANDELA",
-    "category": "Wisdom"
+    "phrase": "THERE IS NO ELEVATOR TO SUCCESS. YOU HAVE TO TAKE THE STAIRS.",
+    "author": "ZIG ZIGLAR",
+    "category": "Success"
   },
   {
     "id": "medium_029",
     "diff": "medium",
-    "phrase": "A WARM SMILE IS THE UNIVERSAL LANGUAGE OF KINDNESS.",
-    "author": "WILLIAM ARTHUR WARD",
-    "category": "Kindness"
+    "phrase": "THE MIND IS EVERYTHING. WHAT YOU THINK YOU BECOME.",
+    "author": "BUDDHA",
+    "category": "Mindset"
   },
   {
     "id": "medium_030",
     "diff": "medium",
-    "phrase": "TO LIVE IS THE RAREST THING IN THE WORLD. MOST PEOPLE JUST EXIST.",
-    "author": "OSCAR WILDE",
-    "category": "Literature"
+    "phrase": "AN UNEXAMINED LIFE IS NOT WORTH LIVING FOR A HUMAN BEING.",
+    "author": "PLATO",
+    "category": "Philosophy"
   },
   {
     "id": "medium_031",
     "diff": "medium",
-    "phrase": "WHAT WE THINK, WE BECOME.",
-    "author": "BUDDHA",
-    "category": "Philosophy"
+    "phrase": "HAPPINESS DEPENDS UPON OURSELVES.",
+    "author": "ARISTOTLE",
+    "category": "Happiness"
   },
   {
     "id": "medium_032",
     "diff": "medium",
-    "phrase": "ALL LIMITATIONS ARE SELF IMPOSED.",
-    "author": "OLIVER WENDELL HOLMES",
-    "category": "Mindset"
+    "phrase": "DO NOT PRAY FOR AN EASY LIFE, PRAY FOR THE STRENGTH TO ENDURE.",
+    "author": "BRUCE LEE",
+    "category": "Strength"
   },
   {
     "id": "medium_033",
     "diff": "medium",
-    "phrase": "TOUGH TIMES NEVER LAST, BUT TOUGH PEOPLE DO.",
-    "author": "ROBERT H. SCHULLER",
-    "category": "Resilience"
+    "phrase": "IN THREE WORDS I CAN SUM UP EVERYTHING I'VE LEARNED: IT GOES ON.",
+    "author": "ROBERT FROST",
+    "category": "Wisdom"
   },
   {
     "id": "medium_034",
     "diff": "medium",
-    "phrase": "PROBLEMS ARE NOT STOP SIGNS, THEY ARE GUIDELINES.",
-    "author": "ROBERT H. SCHULLER",
-    "category": "Motivation"
+    "phrase": "THE POWER OF IMAGINATION MAKES US INFINITE.",
+    "author": "JOHN MUIR",
+    "category": "Imagination"
   },
   {
     "id": "medium_035",
     "diff": "medium",
-    "phrase": "HAVE ENOUGH COURAGE TO START AND ENOUGH HEART TO FINISH.",
-    "author": "JESSICA N. S. PATRICK",
-    "category": "Courage"
+    "phrase": "WE DO NOT REMEMBER DAYS, WE REMEMBER MOMENTS.",
+    "author": "CESARE PAVESE",
+    "category": "Memories"
   },
   {
     "id": "medium_036",
     "diff": "medium",
-    "phrase": "ONE DAY OR DAY ONE. YOU DECIDE.",
-    "author": "UNKNOWN",
-    "category": "Focus"
+    "phrase": "TO LIVE IS THE RAREST THING IN THE WORLD. MOST PEOPLE EXIST.",
+    "author": "OSCAR WILDE",
+    "category": "Life"
   },
   {
     "id": "medium_037",
     "diff": "medium",
-    "phrase": "DO WHAT YOU CAN, WITH WHAT YOU HAVE, WHERE YOU ARE.",
-    "author": "THEODORE ROOSEVELT",
-    "category": "Wisdom"
+    "phrase": "CHANGE YOUR THOUGHTS AND YOU CHANGE YOUR WORLD.",
+    "author": "NORMAN VINCENT PEALE",
+    "category": "Mindset"
   },
   {
     "id": "medium_038",
     "diff": "medium",
-    "phrase": "ACT AS IF WHAT YOU DO MAKES A DIFFERENCE. IT DOES.",
-    "author": "WILLIAM JAMES",
-    "category": "Philosophy"
+    "phrase": "DO ONE THING EVERY DAY THAT SCARES YOU.",
+    "author": "ELEANOR ROOSEVELT",
+    "category": "Courage"
   },
   {
     "id": "medium_039",
     "diff": "medium",
-    "phrase": "NEVER BEND YOUR HEAD. ALWAYS HOLD IT HIGH. LOOK THE WORLD IN THE EYE.",
-    "author": "HELEN KELLER",
+    "phrase": "LIGHT TOMORROW WITH TODAY.",
+    "author": "ELIZABETH BARRETT BROWNING",
     "category": "Inspiration"
   },
   {
     "id": "medium_040",
     "diff": "medium",
-    "phrase": "WHAT CONSUMES YOUR MIND CONTROLS YOUR LIFE.",
-    "author": "UNKNOWN",
-    "category": "Mindset"
+    "phrase": "DREAM BIG AND DARE TO FAIL.",
+    "author": "NORMAN VAUGHAN",
+    "category": "Courage"
   },
   {
     "id": "medium_041",
     "diff": "medium",
-    "phrase": "WHEN WORDS FAIL, MUSIC SPEAKS.",
-    "author": "HANS CHRISTIAN ANDERSEN",
-    "category": "Music"
+    "phrase": "NOTHING VENTURED, NOTHING GAINED.",
+    "author": "BENJAMIN FRANKLIN",
+    "category": "Proverb"
   },
   {
     "id": "medium_042",
     "diff": "medium",
-    "phrase": "EITHER YOU RUN THE DAY OR THE DAY RUNS YOU.",
-    "author": "JIM ROHN",
-    "category": "Motivation"
+    "phrase": "THE ONLY TRUE WISDOM IS IN KNOWING YOU KNOW NOTHING.",
+    "author": "SOCRATES",
+    "category": "Wisdom"
   },
   {
     "id": "medium_043",
     "diff": "medium",
-    "phrase": "LIMIT YOUR ALWAYS AND YOUR NEVERS.",
-    "author": "AMY POEHLER",
-    "category": "Humor"
+    "phrase": "PEACE COMES FROM WITHIN. DO NOT SEEK IT WITHOUT.",
+    "author": "BUDDHA",
+    "category": "Peace"
   },
   {
     "id": "medium_044",
     "diff": "medium",
-    "phrase": "SPREAD LOVE EVERYWHERE YOU GO. LET NO ONE EVER COME TO YOU WITHOUT LEAVING HAPPIER.",
+    "phrase": "COUNT YOUR AGE BY FRIENDS, NOT YEARS.",
+    "author": "JOHN LENNON",
+    "category": "Friendship"
+  },
+  {
+    "id": "medium_045",
+    "diff": "medium",
+    "phrase": "LIFE IS EITHER A DARING ADVENTURE OR NOTHING AT ALL.",
+    "author": "HELEN KELLER",
+    "category": "Adventure"
+  },
+  {
+    "id": "medium_046",
+    "diff": "medium",
+    "phrase": "BE KIND WHENEVER POSSIBLE. IT IS ALWAYS POSSIBLE.",
+    "author": "DALAI LAMA",
+    "category": "Kindness"
+  },
+  {
+    "id": "medium_047",
+    "diff": "medium",
+    "phrase": "HAPPINESS CAN EXIST ONLY IN ACCEPTANCE.",
+    "author": "GEORGE ORWELL",
+    "category": "Philosophy"
+  },
+  {
+    "id": "medium_048",
+    "diff": "medium",
+    "phrase": "THE TANGLED ROOTS OF WORK GROW SWEET FRUIT.",
+    "author": "PROVERB",
+    "category": "Work"
+  },
+  {
+    "id": "medium_049",
+    "diff": "medium",
+    "phrase": "PLANT KINDNESS AND GATHER LOVE.",
+    "author": "PROVERB",
+    "category": "Kindness"
+  },
+  {
+    "id": "medium_050",
+    "diff": "medium",
+    "phrase": "A CLEAR CONSCIENCE LAUGHS AT FALSE ACCUSATIONS.",
+    "author": "PROVERB",
+    "category": "Wisdom"
+  },
+  {
+    "id": "medium_051",
+    "diff": "medium",
+    "phrase": "A FALL INTO A DITCH MAKES YOU WISER.",
+    "author": "PROVERB",
+    "category": "Learning"
+  },
+  {
+    "id": "medium_052",
+    "diff": "medium",
+    "phrase": "A GOOD BEGINNING MAKES A GOOD ENDING.",
+    "author": "PROVERB",
+    "category": "Proverb"
+  },
+  {
+    "id": "medium_053",
+    "diff": "medium",
+    "phrase": "ADVERSITY MAKES A MAN WISE, NOT RICH.",
+    "author": "PROVERB",
+    "category": "Wisdom"
+  },
+  {
+    "id": "medium_054",
+    "diff": "medium",
+    "phrase": "BETTER TO LIGHT A CANDLE THAN CURSE THE DARKNESS.",
+    "author": "ELEANOR ROOSEVELT",
+    "category": "Wisdom"
+  },
+  {
+    "id": "medium_055",
+    "diff": "medium",
+    "phrase": "BEWARE OF LITTLE EXPENSES; A SMALL LEAK WILL SINK A GREAT SHIP.",
+    "author": "BENJAMIN FRANKLIN",
+    "category": "Wisdom"
+  },
+  {
+    "id": "medium_056",
+    "diff": "medium",
+    "phrase": "CONSTANT DRIPPING WEARS AWAY THE STONE.",
+    "author": "PROVERB",
+    "category": "Perseverance"
+  },
+  {
+    "id": "medium_057",
+    "diff": "medium",
+    "phrase": "DISCRETION IS THE BETTER PART OF VALOR.",
+    "author": "WILLIAM SHAKESPEARE",
+    "category": "Literature"
+  },
+  {
+    "id": "medium_058",
+    "diff": "medium",
+    "phrase": "EVERY MAN IS THE ARCHITECT OF HIS OWN FORTUNE.",
+    "author": "SALLUST",
+    "category": "Wisdom"
+  },
+  {
+    "id": "medium_059",
+    "diff": "medium",
+    "phrase": "FORGIVE AND FORGET IS THE BEST COUNSEL.",
+    "author": "PROVERB",
+    "category": "Forgiveness"
+  },
+  {
+    "id": "medium_060",
+    "diff": "medium",
+    "phrase": "GIVING IS THE TRUE SECRET OF ABUNDANCE.",
+    "author": "PROVERB",
+    "category": "Generosity"
+  },
+  {
+    "id": "medium_061",
+    "diff": "medium",
+    "phrase": "HONOR LIES IN HONEST TOIL.",
+    "author": "GROVER CLEVELAND",
+    "category": "Work"
+  },
+  {
+    "id": "medium_062",
+    "diff": "medium",
+    "phrase": "IF YOU WANT PEACE, PREPARE FOR NOBLE EFFORT.",
+    "author": "PROVERB",
+    "category": "Peace"
+  },
+  {
+    "id": "medium_063",
+    "diff": "medium",
+    "phrase": "JUDGE A MAN BY HIS QUESTIONS RATHER THAN HIS ANSWERS.",
+    "author": "VOLTAIRE",
+    "category": "Wisdom"
+  },
+  {
+    "id": "medium_064",
+    "diff": "medium",
+    "phrase": "KEEP YOUR FACE ALWAYS TOWARD SUNSHINE AND SHADOWS FALL BEHIND.",
+    "author": "WALT WHITMAN",
+    "category": "Optimism"
+  },
+  {
+    "id": "medium_065",
+    "diff": "medium",
+    "phrase": "LAUGH AND THE WORLD LAUGHS WITH YOU.",
+    "author": "ELLA WHEELER WILCOX",
+    "category": "Joy"
+  },
+  {
+    "id": "medium_066",
+    "diff": "medium",
+    "phrase": "MANNERS MAKE THE MAN.",
+    "author": "PROVERB",
+    "category": "Etiquette"
+  },
+  {
+    "id": "medium_067",
+    "diff": "medium",
+    "phrase": "NEVER PUT OFF TILL TOMORROW WHAT YOU CAN DO TODAY.",
+    "author": "THOMAS JEFFERSON",
+    "category": "Action"
+  },
+  {
+    "id": "medium_068",
+    "diff": "medium",
+    "phrase": "ONE SWALLOW DOES NOT MAKE A SUMMER.",
+    "author": "ARISTOTLE",
+    "category": "Proverb"
+  },
+  {
+    "id": "medium_069",
+    "diff": "medium",
+    "phrase": "PATIENCE IS A BITTER PLANT, BUT IT HAS SWEET FRUIT.",
+    "author": "PROVERB",
+    "category": "Patience"
+  },
+  {
+    "id": "medium_070",
+    "diff": "medium",
+    "phrase": "QUIET MINDS CANNOT BE PERPLEXED OR FRIGHTENED.",
+    "author": "ROBERT LOUIS STEVENSON",
+    "category": "Peace"
+  },
+  {
+    "id": "medium_071",
+    "diff": "medium",
+    "phrase": "READING MAKETH A FULL MAN, CONFERENCE A READY MAN.",
+    "author": "FRANCIS BACON",
+    "category": "Learning"
+  },
+  {
+    "id": "medium_072",
+    "diff": "medium",
+    "phrase": "SMALL DEEDS DONE ARE BETTER THAN GREAT DEEDS PLANNED.",
+    "author": "PETER MARSHALL",
+    "category": "Action"
+  },
+  {
+    "id": "medium_073",
+    "diff": "medium",
+    "phrase": "THE ROOTS OF EDUCATION ARE BITTER, BUT THE FRUIT IS SWEET.",
+    "author": "ARISTOTLE",
+    "category": "Education"
+  },
+  {
+    "id": "medium_074",
+    "diff": "medium",
+    "phrase": "UNDERTAKE NOT WHAT YOU CANNOT PERFORM.",
+    "author": "GEORGE WASHINGTON",
+    "category": "Integrity"
+  },
+  {
+    "id": "medium_075",
+    "diff": "medium",
+    "phrase": "VIRTUE IS ITS OWN REWARD.",
+    "author": "CICERO",
+    "category": "Virtue"
+  },
+  {
+    "id": "medium_076",
+    "diff": "medium",
+    "phrase": "WISDOM IS THE DAUGHTER OF EXPERIENCE.",
+    "author": "LEONARDO DA VINCI",
+    "category": "Experience"
+  },
+  {
+    "id": "medium_077",
+    "diff": "medium",
+    "phrase": "YOUTH IS A BLUNDER, MANHOOD A STRUGGLE, OLD AGE A REGRET.",
+    "author": "BENJAMIN DISRAELI",
+    "category": "Life"
+  },
+  {
+    "id": "medium_078",
+    "diff": "medium",
+    "phrase": "ZEAL WITHOUT KNOWLEDGE IS FIRE WITHOUT LIGHT.",
+    "author": "PROVERB",
+    "category": "Knowledge"
+  },
+  {
+    "id": "medium_079",
+    "diff": "medium",
+    "phrase": "A BOOK IS A DREAM THAT YOU HOLD IN YOUR HAND.",
+    "author": "NEIL GAIMAN",
+    "category": "Reading"
+  },
+  {
+    "id": "medium_080",
+    "diff": "medium",
+    "phrase": "HE WHO CONQUERS HIMSELF IS THE MIGHTIEST WARRIOR.",
+    "author": "CONFUCIUS",
+    "category": "Self-Mastery"
+  },
+  {
+    "id": "medium_081",
+    "diff": "medium",
+    "phrase": "KIND WORDS CAN BE SHORT BUT THEIR ECHOES ARE ENDLESS.",
     "author": "MOTHER TERESA",
     "category": "Kindness"
   },
   {
-    "id": "medium_045",
+    "id": "medium_082",
+    "diff": "medium",
+    "phrase": "LIFE DOES NOT REQUIRE THAT WE BE THE BEST, ONLY THAT WE TRY.",
+    "author": "H. JACKSON BROWN JR.",
+    "category": "Effort"
+  },
+  {
+    "id": "medium_083",
+    "diff": "medium",
+    "phrase": "MEMORIES OF OUR LIVES ARE WRITTEN IN THE HEART.",
+    "author": "PROVERB",
+    "category": "Memories"
+  },
+  {
+    "id": "medium_084",
     "diff": "medium",
     "phrase": "NO ACT OF KINDNESS, NO MATTER HOW SMALL, IS EVER WASTED.",
     "author": "AESOP",
     "category": "Kindness"
   },
   {
-    "id": "medium_046",
+    "id": "medium_085",
     "diff": "medium",
-    "phrase": "DO GOOD AND FORGET IT; DO EVIL AND REMEMBER IT.",
+    "phrase": "ONE CHORD OF MUSIC CAN REAWAKEN A SLEEPING SPIRIT.",
     "author": "PROVERB",
-    "category": "Proverb"
+    "category": "Music"
   },
   {
-    "id": "medium_047",
+    "id": "medium_086",
     "diff": "medium",
-    "phrase": "JOY IS NOT IN THINGS; IT IS IN US.",
-    "author": "RICHARD WAGNER",
-    "category": "Philosophy"
+    "phrase": "PERSEVERANCE IS NOT A LONG RACE; IT IS MANY SHORT ONES.",
+    "author": "WALTER ELLIOT",
+    "category": "Perseverance"
   },
   {
-    "id": "medium_048",
+    "id": "medium_087",
     "diff": "medium",
-    "phrase": "THE SUN HIMSELF IS WEAK WHEN HE FIRST RISES, AND GATHERS STRENGTH AS THE DAY GETS ON.",
-    "author": "CHARLES DICKENS",
-    "category": "Literature"
+    "phrase": "QUIET REFLECTION CLEARS THE MUDDY WATERS OF THE MIND.",
+    "author": "PROVERB",
+    "category": "Reflection"
   },
   {
-    "id": "medium_049",
+    "id": "medium_088",
     "diff": "medium",
-    "phrase": "THE BEST WAY OUT IS ALWAYS THROUGH.",
-    "author": "ROBERT FROST",
-    "category": "Poetry"
+    "phrase": "REJOICE IN HOPE, BE PATIENT IN TRIBULATION.",
+    "author": "PROVERB",
+    "category": "Faith"
   },
   {
-    "id": "medium_050",
+    "id": "medium_089",
     "diff": "medium",
-    "phrase": "SUNSET IS STILL MY FAVORITE COLOR, AND RAINBOW IS SECOND.",
-    "author": "MATTIE STEPANEK",
-    "category": "Beauty"
+    "phrase": "SUNLIGHT IS THE BEST DISINFECTANT IN HUMAN AFFAIRS.",
+    "author": "LOUIS BRANDEIS",
+    "category": "Truth"
   },
-
+  {
+    "id": "medium_090",
+    "diff": "medium",
+    "phrase": "THE COMPASS OF CONSCIENCE ALWAYS POINTS TOWARD DUTY.",
+    "author": "PROVERB",
+    "category": "Duty"
+  },
+  {
+    "id": "medium_091",
+    "diff": "medium",
+    "phrase": "TRUTH WILL ULTIMATELY PREVAIL WHERE PAINS ARE TAKEN.",
+    "author": "GEORGE WASHINGTON",
+    "category": "Truth"
+  },
+  {
+    "id": "medium_092",
+    "diff": "medium",
+    "phrase": "UNITY GIVES STRENGTH TO THE FRAILEST CREATURES.",
+    "author": "PROVERB",
+    "category": "Unity"
+  },
+  {
+    "id": "medium_093",
+    "diff": "medium",
+    "phrase": "VICTORY BELONGS TO THE MOST PERSEVERING.",
+    "author": "NAPOLEON BONAPARTE",
+    "category": "Perseverance"
+  },
+  {
+    "id": "medium_094",
+    "diff": "medium",
+    "phrase": "WITHOUT COURAGE, WISDOM BEARS NO FRUIT.",
+    "author": "BALTASAR GRACIAN",
+    "category": "Courage"
+  },
+  {
+    "id": "medium_095",
+    "diff": "medium",
+    "phrase": "YOU WILL NEVER FIND A RAINBOW IF YOU ARE LOOKING DOWN.",
+    "author": "CHARLIE CHAPLIN",
+    "category": "Optimism"
+  },
+  {
+    "id": "medium_096",
+    "diff": "medium",
+    "phrase": "ADMIRATION IS THE DAUGHTER OF IGNORANCE.",
+    "author": "BENJAMIN FRANKLIN",
+    "category": "Wisdom"
+  },
+  {
+    "id": "medium_097",
+    "diff": "medium",
+    "phrase": "BRAVERY IS BEING THE ONLY ONE WHO KNOWS YOU ARE AFRAID.",
+    "author": "DAVID HACKWORTH",
+    "category": "Bravery"
+  },
+  {
+    "id": "medium_098",
+    "diff": "medium",
+    "phrase": "CALM SEAS NEVER MADE A SKILLED SAILOR.",
+    "author": "PROVERB",
+    "category": "Resilience"
+  },
+  {
+    "id": "medium_099",
+    "diff": "medium",
+    "phrase": "DELIBERATE WITH CAUTION, BUT ACT WITH PROMPT DECISION.",
+    "author": "PUBLILIUS SYRUS",
+    "category": "Decision"
+  },
+  {
+    "id": "medium_100",
+    "diff": "medium",
+    "phrase": "EXCELLENCE IS NOT AN ACT, BUT A HABIT.",
+    "author": "ARISTOTLE",
+    "category": "Excellence"
+  },
   {
     "id": "hard_001",
     "diff": "hard",
@@ -711,344 +1409,694 @@
   {
     "id": "hard_002",
     "diff": "hard",
-    "phrase": "A DAY WITHOUT SUNSHINE IS LIKE, YOU KNOW, NIGHT.",
-    "author": "STEVE MARTIN",
-    "category": "Humor"
+    "phrase": "THE FUTURE BELONGS TO THOSE WHO BELIEVE IN THE BEAUTY OF THEIR DREAMS.",
+    "author": "ELEANOR ROOSEVELT",
+    "category": "Inspiration"
   },
   {
     "id": "hard_003",
     "diff": "hard",
-    "phrase": "THE ROAD TO SUCCESS IS ALWAYS UNDER CONSTRUCTION.",
-    "author": "LILY TOMLIN",
-    "category": "Wit"
+    "phrase": "WHAT YOU GET BY ACHIEVING YOUR GOALS IS NOT AS IMPORTANT AS WHAT YOU BECOME.",
+    "author": "ZIG ZIGLAR",
+    "category": "Motivation"
   },
   {
     "id": "hard_004",
     "diff": "hard",
-    "phrase": "EXPERIENCE IS SIMPLY THE NAME WE GIVE OUR MISTAKES.",
-    "author": "OSCAR WILDE",
+    "phrase": "HAPPINESS IS NOT SOMETHING READY MADE. IT COMES FROM YOUR OWN ACTIONS.",
+    "author": "DALAI LAMA",
     "category": "Philosophy"
   },
   {
     "id": "hard_005",
     "diff": "hard",
-    "phrase": "ANYONE WHO HAS NEVER MADE A MISTAKE HAS NEVER TRIED ANYTHING NEW.",
-    "author": "ALBERT EINSTEIN",
-    "category": "Science"
+    "phrase": "DO NOT GO WHERE THE PATH MAY LEAD, GO INSTEAD WHERE THERE IS NO PATH.",
+    "author": "RALPH WALDO EMERSON",
+    "category": "Inspiration"
   },
   {
     "id": "hard_006",
+    "diff": "hard",
+    "phrase": "SUCCESS IS NOT FINAL, FAILURE IS NOT FATAL: IT IS THE COURAGE TO CONTINUE.",
+    "author": "WINSTON CHURCHILL",
+    "category": "Leadership"
+  },
+  {
+    "id": "hard_007",
+    "diff": "hard",
+    "phrase": "NEVER BEND YOUR HEAD. ALWAYS HOLD IT HIGH. LOOK THE WORLD IN THE EYE.",
+    "author": "HELEN KELLER",
+    "category": "Inspiration"
+  },
+  {
+    "id": "hard_008",
+    "diff": "hard",
+    "phrase": "SPREAD LOVE EVERYWHERE YOU GO. LET NO ONE EVER COME TO YOU WITHOUT LEAVING HAPPIER.",
+    "author": "MOTHER TERESA",
+    "category": "Kindness"
+  },
+  {
+    "id": "hard_009",
+    "diff": "hard",
+    "phrase": "THE SUN HIMSELF IS WEAK WHEN HE RISES, AND GATHERS STRENGTH AS DAY PROCEEDS.",
+    "author": "CHARLES DICKENS",
+    "category": "Literature"
+  },
+  {
+    "id": "hard_010",
     "diff": "hard",
     "phrase": "EDUCATION IS WHAT REMAINS AFTER ONE HAS FORGOTTEN WHAT ONE HAS LEARNED IN SCHOOL.",
     "author": "ALBERT EINSTEIN",
     "category": "Wisdom"
   },
   {
-    "id": "hard_007",
-    "diff": "hard",
-    "phrase": "I CAN RESIST EVERYTHING EXCEPT TEMPTATION.",
-    "author": "OSCAR WILDE",
-    "category": "Wit"
-  },
-  {
-    "id": "hard_008",
-    "diff": "hard",
-    "phrase": "ALWAYS FORGIVE YOUR ENEMIES; NOTHING ANNOYS THEM SO MUCH.",
-    "author": "OSCAR WILDE",
-    "category": "Wit"
-  },
-  {
-    "id": "hard_009",
-    "diff": "hard",
-    "phrase": "A CONSCIENCE IS WHAT HURTS WHEN ALL YOUR OTHER PARTS FEEL SO GOOD.",
-    "author": "STEVEN WRIGHT",
-    "category": "Humor"
-  },
-  {
-    "id": "hard_010",
-    "diff": "hard",
-    "phrase": "BE CURIOUS, NOT JUDGMENTAL.",
-    "author": "WALT WHITMAN",
-    "category": "Poetry"
-  },
-  {
     "id": "hard_011",
     "diff": "hard",
-    "phrase": "IF YOU TELL THE TRUTH, YOU DON'T HAVE TO REMEMBER ANYTHING.",
-    "author": "MARK TWAIN",
-    "category": "Wisdom"
+    "phrase": "TWO THINGS ARE INFINITE: THE UNIVERSE AND HUMAN STUPIDITY, AND I AM NOT CERTAIN OF THE FIRST.",
+    "author": "ALBERT EINSTEIN",
+    "category": "Humor"
   },
   {
     "id": "hard_012",
     "diff": "hard",
-    "phrase": "THE TROUBLE WITH HAVING AN OPEN MIND, OF COURSE, IS THAT PEOPLE WILL INSIST ON COMING ALONG AND TRYING TO PUT THINGS IN IT.",
-    "author": "TERRY PRATCHETT",
-    "category": "Humor"
+    "phrase": "TO BE YOURSELF IN A CONSTANT WORLD TRYING TO CHANGE YOU IS A TRUE TRIUMPH.",
+    "author": "RALPH WALDO EMERSON",
+    "category": "Individuality"
   },
   {
     "id": "hard_013",
     "diff": "hard",
-    "phrase": "THE ONLY TRUE WISDOM IS IN KNOWING YOU KNOW NOTHING.",
-    "author": "SOCRATES",
-    "category": "Philosophy"
+    "phrase": "THE TROUBLE WITH AN OPEN MIND IS THAT PEOPLE INSIST ON COMING TO PUT THINGS IN.",
+    "author": "TERRY PRATCHETT",
+    "category": "Humor"
   },
   {
     "id": "hard_014",
     "diff": "hard",
-    "phrase": "IT IS REMARKABLE HOW MUCH LONG-TERM ADVANTAGE PEOPLE HAVE GOTTEN BY TRYING TO BE CONSISTENTLY NOT STUPID, INSTEAD OF TRYING TO BE VERY INTELLIGENT.",
+    "phrase": "REMARKABLE ADVANTAGES COME FROM BEING CONSISTENTLY NOT STUPID RATHER THAN BRILLIANT.",
     "author": "CHARLIE MUNGER",
     "category": "Wisdom"
   },
   {
     "id": "hard_015",
     "diff": "hard",
-    "phrase": "DO NOT TAKE LIFE TOO SERIOUSLY. YOU WILL NEVER GET OUT OF IT ALIVE.",
-    "author": "ELBERT HUBBARD",
-    "category": "Humor"
+    "phrase": "MAN IS BORN FREE, AND EVERYWHERE HE IS BOUND TOGETHER IN INVISIBLE CHAINS.",
+    "author": "JEAN-JACQUES ROUSSEAU",
+    "category": "Philosophy"
   },
   {
     "id": "hard_016",
     "diff": "hard",
-    "phrase": "TO BE YOURSELF IN A WORLD THAT IS CONSTANTLY TRYING TO MAKE YOU SOMETHING ELSE IS THE GREATEST ACCOMPLISHMENT.",
-    "author": "RALPH WALDO EMERSON",
-    "category": "Individuality"
+    "phrase": "WHAT WE ACHIEVE INWARDLY WILL INVARIABLY CHANGE OUR SURROUNDING OUTER REALITY.",
+    "author": "PLUTARCH",
+    "category": "Philosophy"
   },
   {
     "id": "hard_017",
     "diff": "hard",
-    "phrase": "WE DON'T SEE THINGS AS THEY ARE, WE SEE THEM AS WE ARE.",
-    "author": "ANAIS NIN",
-    "category": "Perspective"
+    "phrase": "IT IS DURING OUR DARKEST MOMENTS THAT WE MUST FOCUS INTENTLY TO SEE THE LIGHT.",
+    "author": "ARISTOTLE",
+    "category": "Hope"
   },
   {
     "id": "hard_018",
     "diff": "hard",
-    "phrase": "TWO THINGS ARE INFINITE: THE UNIVERSE AND HUMAN STUPIDITY; AND I'M NOT SURE ABOUT THE UNIVERSE.",
-    "author": "ALBERT EINSTEIN",
-    "category": "Humor"
+    "phrase": "WE MUST ACCEPT FINITE DISAPPOINTMENT, BUT NEVER LOSE COMPLETE INFINITE HOPE.",
+    "author": "MARTIN LUTHER KING JR.",
+    "category": "Hope"
   },
   {
     "id": "hard_019",
     "diff": "hard",
-    "phrase": "A LIE GETS HALFWAY AROUND THE WORLD BEFORE THE TRUTH HAS A CHANCE TO GET ITS PANTS ON.",
-    "author": "WINSTON CHURCHILL",
-    "category": "Wit"
+    "phrase": "HE WHO FEARS BEING CONQUERED IS SURE OF DEFEAT BEFORE THE CONFLICT EVEN BEGINS.",
+    "author": "NAPOLEON BONAPARTE",
+    "category": "Courage"
   },
   {
     "id": "hard_020",
     "diff": "hard",
-    "phrase": "THE FOOL DOTH THINK HE IS WISE, BUT THE WISE MAN KNOWS HIMSELF TO BE A FOOL.",
-    "author": "WILLIAM SHAKESPEARE",
-    "category": "Literature"
+    "phrase": "A MAN WHO DARES TO WASTE ONE HOUR OF TIME HAS NOT DISCOVERED THE VALUE OF LIFE.",
+    "author": "CHARLES DARWIN",
+    "category": "Time"
   },
   {
     "id": "hard_021",
     "diff": "hard",
-    "phrase": "I HAVE NOT FAILED. I'VE JUST FOUND TEN THOUSAND WAYS THAT WON'T WORK.",
-    "author": "THOMAS EDISON",
-    "category": "Invention"
+    "phrase": "ALWAYS FORGIVE YOUR ENEMIES; ABSOLUTELY NOTHING ANNOYS THEM NEARLY SO MUCH.",
+    "author": "OSCAR WILDE",
+    "category": "Wit"
   },
   {
     "id": "hard_022",
     "diff": "hard",
-    "phrase": "WISDOM BEGINS IN WONDER.",
-    "author": "SOCRATES",
-    "category": "Philosophy"
+    "phrase": "SOME CAUSE HAPPINESS WHEREVER THEY GO; OTHERS WHENEVER THEY FINALLY DEPART.",
+    "author": "OSCAR WILDE",
+    "category": "Wit"
   },
   {
     "id": "hard_023",
     "diff": "hard",
-    "phrase": "EVERY MAN DIES. NOT EVERY MAN REALLY LIVES.",
-    "author": "WILLIAM WALLACE",
-    "category": "Courage"
+    "phrase": "THE TRUE MEASURE OF ANY INDIVIDUAL IS HOW HE TREATS SOMEONE WHO CANNOT HELP HIM.",
+    "author": "SAMUEL JOHNSON",
+    "category": "Character"
   },
   {
     "id": "hard_024",
     "diff": "hard",
-    "phrase": "HE WHO HAS A WHY TO LIVE CAN BEAR ALMOST ANY HOW.",
-    "author": "FRIEDRICH NIETZSCHE",
-    "category": "Philosophy"
+    "phrase": "ANY FOOL CAN KNOW. THE WHOLE POINT OF SCHOLARSHIP IS ACTUALLY TO UNDERSTAND.",
+    "author": "ALBERT EINSTEIN",
+    "category": "Learning"
   },
   {
     "id": "hard_025",
     "diff": "hard",
-    "phrase": "BE KIND, FOR EVERYONE YOU MEET IS FIGHTING A HARD BATTLE.",
-    "author": "PLATO",
-    "category": "Empathy"
+    "phrase": "GREAT SPIRITS HAVE ALWAYS ENCOUNTERED VIOLENT OPPOSITION FROM MEDIOCRE MINDS.",
+    "author": "ALBERT EINSTEIN",
+    "category": "Perseverance"
   },
   {
     "id": "hard_026",
     "diff": "hard",
-    "phrase": "THE UNEXAMINED LIFE IS NOT WORTH LIVING.",
-    "author": "SOCRATES",
-    "category": "Philosophy"
+    "phrase": "DO NOT DWELL IN THE PAST, DO NOT DREAM OF THE FUTURE, CONCENTRATE THE MIND ON NOW.",
+    "author": "BUDDHA",
+    "category": "Mindfulness"
   },
   {
     "id": "hard_027",
     "diff": "hard",
-    "phrase": "I THINK, THEREFORE I AM.",
-    "author": "RENE DESCARTES",
+    "phrase": "AN IDEA THAT IS NOT DANGEROUS IS UNWORTHY OF BEING CALLED AN IDEA AT ALL.",
+    "author": "OSCAR WILDE",
     "category": "Philosophy"
   },
   {
     "id": "hard_028",
     "diff": "hard",
-    "phrase": "TIME IS A CREATED THING. TO SAY 'I DON'T HAVE TIME' IS TO SAY 'I DON'T WANT TO.'",
-    "author": "LAO TZU",
-    "category": "Time"
+    "phrase": "A CLEVER PERSON SOLVES A PROBLEM. A TRULY WISE PERSON AVOIDS IT ENTIRELY.",
+    "author": "ALBERT EINSTEIN",
+    "category": "Wisdom"
   },
   {
     "id": "hard_029",
     "diff": "hard",
-    "phrase": "COURAGE IS GRACE UNDER PRESSURE.",
-    "author": "ERNEST HEMINGWAY",
-    "category": "Literature"
+    "phrase": "WE CAN EASILY FORGIVE A CHILD WHO IS AFRAID OF THE DARK; TRAGEDY IS WHEN MEN FEAR LIGHT.",
+    "author": "PLATO",
+    "category": "Philosophy"
   },
   {
     "id": "hard_030",
     "diff": "hard",
-    "phrase": "LIFE IS REALLY SIMPLE, BUT WE INSIST ON MAKING IT COMPLICATED.",
-    "author": "CONFUCIUS",
-    "category": "Simplicity"
+    "phrase": "COURAGE DOES NOT ALWAYS ROAR. SOMETIMES COURAGE IS QUIET RESOLUTION AT DUSK.",
+    "author": "MARY ANNE RADMACHER",
+    "category": "Courage"
   },
   {
     "id": "hard_031",
     "diff": "hard",
-    "phrase": "THE MAN WHO MOVES A MOUNTAIN BEGINS BY CARRYING AWAY SMALL STONES.",
-    "author": "CONFUCIUS",
+    "phrase": "THERE ARE ONLY TWO MISTAKES ONE CAN MAKE: NOT GOING ALL THE WAY, AND NOT STARTING.",
+    "author": "BUDDHA",
     "category": "Wisdom"
   },
   {
     "id": "hard_032",
     "diff": "hard",
-    "phrase": "WHATEVER IS BEGUN IN ANGER ENDS IN SHAME.",
-    "author": "BENJAMIN FRANKLIN",
-    "category": "Temperament"
+    "phrase": "BEING ENTIRELY HONEST WITH ONESELF IS AMONG THE MOST RIGOROUS PURSUITS OF LIFE.",
+    "author": "SIGMUND FREUD",
+    "category": "Honesty"
   },
   {
     "id": "hard_033",
     "diff": "hard",
-    "phrase": "WELL DONE IS BETTER THAN WELL SAID.",
-    "author": "BENJAMIN FRANKLIN",
-    "category": "Action"
+    "phrase": "THE ONLY LIMIT TO OUR REALIZATION OF TOMORROW WILL BE OUR SKEPTICAL DOUBTS OF TODAY.",
+    "author": "FRANKLIN D. ROOSEVELT",
+    "category": "Vision"
   },
   {
     "id": "hard_034",
     "diff": "hard",
-    "phrase": "AN UNEXAMINED LIFE IS LIKE A PUZZLE WAITING FOR ITS MISSING CORNER PIECE.",
-    "author": "ANONYMOUS",
-    "category": "Puzzles"
+    "phrase": "CRITICISM CAN EASILY BE AVOIDED BY SAYING NOTHING, DOING NOTHING, AND BEING NOTHING AT ALL.",
+    "author": "ARISTOTLE",
+    "category": "Courage"
   },
   {
     "id": "hard_035",
     "diff": "hard",
-    "phrase": "A ROOM WITHOUT BOOKS IS LIKE A BODY WITHOUT A SOUL.",
-    "author": "CICERO",
-    "category": "Books"
+    "phrase": "KNOWLEDGE SPEAKS PERSISTENTLY, BUT GENUINE WISDOM LISTENS ATTENTIVELY IN SILENCE.",
+    "author": "JIMI HENDRIX",
+    "category": "Wisdom"
   },
   {
     "id": "hard_036",
     "diff": "hard",
-    "phrase": "DOUBT IS THE ORIGIN OF WISDOM.",
-    "author": "RENE DESCARTES",
-    "category": "Philosophy"
+    "phrase": "THE FOOL DOTH THINK HE IS WISE, BUT THE WISE MAN KNOWETH HIMSELF TO BE A FOOL.",
+    "author": "WILLIAM SHAKESPEARE",
+    "category": "Literature"
   },
   {
     "id": "hard_037",
     "diff": "hard",
-    "phrase": "INJUSTICE ANYWHERE IS A THREAT TO JUSTICE EVERYWHERE.",
-    "author": "MARTIN LUTHER KING JR.",
-    "category": "Justice"
+    "phrase": "THOSE WHO CANNOT REMEMBER THE MISTAKES OF THE PAST ARE CONDEMNED TO REPEAT THEM.",
+    "author": "GEORGE SANTAYANA",
+    "category": "History"
   },
   {
     "id": "hard_038",
     "diff": "hard",
-    "phrase": "DARKNESS CANNOT DRIVE OUT DARKNESS; ONLY LIGHT CAN DO THAT.",
-    "author": "MARTIN LUTHER KING JR.",
-    "category": "Hope"
+    "phrase": "A POPULAR LIE TRAVELS HALFWAY AROUND THE WORLD WHILE THE TRUTH IS PUTTING ON SHOES.",
+    "author": "MARK TWAIN",
+    "category": "Truth"
   },
   {
     "id": "hard_039",
     "diff": "hard",
-    "phrase": "THE PURPOSE OF OUR LIVES IS TO BE HAPPY.",
-    "author": "DALAI LAMA",
-    "category": "Happiness"
-  },
-  {
-    "id": "hard_040",
-    "diff": "hard",
-    "phrase": "DO NOT GO GENTLE INTO THAT GOOD NIGHT. RAGE, RAGE AGAINST THE DYING OF THE LIGHT.",
+    "phrase": "DO NOT GO GENTLE INTO THAT GOOD NIGHT; RAGE, RAGE AGAINST THE DYING OF THE LIGHT.",
     "author": "DYLAN THOMAS",
     "category": "Poetry"
   },
   {
+    "id": "hard_040",
+    "diff": "hard",
+    "phrase": "WHEN WE ARE TIRED, WE ARE ATTACKED BY IDEAS WE THOUGHT WE HAD LONG AGO CONQUERED.",
+    "author": "FRIEDRICH NIETZSCHE",
+    "category": "Philosophy"
+  },
+  {
     "id": "hard_041",
     "diff": "hard",
-    "phrase": "NOT ALL THOSE WHO WANDER ARE LOST.",
-    "author": "J. R. R. TOLKIEN",
-    "category": "Literature"
+    "phrase": "WHATEVER YOU DO IN LIFE WILL BE INSIGNIFICANT, BUT IT IS VERY IMPORTANT THAT YOU DO IT.",
+    "author": "MAHATMA GANDHI",
+    "category": "Purpose"
   },
   {
     "id": "hard_042",
     "diff": "hard",
-    "phrase": "THERE IS NO GREATER AGONY THAN BEARING AN UNTOLD STORY INSIDE YOU.",
-    "author": "MAYA ANGELOU",
-    "category": "Writing"
+    "phrase": "A ROOM WITHOUT BOOKS IS TRULY LIKE A HUMAN BODY WITHOUT AN INSPIRING LIVING SOUL.",
+    "author": "CICERO",
+    "category": "Books"
   },
   {
     "id": "hard_043",
     "diff": "hard",
-    "phrase": "THE MIND IS EVERYTHING. WHAT YOU THINK YOU BECOME.",
-    "author": "BUDDHA",
-    "category": "Mindfulness"
+    "phrase": "WE MAKE A LIVING BY WHAT WE OBTAIN, BUT WE MAKE A LIFE BY WHAT WE WILLINGLY GIVE.",
+    "author": "WINSTON CHURCHILL",
+    "category": "Generosity"
   },
   {
     "id": "hard_044",
     "diff": "hard",
-    "phrase": "EVEN THE DARKEST NIGHT WILL END AND THE SUN WILL RISE.",
-    "author": "VICTOR HUGO",
-    "category": "Literature"
+    "phrase": "I WOULD RATHER DIE ON MY FEET THAN LIVE FOREVER KNEELING UPON COWARDLY KNEES.",
+    "author": "EMILIANO ZAPATA",
+    "category": "Courage"
   },
   {
     "id": "hard_045",
     "diff": "hard",
-    "phrase": "WE ACCEPT THE LOVE WE THINK WE DESERVE.",
-    "author": "STEPHEN CHBOSKY",
-    "category": "Love"
+    "phrase": "IF YOU WANT TO SHINE LIKE A BRILLIANT SUN, FIRST BURN FEROCIOUSLY LIKE ONE.",
+    "author": "A. P. J. ABDUL KALAM",
+    "category": "Inspiration"
   },
   {
     "id": "hard_046",
     "diff": "hard",
-    "phrase": "LIFE CAN ONLY BE UNDERSTOOD BACKWARDS; BUT IT MUST BE LIVED FORWARDS.",
-    "author": "SOREN KIERKEGAARD",
-    "category": "Philosophy"
+    "phrase": "THE GREATEST GLORY IN LIVING LIES NOT IN NEVER FALLING, BUT IN RISING EVERY TIME WE FALL.",
+    "author": "NELSON MANDELA",
+    "category": "Resilience"
   },
   {
     "id": "hard_047",
     "diff": "hard",
-    "phrase": "IF YOU DON'T STAND FOR SOMETHING, YOU WILL FALL FOR ANYTHING.",
-    "author": "GORDON A. EADIE",
-    "category": "Integrity"
+    "phrase": "SCIENCE WITHOUT RELIGION IS LAME, RELIGION WITHOUT RIGOROUS SCIENCE IS TOTALLY BLIND.",
+    "author": "ALBERT EINSTEIN",
+    "category": "Science"
   },
   {
     "id": "hard_048",
     "diff": "hard",
-    "phrase": "IT IS NEVER TOO LATE TO BE WHAT YOU MIGHT HAVE BEEN.",
-    "author": "GEORGE ELIOT",
-    "category": "Literature"
+    "phrase": "BETTER TO REMAIN SILENT AND BE THOUGHT A FOOL THAN TO SPEAK AND REMOVE ALL DOUBT.",
+    "author": "MAURICE SWITZER",
+    "category": "Wit"
   },
   {
     "id": "hard_049",
     "diff": "hard",
-    "phrase": "NOBODY CAN HURT ME WITHOUT MY PERMISSION.",
-    "author": "MAHATMA GANDHI",
-    "category": "Strength"
+    "phrase": "A BIRD SINGS NOT BECAUSE IT HAS AN EXPLANATION, IT SINGS BECAUSE IT HAS A JOYFUL SONG.",
+    "author": "CHINESE PROVERB",
+    "category": "Joy"
   },
   {
     "id": "hard_050",
     "diff": "hard",
-    "phrase": "TO KNOW THYSELF IS THE BEGINNING OF WISDOM.",
-    "author": "SOCRATES",
+    "phrase": "BEING DEEPLY LOVED GIVES YOU STRENGTH, WHILE LOVING SOMEONE DEEPLY GIVES YOU COURAGE.",
+    "author": "LAO TZU",
+    "category": "Love"
+  },
+  {
+    "id": "hard_051",
+    "diff": "hard",
+    "phrase": "CONVICTIONS ARE MORE DANGEROUS FOES OF FACTUAL TRUTH THAN DELIBERATE CALCULATION.",
+    "author": "FRIEDRICH NIETZSCHE",
+    "category": "Truth"
+  },
+  {
+    "id": "hard_052",
+    "diff": "hard",
+    "phrase": "HE WHO LAUGHS AT HIMSELF NEVER RUNS OUT OF CHARMING THINGS TO BE THOROUGHLY AMUSED BY.",
+    "author": "EPICURUS",
+    "category": "Humor"
+  },
+  {
+    "id": "hard_053",
+    "diff": "hard",
+    "phrase": "IF YOU WISH TO REACH THE HIGHEST PEAKS, BEGIN BY CONQUERING THE LOWEST VALLEYS.",
+    "author": "PUBLILIUS SYRUS",
+    "category": "Ambition"
+  },
+  {
+    "id": "hard_054",
+    "diff": "hard",
+    "phrase": "MAN CONQUERS THE UNIVERSE WITH BOLD STEPS BUT REMAINS TOTALLY UNFAMILIAR WITH HIMSELF.",
+    "author": "PROVERB",
+    "category": "Philosophy"
+  },
+  {
+    "id": "hard_055",
+    "diff": "hard",
+    "phrase": "THE SHORTEST DISTANCE BETWEEN TWO POINTS ON EARTH IS OFTEN AN ENTIRELY NEW PERSPECTIVE.",
+    "author": "PROVERB",
+    "category": "Perspective"
+  },
+  {
+    "id": "hard_056",
+    "diff": "hard",
+    "phrase": "TO AVOID MISTAKES, GAIN EXPERIENCE; TO GAIN EXPERIENCE, MAKE A MULTITUDE OF MISTAKES.",
+    "author": "PROVERB",
+    "category": "Experience"
+  },
+  {
+    "id": "hard_057",
+    "diff": "hard",
+    "phrase": "WHEN THE WINDS OF ADVERSITY BLOW, SOME BUILD DEFENSIVE WALLS WHILE OTHERS ERECT WINDMILLS.",
+    "author": "PROVERB",
     "category": "Wisdom"
+  },
+  {
+    "id": "hard_058",
+    "diff": "hard",
+    "phrase": "YOU CANNOT DISCOVER NEW OCEANS UNLESS YOU POSSESS COURAGE TO LOSE SIGHT OF THE SHORE.",
+    "author": "ANDRE GIDE",
+    "category": "Exploration"
+  },
+  {
+    "id": "hard_059",
+    "diff": "hard",
+    "phrase": "ZEAL WITHOUT PRUDENCE IS LIKE A RUNAWAY STEED WITHOUT BRIDLE OR STEADY REINS.",
+    "author": "PROVERB",
+    "category": "Prudence"
+  },
+  {
+    "id": "hard_060",
+    "diff": "hard",
+    "phrase": "A COMPROMISE IS DIVIDING A CAKE SO EVERYONE BELIEVES HE GOT THE BIGGEST PIECE.",
+    "author": "LUDWIG ERHARD",
+    "category": "Wit"
+  },
+  {
+    "id": "hard_061",
+    "diff": "hard",
+    "phrase": "FEAR DEFEATS MORE DREAMS THAN OUTRIGHT FAILURE COULD EVER HOPE TO ACCOMPLISH IN LIFE.",
+    "author": "SUZY KASSEM",
+    "category": "Fear"
+  },
+  {
+    "id": "hard_062",
+    "diff": "hard",
+    "phrase": "GRATITUDE IS NOT ONLY THE GREATEST OF VIRTUES, BUT THE PROLIFIC PARENT OF ALL OTHERS.",
+    "author": "CICERO",
+    "category": "Gratitude"
+  },
+  {
+    "id": "hard_063",
+    "diff": "hard",
+    "phrase": "HONESTY OFTEN PROVOKES HOSTILITY AMONG THOSE WHOSE PREJUDICES FLOURISH IN DECEIT.",
+    "author": "PROVERB",
+    "category": "Honesty"
+  },
+  {
+    "id": "hard_064",
+    "diff": "hard",
+    "phrase": "INJUSTICE ANYWHERE IS A PROFOUND THREAT TO UNCHECKED JUSTICE EVERYWHERE ACROSS EARTH.",
+    "author": "MARTIN LUTHER KING JR.",
+    "category": "Justice"
+  },
+  {
+    "id": "hard_065",
+    "diff": "hard",
+    "phrase": "JUDGMENT COMES FROM EXPERIENCE, AND EXPERIENCE SO FREQUENTLY SPRINGS FROM POOR JUDGMENT.",
+    "author": "MARK TWAIN",
+    "category": "Judgment"
+  },
+  {
+    "id": "hard_066",
+    "diff": "hard",
+    "phrase": "KNOWLEDGE IS ACQUIRED BY DILIGENT STUDY, BUT WISDOM IS CULTIVATED THROUGH DEEP REVERENCE.",
+    "author": "PROVERB",
+    "category": "Knowledge"
+  },
+  {
+    "id": "hard_067",
+    "diff": "hard",
+    "phrase": "LIBERTY CONSISTS IN THE FREEDOM TO DO EVERYTHING WHICH INJURES NO OTHER LIVING CITIZEN.",
+    "author": "FRENCH DECLARATION",
+    "category": "Liberty"
+  },
+  {
+    "id": "hard_068",
+    "diff": "hard",
+    "phrase": "MODERATION IN ALL PURSUITS IS THE SAFEST GUARDIAN OF LONG-TERM HUMAN CONTENTMENT.",
+    "author": "PROVERB",
+    "category": "Moderation"
+  },
+  {
+    "id": "hard_069",
+    "diff": "hard",
+    "phrase": "NO LEGACY IS SO RICH AS INTEGRITY SPREAD ABROAD ACROSS COMMODIOUS GENERATIONS.",
+    "author": "WILLIAM SHAKESPEARE",
+    "category": "Integrity"
+  },
+  {
+    "id": "hard_070",
+    "diff": "hard",
+    "phrase": "OPPORTUNITY OFTEN COMES DISGUISED AS HARD LABOR, WHICH IS WHY SO FEW RECOGNIZE IT.",
+    "author": "ANN LANDERS",
+    "category": "Opportunity"
+  },
+  {
+    "id": "hard_071",
+    "diff": "hard",
+    "phrase": "PATIENCE WITH FAMILY IS KIND LOVE, PATIENCE WITH ALL OTHERS IS REQUISITE RESPECT.",
+    "author": "PROVERB",
+    "category": "Patience"
+  },
+  {
+    "id": "hard_072",
+    "diff": "hard",
+    "phrase": "QUIET CONVERSATIONS WITH ONE'S SOUL YIELD THE RICHEST FRUITS OF SOUND UNDERSTANDING.",
+    "author": "PROVERB",
+    "category": "Solitude"
+  },
+  {
+    "id": "hard_073",
+    "diff": "hard",
+    "phrase": "REPUTATION IS WHAT MEN THINK YOU ARE; CONSCIENCE IS WHAT GOD AND ANGELS KNOW YOU BE.",
+    "author": "THOMAS PAINE",
+    "category": "Reputation"
+  },
+  {
+    "id": "hard_074",
+    "diff": "hard",
+    "phrase": "SINCERITY AND ENTHUSIASM CAN CONQUER MOUNTAINS WHERE MERE BRILLIANCE OFTEN STUMBLES.",
+    "author": "PROVERB",
+    "category": "Sincerity"
+  },
+  {
+    "id": "hard_075",
+    "diff": "hard",
+    "phrase": "THE ART OF BEING WISE IS THE ART OF KNOWING EXACTLY WHAT TO OVERLOOK IN CONTROVERSY.",
+    "author": "WILLIAM JAMES",
+    "category": "Wisdom"
+  },
+  {
+    "id": "hard_076",
+    "diff": "hard",
+    "phrase": "UNSELFISH DEVOTION TO COMMON WELL-BEING IS THE HIGHEST CROWN OF MORAL EXCELLENCE.",
+    "author": "PROVERB",
+    "category": "Virtue"
+  },
+  {
+    "id": "hard_077",
+    "diff": "hard",
+    "phrase": "VICTORY GAINED BY COERCION IS AKIN TO DEFEAT, FOR IT LACKS THE GENUINE CONSENT OF HEARTS.",
+    "author": "PROVERB",
+    "category": "Victory"
+  },
+  {
+    "id": "hard_078",
+    "diff": "hard",
+    "phrase": "WISDOM EXCEEDS WEALTH AS THE SUN'S GLOWING MAJESTY OUTSHINES THE FAINTEST FLICKERING CANDLE.",
+    "author": "PROVERB",
+    "category": "Wisdom"
+  },
+  {
+    "id": "hard_079",
+    "diff": "hard",
+    "phrase": "YOUTH MAY BE BLIND TO THE FUTURE, BUT AGE OFTEN TURNS BLIND EYES UPON THE LIVING PRESENT.",
+    "author": "PROVERB",
+    "category": "Age"
+  },
+  {
+    "id": "hard_080",
+    "diff": "hard",
+    "phrase": "A CRITIC IS A LEGLESS TRAVELER WHO INSTRUCTS SWIFT RUNNERS HOW BEST TO SPRINT FORWARD.",
+    "author": "CHANNING POLLOCK",
+    "category": "Wit"
+  },
+  {
+    "id": "hard_081",
+    "diff": "hard",
+    "phrase": "BEWARE OF FALSE KNOWLEDGE; IT IS IMMENSELY MORE DANGEROUS TO REASON THAN OUTRIGHT IGNORANCE.",
+    "author": "GEORGE BERNARD SHAW",
+    "category": "Knowledge"
+  },
+  {
+    "id": "hard_082",
+    "diff": "hard",
+    "phrase": "CHARACTER IS LIKE A SOLID TREE AND REPUTATION LIKE ITS SHADOW CAST BENEATH THE MIDDAY SUN.",
+    "author": "ABRAHAM LINCOLN",
+    "category": "Character"
+  },
+  {
+    "id": "hard_083",
+    "diff": "hard",
+    "phrase": "DIGNITY DOES NOT CONSIST IN POSSESSING HIGH HONORS, BUT IN TRULY CONSCIOUS MERIT OF THEM.",
+    "author": "ARISTOTLE",
+    "category": "Dignity"
+  },
+  {
+    "id": "hard_084",
+    "diff": "hard",
+    "phrase": "ENVY EATS NOTHING EXCEPT ITS OWN FRAIL HEART, CORRODING THE VESSEL IN WHICH IT IS STORED.",
+    "author": "PROVERB",
+    "category": "Envy"
+  },
+  {
+    "id": "hard_085",
+    "diff": "hard",
+    "phrase": "FRIENDSHIP IS A SINGLE ENERGETIC SOUL DWELLING HARMONIOUSLY WITHIN TWO SEPARATE BODIES.",
+    "author": "ARISTOTLE",
+    "category": "Friendship"
+  },
+  {
+    "id": "hard_086",
+    "diff": "hard",
+    "phrase": "GENIUS IS ONE PERCENT INVENTIVE INSPIRATION AND NINETY-NINE PERCENT RIGOROUS PERSPIRATION.",
+    "author": "THOMAS EDISON",
+    "category": "Genius"
+  },
+  {
+    "id": "hard_087",
+    "diff": "hard",
+    "phrase": "HE WHO CANNOT BE A GOOD FOLLOWER CANNOT BE A TRULY INSPIRING COMMANDER OR LEADER.",
+    "author": "ARISTOTLE",
+    "category": "Leadership"
+  },
+  {
+    "id": "hard_088",
+    "diff": "hard",
+    "phrase": "IMAGINATION IS MORE IMPORTANT THAN DRY KNOWLEDGE, FOR KNOWLEDGE IS STRICTLY LIMITED.",
+    "author": "ALBERT EINSTEIN",
+    "category": "Imagination"
+  },
+  {
+    "id": "hard_089",
+    "diff": "hard",
+    "phrase": "JUSTICE WILL NOT BE SERVED UNTIL THOSE WHO ARE UNAFFECTED ARE AS OUTRAGED AS THE AFFLICTED.",
+    "author": "BENJAMIN FRANKLIN",
+    "category": "Justice"
+  },
+  {
+    "id": "hard_090",
+    "diff": "hard",
+    "phrase": "KINDNESS IS A CURRENCY WHICH THE DEAF CAN HEAR CLEARLY AND THE BLIND CAN PLAINLY BEHOLD.",
+    "author": "MARK TWAIN",
+    "category": "Kindness"
+  },
+  {
+    "id": "hard_091",
+    "diff": "hard",
+    "phrase": "LOVING SACRIFICE IS THE HIGHEST TESTAMENT OF DEVOTION KNOWN THROUGHOUT RECORDED HISTORY.",
+    "author": "PROVERB",
+    "category": "Sacrifice"
+  },
+  {
+    "id": "hard_092",
+    "diff": "hard",
+    "phrase": "MAGNIFICENT RESULTS ARE NEVER PRODUCED EXCEPT BY COMMITTING EXTENSIVE PATIENT INDUSTRY.",
+    "author": "PROVERB",
+    "category": "Industry"
+  },
+  {
+    "id": "hard_093",
+    "diff": "hard",
+    "phrase": "NOTHING IN LIFE IS TO BE FEARED; IT IS ONLY TO BE PATIENTLY AND THOROUGHLY UNDERSTOOD.",
+    "author": "MARIE CURIE",
+    "category": "Courage"
+  },
+  {
+    "id": "hard_094",
+    "diff": "hard",
+    "phrase": "OBSTACLES ARE THOSE FRIGHTFUL THINGS YOU SEE WHEN YOU TAKE YOUR FOCUSED EYES OFF THE GOAL.",
+    "author": "HENRY FORD",
+    "category": "Focus"
+  },
+  {
+    "id": "hard_095",
+    "diff": "hard",
+    "phrase": "PRIDE GOETH BEFORE DESTRUCTION, AND A HAUGHTY SPIRIT SWELLS BEFORE A DISASTROUS FALL.",
+    "author": "PROVERB",
+    "category": "Humility"
+  },
+  {
+    "id": "hard_096",
+    "diff": "hard",
+    "phrase": "QUARRELS WOULD NOT LAST SO LONG IF SILLY FAULT WERE ONLY UPON ONE DISPUTING PARTY.",
+    "author": "FRANCOIS DE LA ROCHEFOUCAULD",
+    "category": "Peace"
+  },
+  {
+    "id": "hard_097",
+    "diff": "hard",
+    "phrase": "REAL INTEGRITY IS DOING THE RIGHT THING EVEN WHEN KNOWING THAT NOBODY IS WATCHING YOU.",
+    "author": "C. S. LEWIS",
+    "category": "Integrity"
+  },
+  {
+    "id": "hard_098",
+    "diff": "hard",
+    "phrase": "SOMETIMES THE QUESTIONS ARE COMPLICATED AND THE GENUINE ANSWERS ARE BEAUTIFULLY SIMPLE.",
+    "author": "DR. SEUSS",
+    "category": "Simplicity"
+  },
+  {
+    "id": "hard_099",
+    "diff": "hard",
+    "phrase": "THE ONLY COMPREHENSIVE MISTAKE IN LIFE IS THE ONE FROM WHICH WE DERIVE ZERO WISDOM.",
+    "author": "HENRY FORD",
+    "category": "Learning"
+  },
+  {
+    "id": "hard_100",
+    "diff": "hard",
+    "phrase": "UNJUST CONDEMNATION REBOUNDS WITH DOUBLE WEIGHT UPON THE HEAD OF THE WRONGFUL ACCUSER.",
+    "author": "PROVERB",
+    "category": "Justice"
   }
 ]

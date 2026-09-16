@@ -49,6 +49,10 @@
 #include "../esp32-firmware/src/generators/KillerGen.h"
 #include "../esp32-firmware/src/generators/KillerGen.cpp"
 
+#include "../esp32-firmware/src/generators/CryptogramDataset.h"
+#include "../esp32-firmware/src/generators/CryptogramGen.h"
+#include "../esp32-firmware/src/generators/CryptogramGen.cpp"
+
 #include <iostream>
 #include <iomanip>
 #include <sstream>
@@ -494,6 +498,26 @@ int main(int argc, char** argv) {
             std::cout << "]}";
         }
         std::cout << "\n    ],\n";
+        std::cout << "    \"raster_hex\": \"" << toHex(printer->lastBitmap) << "\"\n";
+        std::cout << "  }";
+    }
+
+    // 12. CRYPTOGRAM
+    {
+        CryptogramGen cGen;
+        cGen.generateWithQuote("ACTIONS SPEAK LOUDER THAN WORDS.", "PROVERB", CRYPTO_EASY, 42);
+        printer->lastBitmap.clear();
+        cGen.printRasterToReceipt(*printer);
+
+        printSep();
+        std::cout << "  {\n";
+        std::cout << "    \"puzzle\": \"cryptogram\",\n";
+        std::cout << "    \"difficulty\": \"easy\",\n";
+        std::cout << "    \"width\": " << printer->lastWidth << ",\n";
+        std::cout << "    \"height\": " << printer->lastHeight << ",\n";
+        std::cout << "    \"phrase\": \"" << cGen.getPhrase() << "\",\n";
+        std::cout << "    \"author\": \"" << cGen.getAuthor() << "\",\n";
+        std::cout << "    \"ciphertext\": \"" << cGen.getCiphertext() << "\",\n";
         std::cout << "    \"raster_hex\": \"" << toHex(printer->lastBitmap) << "\"\n";
         std::cout << "  }";
     }
