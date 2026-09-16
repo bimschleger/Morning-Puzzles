@@ -128,20 +128,25 @@ bool EscPosPrinter::isPrinterOnline(uint32_t timeoutMs) {
         return (_serial != nullptr);
     }
 #if (ACTIVE_PRINTER_MODE == PRINTER_MODE_W5500_ETH)
+    static unsigned long lastSuccessMs = 0;
+    static bool wasOnline = false;
+    unsigned long now = millis();
+
     if (_ethClient.connected()) {
+        wasOnline = true;
+        lastSuccessMs = now;
         return true;
     }
     // Fast physical PHY link check (zero-latency SPI read, ~50 microseconds)
     // When the direct-cabled printer is powered OFF, the link drops immediately!
     if (Ethernet.linkStatus() == LinkOFF) {
+        wasOnline = false;
+        lastSuccessMs = 0;
         return false;
     }
 
     // Cache a recent successful probe for up to 1000ms so we do not flood the printer's
     // embedded TCP stack with 5 new TCP connections per second during idle loop polling.
-    static unsigned long lastSuccessMs = 0;
-    static bool wasOnline = false;
-    unsigned long now = millis();
     if (wasOnline && (now - lastSuccessMs < 1000)) {
         return true;
     }

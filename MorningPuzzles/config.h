@@ -89,6 +89,8 @@
 #define AUTO_PRINT_ON_PRINTER_POWER    true    // Print automatically when printer switch is turned ON
 #define PRINTER_POLL_INTERVAL_MS       200     // Background probe interval to sense power-on & rapid toggles
 #define PRINTER_READY_SETTLE_MS        2000    // Settle time for thermal head homing and motor boot
+#define PRINTER_OFFLINE_DEBOUNCE_MS    3000    // Continuous offline time required before confirming power-off
+#define PRINTER_POST_PRINT_COOLDOWN_MS 15000   // Refractory cooldown after print job before new auto-prints
 
 // Serial Fallback Settings (UART2)
 #define PRINTER_SERIAL_BAUD     115200

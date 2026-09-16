@@ -28,6 +28,10 @@ bool          g_setupModeTriggeredAtBoot = false;
 bool          g_bootAutoPrintPending = false;
 unsigned long g_bootTimeMs = 0;
 
+// Coordinated print state & refractory cooldown across all triggers
+unsigned long g_lastPrintCompletedMs = 0;
+bool          g_autoPrintSatisfiedThisCycle = false;
+
 // Button timing state
 bool          lastBtnState = HIGH;
 unsigned long btnPressStartMs = 0;
@@ -64,6 +68,11 @@ void executePrintJob(PuzzleGrade grade = (PuzzleGrade)-1) {
     );
 
     digitalWrite(STATUS_LED_PIN, LOW);
+
+    // Mark print job completed: record cooldown and satisfy auto-print cycle
+    g_lastPrintCompletedMs = millis();
+    g_autoPrintSatisfiedThisCycle = true;
+    g_bootAutoPrintPending = false;
 
     if (success) {
         Serial.println("[MAIN] Print job completed successfully!\n");
@@ -292,7 +301,7 @@ void checkPrinterPowerTransition() {
     static bool lastPrinterOnline = false;
     static bool initializedState = false;
     static unsigned long steadyOnStartMs = 0;
-    static bool printJobFiredForThisPowerCycle = false;
+    static unsigned long steadyOffStartMs = 0;
 
     unsigned long now = millis();
     if (now - lastPollMs < PRINTER_POLL_INTERVAL_MS) {
@@ -307,7 +316,12 @@ void checkPrinterPowerTransition() {
         initializedState = true;
         if (isOnline) {
             steadyOnStartMs = now;
-            printJobFiredForThisPowerCycle = true; // Handled by boot dwell if AUTO_PRINT_ON_BOOT
+            // If already online at boot, mark satisfied if AUTO_PRINT_ON_BOOT will handle or has handled it
+            #if AUTO_PRINT_ON_BOOT
+            g_autoPrintSatisfiedThisCycle = true;
+            #endif
+        } else {
+            steadyOffStartMs = now;
         }
         return;
     }
@@ -315,22 +329,39 @@ void checkPrinterPowerTransition() {
     // 1. Detected transition from OFF -> ON!
     if (isOnline && !lastPrinterOnline) {
         steadyOnStartMs = now;
-        printJobFiredForThisPowerCycle = false;
+        steadyOffStartMs = 0;
         Serial.println("\n[PRINTER] Printer power ON detected! Waiting for printer mechanism to settle...");
     }
-    // 2. Detected transition from ON -> OFF!
+    // 2. Detected transition from ON -> OFF with debouncing!
     else if (!isOnline && lastPrinterOnline) {
-        Serial.println("[PRINTER] Printer powered OFF.");
-        steadyOnStartMs = 0;
-        printJobFiredForThisPowerCycle = false;
+        if (steadyOffStartMs == 0) {
+            steadyOffStartMs = now;
+        }
+        // Require continuous offline duration (PRINTER_OFFLINE_DEBOUNCE_MS, 3.0s)
+        // to filter out socket teardown, cutter cycling, and transient network jitter.
+        if (now - steadyOffStartMs >= PRINTER_OFFLINE_DEBOUNCE_MS) {
+            Serial.println("[PRINTER] Printer powered OFF confirmed (debounced). Auto-print re-armed for next power-on.");
+            lastPrinterOnline = false;
+            steadyOnStartMs = 0;
+            steadyOffStartMs = 0;
+            g_autoPrintSatisfiedThisCycle = false;
+        }
+        return; // Do not clear lastPrinterOnline or arm new triggers until debounce elapses
+    }
+
+    // Reset offline dwell timer if online
+    if (isOnline) {
+        steadyOffStartMs = 0;
     }
 
     // 3. Steady state processing while printer remains ON
-    if (isOnline && !printJobFiredForThisPowerCycle) {
-        if (now - steadyOnStartMs >= PRINTER_READY_SETTLE_MS) {
-            printJobFiredForThisPowerCycle = true;
+    if (isOnline && !g_autoPrintSatisfiedThisCycle) {
+        // Enforce post-print refractory cooldown period (15 seconds)
+        bool inCooldown = (g_lastPrintCompletedMs > 0) && (now - g_lastPrintCompletedMs < PRINTER_POST_PRINT_COOLDOWN_MS);
+
+        if (!inCooldown && (now - steadyOnStartMs >= PRINTER_READY_SETTLE_MS)) {
             if (!g_bootAutoPrintPending) {
-                Serial.println("\n[PRINTER] Printer ready (2s settle elapsed). Executing automatic daily print job...");
+                Serial.println("\n[PRINTER] Printer ready (settle elapsed). Executing automatic daily print job...");
                 executePrintJob();
             }
         }
@@ -354,10 +385,10 @@ void loop() {
 
             if (g_bootAutoPrintPending) {
                 g_bootAutoPrintPending = false;
-                if (printer.isPrinterOnline(200)) {
+                if (!g_autoPrintSatisfiedThisCycle && printer.isPrinterOnline(200)) {
                     Serial.println("[MAIN] Auto-print on boot trigger! Executing daily print job...");
                     executePrintJob();
-                } else {
+                } else if (!g_autoPrintSatisfiedThisCycle) {
                     Serial.println("[MAIN] Printer not reachable yet at boot dwell. Will auto-print when printer switch is turned ON.");
                 }
             }
