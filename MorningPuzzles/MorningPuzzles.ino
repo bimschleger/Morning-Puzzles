@@ -2,6 +2,7 @@
 #include "config.h"
 #include "EscPosPrinter.h"
 #include "OfflineTimeManager.h"
+#include "OfflineConfigManager.h"
 #include "OfflinePuzzleComposer.h"
 
 #if !OFFLINE_ONLY_BUILD
@@ -17,6 +18,7 @@ PuzzleClient           puzzleClient;
 // Hardware and engines
 EscPosPrinter          printer;
 OfflineTimeManager     timeManager;
+OfflineConfigManager   configManager;
 OfflinePuzzleComposer  offlineComposer;
 
 // Button timing state
@@ -32,20 +34,25 @@ void blinkStatusLed(int count, int delayMs = 100) {
     }
 }
 
-void executePrintJob(PuzzleGrade grade = GRADE_RANDOM) {
+void executePrintJob(PuzzleGrade grade = (PuzzleGrade)-1) {
+    uint8_t count = configManager.getPuzzleCount();
+    PuzzleGrade activeGrade = (grade != (PuzzleGrade)-1) ? grade : configManager.getPuzzleGrade();
+
     Serial.println("\n========================================================");
     Serial.println(">>> STARTING MORNING PUZZLES 100% OFFLINE PRINT JOB <<<");
     Serial.printf(">>> Time: %s\n", timeManager.getFormattedTime().c_str());
-    Serial.printf(">>> Format: %d-Puzzle Random Mix\n", OFFLINE_PUZZLE_COUNT);
+    Serial.printf(">>> Format: %d-Puzzle Mix (%d of 13 games enabled)\n", count, configManager.getEnabledGameCount());
+    Serial.printf(">>> Grade: %s\n", configManager.getGradeName(activeGrade));
     Serial.println("========================================================");
 
     digitalWrite(STATUS_LED_PIN, HIGH);
 
-    // 100% Offline on-device generation across OFFLINE_PUZZLE_COUNT randomly selected puzzles
+    // 100% Offline on-device generation from user-configured active games pool
     bool success = offlineComposer.generateAndPrintReceipt(
         printer, 
         "Enjoy your morning puzzles",
-        grade
+        grade,
+        &configManager
     );
 
     digitalWrite(STATUS_LED_PIN, LOW);
@@ -71,18 +78,10 @@ void handleButtonPress() {
     // Button released
     else if (btnState == HIGH && lastBtnState == LOW) {
         unsigned long duration = now - btnPressStartMs;
-
-        if (duration >= 2500) {
-            // Long Press (>2.5s) -> Toggle SoftAP Setup Portal (local phone time sync)
-            if (timeManager.isPortalActive()) {
-                timeManager.stopSetupPortal();
-            } else {
-                timeManager.startSetupPortal();
-            }
-        } else if (duration > 80) {
-            // Short Press -> Instant On-Demand Print with a fresh random 5-puzzle mix
-            Serial.println("[BTN] Hardware BOOT button pressed -> Generating & printing random 5-puzzle mix!");
-            executePrintJob(GRADE_RANDOM);
+        if (duration > 50) {
+            // Instant On-Demand Print using active configuration
+            Serial.println("[BTN] Hardware BOOT button pressed -> Generating & printing puzzle mix!");
+            executePrintJob();
         }
         delay(50); // debounce
     }
@@ -94,17 +93,21 @@ void handleSerialCommands() {
     if (Serial.available() > 0) {
         char cmd = Serial.read();
         if (cmd == 'p' || cmd == 'P' || cmd == 'r' || cmd == 'R') {
-            Serial.println("[CMD] Manual print trigger (Random 5-puzzle mix).");
-            executePrintJob(GRADE_RANDOM);
+            Serial.println("[CMD] Manual print trigger (Active configured mix).");
+            executePrintJob();
         } else if (cmd == '1' || cmd == '2' || cmd == '3') {
-            Serial.println("[CMD] Manual print trigger (Random 5-puzzle mix).");
-            executePrintJob(GRADE_RANDOM);
+            Serial.println("[CMD] Manual print trigger (Active configured mix).");
+            executePrintJob();
         } else if (cmd == 'g' || cmd == 'G') {
             offlineComposer.cycleGrade();
             Serial.printf("[CMD] Cycled active grade to: %s\n", offlineComposer.getGradeName(offlineComposer.getCurrentGrade()));
         } else if (cmd == 'w' || cmd == 'W') {
-            if (timeManager.isPortalActive()) timeManager.stopSetupPortal();
-            else timeManager.startSetupPortal();
+            if (timeManager.isPortalActive()) {
+                timeManager.stopSetupPortal();
+            } else {
+                timeManager.startSetupPortal();
+                timeManager.printSetupTicket(printer);
+            }
         } else if (cmd == 't' || cmd == 'T') {
             Serial.println("[CMD] Printing self-test ticket...");
 #if (ACTIVE_PRINTER_MODE == PRINTER_MODE_W5500_ETH)
@@ -117,9 +120,11 @@ void handleSerialCommands() {
         } else if (cmd == 's' || cmd == 'S') {
             Serial.println("\n--- MORNING PUZZLES STATUS ---");
             Serial.println("Mode:         100% Standalone Offline (Zero External APIs)");
-            Serial.printf("Format:       %d Random Puzzles per print (from 12 available)\n", OFFLINE_PUZZLE_COUNT);
+            Serial.printf("Format:       %d Puzzles per print (%d of 13 games enabled)\n", 
+                          configManager.getPuzzleCount(), configManager.getEnabledGameCount());
+            Serial.printf("Difficulty:   %s\n", configManager.getGradeName(configManager.getPuzzleGrade()));
             Serial.printf("Time:         %s\n", timeManager.getFormattedTime().c_str());
-            Serial.printf("Time Set:     %s\n", timeManager.isTimeSet() ? "Yes" : "No (Hold BOOT 3s to set)");
+            Serial.printf("Time Set:     %s\n", timeManager.isTimeSet() ? "Yes" : "No (Hold BOOT or power-cycle 3x to set)");
 #if (ACTIVE_PRINTER_MODE == PRINTER_MODE_W5500_ETH)
             Serial.printf("Printer:      Direct W5500 RJ45 Ethernet (ESP32: %s -> %s:%d)\n", ESP32_STATIC_IP, PRINTER_IP_ADDR, PRINTER_TCP_PORT);
 #elif (ACTIVE_PRINTER_MODE == PRINTER_MODE_SERIAL)
@@ -129,7 +134,7 @@ void handleSerialCommands() {
 #endif
             Serial.printf("Daily Cron:   %02d:%02d every morning\n", DAILY_PRINT_HOUR, DAILY_PRINT_MINUTE);
             Serial.printf("Hotspot:      %s\n", timeManager.isPortalActive() ? "Active (Morning-Puzzles-Setup)" : "Inactive");
-            Serial.println("Controls:     [P]rint / [R]andom 5-puzzle mix | [W]i-Fi Setup | [S]tatus");
+            Serial.println("Controls:     [P]rint | [W]i-Fi Setup | [S]tatus");
             Serial.println("-------------------------------\n");
         }
     }
@@ -179,25 +184,32 @@ void setup() {
     }
 #endif
 
+    // Initialize offline persistent configuration (NVS Flash)
+    configManager.begin();
+
     // Initialize offline timekeeping (checks for optional DS3231 RTC on I2C)
     timeManager.begin();
+    timeManager.setConfigManager(&configManager);
+    timeManager.setPrinter(&printer);
 
     Serial.println("[MAIN] Operating in 100% STANDALONE OFFLINE mode.");
-    Serial.printf("[MAIN] Each printout randomly selects %d unique games from all 12 available offline games.\n", OFFLINE_PUZZLE_COUNT);
+    Serial.printf("[MAIN] Configuration: %d puzzles per print from %d enabled games (Difficulty: %s)\n",
+                  configManager.getPuzzleCount(), configManager.getEnabledGameCount(),
+                  configManager.getGradeName(configManager.getPuzzleGrade()));
 
     Serial.println("\n--- CONTROLS & HOW TO USE ---");
-    Serial.println("1. Short-press BOOT button (GPIO 0) -> Instantly generates & prints a random 5-puzzle mix!");
-    Serial.println("2. Long-press BOOT button (3 sec)   -> Starts local Wi-Fi hotspot to sync time from phone!");
+    Serial.println("1. Press BOOT button (GPIO 0)       -> Instantly generates & prints current configured puzzle mix!");
+    Serial.println("2. Power-cycle printer 3x in 5 sec  -> Activates Setup Hotspot with Dual QR code receipt ticket!");
     Serial.printf("3. Daily scheduled auto-print       -> Every morning at %02d:%02d\n", DAILY_PRINT_HOUR, DAILY_PRINT_MINUTE);
     Serial.println("4. Auto-print on Printer Power-ON   -> Flip printer switch ON to print automatically!");
-    Serial.println("5. Serial Monitor (115200 baud)     -> [P]rint / [R]andom mix | [W]i-Fi Setup | [S]tatus\n");
+    Serial.println("5. Serial Monitor (115200 baud)     -> [P]rint | [W]i-Fi Setup | [S]tatus\n");
 
 #if AUTO_PRINT_ON_BOOT
     Serial.println("[MAIN] AUTO_PRINT_ON_BOOT active. Checking printer readiness...");
     delay(PRINTER_READY_SETTLE_MS);
     if (printer.isPrinterOnline(1000)) {
         Serial.println("[MAIN] Printer online at boot -> Executing auto-print job!");
-        executePrintJob(GRADE_RANDOM);
+        executePrintJob();
     } else {
         Serial.println("[MAIN] Printer not reachable yet at boot. Will auto-print when printer switch is turned ON.");
     }
@@ -210,27 +222,77 @@ void checkPrinterPowerTransition() {
     static bool lastPrinterOnline = false;
     static bool initializedState = false;
 
+    static int powerCycleCount = 0;
+    static unsigned long firstToggleMs = 0;
+    static unsigned long steadyOnStartMs = 0;
+    static bool setupModeTriggered = false;
+
     unsigned long now = millis();
     if (now - lastPollMs < PRINTER_POLL_INTERVAL_MS) {
         return;
     }
     lastPollMs = now;
 
-    bool isOnline = printer.isPrinterOnline(300);
+    bool isOnline = printer.isPrinterOnline(150);
 
     if (!initializedState) {
         lastPrinterOnline = isOnline;
         initializedState = true;
+        if (isOnline) steadyOnStartMs = now;
         return;
     }
 
-    // Detected transition from OFF -> ON!
+    // 1. Detected transition from OFF -> ON!
     if (isOnline && !lastPrinterOnline) {
-        Serial.println("\n[PRINTER] >>> PRINTER POWER-ON DETECTED! <<<");
-        Serial.println("[PRINTER] Waiting for thermal head homing and motor boot...");
-        delay(PRINTER_READY_SETTLE_MS);
-        Serial.println("[PRINTER] Starting automatic print job...");
-        executePrintJob(GRADE_RANDOM);
+        if (powerCycleCount == 0 || (now - firstToggleMs > 5000)) {
+            firstToggleMs = now;
+            powerCycleCount = 1;
+        } else {
+            powerCycleCount++;
+        }
+        steadyOnStartMs = now;
+        setupModeTriggered = false;
+        Serial.printf("\n[PRINTER] Power ON transition #%d detected! (Elapsed in window: %lu ms)\n", 
+                      powerCycleCount, now - firstToggleMs);
+    }
+    // 2. Detected transition from ON -> OFF!
+    else if (!isOnline && lastPrinterOnline) {
+        Serial.println("[PRINTER] Printer powered OFF.");
+        steadyOnStartMs = 0;
+    }
+
+    // 3. Steady state processing while printer remains ON
+    if (isOnline) {
+        // Did user perform 3 toggles within 5 seconds?
+        if (powerCycleCount >= 3) {
+            // Wait for 3 seconds of steady ON to confirm user is finished toggling
+            if (!setupModeTriggered && (now - steadyOnStartMs >= 3000)) {
+                setupModeTriggered = true;
+                Serial.println("\n[PRINTER] >>> 3-CYCLE GESTURE CONFIRMED! ENTERING SETUP MODE <<<");
+                powerCycleCount = 0;
+
+                // Start Wi-Fi hotspot immediately (broadcasts in ~150ms)
+                timeManager.startSetupPortal();
+
+                // Print setup ticket with dual stacked QR codes
+                timeManager.printSetupTicket(printer);
+            }
+        }
+        // Normal single power-on: steady ON for 3 seconds with no further toggles
+        else if (powerCycleCount == 1) {
+            if (now - steadyOnStartMs >= 3000) {
+                Serial.println("\n[PRINTER] Normal power-on confirmed. Starting automatic daily print job...");
+                powerCycleCount = 0;
+                executePrintJob();
+            }
+        }
+        // 2 toggles where 5s window expired without reaching 3
+        else if (powerCycleCount == 2) {
+            if (now - firstToggleMs > 5000 && now - steadyOnStartMs >= 3000) {
+                Serial.println("[PRINTER] Incomplete power-cycle sequence. Resetting toggle counter.");
+                powerCycleCount = 0;
+            }
+        }
     }
 
     lastPrinterOnline = isOnline;
@@ -241,7 +303,7 @@ void loop() {
     // 1. Handle SoftAP captive portal requests if user opened setup mode
     timeManager.handleClient();
 
-    // 2. Monitor physical BOOT button (short click vs long press)
+    // 2. Monitor physical BOOT button (simple on-demand print)
     handleButtonPress();
 
     // 3. Monitor Serial console commands
@@ -250,11 +312,11 @@ void loop() {
     // 4. Check for daily morning 7:00 AM cron trigger
     if (timeManager.isCronTriggerTime(DAILY_PRINT_HOUR, DAILY_PRINT_MINUTE)) {
         Serial.println("[MAIN] 7:00 AM Morning Cron Trigger! Starting daily print job...");
-        executePrintJob(GRADE_RANDOM);
+        executePrintJob();
     }
 
 #if AUTO_PRINT_ON_PRINTER_POWER
-    // 5. Monitor printer power switch (auto-print when printer turns ON)
+    // 5. Monitor printer power switch (auto-print or rapid 3x toggle setup trigger)
     checkPrinterPowerTransition();
 #endif
 

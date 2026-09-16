@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 class EscPosPrinter;
+#include "OfflineConfigManager.h"
 #include "SudokuGen.h"
 #include "WordSearchGen.h"
 #include "NonogramGen.h"
@@ -17,38 +18,15 @@ class EscPosPrinter;
 #include "LightsGen.h"
 #include "LoopGen.h"
 
-enum PuzzleGrade {
-    GRADE_EASY = 0,
-    GRADE_MEDIUM = 1,
-    GRADE_HARD = 2,
-    GRADE_ROTATING = 3,
-    GRADE_RANDOM = 4,
-    GRADE_EXTREME = 5
-};
-
-enum OfflinePuzzleType {
-    PUZZLE_SUDOKU = 0,
-    PUZZLE_WORDSEARCH,
-    PUZZLE_NONOGRAM,
-    PUZZLE_QUEENS,
-    PUZZLE_JUMBLE,
-    PUZZLE_BINARY,
-    PUZZLE_MINES,
-    PUZZLE_TENTS,
-    PUZZLE_BRIDGES,
-    PUZZLE_TANGO,
-    PUZZLE_WHEEL,
-    PUZZLE_LIGHTS,
-    PUZZLE_LOOP,
-    OFFLINE_PUZZLE_TOTAL
-};
-
 class OfflinePuzzleComposer {
 public:
     OfflinePuzzleComposer();
 
-    // Generates a random selection of puzzles (OFFLINE_PUZZLE_COUNT) and prints directly
-    bool generateAndPrintReceipt(EscPosPrinter& printer, const String& subtitle = "Enjoy your morning puzzles", PuzzleGrade grade = GRADE_RANDOM);
+    // Generates a random selection of puzzles from enabled games pool and prints directly
+    bool generateAndPrintReceipt(EscPosPrinter& printer, 
+                                 const String& subtitle = "Enjoy your morning puzzles", 
+                                 PuzzleGrade grade = (PuzzleGrade)-1,
+                                 const OfflineConfigManager* config = nullptr);
 
     void cycleGrade();
     void setGrade(PuzzleGrade grade);

@@ -10,14 +10,17 @@
 #include <Wire.h>
 #include "../config.h"
 
-// Forward declaration
+// Forward declarations
 class EscPosPrinter;
+class OfflineConfigManager;
 
 class OfflineTimeManager {
 public:
     OfflineTimeManager();
 
     void begin();
+    void setConfigManager(OfflineConfigManager* config) { _configManager = config; }
+    void setPrinter(EscPosPrinter* printer) { _printer = printer; }
     
     // Time status & inspection
     bool isTimeSet() const { return _timeSet; }
@@ -30,6 +33,10 @@ public:
     void stopSetupPortal();
     bool isPortalActive() const { return _portalActive; }
     void handleClient(); // Call in loop() when portal is active
+
+    // Thermal Tickets
+    void printSetupTicket(EscPosPrinter& printer);
+    void printConfigSavedTicket(EscPosPrinter& printer, const OfflineConfigManager& config);
 
     // Direct Time Setter (Unix epoch seconds)
     void setSystemTime(time_t epoch, int tzOffsetMinutes = 0);
@@ -44,6 +51,12 @@ private:
     int _lastPrintedDay;
     bool _portalActive;
     bool _ds3231Present;
+    unsigned long _portalStartedMs;
+    bool _pendingExit;
+    unsigned long _pendingExitMs;
+
+    OfflineConfigManager* _configManager;
+    EscPosPrinter*        _printer;
 
     WebServer _server;
     DNSServer _dnsServer;

@@ -87,7 +87,7 @@
 // -----------------------------------------------------------------------------
 #define AUTO_PRINT_ON_BOOT             true    // Print automatically once when ESP32 boots up
 #define AUTO_PRINT_ON_PRINTER_POWER    true    // Print automatically when printer switch is turned ON
-#define PRINTER_POLL_INTERVAL_MS       1500    // Background probe interval to sense printer power-on
+#define PRINTER_POLL_INTERVAL_MS       200     // Background probe interval to sense power-on & rapid toggles
 #define PRINTER_READY_SETTLE_MS        2000    // Settle time for thermal head homing and motor boot
 
 // Serial Fallback Settings (UART2)

@@ -35,8 +35,12 @@ public:
     }
 };
 
+#include "../src/printer/qrcode.h"
+#include "../src/printer/qrcode.c"
 #include "../src/printer/ThermalCanvas.h"
 #include "../src/printer/ThermalCanvas.cpp"
+#include "../src/config/OfflineConfigManager.h"
+#include "../src/config/OfflineConfigManager.cpp"
 
 #include "../src/generators/SudokuGen.h"
 #include "../src/generators/SudokuGen.cpp"
@@ -124,8 +128,69 @@ int main() {
         return 1;
     }
 
+    // Test 5: Custom Configured Game Pool (7 of 13 enabled, print 4)
+    std::cout << "\n>>> TEST 5: CUSTOM CONFIGURED GAME POOL (7 of 13 enabled, print 4) <<<" << std::endl;
+    OfflineConfigManager config;
+    config.begin();
+    // Enable 7 games: Sudoku, Queens, Mines, Bridges, Tango, Lights, Wheel
+    uint16_t mask = (1 << PUZZLE_SUDOKU) | (1 << PUZZLE_QUEENS) | (1 << PUZZLE_MINES) |
+                    (1 << PUZZLE_BRIDGES) | (1 << PUZZLE_TANGO) | (1 << PUZZLE_LIGHTS) | (1 << PUZZLE_WHEEL);
+    config.setGameMask(mask);
+    config.setPuzzleCount(4);
+    config.setPuzzleGrade(GRADE_ESCALATING);
+    if (config.getEnabledGameCount() != 7) {
+        std::cerr << "FAILED: Expected 7 enabled games, got " << (int)config.getEnabledGameCount() << std::endl;
+        return 1;
+    }
+    if (config.getPuzzleCount() != 4) {
+        std::cerr << "FAILED: Expected count 4, got " << (int)config.getPuzzleCount() << std::endl;
+        return 1;
+    }
+    bool okCustom = composer.generateAndPrintReceipt(printer, "Friday, September 18, 2026", (PuzzleGrade)-1, &config);
+    if (!okCustom) {
+        std::cerr << "FAILED on Custom Game Pool" << std::endl;
+        return 1;
+    }
+
+    // Test 6: Escalating Difficulty
+    std::cout << "\n>>> TEST 6: ESCALATING DIFFICULTY PROGRESSION <<<" << std::endl;
+    config.setPuzzleCount(5);
+    config.setPuzzleGrade(GRADE_ESCALATING);
+    for (uint8_t i = 0; i < 5; i++) {
+        PuzzleGrade slot = composer.getGradeForSlot(i, 5);
+        std::cout << "  Slot " << (int)i << "/5 Grade: " << composer.getGradeName(slot) << std::endl;
+    }
+
+    // Test 7: QR Code Generation on ThermalCanvas
+    std::cout << "\n>>> TEST 7: THERMAL CANVAS QR CODE GENERATION <<<" << std::endl;
+    ThermalCanvas qrCanvas;
+    if (!qrCanvas.begin(240)) {
+        std::cerr << "FAILED to allocate QR canvas" << std::endl;
+        return 1;
+    }
+    bool qr1 = qrCanvas.drawQrCode(288, 120, "WIFI:S:Morning-Puzzles-Setup;T:nopass;;", 6);
+    if (!qr1) {
+        std::cerr << "FAILED to render Wi-Fi QR code" << std::endl;
+        return 1;
+    }
+    qrCanvas.printTo(printer);
+    qrCanvas.end();
+
+    if (!qrCanvas.begin(200)) {
+        std::cerr << "FAILED to allocate URL QR canvas" << std::endl;
+        return 1;
+    }
+    bool qr2 = qrCanvas.drawQrCode(288, 100, "http://192.168.4.1", 6);
+    if (!qr2) {
+        std::cerr << "FAILED to render URL QR code" << std::endl;
+        return 1;
+    }
+    qrCanvas.printTo(printer);
+    qrCanvas.end();
+    std::cout << "  -> QR Code generation on ThermalCanvas: OK" << std::endl;
+
     std::cout << "\n==================================================" << std::endl;
-    std::cout << ">>> SUCCESS: 100% OFFLINE MULTI-GRADE GENERATION VERIFIED! <<<" << std::endl;
+    std::cout << ">>> SUCCESS: 100% OFFLINE CONFIG & MULTI-GRADE TESTS VERIFIED! <<<" << std::endl;
     std::cout << "==================================================" << std::endl;
     return 0;
 }

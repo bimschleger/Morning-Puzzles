@@ -1,5 +1,6 @@
 #include "ThermalCanvas.h"
 #include "EscPosPrinter.h"
+#include "qrcode.h"
 #include <algorithm>
 #include <cstdlib>
 
@@ -351,6 +352,39 @@ int16_t ThermalCanvas::getTextWidth(const char* text, uint8_t scale) const {
     if (len == 0) return 0;
     int16_t charW = 6 * scale + max(1, scale / 2);
     return len * charW;
+}
+
+bool ThermalCanvas::drawQrCode(int16_t cx, int16_t cy, const char* text, uint8_t moduleScale) {
+    if (!text || moduleScale == 0 || !_buffer) return false;
+
+    QRCode qrcode;
+    uint8_t qrcodeData[512]; // Up to version 10
+    int8_t status = -1;
+    uint8_t version = 1;
+
+    for (version = 1; version <= 10; version++) {
+        status = qrcode_initText(&qrcode, qrcodeData, version, ECC_LOW, text);
+        if (status == 0) break;
+    }
+    if (status != 0) return false;
+
+    int16_t qrPx = (int16_t)qrcode.size * moduleScale;
+    int16_t startX = cx - (qrPx / 2);
+    int16_t startY = cy - (qrPx / 2);
+
+    // Quiet zone: 4 modules white background
+    int16_t quietPx = 4 * moduleScale;
+    fillRect(startX - quietPx, startY - quietPx, qrPx + 2 * quietPx, qrPx + 2 * quietPx, 0);
+
+    // Draw dark modules
+    for (uint8_t y = 0; y < qrcode.size; y++) {
+        for (uint8_t x = 0; x < qrcode.size; x++) {
+            if (qrcode_getModule(&qrcode, x, y)) {
+                fillRect(startX + x * moduleScale, startY + y * moduleScale, moduleScale, moduleScale, 1);
+            }
+        }
+    }
+    return true;
 }
 
 bool ThermalCanvas::printTo(EscPosPrinter& printer) {

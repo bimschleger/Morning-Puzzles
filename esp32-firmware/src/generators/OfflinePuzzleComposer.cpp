@@ -169,12 +169,20 @@ void OfflinePuzzleComposer::printSinglePuzzle(EscPosPrinter& printer, OfflinePuz
     }
 }
 
-bool OfflinePuzzleComposer::generateAndPrintReceipt(EscPosPrinter& printer, const String& subtitle, PuzzleGrade grade) {
+bool OfflinePuzzleComposer::generateAndPrintReceipt(EscPosPrinter& printer, const String& subtitle, PuzzleGrade grade, const OfflineConfigManager* config) {
     // 1. Reseed PRNG with ESP32 hardware True Random Number Generator + microsecond timer
     randomSeed(esp_random() ^ (uint32_t)micros());
 
     // 2. Maintain grade state for status reporting
-    PuzzleGrade effectiveGrade = grade;
+    PuzzleGrade effectiveGrade;
+    if (grade != (PuzzleGrade)-1) {
+        effectiveGrade = grade;
+    } else if (config) {
+        effectiveGrade = config->getPuzzleGrade();
+    } else {
+        effectiveGrade = GRADE_ESCALATING;
+    }
+
     if (effectiveGrade == GRADE_ROTATING) {
         effectiveGrade = (PuzzleGrade)(_rotationIndex % 3);
         _rotationIndex = (_rotationIndex + 1) % 3;
@@ -191,11 +199,25 @@ bool OfflinePuzzleComposer::generateAndPrintReceipt(EscPosPrinter& printer, cons
 
     printer.init();
 
-    uint8_t count = OFFLINE_PUZZLE_COUNT;
-    if (count > (uint8_t)OFFLINE_PUZZLE_TOTAL) count = (uint8_t)OFFLINE_PUZZLE_TOTAL;
+    // 3. Determine enabled puzzle list and puzzle count
+    OfflinePuzzleType activePuzzles[OFFLINE_PUZZLE_TOTAL];
+    uint8_t totalAvailable = 0;
+
+    if (config) {
+        totalAvailable = config->getEnabledPuzzles(activePuzzles, OFFLINE_PUZZLE_TOTAL);
+    }
+    if (totalAvailable == 0) {
+        totalAvailable = (uint8_t)OFFLINE_PUZZLE_TOTAL;
+        for (uint8_t i = 0; i < totalAvailable; i++) {
+            activePuzzles[i] = (OfflinePuzzleType)i;
+        }
+    }
+
+    uint8_t count = config ? config->getPuzzleCount() : OFFLINE_PUZZLE_COUNT;
+    if (count > totalAvailable) count = totalAvailable;
     if (count < 1) count = 1;
 
-    // 1. Receipt Header
+    // 4. Receipt Header
     String headerSubtitle = (subtitle.length() > 0) ? subtitle : "Enjoy your morning puzzles";
     printer.printHeader("MORNING PUZZLES", headerSubtitle);
     printer.setAlign(ALIGN_CENTER);
@@ -208,36 +230,20 @@ bool OfflinePuzzleComposer::generateAndPrintReceipt(EscPosPrinter& printer, cons
     bool useRaster = false;
 #endif
 
-    OfflinePuzzleType allPuzzles[OFFLINE_PUZZLE_TOTAL] = {
-        PUZZLE_SUDOKU,
-        PUZZLE_WORDSEARCH,
-        PUZZLE_NONOGRAM,
-        PUZZLE_QUEENS,
-        PUZZLE_JUMBLE,
-        PUZZLE_BINARY,
-        PUZZLE_MINES,
-        PUZZLE_TENTS,
-        PUZZLE_BRIDGES,
-        PUZZLE_TANGO,
-        PUZZLE_WHEEL,
-        PUZZLE_LIGHTS,
-        PUZZLE_LOOP
-    };
-
-    // Fisher-Yates shuffle
-    for (int i = (int)OFFLINE_PUZZLE_TOTAL - 1; i > 0; i--) {
+    // Fisher-Yates shuffle on available enabled puzzles
+    for (int i = (int)totalAvailable - 1; i > 0; i--) {
         int j = random(i + 1);
-        OfflinePuzzleType temp = allPuzzles[i];
-        allPuzzles[i] = allPuzzles[j];
-        allPuzzles[j] = temp;
+        OfflinePuzzleType temp = activePuzzles[i];
+        activePuzzles[i] = activePuzzles[j];
+        activePuzzles[j] = temp;
     }
 
     for (uint8_t i = 0; i < count; i++) {
         PuzzleGrade slotGrade = effectiveGrade;
-        if (effectiveGrade == GRADE_RANDOM) {
+        if (effectiveGrade == GRADE_ESCALATING) {
             slotGrade = getGradeForSlot(i, count);
         }
-        printSinglePuzzle(printer, allPuzzles[i], useRaster, slotGrade);
+        printSinglePuzzle(printer, activePuzzles[i], useRaster, slotGrade);
         printer.printHorizontalLine('-');
     }
 

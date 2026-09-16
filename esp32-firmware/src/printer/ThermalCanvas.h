@@ -46,6 +46,9 @@ public:
     void drawCenteredText(int16_t y, const char* text, uint8_t scale = 2, uint8_t color = 1);
     int16_t getTextWidth(const char* text, uint8_t scale = 2) const;
 
+    // QR Code rendering
+    bool drawQrCode(int16_t cx, int16_t cy, const char* text, uint8_t moduleScale = 6);
+
     // Direct stream to thermal printer
     bool printTo(EscPosPrinter& printer);
 

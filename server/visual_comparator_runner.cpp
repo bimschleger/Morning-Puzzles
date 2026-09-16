@@ -5,6 +5,8 @@
 
 #include "../esp32-firmware/src/printer/EscPosPrinter.h"
 #include "../esp32-firmware/src/printer/EscPosPrinter.cpp"
+#include "../esp32-firmware/src/printer/qrcode.h"
+#include "../esp32-firmware/src/printer/qrcode.c"
 #include "../esp32-firmware/src/printer/ThermalCanvas.h"
 #include "../esp32-firmware/src/printer/ThermalCanvas.cpp"
 

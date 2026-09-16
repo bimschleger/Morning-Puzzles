@@ -56,6 +56,19 @@ public:
     }
 };
 
+class IPAddress {
+public:
+    uint8_t bytes[4];
+    IPAddress() { bytes[0]=bytes[1]=bytes[2]=bytes[3]=0; }
+    IPAddress(uint8_t a, uint8_t b, uint8_t c, uint8_t d) {
+        bytes[0]=a; bytes[1]=b; bytes[2]=c; bytes[3]=d;
+    }
+    String toString() const {
+        return String(std::to_string(bytes[0]) + "." + std::to_string(bytes[1]) + "." + std::to_string(bytes[2]) + "." + std::to_string(bytes[3]));
+    }
+    bool fromString(const String& s) { return true; }
+};
+
 inline String operator+(const String& lhs, const String& rhs) {
     return String(static_cast<const std::string&>(lhs) + static_cast<const std::string&>(rhs));
 }
