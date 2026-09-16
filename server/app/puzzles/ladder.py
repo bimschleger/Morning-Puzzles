@@ -132,7 +132,7 @@ class LadderPuzzle(BasePuzzle):
         total_rungs = len(solution) if solution else 5
         word_len = len(start_word)
 
-        tile_size = 52 if word_len == 4 else 46
+        tile_size = 66
         gap_y = 14
         box_width = word_len * tile_size
 
@@ -140,7 +140,6 @@ class LadderPuzzle(BasePuzzle):
         gap_x = 14
         total_content_w = num_width + gap_x + box_width
         start_x = (target_width - total_content_w) // 2
-        num_x = start_x + num_width
         box_x = start_x + num_width + gap_x
 
         margin_top = 24
@@ -149,73 +148,39 @@ class LadderPuzzle(BasePuzzle):
         # Align height to multiple of 8
         total_height = (total_height + 7) & ~7
 
-        if HAS_PILLOW:
-            try:
-                font_letter = ImageFont.truetype("Courier.ttf", 32)
-                font_num = ImageFont.truetype("Arial.ttf", 20)
-            except IOError:
-                font_letter = ImageFont.load_default()
-                font_num = ImageFont.load_default()
+        tb = ThermalBitmap(target_width, total_height)
 
-            img = Image.new("L", (target_width, total_height), 255)
-            draw = ImageDraw.Draw(img)
-
-            # Draw each rung: step number + word boxes
-            for r in range(total_rungs):
-                ry = margin_top + r * (tile_size + gap_y)
-
-                # Number indicator (e.g. "1.")
-                num_text = f"{r + 1}."
-                draw.text((num_x - 26, ry + tile_size // 2 - 12), num_text, fill=0, font=font_num)
-
-                # Word for this rung
-                if r == 0:
-                    rung_word = start_word
-                elif r == total_rungs - 1:
-                    rung_word = target_word
-                else:
-                    rung_word = ""
-
-                # Draw word box frame and dividers
-                draw.rectangle([box_x, ry, box_x + box_width, ry + tile_size], outline=0, width=2)
-                for c in range(1, word_len):
-                    div_x = box_x + c * tile_size
-                    draw.line([div_x, ry, div_x, ry + tile_size], fill=0, width=1)
-
-                # Letter characters inside boxes
-                if rung_word:
-                    for c in range(word_len):
-                        tx = box_x + c * tile_size
-                        ch = rung_word[c]
-                        draw.text((tx + tile_size // 2 - 9, ry + tile_size // 2 - 14), ch, fill=0, font=font_letter)
-
-            return pil_to_escpos(img)
-
-        # Pure Python Fallback
-        bmp = ThermalBitmap(target_width, total_height)
         for r in range(total_rungs):
             ry = margin_top + r * (tile_size + gap_y)
-            num_text = f"{r + 1}."
-            bmp.draw_text(num_x - 26, ry + tile_size // 2 - 8, num_text, scale=2, color=1)
 
+            # Step number on left (scale=2, right-aligned)
+            num_text = f"{r + 1}."
+            text_x = box_x - gap_x - len(num_text) * 12
+            text_y = ry + (tile_size - 14) // 2
+            tb.draw_text(text_x, text_y, num_text, scale=2, color=1)
+
+            # Draw 2px outer rectangle for the word box
+            tb.draw_rect(box_x, ry, box_width, tile_size, thickness=2, color=1)
+
+            # Draw 1px internal vertical cell dividers
+            for c in range(1, word_len):
+                div_x = box_x + c * tile_size
+                tb.draw_vline(div_x, ry, tile_size, thickness=1, color=1)
+
+            # Start and target word glyphs (scale=3)
+            rung_word = ""
             if r == 0:
                 rung_word = start_word
             elif r == total_rungs - 1:
                 rung_word = target_word
-            else:
-                rung_word = ""
-
-            bmp.draw_rect(box_x, ry, box_width, tile_size, thickness=2, color=1)
-            for c in range(1, word_len):
-                div_x = box_x + c * tile_size
-                bmp.draw_vline(div_x, ry, tile_size, thickness=1, color=1)
 
             if rung_word:
                 for c in range(word_len):
-                    tx = box_x + c * tile_size
-                    bmp.draw_char(tx + tile_size // 2 - 6, ry + tile_size // 2 - 8, rung_word[c], scale=2, color=1)
+                    char_x = box_x + c * tile_size + (tile_size - 15) // 2
+                    char_y = ry + (tile_size - 21) // 2
+                    tb.draw_char(char_x, char_y, rung_word[c], scale=3, color=1)
 
-        return bmp.to_escpos()
+        return tb.to_escpos()
 
     def verify_accuracy(
         self,

@@ -30,6 +30,7 @@ enum OfflinePuzzleType : uint8_t {
     PUZZLE_LOOP,
     PUZZLE_KILLER,
     PUZZLE_CRYPTOGRAM,
+    PUZZLE_LADDER,
     OFFLINE_PUZZLE_TOTAL
 };
 

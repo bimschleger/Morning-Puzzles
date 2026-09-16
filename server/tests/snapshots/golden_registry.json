@@ -31,22 +31,22 @@
   },
   "queens": {
     "title": "STARS",
-    "sha256": "1342e9647fa7aef08fc80654a807ad7ef6e4a43e96d0cb58dc494871baf4182f",
+    "sha256": "b499a78ab9aba3586c2a4f08f722bff27a0430952fe628fab3b620ebd90ddec8",
     "byte_length": 41480,
     "width_dots": 576,
     "height_dots": 576,
-    "average_duty_cycle_pct": 20.88,
+    "average_duty_cycle_pct": 21.55,
     "max_consecutive_dense_lines": 9,
     "is_safe": true
   },
   "jumble": {
     "title": "JUMBLE",
-    "sha256": "01736ccef53e4b92ba745f5444cfaa62c9ebcc75305f26120256c7aa2c448040",
-    "byte_length": 46088,
+    "sha256": "7ee7df4fd91fc81edf9c3ba7ae0ea8e81fc12ecc96e40efb4a6b18e4c5adf334",
+    "byte_length": 80072,
     "width_dots": 576,
-    "height_dots": 640,
-    "average_duty_cycle_pct": 10.65,
-    "max_consecutive_dense_lines": 4,
+    "height_dots": 1112,
+    "average_duty_cycle_pct": 5.32,
+    "max_consecutive_dense_lines": 2,
     "is_safe": true
   },
   "binary": {
@@ -91,22 +91,22 @@
   },
   "killer": {
     "title": "KILLER",
-    "sha256": "ba867dd353614381d9d9036bf7f6d0009669eb256e570f6f6591499fb5d147ea",
+    "sha256": "f00a62b3a597144111334e4e3a64010a10870c954be24ee1ecc5e65aade82d73",
     "byte_length": 41480,
     "width_dots": 576,
     "height_dots": 576,
-    "average_duty_cycle_pct": 7.14,
+    "average_duty_cycle_pct": 6.99,
     "max_consecutive_dense_lines": 4,
     "is_safe": true
   },
   "cryptogram": {
     "title": "CRYPTOGRAM",
-    "sha256": "14e9c8020051b02a2360831ad9d668d767f3d36f3f3642234b8c27fc9238cf11",
-    "byte_length": 36296,
+    "sha256": "d137a596cf6d6c983a9e9586743ed7aba07f6f1537995482476aca9d59413690",
+    "byte_length": 43208,
     "width_dots": 576,
-    "height_dots": 504,
-    "average_duty_cycle_pct": 1.98,
-    "max_consecutive_dense_lines": 1,
+    "height_dots": 600,
+    "average_duty_cycle_pct": 3.4,
+    "max_consecutive_dense_lines": 0,
     "is_safe": true
   },
   "tango": {
@@ -121,11 +121,11 @@
   },
   "ladder": {
     "title": "LADDER",
-    "sha256": "22b0ab679c1d9b1ef41ecddf4674874113c8d6d4962ff57b4c46d52e4dbcfa00",
-    "byte_length": 26504,
+    "sha256": "76002c7e8fd4e0cc575d78e86d48d19235b9eec31d740384220faf955b1b4a5d",
+    "byte_length": 37448,
     "width_dots": 576,
-    "height_dots": 368,
-    "average_duty_cycle_pct": 3.22,
+    "height_dots": 520,
+    "average_duty_cycle_pct": 3.59,
     "max_consecutive_dense_lines": 0,
     "is_safe": true
   },

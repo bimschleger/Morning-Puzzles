@@ -267,6 +267,28 @@ void OfflinePuzzleComposer::printSinglePuzzle(EscPosPrinter& printer, OfflinePuz
             }
             break;
         }
+        case PUZZLE_LADDER: {
+            LadderDifficulty diff = (grade == GRADE_EASY) ? LADDER_EASY : ((grade == GRADE_HARD || grade == GRADE_EXTREME) ? LADDER_HARD : LADDER_MEDIUM);
+            const char* diffStr = (diff == LADDER_EASY) ? "EASY" : ((diff == LADDER_HARD) ? "HARD" : "MEDIUM");
+            Serial.println("[COMPOSER] Generating Ladder...");
+            LadderGen ladder;
+            ladder.generate(diff);
+            uint8_t count = ladder.getIntermediateCount();
+            char instr[100];
+            char countPhrase[32];
+            if (count == 1) {
+                snprintf(countPhrase, sizeof(countPhrase), "1 English word");
+            } else {
+                snprintf(countPhrase, sizeof(countPhrase), "%d English words", (int)count);
+            }
+            snprintf(instr, sizeof(instr), "Deduce %s to link %s to %s, changing 1 letter each step.",
+                     countPhrase, ladder.getStartWord(), ladder.getTargetWord());
+            printPuzzleHeader(printer, "LADDER", diffStr, instr);
+            if (!useRaster || !ladder.printRasterToReceipt(printer)) {
+                ladder.printToReceipt(printer);
+            }
+            break;
+        }
         default:
             break;
     }

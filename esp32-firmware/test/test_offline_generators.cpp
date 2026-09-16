@@ -90,6 +90,10 @@ public:
 #include "../src/generators/CryptogramGen.h"
 #include "../src/generators/CryptogramGen.cpp"
 
+#include "../src/generators/LadderDataset.h"
+#include "../src/generators/LadderGen.h"
+#include "../src/generators/LadderGen.cpp"
+
 #include "../src/generators/OfflinePuzzleComposer.h"
 #include "../src/generators/OfflinePuzzleComposer.cpp"
 

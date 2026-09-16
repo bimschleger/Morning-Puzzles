@@ -177,6 +177,15 @@ def test_visual_consistency():
                 "ciphertext": item["ciphertext"],
                 "difficulty": item.get("difficulty", "easy"),
             }
+        elif p_name == "ladder":
+            py_data = {
+                "start_word": item["start_word"],
+                "target_word": item["target_word"],
+                "word_len": item["word_len"],
+                "total_words": item["total_words"],
+                "solution": item["solution"],
+                "difficulty": item.get("difficulty", "easy"),
+            }
         else:
             print(f"Unknown puzzle {p_name}")
             continue

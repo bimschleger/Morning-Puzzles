@@ -53,6 +53,10 @@
 #include "../esp32-firmware/src/generators/CryptogramGen.h"
 #include "../esp32-firmware/src/generators/CryptogramGen.cpp"
 
+#include "../esp32-firmware/src/generators/LadderDataset.h"
+#include "../esp32-firmware/src/generators/LadderGen.h"
+#include "../esp32-firmware/src/generators/LadderGen.cpp"
+
 #include <iostream>
 #include <iomanip>
 #include <sstream>
@@ -518,6 +522,33 @@ int main(int argc, char** argv) {
         std::cout << "    \"phrase\": \"" << cGen.getPhrase() << "\",\n";
         std::cout << "    \"author\": \"" << cGen.getAuthor() << "\",\n";
         std::cout << "    \"ciphertext\": \"" << cGen.getCiphertext() << "\",\n";
+        std::cout << "    \"raster_hex\": \"" << toHex(printer->lastBitmap) << "\"\n";
+        std::cout << "  }";
+    }
+
+    // 13. LADDER
+    {
+        LadderGen ladderGen;
+        ladderGen.generate(LADDER_EASY);
+        printer->lastBitmap.clear();
+        ladderGen.printRasterToReceipt(*printer);
+
+        printSep();
+        std::cout << "  {\n";
+        std::cout << "    \"puzzle\": \"ladder\",\n";
+        std::cout << "    \"difficulty\": \"easy\",\n";
+        std::cout << "    \"width\": " << printer->lastWidth << ",\n";
+        std::cout << "    \"height\": " << printer->lastHeight << ",\n";
+        std::cout << "    \"start_word\": \"" << ladderGen.getStartWord() << "\",\n";
+        std::cout << "    \"target_word\": \"" << ladderGen.getTargetWord() << "\",\n";
+        std::cout << "    \"word_len\": " << (int)ladderGen.getWordLen() << ",\n";
+        std::cout << "    \"total_words\": " << (int)ladderGen.getTotalWords() << ",\n";
+        std::cout << "    \"solution\": [";
+        for (uint8_t i = 0; i < ladderGen.getTotalWords(); i++) {
+            if (i > 0) std::cout << ", ";
+            std::cout << "\"" << ladderGen.getWord(i) << "\"";
+        }
+        std::cout << "],\n";
         std::cout << "    \"raster_hex\": \"" << toHex(printer->lastBitmap) << "\"\n";
         std::cout << "  }";
     }

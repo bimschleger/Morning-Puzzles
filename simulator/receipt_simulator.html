@@ -5073,24 +5073,29 @@
       constructor() {
         this.puzzles = {
           easy: [
-            { start: 'COLD', target: 'WARM', solution: ['COLD', 'CORD', 'CARD', 'WARD', 'WARM'] },
-            { start: 'HEAD', target: 'TAIL', solution: ['HEAD', 'HEAL', 'TEAL', 'TELL', 'TALL', 'TAIL'] },
-            { start: 'LOVE', target: 'HATE', solution: ['LOVE', 'HOVE', 'HAVE', 'HATE'] },
-            { start: 'SHIP', target: 'DOCK', solution: ['SHIP', 'SHOP', 'SHOT', 'SOOT', 'DOCK'] },
-            { start: 'FIRE', target: 'HOSE', solution: ['FIRE', 'FORE', 'FORK', 'HORK', 'HOSE'] }
+            { start: 'BID', target: 'DUE', solution: ['BID', 'DID', 'DIE', 'DUE'] },
+            { start: 'LOT', target: 'NEW', solution: ['LOT', 'NOT', 'NOW', 'NEW'] },
+            { start: 'WHO', target: 'WAS', solution: ['WHO', 'WHY', 'WAY', 'WAS'] },
+            { start: 'DISK', target: 'ROSE', solution: ['DISK', 'RISK', 'RISE', 'ROSE'] },
+            { start: 'VOTE', target: 'DONE', solution: ['VOTE', 'NOTE', 'NONE', 'DONE'] },
+            { start: 'CORE', target: 'LOVE', solution: ['CORE', 'MORE', 'MOVE', 'LOVE'] },
+            { start: 'SAID', target: 'SENT', solution: ['SAID', 'SAND', 'SEND', 'SENT'] }
           ],
           medium: [
-            { start: 'SLOW', target: 'FAST', solution: ['SLOW', 'BLOW', 'BLOT', 'BOOT', 'FOOT', 'FAST'] },
-            { start: 'EAST', target: 'WEST', solution: ['EAST', 'PAST', 'PEST', 'WEST'] },
-            { start: 'SAND', target: 'DUNE', solution: ['SAND', 'SANE', 'DANE', 'DONE', 'DUNE'] },
-            { start: 'CAMP', target: 'TENT', solution: ['CAMP', 'CARP', 'TARP', 'TART', 'TENT'] },
-            { start: 'ROAD', target: 'PATH', solution: ['ROAD', 'READ', 'BEAD', 'BATH', 'PATH'] }
+            { start: 'LAKE', target: 'POND', solution: ['LAKE', 'LANE', 'LONE', 'BONE', 'BOND', 'POND'] },
+            { start: 'SAFE', target: 'HOPE', solution: ['SAFE', 'SAME', 'SOME', 'HOME', 'HOPE'] },
+            { start: 'LAND', target: 'CARE', solution: ['LAND', 'HAND', 'HARD', 'CARD', 'CARE'] },
+            { start: 'HEAD', target: 'SELL', solution: ['HEAD', 'READ', 'REAL', 'SEAL', 'SELL'] },
+            { start: 'WILL', target: 'WEST', solution: ['WILL', 'BILL', 'BELL', 'BELT', 'BEST', 'WEST'] },
+            { start: 'STOP', target: 'KNEW', solution: ['STOP', 'SHOP', 'SHOW', 'SNOW', 'KNOW', 'KNEW'] }
           ],
           hard: [
-            { start: 'BLACK', target: 'WHITE', solution: ['BLACK', 'BLANK', 'BLINK', 'CLINK', 'CHINK', 'CHINE', 'WHITE'] },
-            { start: 'STONE', target: 'WATER', solution: ['STONE', 'SHONE', 'SHINE', 'SHIRE', 'SHARE', 'WHARE', 'WATER'] },
-            { start: 'WHEAT', target: 'BREAD', solution: ['WHEAT', 'CHEAT', 'CLEAT', 'BLEAT', 'BLEST', 'BREST', 'BREAD'] },
-            { start: 'TEARS', target: 'SMILE', solution: ['TEARS', 'SEARS', 'STARS', 'STARE', 'STALE', 'SHALE', 'SMILE'] }
+            { start: 'FACE', target: 'LIFE', solution: ['FACE', 'FACT', 'FAST', 'LAST', 'LIST', 'LIFT', 'LIFE'] },
+            { start: 'BALL', target: 'POOR', solution: ['BALL', 'FALL', 'FULL', 'PULL', 'POLL', 'POOL', 'POOR'] },
+            { start: 'SHARP', target: 'SHIFT', solution: ['SHARP', 'SHARE', 'SHORE', 'SHORT', 'SHIRT', 'SHIFT'] },
+            { start: 'CHECK', target: 'BLACK', solution: ['CHECK', 'CHICK', 'CLICK', 'CLOCK', 'BLOCK', 'BLACK'] },
+            { start: 'THERE', target: 'WHITE', solution: ['THERE', 'THESE', 'THOSE', 'WHOSE', 'WHOLE', 'WHILE', 'WHITE'] },
+            { start: 'WHERE', target: 'PHASE', solution: ['WHERE', 'THERE', 'THESE', 'THOSE', 'CHOSE', 'CHASE', 'PHASE'] }
           ]
         };
       }
@@ -6519,30 +6524,49 @@
     }
 
     function renderOfflineLadder(canvas, lData) {
-      const padding = 24;
+      const targetWidth = 576;
       const totalRungs = lData.totalWords;
       const wordLen = lData.wordLen;
-      const tileSize = 38;
-      const gapY = 10;
-      const totalH = 20 + totalRungs * (tileSize + gapY) + 20;
+      const tileSize = 66;
+      const gapY = 14;
+      const boxWidth = wordLen * tileSize;
+      const numWidth = 36;
+      const gapX = 14;
+      const totalContentW = numWidth + gapX + boxWidth;
+      const startX = Math.floor((targetWidth - totalContentW) / 2);
+      const boxX = startX + numWidth + gapX;
 
-      const tc = new ThermalCanvasSimulator(576, totalH);
-      const boxW = wordLen * tileSize;
-      const boxX = padding + Math.floor((576 - padding * 2 - boxW) / 2);
+      const marginTop = 24;
+      const ladderHeight = totalRungs * tileSize + (totalRungs - 1) * gapY;
+      const totalH = (marginTop + ladderHeight + marginTop + 7) & ~7;
+
+      const tc = new ThermalCanvasSimulator(targetWidth, totalH);
 
       for (let r = 0; r < totalRungs; r++) {
-        const ry = 20 + r * (tileSize + gapY);
-        tc.drawText(boxX - 30, ry + Math.floor(tileSize / 2) - 8, `${r + 1}.`, 2);
+        const ry = marginTop + r * (tileSize + gapY);
 
-        tc.drawRect(boxX, ry, boxW, tileSize, 2);
+        // Step number on left (scale=2, right-aligned)
+        const numText = `${r + 1}.`;
+        const textW = numText.length * 12;
+        const textX = boxX - gapX - textW;
+        const textY = ry + Math.floor((tileSize - 14) / 2);
+        tc.drawText(textX, textY, numText, 2);
+
+        // 2px outer rectangle for word box
+        tc.drawRect(boxX, ry, boxWidth, tileSize, 2);
+
+        // 1px internal vertical cell dividers
         for (let c = 1; c < wordLen; c++) {
           tc.drawVLine(boxX + c * tileSize, ry, tileSize, 1);
         }
 
+        // Start and target word glyphs (scale=3)
         const rungWord = (r === 0 ? lData.start : (r === totalRungs - 1 ? lData.target : ''));
         if (rungWord) {
           for (let c = 0; c < wordLen; c++) {
-            tc.drawChar(boxX + c * tileSize + Math.floor(tileSize / 2) - 6, ry + Math.floor(tileSize / 2) - 8, rungWord[c], 2);
+            const charX = boxX + c * tileSize + Math.floor((tileSize - 15) / 2);
+            const charY = ry + Math.floor((tileSize - 21) / 2);
+            tc.drawChar(charX, charY, rungWord[c], 3);
           }
         }
       }

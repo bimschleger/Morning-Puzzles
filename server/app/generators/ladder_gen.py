@@ -117,6 +117,8 @@ class LadderGenerator:
                     self.words5 = data.get("words5", [])
                     if "curated" in data:
                         self.curated = data["curated"]
+                    elif "easy" in data and "medium" in data:
+                        self.curated = data
             except Exception as e:
                 print(f"[LadderGenerator] Warning: Could not load {path}: {e}")
 
