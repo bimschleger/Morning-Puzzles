@@ -131,14 +131,44 @@ bool EscPosPrinter::isPrinterOnline(uint32_t timeoutMs) {
     if (_ethClient.connected()) {
         return true;
     }
+    // Fast physical PHY link check (zero-latency SPI read, ~50 microseconds)
+    // When the direct-cabled printer is powered OFF, the link drops immediately!
+    if (Ethernet.linkStatus() == LinkOFF) {
+        return false;
+    }
+
+    // Cache a recent successful probe for up to 1000ms so we do not flood the printer's
+    // embedded TCP stack with 5 new TCP connections per second during idle loop polling.
+    static unsigned long lastSuccessMs = 0;
+    static bool wasOnline = false;
+    unsigned long now = millis();
+    if (wasOnline && (now - lastSuccessMs < 1000)) {
+        return true;
+    }
+
+    // PHY link is ON. Probe TCP port 9100 with bounded retransmission (max ~100ms total)
+    // to prevent blocking the ESP32 CPU loop if the printer IP is temporarily unreachable.
+    uint16_t rtr = (timeoutMs > 0 && timeoutMs < 200) ? timeoutMs : 50;
+    Ethernet.setRetransmissionTimeout(rtr);
+    Ethernet.setRetransmissionCount(1);
+
     EthernetClient probe;
     IPAddress targetIP;
     targetIP.fromString(PRINTER_IP_ADDR);
-    if (probe.connect(targetIP, PRINTER_TCP_PORT)) {
+    bool online = probe.connect(targetIP, PRINTER_TCP_PORT);
+    if (online) {
         probe.stop();
-        return true;
+        wasOnline = true;
+        lastSuccessMs = now;
+    } else {
+        wasOnline = false;
     }
-    return false;
+
+    // Restore standard retransmission parameters for print jobs
+    Ethernet.setRetransmissionTimeout(2000);
+    Ethernet.setRetransmissionCount(8);
+
+    return online;
 #else
     if (_tcpClient.connected()) {
         return true;
