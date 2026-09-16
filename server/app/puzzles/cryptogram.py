@@ -109,7 +109,7 @@ class CryptogramPuzzle(BasePuzzle):
         else:
             clue_str = "CLUES: " + ", ".join(f"{c['cipher']} = {c['plain']}" for c in clues)
 
-        formatted_text = self._format_ascii_text(ciphertext, author)
+        formatted_text = self._format_ascii_text(ciphertext, author, clue_str=clue_str)
 
         raw_data = {
             "type": "cryptogram",
@@ -148,13 +148,7 @@ class CryptogramPuzzle(BasePuzzle):
         ciphertext = str(puzzle_data.get("ciphertext", "")).strip()
         author = str(puzzle_data.get("author", "")).strip()
         clue_str = puzzle_data.get("clue_str", "")
-
-        lines = []
-        if clue_str:
-            lines.append("   " + clue_str)
-            lines.append("")
-        lines.append(self._format_ascii_text(ciphertext, author))
-        return "\n".join(lines)
+        return self._format_ascii_text(ciphertext, author, clue_str=clue_str)
 
     def format_solution_key(self, puzzle_data: Union[BasePuzzleResult, Dict[str, Any]]) -> List[str]:
         phrase = puzzle_data.get("phrase") or puzzle_data.get("solution", "")
@@ -176,6 +170,7 @@ class CryptogramPuzzle(BasePuzzle):
         inner_width = target_width - padding * 2  # 528
         ciphertext = str(puzzle_data.get("ciphertext", "")).strip()
         author = str(puzzle_data.get("author", "")).strip()
+        clue_str = str(puzzle_data.get("clue_str", "")).strip()
 
         words = ciphertext.split(" ")
         lines: List[str] = []
@@ -197,11 +192,20 @@ class CryptogramPuzzle(BasePuzzle):
         author_height = 36 if author else 0
         tracker_height = 80
         scratchpad_height = 140
-        total_h = header_gap + len(lines) * (row_height + row_gap) + author_height + tracker_height + scratchpad_height + 40
+        badge_total_h = (36 + 16) if clue_str else 0
+        total_h = header_gap + badge_total_h + len(lines) * (row_height + row_gap) + author_height + tracker_height + scratchpad_height + 40
         total_h = ((total_h + 7) // 8) * 8  # Multiple of 8 dots
 
         tb = ThermalBitmap(target_width, total_h)
         cur_y = 16
+
+        # 0. Clue badge
+        if clue_str:
+            badge_y = 12
+            badge_h = 36
+            tb.draw_rect(padding, badge_y, inner_width, badge_h, thickness=2)
+            tb.draw_centered_text(badge_y + 11, clue_str, scale=2, color=1)
+            cur_y = badge_y + badge_h + 16
 
         # 1. Ciphertext rows with handwriting slot underlines
         for line_str in lines:
@@ -289,7 +293,7 @@ class CryptogramPuzzle(BasePuzzle):
         clues.sort(key=lambda x: x["cipher"])
         return clues
 
-    def _format_ascii_text(self, ciphertext: str, author: str = "") -> str:
+    def _format_ascii_text(self, ciphertext: str, author: str = "", clue_str: str = "") -> str:
         words = ciphertext.split(" ")
         lines_of_words: List[List[str]] = []
         current_line: List[str] = []
@@ -310,6 +314,9 @@ class CryptogramPuzzle(BasePuzzle):
             lines_of_words.append(current_line)
 
         output_lines: List[str] = []
+        if clue_str:
+            output_lines.append("   " + clue_str)
+            output_lines.append("")
 
         for line_words in lines_of_words:
             slot_parts = []

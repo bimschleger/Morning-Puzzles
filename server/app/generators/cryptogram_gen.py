@@ -94,7 +94,7 @@ class CryptogramGenerator:
         else:
             clue_str = "CLUES: " + ", ".join(f"{c['cipher']} = {c['plain']}" for c in clues)
 
-        formatted_text = self.format_ascii_text(ciphertext, author)
+        formatted_text = self.format_ascii_text(ciphertext, author, clue_str=clue_str)
 
         return {
             "type": "cryptogram",
@@ -152,7 +152,7 @@ class CryptogramGenerator:
         return clues
 
     @staticmethod
-    def format_ascii_text(ciphertext: str, author: str = "") -> str:
+    def format_ascii_text(ciphertext: str, author: str = "", clue_str: str = "") -> str:
         """
         Formats the cryptogram into dual-row ASCII layout with handwriting guess slots
         directly above each ciphertext letter, word-wrapped to <= 44 columns, followed by
@@ -180,6 +180,9 @@ class CryptogramGenerator:
             lines_of_words.append(current_line)
 
         output_lines: List[str] = []
+        if clue_str:
+            output_lines.append("   " + clue_str)
+            output_lines.append("")
 
         for line_words in lines_of_words:
             # Row 1 (Handwriting slot row directly above ciphertext)

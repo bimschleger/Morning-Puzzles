@@ -281,8 +281,9 @@ bool CryptogramGen::printRasterToReceipt(EscPosPrinter& printer) {
     const int16_t authorHeight = (_author.length() > 0) ? 36 : 0;
     const int16_t trackerHeight = 80;
     const int16_t scratchpadHeight = 140;
+    const int16_t badgeTotalH = (_clueStr.length() > 0) ? (36 + 16) : 0;
 
-    int16_t totalH = headerGap + numLines * (rowHeight + rowGap) + authorHeight + trackerHeight + scratchpadHeight + 40;
+    int16_t totalH = headerGap + badgeTotalH + numLines * (rowHeight + rowGap) + authorHeight + trackerHeight + scratchpadHeight + 40;
     totalH = ((totalH + 7) / 8) * 8; // Align to 8 dots
 
     ThermalCanvas canvas;
@@ -292,6 +293,15 @@ bool CryptogramGen::printRasterToReceipt(EscPosPrinter& printer) {
     canvas.clear(0);
 
     int16_t curY = 16;
+
+    // 0. Clue badge
+    if (_clueStr.length() > 0) {
+        int16_t badgeY = 12;
+        int16_t badgeH = 36;
+        canvas.drawRect(padding, badgeY, innerWidth, badgeH, 2);
+        canvas.drawCenteredText(badgeY + 11, _clueStr.c_str(), 2, 1);
+        curY = badgeY + badgeH + 16;
+    }
 
     // 1. Ciphertext rows with handwriting slot underlines
     for (uint8_t l = 0; l < numLines; l++) {

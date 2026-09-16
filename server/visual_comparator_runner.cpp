@@ -528,6 +528,7 @@ int main(int argc, char** argv) {
         std::cout << "    \"phrase\": \"" << cGen.getPhrase() << "\",\n";
         std::cout << "    \"author\": \"" << cGen.getAuthor() << "\",\n";
         std::cout << "    \"ciphertext\": \"" << cGen.getCiphertext() << "\",\n";
+        std::cout << "    \"clue_str\": \"" << cGen.getClueString() << "\",\n";
         std::cout << "    \"raster_hex\": \"" << toHex(printer->lastBitmap) << "\"\n";
         std::cout << "  }";
     }

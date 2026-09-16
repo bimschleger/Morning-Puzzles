@@ -4494,7 +4494,8 @@
       const authorHeight = cData.author ? 24 : 0;
       const trackerHeight = 46;
       const scratchpadHeight = 84;
-      const totalH = 16 + lines.length * (rowHeight + rowGap) + authorHeight + trackerHeight + scratchpadHeight + 20;
+      const badgeTotalH = cData.clueStr ? 32 : 0;
+      const totalH = 16 + badgeTotalH + lines.length * (rowHeight + rowGap) + authorHeight + trackerHeight + scratchpadHeight + 20;
 
       canvas.width = width;
       canvas.height = totalH;
@@ -4505,6 +4506,18 @@
       ctx.fillRect(0, 0, width, totalH);
 
       let curY = 16;
+
+      if (cData.clueStr) {
+        ctx.strokeStyle = '#333333';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(padding, curY, innerWidth, 24);
+        ctx.fillStyle = '#111111';
+        ctx.font = 'bold 11px "Space Mono", monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(cData.clueStr, width / 2, curY + 12);
+        curY += 24 + 10;
+      }
 
       // Draw wrapped rows
       for (const line of lines) {
@@ -6505,11 +6518,21 @@
       const authorHeight = cData.author ? 36 : 0;
       const trackerHeight = 80;
       const scratchpadHeight = 140;
-      let totalH = headerGap + lines.length * (rowHeight + rowGap) + authorHeight + trackerHeight + scratchpadHeight + 40;
+      const badgeTotalH = cData.clueStr ? (36 + 16) : 0;
+      let totalH = headerGap + badgeTotalH + lines.length * (rowHeight + rowGap) + authorHeight + trackerHeight + scratchpadHeight + 40;
       totalH = Math.floor((totalH + 7) / 8) * 8;
 
       const tc = new ThermalCanvasSimulator(576, totalH);
       let curY = 16;
+
+      // 0. Clue badge
+      if (cData.clueStr) {
+        const badgeY = 12;
+        const badgeH = 36;
+        tc.drawRect(padding, badgeY, innerWidth, badgeH, 2);
+        tc.drawCenteredText(badgeY + 11, cData.clueStr, 2);
+        curY = badgeY + badgeH + 16;
+      }
 
       // 1. Ciphertext rows with handwriting slot underlines
       for (const lineStr of lines) {
@@ -7455,10 +7478,6 @@
         const desc = `Deduce the hidden phrase using the ${clueWord} and substitution logic.`;
 
         addStandardPuzzleHeader(items, 'CRYPTOGRAM', diff, desc);
-        if (cData.clueStr) {
-          items.push({ type: 'text', text: centerLine(cData.clueStr, 48) });
-          items.push({ type: 'blank', text: '' });
-        }
 
         if (isOfflineRaster) {
           items.push({
@@ -7472,6 +7491,10 @@
           });
         } else {
           // Monospaced ASCII fallback
+          if (cData.clueStr) {
+            items.push({ type: 'text', text: centerLine(cData.clueStr, 48) });
+            items.push({ type: 'blank', text: '' });
+          }
           const words = cData.ciphertext.split(' ');
           const lines = [];
           let curr = '';
