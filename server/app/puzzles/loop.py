@@ -261,9 +261,9 @@ class LoopPuzzle(BasePuzzle):
     """
 
     DIFFICULTY_SETTINGS = {
-        "easy":   {"size": 6, "target_density": 0.58, "cell_size": 54, "padding": 26},
-        "medium": {"size": 7, "target_density": 0.48, "cell_size": 46, "padding": 27},
-        "hard":   {"size": 9, "target_density": 0.38, "cell_size": 36, "padding": 26},
+        "easy":   {"size": 6, "target_density": 0.58, "cell_size": 88, "padding": 24},
+        "medium": {"size": 7, "target_density": 0.48, "cell_size": 75, "padding": 25},
+        "hard":   {"size": 9, "target_density": 0.38, "cell_size": 58, "padding": 27},
     }
 
     @property
@@ -466,21 +466,22 @@ class LoopPuzzle(BasePuzzle):
     def format_ascii_puzzle(self, puzzle_data: Union[BasePuzzleResult, Dict[str, Any]]) -> str:
         n = puzzle_data.get("size", 7)
         clues = puzzle_data.get("clues", [])
+        indent = "      "
 
         lines = []
         for r in range(n):
             # Dot row
-            dot_line = " ".join([".   "] * n) + "."
+            dot_line = indent + " ".join([".   "] * n) + "."
             lines.append(dot_line)
             # Clue row
-            clue_parts = []
+            clue_parts = [indent]
             for c in range(n):
                 k = clues[r][c] if r < len(clues) and c < len(clues[r]) else -1
                 ch = str(k) if k >= 0 else " "
                 clue_parts.append(f"  {ch} ")
             lines.append("".join(clue_parts) + " ")
         # Final dot row
-        lines.append(" ".join([".   "] * n) + ".")
+        lines.append(indent + " ".join([".   "] * n) + ".")
         return "\n".join(lines)
 
     def format_solution_key(self, puzzle_data: Union[BasePuzzleResult, Dict[str, Any]]) -> List[str]:
@@ -537,66 +538,27 @@ class LoopPuzzle(BasePuzzle):
 
         board_size = cell_size * n
         left_margin = (target_width - board_size) // 2
-        total_h = padding + board_size + padding
-        total_h = ((total_h + 7) // 8) * 8
+        total_h = 576
 
-        # High-res Pillow rendering
-        if HAS_PILLOW:
-            img = Image.new("L", (target_width, total_h), 255)
-            draw = ImageDraw.Draw(img)
-
-            # Draw lattice dots (clean Nikoli style: 4px diameter filled circles)
-            dot_radius = 2
-            for r in range(n + 1):
-                py = padding + r * cell_size
-                for c in range(n + 1):
-                    px = left_margin + c * cell_size
-                    draw.ellipse([px - dot_radius, py - dot_radius, px + dot_radius, py + dot_radius], fill=0)
-
-            # Clue font
-            font_size = max(18, int(cell_size * 0.48))
-            try:
-                font_clue = ImageFont.truetype("Courier.ttf", font_size)
-            except IOError:
-                font_clue = ImageFont.load_default()
-
-            for r in range(n):
-                for c in range(n):
-                    k = clues[r][c] if r < len(clues) and c < len(clues[r]) else -1
-                    if k >= 0:
-                        digit_str = str(k)
-                        try:
-                            bbox = font_clue.getbbox(digit_str)
-                            tw = bbox[2] - bbox[0]
-                            th = bbox[3] - bbox[1]
-                        except AttributeError:
-                            tw, th = draw.textsize(digit_str, font=font_clue)
-                        tx = left_margin + c * cell_size + (cell_size - tw) // 2
-                        ty = padding + r * cell_size + (cell_size - th) // 2
-                        draw.text((tx, ty), digit_str, fill=0, font=font_clue)
-
-            img_1bit = img.convert("1")
-            raw_bytes = img_1bit.tobytes()
-            return image_to_escpos_raster(raw_bytes, target_width, total_h)
-
-        # Fallback pure-Python ThermalBitmap
         tb = ThermalBitmap(target_width, total_h)
-        dot_radius = 2
+        dot_radius = 3
+
+        # Draw lattice dots (clean Nikoli style: 3px radius filled circles)
         for r in range(n + 1):
             py = padding + r * cell_size
             for c in range(n + 1):
                 px = left_margin + c * cell_size
                 tb.fill_circle(px, py, dot_radius, color=1)
 
+        # Draw clue numbers (scale 3 monospaced bitmap digits centered in cells)
         for r in range(n):
             for c in range(n):
                 k = clues[r][c] if r < len(clues) and c < len(clues[r]) else -1
                 if k >= 0:
                     digit_str = str(k)
-                    tw = tb.get_text_width(digit_str, scale=3)
-                    tx = left_margin + c * cell_size + (cell_size - tw) // 2
+                    tx = left_margin + c * cell_size + (cell_size - 18) // 2
                     ty = padding + r * cell_size + (cell_size - 21) // 2
-                    tb.draw_text(tx, ty, digit_str, scale=3, color=1)
+                    tb.draw_char(tx, ty, digit_str, scale=3, color=1)
 
         return tb.to_escpos()
 

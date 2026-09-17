@@ -344,24 +344,23 @@ void LoopGen::printToReceipt(EscPosPrinter& printer, LoopDifficulty diff) {
 
 bool LoopGen::printRasterToReceipt(EscPosPrinter& printer, LoopDifficulty diff) {
     (void)diff;
-    int16_t cellSize = (_size == 6) ? 54 : ((_size == 9) ? 36 : 46);
-    int16_t padding = (_size == 7) ? 27 : 26;
+    int16_t cellSize = (_size == 6) ? 88 : ((_size == 9) ? 58 : 75);
+    int16_t padding = (_size == 6) ? 24 : ((_size == 9) ? 27 : 25);
     int16_t boardSize = cellSize * _size;
     int16_t leftMargin = (THERMAL_CANVAS_WIDTH - boardSize) / 2;
-    int16_t totalH = padding + boardSize + padding;
-    totalH = ((totalH + 7) / 8) * 8;
+    int16_t totalH = 576;
 
     ThermalCanvas canvas;
     if (!canvas.begin(totalH)) {
         return false;
     }
 
-    // Draw dots (clean Nikoli style: 4px diameter filled circles)
+    // Draw dots (clean Nikoli style: 3px radius filled circles)
     for (uint8_t r = 0; r <= _size; r++) {
         int16_t py = padding + r * cellSize;
         for (uint8_t c = 0; c <= _size; c++) {
             int16_t px = leftMargin + c * cellSize;
-            canvas.fillCircle(px, py, 2, 1);
+            canvas.fillCircle(px, py, 3, 1);
         }
     }
 

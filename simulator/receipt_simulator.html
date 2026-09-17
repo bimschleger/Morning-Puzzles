@@ -6765,21 +6765,20 @@
 
     function renderOfflineLoop(canvas, loopData) {
       const size = loopData.size || 7;
-      const cellSize = (size === 6) ? 54 : ((size === 9) ? 36 : 46);
-      const padding = (size === 7) ? 27 : 26;
+      const cellSize = (size === 6) ? 88 : ((size === 9) ? 58 : 75);
+      const padding = (size === 6) ? 24 : ((size === 9) ? 27 : 25);
       const boardSize = cellSize * size;
       const leftMargin = Math.floor((576 - boardSize) / 2);
-      let totalH = padding + boardSize + padding;
-      totalH = Math.ceil(totalH / 8) * 8;
+      const totalH = 576;
 
       const tc = new ThermalCanvasSimulator(576, totalH);
 
-      // Draw dots (clean Nikoli style: 4px diameter filled circles)
+      // Draw dots (clean Nikoli style: 3px radius filled circles)
       for (let r = 0; r <= size; r++) {
         const py = padding + r * cellSize;
         for (let c = 0; c <= size; c++) {
           const px = leftMargin + c * cellSize;
-          tc.fillCircle(px, py, 2, 1);
+          tc.fillCircle(px, py, 3, 1);
         }
       }
 
