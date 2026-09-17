@@ -241,8 +241,8 @@ bool KillerGen::printRasterToReceipt(EscPosPrinter& printer) {
             }
         }
         if (minR != -1) {
-            int16_t tx = padding + minC * cellSize + inset + 3;
-            int16_t ty = padding + minR * cellSize + inset + 3;
+            int16_t tx = padding + minC * cellSize + inset + 8;
+            int16_t ty = padding + minR * cellSize + inset + 8;
             char sumStr[8];
             snprintf(sumStr, sizeof(sumStr), "%d", (int)_cageSums[cid]);
             canvas.drawText(tx, ty, sumStr, 2);

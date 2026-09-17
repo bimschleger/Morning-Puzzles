@@ -396,8 +396,8 @@ class KillerPuzzle(BasePuzzle):
                 if not cells:
                     continue
                 r0, c0 = cells[0]
-                tx = padding + c0 * c_size + inset + 4
-                ty = padding + r0 * c_size + inset + 2
+                tx = padding + c0 * c_size + inset + 8
+                ty = padding + r0 * c_size + inset + 7
                 draw.text((tx, ty), str(cg.get("sum", "")), fill=0, font=font_clue)
 
             return pil_to_escpos(img)
@@ -435,8 +435,8 @@ class KillerPuzzle(BasePuzzle):
             if not cells:
                 continue
             r0, c0 = cells[0]
-            tx = padding + c0 * c_size + inset + 3
-            ty = padding + r0 * c_size + inset + 3
+            tx = padding + c0 * c_size + inset + 8
+            ty = padding + r0 * c_size + inset + 8
             tb.draw_text(tx, ty, str(cg.get("sum", "")), scale=2, color=1)
 
         return tb.to_escpos()

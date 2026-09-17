@@ -4400,8 +4400,8 @@
         if (!cg.cells || cg.cells.length === 0) continue;
         const sortedCells = [...cg.cells].sort((a, b) => (a[0] === b[0] ? a[1] - b[1] : a[0] - b[0]));
         const [r0, c0] = sortedCells[0];
-        const tx = padding + c0 * cellSize + inset + 3;
-        const ty = padding + r0 * cellSize + inset + 2;
+        const tx = padding + c0 * cellSize + inset + 6;
+        const ty = padding + r0 * cellSize + inset + 5;
         ctx.fillText(cg.sum.toString(), tx, ty);
       }
     }
@@ -6461,7 +6461,11 @@
       }
 
       // Dashed cage boundaries and cage sums
-      const inset = 4;
+      const inset = (size === 4) ? 10 : 8;
+      const dashLen = 8;
+      const gapLen = 6;
+      const step = dashLen + gapLen;
+
       for (const cg of (kData.cages || [])) {
         const cells = cg.cells || [];
         for (const [r, c] of cells) {
@@ -6476,23 +6480,35 @@
           const hasRight = cells.some(([cr, cc]) => cr === r && cc === c + 1);
 
           if (!hasTop) {
-            for (let dx = x0; dx < x1; dx += 8) tc.drawHLine(dx, y0, 4, 1);
+            for (let x = x0; x < x1; x += step) {
+              const seg = ((x + dashLen) > x1) ? (x1 - x) : dashLen;
+              tc.drawHLine(x, y0, seg, 2);
+            }
           }
           if (!hasBottom) {
-            for (let dx = x0; dx < x1; dx += 8) tc.drawHLine(dx, y1, 4, 1);
+            for (let x = x0; x < x1; x += step) {
+              const seg = ((x + dashLen) > x1) ? (x1 - x) : dashLen;
+              tc.drawHLine(x, y1, seg, 2);
+            }
           }
           if (!hasLeft) {
-            for (let dy = y0; dy < y1; dy += 8) tc.drawVLine(x0, dy, 4, 1);
+            for (let y = y0; y < y1; y += step) {
+              const seg = ((y + dashLen) > y1) ? (y1 - y) : dashLen;
+              tc.drawVLine(x0, y, seg, 2);
+            }
           }
           if (!hasRight) {
-            for (let dy = y0; dy < y1; dy += 8) tc.drawVLine(x1, dy, 4, 1);
+            for (let y = y0; y < y1; y += step) {
+              const seg = ((y + dashLen) > y1) ? (y1 - y) : dashLen;
+              tc.drawVLine(x1, y, seg, 2);
+            }
           }
         }
 
         if (cells.length > 0) {
           const sorted = cells.slice().sort((a, b) => (a[0] - b[0]) || (a[1] - b[1]));
           const [r0, c0] = sorted[0];
-          tc.drawText(padding + c0 * cellSize + inset + 3, padding + r0 * cellSize + inset + 3, String(cg.sum), 2);
+          tc.drawText(padding + c0 * cellSize + inset + 8, padding + r0 * cellSize + inset + 8, String(cg.sum), 2);
         }
       }
 
