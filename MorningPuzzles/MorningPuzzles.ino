@@ -77,12 +77,12 @@ void executePrintJob(PuzzleGrade grade = (PuzzleGrade)-1) {
 
     digitalWrite(STATUS_LED_PIN, LOW);
 
-    // Mark print job completed: record cooldown and satisfy auto-print cycle
+    // Mark print job completed: record cooldown
     g_lastPrintCompletedMs = millis();
-    g_autoPrintSatisfiedThisCycle = true;
     g_bootAutoPrintPending = false;
 
     if (success) {
+        g_autoPrintSatisfiedThisCycle = true;
         Serial.println("[MAIN] Print job completed successfully!\n");
         blinkStatusLed(2, 200);
     } else {
@@ -302,11 +302,6 @@ void setup() {
 
 #if AUTO_PRINT_ON_PRINTER_POWER
 void checkPrinterPowerTransition() {
-    // If setup portal is already active, do not trigger auto-print
-    if (timeManager.isPortalActive()) {
-        return;
-    }
-
     static unsigned long lastPollMs = 0;
     static bool lastPrinterOnline = false;
     static bool initializedState = false;
@@ -349,9 +344,15 @@ void checkPrinterPowerTransition() {
         if (steadyOffStartMs == 0) {
             steadyOffStartMs = now;
         }
-        // Require continuous offline duration (PRINTER_OFFLINE_DEBOUNCE_MS, 3.0s)
+#if (ACTIVE_PRINTER_MODE == PRINTER_MODE_W5500_ETH)
+        // Direct physical Ethernet cable: link drop confirms power loss quickly (>= 400ms)
+        bool fastPhyDrop = (Ethernet.linkStatus() == LinkOFF && (now - steadyOffStartMs >= 400));
+#else
+        bool fastPhyDrop = false;
+#endif
+        // Continuous offline duration (PRINTER_OFFLINE_DEBOUNCE_MS, 1.0s)
         // to filter out socket teardown, cutter cycling, and transient network jitter.
-        if (now - steadyOffStartMs >= PRINTER_OFFLINE_DEBOUNCE_MS) {
+        if (fastPhyDrop || (now - steadyOffStartMs >= PRINTER_OFFLINE_DEBOUNCE_MS)) {
             Serial.println("[PRINTER] Printer powered OFF confirmed (debounced). On-demand print re-armed for next power-on.");
             lastPrinterOnline = false;
             steadyOnStartMs = 0;
@@ -373,6 +374,12 @@ void checkPrinterPowerTransition() {
 
         if (!inCooldown && (now - steadyOnStartMs >= PRINTER_READY_SETTLE_MS)) {
             if (!g_bootAutoPrintPending) {
+                // If user toggles printer power while Setup Portal is active,
+                // treat this physical gesture as exiting setup mode to execute the print.
+                if (timeManager.isPortalActive()) {
+                    Serial.println("\n[PRINTER] Printer power toggle detected while Setup Portal active -> Closing hotspot and printing on-demand puzzle mix.");
+                    timeManager.stopSetupPortal();
+                }
                 Serial.println("\n[PRINTER] Printer ready (settle elapsed). Executing on-demand print job...");
                 executePrintJob();
             }

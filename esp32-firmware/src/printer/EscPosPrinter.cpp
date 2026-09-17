@@ -151,9 +151,9 @@ bool EscPosPrinter::isPrinterOnline(uint32_t timeoutMs) {
         return true;
     }
 
-    // PHY link is ON. Probe TCP port 9100 with bounded retransmission (max ~100ms total)
+    // PHY link is ON. Probe TCP port 9100 with bounded retransmission
     // to prevent blocking the ESP32 CPU loop if the printer IP is temporarily unreachable.
-    uint16_t rtr = (timeoutMs > 0 && timeoutMs < 200) ? timeoutMs : 50;
+    uint16_t rtr = (timeoutMs > 0) ? (uint16_t)min((uint32_t)timeoutMs, (uint32_t)1000) : 100;
     Ethernet.setRetransmissionTimeout(rtr);
     Ethernet.setRetransmissionCount(1);
 

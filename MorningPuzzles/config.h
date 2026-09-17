@@ -93,7 +93,7 @@
 // 1. SETUP MODE: Turn printer ON first, then plug in ESP32.
 //    ESP32 detects printer is already online at boot (<500ms probe) and launches
 //    the SoftAP configuration portal ('Morning-Puzzles-Setup') and prints the QR setup ticket.
-// 2. ON-DEMAND PRINT: While ESP32 is running, flip printer switch OFF, wait 3s, then ON.
+// 2. ON-DEMAND PRINT: While ESP32 is running, flip printer switch OFF, wait 1-2s, then ON.
 //    ESP32 detects the printer power-on transition and prints a fresh puzzle bundle.
 // 3. SCHEDULED CRON: Leave both ON. Operates quietly until daily scheduled print time.
 // 4. POWER OUTAGE RECOVERY: Simultaneous power restore causes printer to take ~2-3s to boot,
@@ -104,7 +104,7 @@
 #define AUTO_PRINT_ON_PRINTER_POWER    true    // Print on-demand when printer switch is flipped OFF then ON
 #define PRINTER_POLL_INTERVAL_MS       200     // Background probe interval to sense power-on & rapid toggles
 #define PRINTER_READY_SETTLE_MS        2000    // Settle time for thermal head homing and motor boot
-#define PRINTER_OFFLINE_DEBOUNCE_MS    3000    // Continuous offline time required before confirming power-off
+#define PRINTER_OFFLINE_DEBOUNCE_MS    1000    // Continuous offline time required before confirming power-off (1s)
 #define PRINTER_POST_PRINT_COOLDOWN_MS 15000   // Refractory cooldown after print job before new auto-prints
 
 // Serial Fallback Settings (UART2)
