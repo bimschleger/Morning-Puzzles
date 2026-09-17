@@ -168,7 +168,7 @@ class JumblePuzzle(BasePuzzle):
         words_data = puzzle_data.get("words", [])
         scrambled = puzzle_data.get("scrambled", words_data)
         circles = puzzle_data.get("circles", [])
-        count = min(4, len(scrambled))
+        count = min(6, len(scrambled))
 
         riddle = puzzle_data.get("riddle") or puzzle_data.get("clue", "")
         answer = puzzle_data.get("answer", "")
@@ -337,8 +337,8 @@ class JumblePuzzle(BasePuzzle):
         words_data = puzzle_data.get("words") or puzzle_data.get("scrambled")
         if not words_data or not isinstance(words_data, list):
             return False, "Jumble words data missing or invalid"
-        if len(words_data) < 2:
-            return False, f"Jumble has too few words: {len(words_data)}"
+        if len(words_data) < 4 or len(words_data) > 6:
+            return False, f"Jumble must have between 4 and 6 words, got {len(words_data)}"
 
         riddle = puzzle_data.get("riddle") or puzzle_data.get("clue")
         answer = puzzle_data.get("answer")
@@ -347,7 +347,14 @@ class JumblePuzzle(BasePuzzle):
         if not answer or not isinstance(answer, str):
             return False, "Jumble answer missing or invalid"
 
-        # 1. Verify anagrams of each scrambled word
+        diff = str(puzzle_data.get("difficulty", "")).lower()
+        tier_lens = {
+            "easy": (4, 5),
+            "medium": (5, 6),
+            "hard": (6, 7, 8),
+        }.get(diff)
+
+        # 1. Verify anagrams, difficulty bounds, and circle constraints
         extracted_circled = []
         for idx, item in enumerate(words_data):
             orig = item.get("original", "")
@@ -356,7 +363,18 @@ class JumblePuzzle(BasePuzzle):
                 return False, f"Jumble word {idx} missing original or scrambled text"
             if sorted(orig.upper()) != sorted(scram.upper()):
                 return False, f"Jumble word {idx} scrambled '{scram}' is not an anagram of '{orig}'"
+            if tier_lens and len(orig) not in tier_lens:
+                return False, f"Jumble word '{orig}' length {len(orig)} invalid for {diff} (expected {tier_lens})"
+
             circles = item.get("circle_indices", item.get("circles", []))
+            if not circles:
+                return False, f"Jumble word {idx} has zero circled letters"
+            max_c = 2 if len(orig) == 4 else (3 if len(orig) == 5 else 4)
+            if len(circles) > max_c:
+                return False, f"Jumble word {idx} has {len(circles)} circles, exceeding maximum {max_c}"
+            if len(orig) - len(circles) < 2:
+                return False, f"Jumble word {idx} '{orig}' has fewer than 2 uncircled distractor letters"
+
             for c_idx in circles:
                 if 0 <= c_idx < len(orig):
                     extracted_circled.append(orig[c_idx].upper())

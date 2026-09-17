@@ -128,7 +128,7 @@ bool JumbleGen::printRasterToReceipt(EscPosPrinter& printer) {
     const int16_t innerWidth = THERMAL_CANVAS_WIDTH - padding * 2;
     const int16_t clueSize = 66;
     const int16_t wordGap = 12;
-    uint8_t count = (_numWords > 4) ? 4 : _numWords;
+    uint8_t count = (_numWords > MAX_WORDS) ? MAX_WORDS : _numWords;
 
     // Tokenize answer words
     const int16_t ansH = 66;

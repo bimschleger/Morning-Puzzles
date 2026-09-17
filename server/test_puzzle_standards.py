@@ -428,6 +428,92 @@ def test_playable_cells_cleanliness():
     print("  -> Passed! Empty playable cells remain clean across all targets with zero phantom dots.\n")
 
 
+def test_jumble_difficulty_standards():
+    print("Test 9: Verifying Jumble Difficulty Tier Caps & Clue Rules...")
+    import json
+    jumbles_path = os.path.join(os.path.dirname(__file__), "data", "jumbles.json")
+    assert os.path.exists(jumbles_path), f"Jumbles dataset not found at {jumbles_path}"
+
+    with open(jumbles_path, "r", encoding="utf-8") as f:
+        puzzles = json.load(f)
+
+    assert len(puzzles) == 300, f"Expected 300 jumble puzzles, got {len(puzzles)}"
+
+    tier_rules = {
+        "easy": (4, 5),
+        "medium": (5, 6),
+        "hard": (6, 7, 8)
+    }
+
+    counts = {"easy": 0, "medium": 0, "hard": 0}
+
+    for p in puzzles:
+        diff = p["diff"]
+        assert diff in tier_rules, f"Unknown difficulty: {diff}"
+        counts[diff] += 1
+
+        words = p["words"]
+        circles = p["circles"]
+        riddle = p["riddle"]
+        answer = p["answer"]
+
+        # Minimum 4 clues, maximum 6
+        assert 4 <= len(words) <= 6, f"Puzzle {p['id']} has {len(words)} clues (expected 4-6)"
+        assert len(circles) == len(words), f"Mismatch between words and circles count in {p['id']}"
+
+        allowed_lens = tier_rules[diff]
+        ans_tokens = set(re.findall(r'[A-Z]+', answer.upper()))
+
+        extracted_circled = []
+        for w, c in zip(words, circles):
+            assert len(w) in allowed_lens, (
+                f"Puzzle {p['id']} ({diff}) word '{w}' has length {len(w)}, expected in {allowed_lens}"
+            )
+            max_c = 2 if len(w) == 4 else (3 if len(w) == 5 else 4)
+            assert 1 <= len(c) <= max_c, (
+                f"Puzzle {p['id']} word '{w}' has {len(c)} circles, expected 1..{max_c}"
+            )
+            assert len(w) - len(c) >= 2, (
+                f"Puzzle {p['id']} word '{w}' does not have at least 2 uncircled distractor letters"
+            )
+            assert w.upper() not in ans_tokens, (
+                f"Puzzle {p['id']} clue word '{w}' leaked in answer '{answer}'"
+            )
+            for idx in c:
+                assert 0 <= idx < len(w), f"Circle index {idx} out of range for '{w}'"
+                extracted_circled.append(w[idx].upper())
+
+        clean_ans = [ch for ch in answer.upper() if 'A' <= ch <= 'Z']
+        assert sorted(extracted_circled) == sorted(clean_ans), (
+            f"Puzzle {p['id']} multiset mismatch: circled {sorted(extracted_circled)} != answer {sorted(clean_ans)}"
+        )
+
+    for diff, cnt in counts.items():
+        assert cnt == 100, f"Expected 100 {diff} puzzles, got {cnt}"
+
+    # Verify tri-target synchronization
+    progmem_path = os.path.join(os.path.dirname(__file__), "..", "esp32-firmware", "src", "generators", "JumbleDataset.h")
+    arduino_path = os.path.join(os.path.dirname(__file__), "..", "MorningPuzzles", "JumbleDataset.h")
+    sim_path = os.path.join(os.path.dirname(__file__), "..", "simulator", "receipt_simulator.html")
+
+    assert os.path.exists(progmem_path), f"ESP32 dataset missing: {progmem_path}"
+    assert os.path.exists(arduino_path), f"Arduino dataset missing: {arduino_path}"
+
+    with open(progmem_path, "r", encoding="utf-8") as f:
+        src_cpp = f.read()
+    assert "TOTAL_JUMBLE_PUZZLES = 300" in src_cpp
+
+    with open(arduino_path, "r", encoding="utf-8") as f:
+        src_ino = f.read()
+    assert "TOTAL_JUMBLE_PUZZLES = 300" in src_ino
+
+    with open(sim_path, "r", encoding="utf-8") as f:
+        src_sim = f.read()
+    assert "const JUMBLE_RIDDLES =" in src_sim
+
+    print("  -> Passed! All 300 Jumble puzzles strictly satisfy difficulty word lengths, clue counts (4-6), circles, and multiset equivalence across targets.\n")
+
+
 if __name__ == "__main__":
     print("==================================================================")
     print("RUNNING MORNING PUZZLES PRESENTATION & AUTHORING STANDARDS TESTS")
@@ -441,8 +527,9 @@ if __name__ == "__main__":
     test_plugin_contract_compliance()
     test_master_receipt_header_and_footer()
     test_playable_cells_cleanliness()
+    test_jumble_difficulty_standards()
 
     print("==================================================================")
-    print("ALL PRESENTATION & AUTHORING STANDARDS TESTS PASSED (8/8)!")
+    print("ALL PRESENTATION & AUTHORING STANDARDS TESTS PASSED (9/9)!")
     print("==================================================================")
 
