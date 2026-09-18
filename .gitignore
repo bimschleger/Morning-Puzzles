@@ -1,0 +1,15 @@
+# Environment and secrets
+.env
+.env.local
+.env.*.local
+*.env
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# System artifacts
+.DS_Store
+Thumbs.db
