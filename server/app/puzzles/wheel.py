@@ -73,7 +73,7 @@ class WheelPuzzle(BasePuzzle):
     def get_instruction(self, puzzle_data: Union[BasePuzzleResult, Dict[str, Any]]) -> str:
         cnt = puzzle_data.get("word_count", 25)
         center = str(puzzle_data.get("center_letter", "E")).upper()
-        return f"Find {cnt}+ words using center letter {center} and outer letters, including a 7-letter pangram."
+        return f"Find {cnt}+ words using center letter {center} (letters may repeat), including a 7-letter pangram."
 
     def format_ascii_puzzle(self, puzzle_data: Union[BasePuzzleResult, Dict[str, Any]]) -> str:
         center = str(puzzle_data.get("center_letter", "E")).upper()

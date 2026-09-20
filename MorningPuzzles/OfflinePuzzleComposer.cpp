@@ -200,7 +200,7 @@ void OfflinePuzzleComposer::printSinglePuzzle(EscPosPrinter& printer, OfflinePuz
             WheelGen wheel;
             wheel.generate(diff);
             char instr[110];
-            snprintf(instr, sizeof(instr), "Find %d+ words using center letter %c and outer letters, including a 7-letter pangram.", 
+            snprintf(instr, sizeof(instr), "Find %d+ words using center letter %c (letters may repeat), including a 7-letter pangram.", 
                      (int)wheel.getWordCount(), wheel.getCenterLetter());
             printPuzzleHeader(printer, "WHEEL", diffStr, instr);
             if (!useRaster || !wheel.printRasterToReceipt(printer)) {

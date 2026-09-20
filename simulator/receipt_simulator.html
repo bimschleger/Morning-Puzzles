@@ -6910,7 +6910,7 @@
       'CRYPTOGRAM': 'Deduce the hidden phrase using the 2 letter clues and substitution logic.',
       'TANGO': 'Fill each line with three 0s and three 1s without trios; = means same, x means opposite.',
       'LADDER': 'Deduce 3 English words to link COLD to WARM, changing 1 letter each step.',
-      'WHEEL': 'Find 25+ words using center letter and outer letters, including a 7-letter pangram.',
+      'WHEEL': 'Find 25+ words using center letter (letters may repeat), including a 7-letter pangram.',
       'LIGHTS': 'Place 8 bulbs to light all corridors without bulbs shining on each other or exceeding numbers.',
       'LOOP': 'Draw a single continuous closed loop connecting dots so each number matches its edge count.'
     };
@@ -7763,7 +7763,7 @@
       PUZZLE_RENDERERS['wheel'] = () => {
         const diff = document.getElementById('diff-wheel').value;
         const wData = wheelSim.generate(diff);
-        const wheelDesc = `Find ${wData.wordCount}+ words using center letter ${wData.center} and outer letters, including a 7-letter pangram.`;
+        const wheelDesc = `Find ${wData.wordCount}+ words using center letter ${wData.center} (letters may repeat), including a 7-letter pangram.`;
         addStandardPuzzleHeader(items, 'WHEEL', diff, wheelDesc);
 
         if (isOfflineRaster || isGraphic) {
