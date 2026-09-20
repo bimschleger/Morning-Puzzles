@@ -24,6 +24,10 @@ public:
     uint8_t getGood() const { return _good; }
     uint8_t getGreat() const { return _great; }
     uint8_t getGenius() const { return _genius; }
+    uint8_t getCount4() const { return _count4; }
+    uint8_t getCount5() const { return _count5; }
+    uint8_t getCount6() const { return _count6; }
+    uint8_t getCount7Plus() const { return _count7plus; }
 
 private:
     char _center;
@@ -32,6 +36,10 @@ private:
     uint8_t _good;
     uint8_t _great;
     uint8_t _genius;
+    uint8_t _count4;
+    uint8_t _count5;
+    uint8_t _count6;
+    uint8_t _count7plus;
     WheelDifficulty _difficulty;
 };
 

@@ -9,6 +9,10 @@ WheelGen::WheelGen()
       _good(0),
       _great(0),
       _genius(0),
+      _count4(0),
+      _count5(0),
+      _count6(0),
+      _count7plus(0),
       _difficulty(WHEEL_MEDIUM)
 {
     _outer[0] = '\0';
@@ -35,6 +39,10 @@ void WheelGen::generate(WheelDifficulty difficulty) {
     _good = chosen.good;
     _great = chosen.great;
     _genius = chosen.genius;
+    _count4 = chosen.count4;
+    _count5 = chosen.count5;
+    _count6 = chosen.count6;
+    _count7plus = chosen.count7plus;
 }
 
 void WheelGen::printToReceipt(EscPosPrinter& printer) {
@@ -52,6 +60,7 @@ void WheelGen::printToReceipt(EscPosPrinter& printer) {
 
     printer.println("   TARGET BENCHMARKS:");
     printer.println(String("     Good: ") + _good + " words  |  Great: " + _great + " words  |  Genius: " + _genius + "+ words");
+    printer.println(String("     4L: ") + _count4 + "  |  5L: " + _count5 + "  |  6L: " + _count6 + "  |  7+: " + _count7plus);
     printer.println("");
     printer.println(String("   WORDS FOUND (Must include central letter ") + _center + "):");
     printer.println("   _________________        _________________");
@@ -97,21 +106,23 @@ bool WheelGen::printRasterToReceipt(EscPosPrinter& printer) {
     drawHexCell(canvas, xc, yc, hexRadius - 4, 2);
     canvas.drawChar(xc - 9, yc - 10, _center, 3);
 
-    // Target Benchmarks box
+    // Consolidated 2-Row Target Benchmarks & Lengths box
     const int16_t boxW = 420;
-    const int16_t boxH = 34;
+    const int16_t boxH = 50;
     const int16_t boxX = (THERMAL_CANVAS_WIDTH - boxW) / 2;
-    const int16_t boxY = 260;
+    const int16_t boxY = 252;
     canvas.drawRect(boxX, boxY, boxW, boxH, 2);
 
     String benchText = "GOOD: " + String(_good) + "   GREAT: " + String(_great) + "   GENIUS: " + String(_genius) + "+";
     canvas.drawCenteredText(boxY + 8, benchText.c_str(), 2);
+    String lenText = "4L: " + String(_count4) + "   5L: " + String(_count5) + "   6L: " + String(_count6) + "   7+: " + String(_count7plus);
+    canvas.drawCenteredText(boxY + 28, lenText.c_str(), 2);
 
     // Ruled handwriting lines
-    canvas.drawHLine(48, 315, 220, 1);
-    canvas.drawHLine(308, 315, 220, 1);
-    canvas.drawHLine(48, 345, 220, 1);
-    canvas.drawHLine(308, 345, 220, 1);
+    canvas.drawHLine(48, 318, 220, 1);
+    canvas.drawHLine(308, 318, 220, 1);
+    canvas.drawHLine(48, 348, 220, 1);
+    canvas.drawHLine(308, 348, 220, 1);
 
     bool ok = canvas.printTo(printer);
     canvas.end();

@@ -83,9 +83,21 @@ class WheelPuzzle(BasePuzzle):
 
         o = [str(x).upper() for x in outer[:6]]
         benchmarks = puzzle_data.get("benchmarks", {"good": 10, "great": 18, "genius": 25})
-        b_good = benchmarks.get("good", 10)
-        b_great = benchmarks.get("great", 18)
-        b_genius = benchmarks.get("genius", 25)
+        b_good = benchmarks.get("good", puzzle_data.get("good", 10))
+        b_great = benchmarks.get("great", puzzle_data.get("great", 18))
+        b_genius = benchmarks.get("genius", puzzle_data.get("genius", 25))
+
+        length_counts = puzzle_data.get("length_counts", {})
+        c4 = length_counts.get("4", puzzle_data.get("count4", 0))
+        c5 = length_counts.get("5", puzzle_data.get("count5", 0))
+        c6 = length_counts.get("6", puzzle_data.get("count6", 0))
+        c7 = length_counts.get("7+", puzzle_data.get("count7plus", 0))
+        if c4 == 0 and c5 == 0 and c6 == 0 and c7 == 0 and "words" in puzzle_data:
+            words_list = puzzle_data.get("words", [])
+            c4 = sum(1 for w in words_list if len(w) == 4)
+            c5 = sum(1 for w in words_list if len(w) == 5)
+            c6 = sum(1 for w in words_list if len(w) == 6)
+            c7 = sum(1 for w in words_list if len(w) >= 7)
 
         lines: List[str] = [
             "                  +---+---+",
@@ -98,6 +110,7 @@ class WheelPuzzle(BasePuzzle):
             "",
             "   TARGET BENCHMARKS:",
             f"     Good: {b_good} words  |  Great: {b_great} words  |  Genius: {b_genius}+ words",
+            f"     4L: {c4}  |  5L: {c5}  |  6L: {c6}  |  7+: {c7}",
             "",
             f"   WORDS FOUND (Must include central letter {center}):",
             "   _________________        _________________",
@@ -112,6 +125,17 @@ class WheelPuzzle(BasePuzzle):
         cnt = puzzle_data.get("word_count", len(puzzle_data.get("words", [])))
         words = sorted(list(puzzle_data.get("words", [])))
 
+        length_counts = puzzle_data.get("length_counts", {})
+        c4 = length_counts.get("4", puzzle_data.get("count4", 0))
+        c5 = length_counts.get("5", puzzle_data.get("count5", 0))
+        c6 = length_counts.get("6", puzzle_data.get("count6", 0))
+        c7 = length_counts.get("7+", puzzle_data.get("count7plus", 0))
+        if c4 == 0 and c5 == 0 and c6 == 0 and c7 == 0 and words:
+            c4 = sum(1 for w in words if len(w) == 4)
+            c5 = sum(1 for w in words if len(w) == 5)
+            c6 = sum(1 for w in words if len(w) == 6)
+            c7 = sum(1 for w in words if len(w) >= 7)
+
         lines: List[str] = []
         if pangrams:
             p_text = "PANGRAM: " + ", ".join(pangrams)
@@ -119,6 +143,7 @@ class WheelPuzzle(BasePuzzle):
                 lines.append(l)
 
         lines.append(f"TOTAL WORDS: {cnt}")
+        lines.append(f"LENGTHS: 4L: {c4} | 5L: {c5} | 6L: {c6} | 7+: {c7}")
 
         # Format words in columns (4 columns wide, fitting <= 46 chars)
         col_w = 10
@@ -141,9 +166,21 @@ class WheelPuzzle(BasePuzzle):
         outer = [str(x).upper() for x in outer[:6]]
 
         benchmarks = puzzle_data.get("benchmarks", {"good": 10, "great": 18, "genius": 25})
-        b_good = benchmarks.get("good", 10)
-        b_great = benchmarks.get("great", 18)
-        b_genius = benchmarks.get("genius", 25)
+        b_good = benchmarks.get("good", puzzle_data.get("good", 10))
+        b_great = benchmarks.get("great", puzzle_data.get("great", 18))
+        b_genius = benchmarks.get("genius", puzzle_data.get("genius", 25))
+
+        length_counts = puzzle_data.get("length_counts", {})
+        c4 = length_counts.get("4", puzzle_data.get("count4", 0))
+        c5 = length_counts.get("5", puzzle_data.get("count5", 0))
+        c6 = length_counts.get("6", puzzle_data.get("count6", 0))
+        c7 = length_counts.get("7+", puzzle_data.get("count7plus", 0))
+        if c4 == 0 and c5 == 0 and c6 == 0 and c7 == 0 and "words" in puzzle_data:
+            words_list = puzzle_data.get("words", [])
+            c4 = sum(1 for w in words_list if len(w) == 4)
+            c5 = sum(1 for w in words_list if len(w) == 5)
+            c6 = sum(1 for w in words_list if len(w) == 6)
+            c7 = sum(1 for w in words_list if len(w) >= 7)
 
         total_height = 368  # Multiple of 8
         xc = target_width // 2
@@ -188,20 +225,22 @@ class WheelPuzzle(BasePuzzle):
         tb.draw_polygon(center_inner, thickness=2, color=1)
         tb.draw_char(xc - 9, yc - 10, center, scale=3)
 
-        # Draw Target Benchmarks box
-        box_y = 260
-        box_h = 34
+        # Draw Consolidated 2-Row Target Benchmarks & Lengths box
+        box_y = 252
+        box_h = 50
         box_w = 420
         box_x = (target_width - box_w) // 2
         tb.draw_rect(box_x, box_y, box_w, box_h, thickness=2, color=1)
         bench_text = f"GOOD: {b_good}   GREAT: {b_great}   GENIUS: {b_genius}+"
         tb.draw_centered_text(box_y + 8, bench_text, scale=2, color=1)
+        len_text = f"4L: {c4}   5L: {c5}   6L: {c6}   7+: {c7}"
+        tb.draw_centered_text(box_y + 28, len_text, scale=2, color=1)
 
         # Ruled handwriting lines (2 columns)
-        tb.draw_hline(48, 315, 220, thickness=1, color=1)
-        tb.draw_hline(308, 315, 220, thickness=1, color=1)
-        tb.draw_hline(48, 345, 220, thickness=1, color=1)
-        tb.draw_hline(308, 345, 220, thickness=1, color=1)
+        tb.draw_hline(48, 318, 220, thickness=1, color=1)
+        tb.draw_hline(308, 318, 220, thickness=1, color=1)
+        tb.draw_hline(48, 348, 220, thickness=1, color=1)
+        tb.draw_hline(308, 348, 220, thickness=1, color=1)
 
         return tb.to_escpos()
 
@@ -244,5 +283,15 @@ class WheelPuzzle(BasePuzzle):
                 return False, f"Wheel pangram '{p}' does not use all 7 wheel letters"
             if p not in words:
                 return False, f"Wheel pangram '{p}' is not listed in words"
+
+        # 3. Check length counts if present
+        lc = puzzle_data.get("length_counts")
+        if lc:
+            c4 = lc.get("4", 0)
+            c5 = lc.get("5", 0)
+            c6 = lc.get("6", 0)
+            c7 = lc.get("7+", 0)
+            if c4 + c5 + c6 + c7 != len(words):
+                return False, f"Sum of length counts ({c4}+{c5}+{c6}+{c7}={c4+c5+c6+c7}) does not match total words {len(words)}"
 
         return True, "All rules satisfied"

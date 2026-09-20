@@ -197,6 +197,11 @@ def build_dataset():
         great = max(good + 2, int(total_cnt * 0.65))
         genius = max(great + 2, int(total_cnt * 0.85))
 
+        c4 = sum(1 for w in valid_words if len(w) == 4)
+        c5 = sum(1 for w in valid_words if len(w) == 5)
+        c6 = sum(1 for w in valid_words if len(w) == 6)
+        c7 = sum(1 for w in valid_words if len(w) >= 7)
+
         puzzle_id = f"{diff}_{idx + 1:03d}"
         puzzles_data.append({
             "id": puzzle_id,
@@ -211,6 +216,12 @@ def build_dataset():
                 "good": good,
                 "great": great,
                 "genius": genius
+            },
+            "length_counts": {
+                "4": c4,
+                "5": c5,
+                "6": c6,
+                "7+": c7
             }
         })
         print(f"[{diff.upper()}] {puzzle_id}: center={center} outer={''.join(outer)} -> {total_cnt} words, {len(pangrams)} pangram(s)")

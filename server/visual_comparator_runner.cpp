@@ -180,6 +180,10 @@ int main(int argc, char** argv) {
         std::cout << "    \"good\": " << (int)wGen.getGood() << ",\n";
         std::cout << "    \"great\": " << (int)wGen.getGreat() << ",\n";
         std::cout << "    \"genius\": " << (int)wGen.getGenius() << ",\n";
+        std::cout << "    \"count4\": " << (int)wGen.getCount4() << ",\n";
+        std::cout << "    \"count5\": " << (int)wGen.getCount5() << ",\n";
+        std::cout << "    \"count6\": " << (int)wGen.getCount6() << ",\n";
+        std::cout << "    \"count7plus\": " << (int)wGen.getCount7Plus() << ",\n";
         std::cout << "    \"raster_hex\": \"" << toHex(printer->lastBitmap) << "\"\n";
         std::cout << "  }";
     }

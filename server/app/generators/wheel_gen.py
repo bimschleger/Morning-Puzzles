@@ -82,6 +82,22 @@ FALLBACK_PUZZLES: Dict[str, List[Dict[str, Any]]] = {
 }
 
 
+def compute_length_counts(words: List[str]) -> Dict[str, int]:
+    """Calculates distribution of words by length: 4L, 5L, 6L, 7+L."""
+    counts = {"4": 0, "5": 0, "6": 0, "7+": 0}
+    for w in words:
+        l = len(w)
+        if l == 4:
+            counts["4"] += 1
+        elif l == 5:
+            counts["5"] += 1
+        elif l == 6:
+            counts["6"] += 1
+        elif l >= 7:
+            counts["7+"] += 1
+    return counts
+
+
 def word_to_mask(w: str) -> int:
     """Computes a 26-bit integer bitmask for uppercase A-Z characters."""
     mask = 0
@@ -171,6 +187,7 @@ class WheelGenerator:
             great = max(good + 2, int(total_cnt * 0.65))
             genius = max(great + 2, int(total_cnt * 0.85))
 
+            length_counts = compute_length_counts(words)
             return {
                 "id": f"custom_{rng.randint(100, 999)}",
                 "difficulty": diff_clean,
@@ -180,11 +197,14 @@ class WheelGenerator:
                 "pangrams": pangrams,
                 "words": words,
                 "word_count": total_cnt,
-                "benchmarks": {"good": good, "great": great, "genius": genius}
+                "benchmarks": {"good": good, "great": great, "genius": genius},
+                "length_counts": length_counts,
             }
 
         catalog = self.puzzles_by_diff[diff_clean]
         chosen = dict(rng.choice(catalog))
+        words = list(chosen["words"])
+        length_counts = chosen.get("length_counts") or compute_length_counts(words)
 
         # Re-pack and return shallow copy
         return {
@@ -195,7 +215,8 @@ class WheelGenerator:
             "letters": chosen["center_letter"] + "".join(chosen["outer_letters"]),
             "root_word": chosen.get("root_word", chosen["center_letter"] + "".join(chosen["outer_letters"])),
             "pangrams": list(chosen["pangrams"]),
-            "words": list(chosen["words"]),
+            "words": words,
             "word_count": chosen["word_count"],
-            "benchmarks": dict(chosen["benchmarks"])
+            "benchmarks": dict(chosen["benchmarks"]),
+            "length_counts": dict(length_counts),
         }

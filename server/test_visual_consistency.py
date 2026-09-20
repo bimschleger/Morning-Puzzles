@@ -114,7 +114,11 @@ def test_visual_consistency():
                 "outer_letters": item["outer_letters"],
                 "good": item["good"],
                 "great": item["great"],
-                "genius": item["genius"]
+                "genius": item["genius"],
+                "count4": item.get("count4", 0),
+                "count5": item.get("count5", 0),
+                "count6": item.get("count6", 0),
+                "count7plus": item.get("count7plus", 0),
             }
         elif p_name == "mines":
             py_data = {
