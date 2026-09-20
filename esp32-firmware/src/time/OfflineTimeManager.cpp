@@ -283,8 +283,6 @@ void OfflineTimeManager::printSetupTicket(EscPosPrinter& printer) {
     printer.setBold(true);
     printer.println("Click Save to apply your settings.");
     printer.setBold(false);
-    printer.println("(A confirmation ticket prints automatically)");
-    printer.println("(Hotspot auto-closes after 5 minutes)");
     printer.println("");
 
     // Controls Section
@@ -296,11 +294,11 @@ void OfflineTimeManager::printSetupTicket(EscPosPrinter& printer) {
     printer.println("Use these three modes to operate your printer:");
     printer.println("");
     printer.setAlign(ALIGN_LEFT);
-    printer.println("1. Scheduled: Runs every day if configured");
+    printer.println("1. SCHEDULED: Runs every day if configured");
     printer.println("   as long as the printer is powered on.");
-    printer.println("2. On-demand: Turn printer off and back on");
+    printer.println("2. ON-DEMAND: Turn printer off and back on");
     printer.println("   to print fresh puzzles immediately.");
-    printer.println("3. Setup: Leave printer power switch ON,");
+    printer.println("3. SETUP: Leave printer power switch ON,");
     printer.println("   unplug the power strip, and plug it back in.");
     printer.printHorizontalLine('-');
 
@@ -407,11 +405,11 @@ void OfflineTimeManager::printConfigSavedTicket(EscPosPrinter& printer, const Of
     printer.println("Use these three modes to operate your printer:");
     printer.println("");
     printer.setAlign(ALIGN_LEFT);
-    printer.println("1. Scheduled: Runs every day if configured");
+    printer.println("1. SCHEDULED: Runs every day if configured");
     printer.println("   as long as the printer is powered on.");
-    printer.println("2. On-demand: Turn printer off and back on");
+    printer.println("2. ON-DEMAND: Turn printer off and back on");
     printer.println("   to print fresh puzzles immediately.");
-    printer.println("3. Setup: Leave printer power switch ON,");
+    printer.println("3. SETUP: Leave printer power switch ON,");
     printer.println("   unplug the power strip, and plug it back in.");
     printer.printHorizontalLine('-');
 
