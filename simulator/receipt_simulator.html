@@ -2571,7 +2571,11 @@
       const dummyCtx = dummyCanvas.getContext('2d');
 
       dummyCtx.font = 'bold 12px "Space Mono", monospace';
-      const riddleLines = getCanvasWrappedLines(dummyCtx, `"${jData.riddle}"`, innerWidth);
+      let rClean = (jData.riddle || '').trim().replace(/[\u2014\u2013]/g, '-');
+      while (rClean.endsWith('-') || rClean.endsWith(' ')) {
+        rClean = rClean.slice(0, -1).trimEnd();
+      }
+      const riddleLines = getCanvasWrappedLines(dummyCtx, `"${rClean}"`, innerWidth);
 
       // Pre-calculate answer row wrapping and sizing (matching clue cell height)
       const clueHeight = 28;
@@ -2642,7 +2646,7 @@
       let calcHeight = padding;
       calcHeight += wordsTotalHeight; // Word combos
       calcHeight += 12; // Divider line
-      calcHeight += 18 + riddleLines.length * 17 + 8; // Riddle Clue Question
+      calcHeight += 18 + riddleLines.length * 17 + 24; // Riddle Clue Question
       calcHeight += 18 + 2 * 24 + 10; // Scratchpad (heading + 2 ruled lines)
       calcHeight += 20 + ansLines.length * (ansBoxSize + 12) + 14; // Answer boxes & margin
       calcHeight += padding;
@@ -2748,7 +2752,7 @@
         ctx.fillText(line, padding, curY);
         curY += 17;
       }
-      curY += 6;
+      curY += 22;
 
       // Scratchpad lines
       ctx.font = 'bold 11px "Space Mono", monospace';
@@ -6136,7 +6140,11 @@
       if (curLine.length > 0) ansLines.push(curLine);
 
       // Tokenize riddle into wrapped lines (~28 chars)
-      const riddleStr = `"${jData.riddle || ''}"`;
+      let rClean = (jData.riddle || '').trim().replace(/[\u2014\u2013]/g, '-');
+      while (rClean.endsWith('-') || rClean.endsWith(' ')) {
+        rClean = rClean.slice(0, -1).trimEnd();
+      }
+      const riddleStr = `"${rClean}"`;
       const riddleLines = [];
       let rStart = 0;
       while (rStart < riddleStr.length) {
@@ -6162,7 +6170,7 @@
         12
         + count * (132 + wordGap)
         + 16
-        + 20 + riddleLines.length * 28 + 6
+        + 20 + riddleLines.length * 28 + 22
         + 20 + 192
         + 22 + ansLines.length * (ansH + lineGap) + 4
       );
@@ -6214,7 +6222,7 @@
         tc.drawText(padding + 4, curY, rLine, 3);
         curY += 28;
       }
-      curY += 6;
+      curY += 22;
 
       // 4. Scratchpad (192-dot blank writing area without dashed lines)
       tc.drawText(padding, curY, "SCRATCHPAD:", 2);

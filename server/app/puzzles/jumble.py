@@ -126,6 +126,9 @@ class JumblePuzzle(BasePuzzle):
     def format_ascii_puzzle(self, puzzle_data: Union[BasePuzzleResult, Dict[str, Any]]) -> str:
         words_data = puzzle_data.get("words", [])
         clue = puzzle_data.get("riddle", puzzle_data.get("clue", ""))
+        r_clean = (clue or "").strip().replace("—", "-").replace("–", "-")
+        while r_clean and r_clean[-1] in ("-", " "):
+            r_clean = r_clean[:-1].rstrip()
         count = len(words_data)
         lines = []
         lines.append(f"Unscramble these {count} Jumbles, one letter to each square:")
@@ -138,7 +141,7 @@ class JumblePuzzle(BasePuzzle):
             lines.append(f"   {scrambled:<10} {' '.join(slot_repr)}")
 
         lines.append("")
-        lines.append(f"Riddle: {clue}")
+        lines.append(f"Riddle: {r_clean}")
         lines.append("Answer: " + "_ " * 8)
         return "\n".join(lines)
 
@@ -173,8 +176,13 @@ class JumblePuzzle(BasePuzzle):
         riddle = puzzle_data.get("riddle") or puzzle_data.get("clue", "")
         answer = puzzle_data.get("answer", "")
 
+        # Sanitize riddle: replace em/en-dashes, strip trailing dashes and spaces
+        r_clean = (riddle or "").strip().replace("—", "-").replace("–", "-")
+        while r_clean and r_clean[-1] in ("-", " "):
+            r_clean = r_clean[:-1].rstrip()
+
         # Tokenize riddle into wrapped lines (~28 chars)
-        riddle_str = f'"{riddle}"'
+        riddle_str = f'"{r_clean}"'
         riddle_lines = textwrap.wrap(riddle_str, width=28)
         if not riddle_lines:
             riddle_lines = [riddle_str]
@@ -229,7 +237,7 @@ class JumblePuzzle(BasePuzzle):
             12
             + count * (132 + word_gap)
             + 16  # divider gap
-            + 20 + len(riddle_lines) * 28 + 6  # riddle (scale=3)
+            + 20 + len(riddle_lines) * 28 + 22  # riddle (scale=3, 22-dot spacing below)
             + 20 + 192  # scratchpad (header + 192-dot blank writing area)
             + 22 + len(ans_lines) * (ans_h + line_gap) + 4  # answer
         )
@@ -276,7 +284,7 @@ class JumblePuzzle(BasePuzzle):
         for r_line in riddle_lines:
             tb.draw_text(padding + 4, cur_y, r_line, scale=3)
             cur_y += 28
-        cur_y += 6
+        cur_y += 22
 
         # 4. Scratchpad (192-dot blank writing area without dashed lines)
         tb.draw_text(padding, cur_y, "SCRATCHPAD:", scale=2)

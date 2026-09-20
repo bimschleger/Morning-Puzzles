@@ -95,9 +95,27 @@ void JumbleGen::printToReceipt(EscPosPrinter& printer) {
         printer.printKeyValue(left, slots + "   ___________", 46);
     }
 
+    String rClean = "";
+    if (_riddle) {
+        size_t rLen = strlen(_riddle);
+        for (size_t i = 0; i < rLen; ) {
+            if ((uint8_t)_riddle[i] == 0xE2 && i + 2 < rLen && (uint8_t)_riddle[i+1] == 0x80 &&
+                ((uint8_t)_riddle[i+2] == 0x94 || (uint8_t)_riddle[i+2] == 0x93)) {
+                rClean += '-';
+                i += 3;
+            } else {
+                rClean += _riddle[i];
+                i++;
+            }
+        }
+        while (rClean.length() > 0 && (rClean[rClean.length() - 1] == ' ' || rClean[rClean.length() - 1] == '-')) {
+            rClean = rClean.substring(0, rClean.length() - 1);
+        }
+    }
+
     printer.println("");
     printer.println("Riddle:");
-    printer.println(String("  \"") + _riddle + "\"");
+    printer.println(String("  \"") + rClean + "\"");
     printer.println("");
     printer.println("Answer:");
 
@@ -202,7 +220,24 @@ bool JumbleGen::printRasterToReceipt(EscPosPrinter& printer) {
     }
 
     // Format riddle into wrapped lines (~28 chars)
-    String riddleStr = String("\"") + _riddle + "\"";
+    String rClean = "";
+    if (_riddle) {
+        size_t rLen = strlen(_riddle);
+        for (size_t i = 0; i < rLen; ) {
+            if ((uint8_t)_riddle[i] == 0xE2 && i + 2 < rLen && (uint8_t)_riddle[i+1] == 0x80 &&
+                ((uint8_t)_riddle[i+2] == 0x94 || (uint8_t)_riddle[i+2] == 0x93)) {
+                rClean += '-';
+                i += 3;
+            } else {
+                rClean += _riddle[i];
+                i++;
+            }
+        }
+        while (rClean.length() > 0 && (rClean[rClean.length() - 1] == ' ' || rClean[rClean.length() - 1] == '-')) {
+            rClean = rClean.substring(0, rClean.length() - 1);
+        }
+    }
+    String riddleStr = String("\"") + rClean + "\"";
     String riddleLines[8];
     uint8_t numRiddleLines = 0;
     int16_t rStart = 0;
@@ -230,7 +265,7 @@ bool JumbleGen::printRasterToReceipt(EscPosPrinter& printer) {
         12
         + count * (132 + wordGap)
         + 16
-        + 20 + numRiddleLines * 28 + 6
+        + 20 + numRiddleLines * 28 + 22
         + 20 + 192
         + 22 + numAnsLines * (ansH + lineGap) + 4
     );
@@ -292,7 +327,7 @@ bool JumbleGen::printRasterToReceipt(EscPosPrinter& printer) {
         canvas.drawText(padding + 4, curY, riddleLines[r].c_str(), 3);
         curY += 28;
     }
-    curY += 6;
+    curY += 22;
 
     // 4. Scratchpad (192-dot blank writing area without dashed lines)
     canvas.drawText(padding, curY, "SCRATCHPAD:", 2);
