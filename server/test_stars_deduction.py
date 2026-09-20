@@ -18,7 +18,6 @@ from typing import List, Tuple, Set
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "server"))
 from app.puzzles.stars import StarsPuzzle
-from app.generators.queens_gen import QueensGenerator
 
 DATA_PATH = os.path.join(os.path.dirname(__file__), "data", "stars_dataset.json")
 
@@ -241,19 +240,16 @@ class TestStarsDeduction(unittest.TestCase):
             self.assertEqual(sols, 1, f"Transform {t} failed unique solvability")
 
     def test_generator_runtime_integration(self):
-        """Verify StarsPuzzle and QueensGenerator instantiate and run cleanly."""
+        """Verify StarsPuzzle instantiates and runs cleanly."""
         puzzle_plugin = StarsPuzzle()
-        gen = QueensGenerator()
 
         for diff in ["easy", "medium", "hard", "extreme"]:
             res = puzzle_plugin.generate(difficulty=diff, seed=12345)
             self.assertEqual(res.title, "STARS")
             self.assertEqual(res.difficulty, diff)
             self.assertEqual(res["difficulty"], diff)
-
-            q_data = gen.generate(difficulty=diff)
-            self.assertIn("regions", q_data)
-            self.assertIn("stars_solution", q_data)
+            self.assertIn("regions", res["regions"]) if "regions" in res and isinstance(res["regions"], dict) else self.assertIn("regions", res.to_dict())
+            self.assertIn("stars_solution", res.to_dict())
 
 
 if __name__ == "__main__":

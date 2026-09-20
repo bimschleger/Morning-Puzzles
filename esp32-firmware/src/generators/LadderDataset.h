@@ -1,3 +1,5 @@
+// Automatically generated from server/data/ladder_words.json by tools/datasets/build_all_datasets.py
+// Do not edit directly!
 #ifndef LADDER_DATASET_H
 #define LADDER_DATASET_H
 

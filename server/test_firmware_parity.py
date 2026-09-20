@@ -12,6 +12,7 @@ Validates:
 
 import os
 import sys
+import re
 import shutil
 import subprocess
 from typing import Dict, List, Tuple
@@ -134,6 +135,80 @@ def test_host_cpp_compilation():
             os.remove(output_bin)
 
 
+def test_rule_7_flat_includes():
+    print("\nTest 4: Verifying Rule 7 (Zero Relative Include Paths in MorningPuzzles/)...")
+    assert os.path.exists(SKETCH_DIR), f"MorningPuzzles dir not found at {SKETCH_DIR}"
+
+    relative_includes = []
+    for root, _, files in os.walk(SKETCH_DIR):
+        for f in files:
+            if f.endswith((".h", ".cpp", ".ino")):
+                fpath = os.path.join(root, f)
+                with open(fpath, "r", encoding="utf-8", errors="ignore") as fh:
+                    for line_num, line in enumerate(fh, 1):
+                        if re.search(r'#include\s*["<]\.\./', line):
+                            relative_includes.append(f"{f}:{line_num}: {line.strip()}")
+
+    assert not relative_includes, (
+        f"Rule 7 Violation: Found relative include paths in MorningPuzzles/:\n" + "\n".join(relative_includes)
+    )
+    print("  -> Passed! Zero relative #include paths found in MorningPuzzles/ (100% flat includes).")
+
+
+def test_rule_14_offline_appliance_libraries():
+    print("\nTest 5: Verifying Rule 14 (Offline Appliance Standards: No HTTPClient/ArduinoJson)...")
+    src_dir = os.path.join(FW_DIR, "src")
+    assert os.path.exists(src_dir), f"src dir not found at {src_dir}"
+
+    violations = []
+    for root, _, files in os.walk(src_dir):
+        for f in files:
+            if f.endswith((".h", ".cpp")):
+                fpath = os.path.join(root, f)
+                rel_path = os.path.relpath(fpath, src_dir)
+                with open(fpath, "r", encoding="utf-8", errors="ignore") as fh:
+                    content = fh.read()
+
+                if "HTTPClient" in content:
+                    violations.append(f"{rel_path}: Contains prohibited HTTPClient")
+                if "ArduinoJson" in content:
+                    violations.append(f"{rel_path}: Contains prohibited ArduinoJson")
+                if "WiFiClient" in content and rel_path not in ("printer/EscPosPrinter.h", "printer/EscPosPrinter.cpp"):
+                    violations.append(f"{rel_path}: Contains WiFiClient outside printer/EscPosPrinter")
+
+    assert not violations, (
+        f"Rule 14 Violation: Prohibited network/cloud client libraries found:\n" + "\n".join(violations)
+    )
+    print("  -> Passed! Zero occurrences of HTTPClient or ArduinoJson in esp32-firmware/src/.")
+
+
+def test_softap_portal_parity():
+    print("\nTest 6: Verifying SoftAP Captive Portal Parity (PortalHtml.h matches portal.html)...")
+    portal_html_path = os.path.join(ROOT_DIR, "portal.html")
+    portal_h_path = os.path.join(FW_DIR, "src", "time", "PortalHtml.h")
+
+    assert os.path.exists(portal_html_path), f"portal.html not found at {portal_html_path}"
+    assert os.path.exists(portal_h_path), f"PortalHtml.h not found at {portal_h_path}"
+
+    with open(portal_html_path, "rb") as f:
+        html_bytes = f.read()
+
+    with open(portal_h_path, "r", encoding="utf-8") as f:
+        header_text = f.read()
+
+    # Extract hex bytes from header
+    hex_values = re.findall(r"0x([0-9A-Fa-f]{2})", header_text)
+    assert hex_values, f"No hex bytes found in {portal_h_path}"
+    compressed_bytes = bytes(int(h, 16) for h in hex_values)
+
+    import gzip
+    decompressed = gzip.decompress(compressed_bytes)
+    assert decompressed == html_bytes, (
+        f"PortalHtml.h decompressed content does not match portal.html! Run scripts/build_portal_header.py to synchronize."
+    )
+    print("  -> Passed! PortalHtml.h accurately reflects compressed portal.html.")
+
+
 def run_firmware_tests(strict: bool = False):
     print("=" * 60)
     print("RUNNING TIER 4: Firmware Parity & C++ Compilation Verification")
@@ -141,6 +216,9 @@ def run_firmware_tests(strict: bool = False):
     test_generator_parity(strict=strict)
     test_arduino_sketch_sync()
     test_host_cpp_compilation()
+    test_rule_7_flat_includes()
+    test_rule_14_offline_appliance_libraries()
+    test_softap_portal_parity()
     print("\n[SUCCESS] Tier 4 Firmware verification completed!\n")
 
 

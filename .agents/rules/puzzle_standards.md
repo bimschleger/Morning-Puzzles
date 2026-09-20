@@ -129,5 +129,18 @@ All games in Morning Puzzles must deliver identical, pixel-harmonized visual exp
 - **Dynamic Multi-Digit Coordinate Offsets**: Coordinate calculations for row/column clues must right-align multi-digit numbers (e.g. "10", "12") with respect to the margin to prevent clipping into outer boundaries.
 - **Clean Playable Cells (No Phantom Dots)**: Empty, playable grid cells (in `MINES`, `NONOGRAM`, `TENTS`, `SUDOKU`, `BINARY`, `TANGO`) must remain clean white space. Never draw center guide dots or phantom artifacts that players could confuse with placed symbols or pencil markings.
 
+## 14. Standalone Offline Appliance Standard
+- **100% Offline Operation**: The physical ESP32 printer appliance must operate 100% offline. Zero outbound runtime HTTP, NTP, or cloud API calls.
+- **Prohibited Client Libraries**: Outbound client libraries (`HTTPClient`, `WiFiClient`, `ArduinoJson`) are prohibited in offline builds.
+- **Constrained Wi-Fi Hardware**: Wi-Fi hardware is strictly reserved for local SoftAP captive portal setup (`Morning-Puzzles-Setup`) and local-subnet printer sockets (`PRINTER_MODE_WIFI_TCP`). Point-to-point Ethernet (`PRINTER_MODE_W5500_ETH`) and Serial (`PRINTER_MODE_SERIAL`) modes must compile with zero Wi-Fi dependencies or headers.
+- **Trigger Mechanisms**: Receipts must print via local hardware button press, power toggle gesture, or on-device RTC daily cron.
 
+## 15. Single Source of Truth for Curated Datasets
+- **Canonical JSON Origin**: All curated puzzle datasets must originate as canonical JSON in `server/data/*.json`.
+- **Automated Pipeline Compilation**: C++ PROGMEM headers (`*Dataset.h`) and Web Simulator JS datasets must be compiled from canonical JSON via `tools/datasets/build_all_datasets.py`.
+- **Prohibition of Manual Duplication**: Manual copy-pasting or parallel maintenance of puzzle datasets across targets is strictly prohibited.
 
+## 16. Web Simulator Hardware Emulation Standard
+- **Bit-Level Physical Thermal Emulation**: The Web Simulator must provide bit-level physical thermal emulation using `ThermalCanvasSimulator` (576-dot 1-bit raster).
+- **Prohibition of Anti-Aliased Vector Canvas**: Canvas 2D vector rendering is prohibited.
+- **Offline Appliance Terminology**: Simulator UI terminology must reflect standalone offline appliance concepts.

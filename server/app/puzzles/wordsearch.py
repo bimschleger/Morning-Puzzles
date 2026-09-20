@@ -9,15 +9,45 @@ import string
 import textwrap
 from typing import List, Tuple, Dict, Any, Optional, Union
 
+import json
+from pathlib import Path
+
 from .base import BasePuzzle, BasePuzzleResult
-from ..generators.wordsearch_dataset import (
-    get_random_theme,
-    get_theme_words,
-)
 from ..renderer.canvas import (
     THERMAL_WIDTH_DOTS,
     ThermalBitmap,
 )
+
+_DATASET_CACHE: Optional[Dict[str, Dict[str, List[str]]]] = None
+
+
+def _get_wordsearch_dataset() -> Dict[str, Dict[str, List[str]]]:
+    global _DATASET_CACHE
+    if _DATASET_CACHE is None:
+        dataset_path = Path(__file__).resolve().parent.parent.parent / "data" / "wordsearch_dataset.json"
+        with open(dataset_path, "r", encoding="utf-8") as f:
+            _DATASET_CACHE = json.load(f)
+    return _DATASET_CACHE
+
+
+def get_random_theme(difficulty: str = "medium") -> Tuple[str, List[str]]:
+    data = _get_wordsearch_dataset()
+    diff_key = difficulty.lower()
+    theme_pool = data.get(diff_key, data.get("medium", {}))
+    theme_name = random.choice(list(theme_pool.keys()))
+    return theme_name, list(theme_pool[theme_name])
+
+
+def get_theme_words(theme_name: str, difficulty: str = "medium") -> Tuple[str, List[str]]:
+    data = _get_wordsearch_dataset()
+    diff_key = difficulty.lower()
+    theme_pool = data.get(diff_key, data.get("medium", {}))
+    if theme_name and theme_name in theme_pool:
+        return theme_name, list(theme_pool[theme_name])
+    for pool in data.values():
+        if theme_name in pool:
+            return theme_name, list(pool[theme_name])
+    return get_random_theme(difficulty)
 
 DIRECTIONS = {
     "E":  (0, 1),    # Horizontal forward

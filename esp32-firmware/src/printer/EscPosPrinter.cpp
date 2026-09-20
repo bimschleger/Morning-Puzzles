@@ -74,7 +74,7 @@ bool EscPosPrinter::connect() {
         _outputStream = nullptr;
         return false;
     }
-#else
+#elif (ACTIVE_PRINTER_MODE == PRINTER_MODE_WIFI_TCP)
     if (_tcpClient.connected()) {
         return true;
     }
@@ -102,7 +102,7 @@ void EscPosPrinter::disconnect() {
         _outputStream = nullptr;
         Serial.println("[PRINTER] Disconnected W5500 Ethernet socket.");
     }
-#else
+#elif (ACTIVE_PRINTER_MODE == PRINTER_MODE_WIFI_TCP)
     if (_mode != PRINTER_MODE_SERIAL && _tcpClient.connected()) {
         _tcpClient.flush();
         _tcpClient.stop();
@@ -118,8 +118,10 @@ bool EscPosPrinter::isConnected() {
     }
 #if (ACTIVE_PRINTER_MODE == PRINTER_MODE_W5500_ETH)
     return _ethClient.connected();
-#else
+#elif (ACTIVE_PRINTER_MODE == PRINTER_MODE_WIFI_TCP)
     return _tcpClient.connected();
+#else
+    return false;
 #endif
 }
 
@@ -174,7 +176,7 @@ bool EscPosPrinter::isPrinterOnline(uint32_t timeoutMs) {
     Ethernet.setRetransmissionCount(8);
 
     return online;
-#else
+#elif (ACTIVE_PRINTER_MODE == PRINTER_MODE_WIFI_TCP)
     if (_tcpClient.connected()) {
         return true;
     }
@@ -183,6 +185,8 @@ bool EscPosPrinter::isPrinterOnline(uint32_t timeoutMs) {
         probe.stop();
         return true;
     }
+    return false;
+#else
     return false;
 #endif
 }

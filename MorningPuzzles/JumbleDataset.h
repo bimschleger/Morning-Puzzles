@@ -1,3 +1,5 @@
+// Automatically generated from server/data/jumbles.json by tools/datasets/build_all_datasets.py
+// Do not edit directly!
 #ifndef JUMBLE_DATASET_H
 #define JUMBLE_DATASET_H
 

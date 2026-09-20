@@ -12,21 +12,19 @@ from typing import List, Dict, Set, Any
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from app.generators.wordsearch_dataset import (
-    WORDSEARCH_THEMES_EASY,
-    WORDSEARCH_THEMES_MEDIUM,
-    WORDSEARCH_THEMES_HARD,
-)
-
 # Base list of common words from project datasets
 def collect_project_words() -> Set[str]:
     words = set()
-    for d in [WORDSEARCH_THEMES_EASY, WORDSEARCH_THEMES_MEDIUM, WORDSEARCH_THEMES_HARD]:
-        for theme, wlist in d.items():
-            for w in wlist:
-                w_clean = w.strip().upper()
-                if len(w_clean) >= 4 and w_clean.isalpha():
-                    words.add(w_clean)
+    ws_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "wordsearch_dataset.json")
+    if os.path.exists(ws_path):
+        with open(ws_path, "r", encoding="utf-8") as f:
+            ws_data = json.load(f)
+            for tier_dict in ws_data.values():
+                for theme, wlist in tier_dict.items():
+                    for w in wlist:
+                        w_clean = w.strip().upper()
+                        if len(w_clean) >= 4 and w_clean.isalpha():
+                            words.add(w_clean)
 
     jumbles_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "jumbles.json")
     if os.path.exists(jumbles_path):

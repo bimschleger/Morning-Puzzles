@@ -34,6 +34,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   sed -i '' 's|#include "time/OfflineTimeManager.h"|#include "OfflineTimeManager.h"|g' "$SKETCH_DIR"/MorningPuzzles.ino
   sed -i '' 's|#include "config/OfflineConfigManager.h"|#include "OfflineConfigManager.h"|g' "$SKETCH_DIR"/MorningPuzzles.ino
   sed -i '' 's|#include "generators/OfflinePuzzleComposer.h"|#include "OfflinePuzzleComposer.h"|g' "$SKETCH_DIR"/MorningPuzzles.ino
+  sed -i '' 's|#include "time/PortalHtml.h"|#include "PortalHtml.h"|g' "$SKETCH_DIR"/*.cpp "$SKETCH_DIR"/*.h "$SKETCH_DIR"/MorningPuzzles.ino 2>/dev/null || true
 else
   sed -i 's|#include "../printer/EscPosPrinter.h"|#include "EscPosPrinter.h"|g' "$SKETCH_DIR"/*.h
   sed -i 's|#include "../printer/EscPosPrinter.h"|#include "EscPosPrinter.h"|g' "$SKETCH_DIR"/*.cpp
@@ -47,6 +48,7 @@ else
   sed -i 's|#include "time/OfflineTimeManager.h"|#include "OfflineTimeManager.h"|g' "$SKETCH_DIR"/MorningPuzzles.ino
   sed -i 's|#include "config/OfflineConfigManager.h"|#include "OfflineConfigManager.h"|g' "$SKETCH_DIR"/MorningPuzzles.ino
   sed -i 's|#include "generators/OfflinePuzzleComposer.h"|#include "OfflinePuzzleComposer.h"|g' "$SKETCH_DIR"/MorningPuzzles.ino
+  sed -i 's|#include "time/PortalHtml.h"|#include "PortalHtml.h"|g' "$SKETCH_DIR"/*.cpp "$SKETCH_DIR"/*.h "$SKETCH_DIR"/MorningPuzzles.ino 2>/dev/null || true
 fi
 
 echo "Successfully synchronized MorningPuzzles Arduino sketch!"

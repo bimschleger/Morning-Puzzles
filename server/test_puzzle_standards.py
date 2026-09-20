@@ -514,6 +514,15 @@ def test_jumble_difficulty_standards():
     print("  -> Passed! All 300 Jumble puzzles strictly satisfy difficulty word lengths, clue counts (4-6), circles, and multiset equivalence across targets.\n")
 
 
+def test_generators_directory_removed():
+    print("Test 10: Verifying Complete Removal of Obsolete server/app/generators/...")
+    gen_dir = os.path.join(os.path.dirname(__file__), "app", "generators")
+    assert not os.path.exists(gen_dir), (
+        f"Directory {gen_dir} must not exist! All puzzles must be modular plugins in server/app/puzzles/."
+    )
+    print("  -> Passed! server/app/generators/ does not exist.\n")
+
+
 if __name__ == "__main__":
     print("==================================================================")
     print("RUNNING MORNING PUZZLES PRESENTATION & AUTHORING STANDARDS TESTS")
@@ -528,8 +537,9 @@ if __name__ == "__main__":
     test_master_receipt_header_and_footer()
     test_playable_cells_cleanliness()
     test_jumble_difficulty_standards()
+    test_generators_directory_removed()
 
     print("==================================================================")
-    print("ALL PRESENTATION & AUTHORING STANDARDS TESTS PASSED (9/9)!")
+    print("ALL PRESENTATION & AUTHORING STANDARDS TESTS PASSED (10/10)!")
     print("==================================================================")
 

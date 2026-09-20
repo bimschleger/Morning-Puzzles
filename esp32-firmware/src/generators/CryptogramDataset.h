@@ -1,6 +1,5 @@
-// Morning Puzzles - Offline Cryptogram Dataset
-// 300 Curated Quotes (100 Easy, 100 Medium, 100 Hard) stored in PROGMEM flash.
-// Auto-generated from server/data/cryptograms.json
+// Automatically generated from server/data/cryptograms.json by tools/datasets/build_all_datasets.py
+// Do not edit directly!
 #ifndef CRYPTOGRAM_DATASET_H
 #define CRYPTOGRAM_DATASET_H
 

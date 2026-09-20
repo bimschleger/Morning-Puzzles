@@ -6,7 +6,7 @@
 #if (ACTIVE_PRINTER_MODE == PRINTER_MODE_W5500_ETH)
 #include <SPI.h>
 #include <Ethernet.h>
-#else
+#elif (ACTIVE_PRINTER_MODE == PRINTER_MODE_WIFI_TCP)
 #include <WiFi.h>
 #include <WiFiClient.h>
 #endif
@@ -64,7 +64,7 @@ private:
     uint8_t _mode;
 #if (ACTIVE_PRINTER_MODE == PRINTER_MODE_W5500_ETH)
     EthernetClient _ethClient;
-#else
+#elif (ACTIVE_PRINTER_MODE == PRINTER_MODE_WIFI_TCP)
     WiFiClient _tcpClient;
 #endif
     HardwareSerial* _serial;

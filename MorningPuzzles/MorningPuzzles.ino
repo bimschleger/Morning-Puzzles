@@ -15,13 +15,7 @@
 #include "OfflinePuzzleComposer.h"
 #include <Preferences.h>
 
-#if !OFFLINE_ONLY_BUILD
-#include <WiFi.h>
-#include "scheduler/DailyScheduler.h"
-#include "net/PuzzleClient.h"
-DailyScheduler         scheduler;
-PuzzleClient           puzzleClient;
-#elif (ACTIVE_PRINTER_MODE == PRINTER_MODE_WIFI_TCP)
+#if (ACTIVE_PRINTER_MODE == PRINTER_MODE_WIFI_TCP)
 #include <WiFi.h>
 #endif
 

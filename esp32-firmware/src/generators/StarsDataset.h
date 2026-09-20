@@ -1,3 +1,5 @@
+// Automatically generated from server/data/stars_dataset.json by tools/datasets/build_all_datasets.py
+// Do not edit directly!
 #ifndef STARS_DATASET_H
 #define STARS_DATASET_H
 

@@ -1,3 +1,5 @@
+// Automatically generated from server/data/wheel_dictionary.json by tools/datasets/build_all_datasets.py
+// Do not edit directly!
 #ifndef WHEEL_DATASET_H
 #define WHEEL_DATASET_H
 

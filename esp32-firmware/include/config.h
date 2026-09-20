@@ -12,15 +12,6 @@
 // -----------------------------------------------------------------------------
 #define OFFLINE_ONLY_BUILD      1       // 1 = Strip all outbound network/API client code
 
-// Supported modes:
-//   1 = STANDALONE OFFLINE (All 7 puzzles generated 100% on ESP32, zero server needed)
-//   2 = NETWORK SERVER     (Legacy: fetches pre-rendered puzzles from remote API)
-//   3 = HYBRID             (Legacy: tries network server first; falls back to on-device generation)
-#define MODE_STANDALONE_OFFLINE 1
-#define MODE_NETWORK_SERVER     2
-#define MODE_HYBRID             3
-#define ACTIVE_OPERATION_MODE   MODE_STANDALONE_OFFLINE
-
 // -----------------------------------------------------------------------------
 // 2. On-Demand Puzzle Grade & Difficulty Configuration
 // -----------------------------------------------------------------------------
@@ -115,16 +106,11 @@
 // -----------------------------------------------------------------------------
 // 5. Wi-Fi Network Settings
 // -----------------------------------------------------------------------------
-// Required when ACTIVE_PRINTER_MODE is PRINTER_MODE_ETHERNET so the ESP32
+// Required only when ACTIVE_PRINTER_MODE is PRINTER_MODE_WIFI_TCP so the ESP32
 // can connect to your router and reach the printer over TCP port 9100.
 #define WIFI_SSID               "YOUR_WIFI_SSID"
 #define WIFI_PASSWORD           "YOUR_WIFI_PASSWORD"
 #define WIFI_CONNECT_TIMEOUT_MS 15000
-
-#define PUZZLE_API_HOST         "192.168.1.50"
-#define PUZZLE_API_PORT         8000
-#define PUZZLE_API_PATH         "/api/v1/daily-print"
-#define PUZZLE_API_KEY          ""
 
 // -----------------------------------------------------------------------------
 // 6. Hardware Pins & User Interaction

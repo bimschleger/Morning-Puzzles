@@ -41,11 +41,11 @@
   },
   "jumble": {
     "title": "JUMBLE",
-    "sha256": "7ee7df4fd91fc81edf9c3ba7ae0ea8e81fc12ecc96e40efb4a6b18e4c5adf334",
-    "byte_length": 80072,
+    "sha256": "81502e40351620443236fcb24c5f824860dfe037f9adfe3f68e8b1fde85ec975",
+    "byte_length": 81224,
     "width_dots": 576,
-    "height_dots": 1112,
-    "average_duty_cycle_pct": 5.32,
+    "height_dots": 1128,
+    "average_duty_cycle_pct": 5.22,
     "max_consecutive_dense_lines": 2,
     "is_safe": true
   },
@@ -61,7 +61,7 @@
   },
   "mines": {
     "title": "MINES",
-    "sha256": "781591abdb666161824704c550a80e101aeacf87bcaa2d058e04a4004607e86d",
+    "sha256": "49bfb80c6c18fb4f2b1527ff7db3cef7a1786d8ad1acdb351df4fead07ef4c12",
     "byte_length": 43208,
     "width_dots": 576,
     "height_dots": 600,
@@ -81,17 +81,17 @@
   },
   "bridges": {
     "title": "BRIDGES",
-    "sha256": "695d4d9442a74620fb42d6826385b796b14d3956f720452da2123d113284cb9e",
+    "sha256": "75088f82e0695b6967d4cbf8610cf4d7ff11a3d996a15b40cbb15503c88b38a0",
     "byte_length": 41480,
     "width_dots": 576,
     "height_dots": 576,
-    "average_duty_cycle_pct": 1.78,
+    "average_duty_cycle_pct": 1.73,
     "max_consecutive_dense_lines": 0,
     "is_safe": true
   },
   "killer": {
     "title": "KILLER",
-    "sha256": "f00a62b3a597144111334e4e3a64010a10870c954be24ee1ecc5e65aade82d73",
+    "sha256": "41606fe8ae2df97dfe3f2a2f21c9f92c6c7028e0517ccbfbf1952d54c3ac9b0e",
     "byte_length": 41480,
     "width_dots": 576,
     "height_dots": 576,
@@ -101,11 +101,11 @@
   },
   "cryptogram": {
     "title": "CRYPTOGRAM",
-    "sha256": "d137a596cf6d6c983a9e9586743ed7aba07f6f1537995482476aca9d59413690",
-    "byte_length": 43208,
+    "sha256": "db19527a3c4cd16f7ff8eb69cb594c1b2f1bf25455c6214b748c7e3b31b70c87",
+    "byte_length": 47240,
     "width_dots": 576,
-    "height_dots": 600,
-    "average_duty_cycle_pct": 3.4,
+    "height_dots": 656,
+    "average_duty_cycle_pct": 3.58,
     "max_consecutive_dense_lines": 0,
     "is_safe": true
   },
@@ -131,11 +131,11 @@
   },
   "wheel": {
     "title": "WHEEL",
-    "sha256": "259aafd1f29f39435a86ada47733c88ad65ea3ed23c9387d3078bf888db4aaf1",
+    "sha256": "2daa012bec054a92002917395412cfc307930950feb27404c95d0a93fd5b4c8d",
     "byte_length": 26504,
     "width_dots": 576,
     "height_dots": 368,
-    "average_duty_cycle_pct": 4.17,
+    "average_duty_cycle_pct": 4.61,
     "max_consecutive_dense_lines": 1,
     "is_safe": true
   },
@@ -151,11 +151,11 @@
   },
   "loop": {
     "title": "LOOP",
-    "sha256": "424c16437001d272e6f96ccc2da43ec54771fd38753c5f4b72df7cef13aa22ba",
-    "byte_length": 27080,
+    "sha256": "3d5dbaede8ba680d0017be106c31e6c3b8c23377d51953f432fb99aba555c805",
+    "byte_length": 41480,
     "width_dots": 576,
-    "height_dots": 376,
-    "average_duty_cycle_pct": 1.94,
+    "height_dots": 576,
+    "average_duty_cycle_pct": 1.57,
     "max_consecutive_dense_lines": 0,
     "is_safe": true
   }

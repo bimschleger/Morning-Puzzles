@@ -14,7 +14,6 @@ import os
 from typing import List, Tuple, Set
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "server"))
-from app.generators.killer_gen import KillerSudokuGenerator
 from app.puzzles.killer import KillerPuzzle
 
 
@@ -36,7 +35,7 @@ def is_orthogonally_connected(cells: List[Tuple[int, int]]) -> bool:
     return len(visited) == len(cells)
 
 
-def verify_puzzle_integrity(puzzle: dict, gen: KillerSudokuGenerator):
+def verify_puzzle_integrity(puzzle: dict, plugin: KillerPuzzle):
     size = puzzle["size"]
     box_r = puzzle["box_rows"]
     box_c = puzzle["box_cols"]
@@ -85,7 +84,7 @@ def verify_puzzle_integrity(puzzle: dict, gen: KillerSudokuGenerator):
     assert len(assigned) == size * size, f"All {size * size} cells must belong to a cage, got {len(assigned)}"
 
     # 3. Independent solver check: exactly 1 unique solution
-    sols = gen._find_multiple_solutions(size, box_r, box_c, cages, max_count=2)
+    sols = plugin._find_multiple_solutions(size, box_r, box_c, cages, max_count=2)
     assert len(sols) == 1, f"Puzzle has {len(sols)} solutions instead of 1 unique solution"
 
 
@@ -94,14 +93,14 @@ def test_killer_sudoku():
     print("RUNNING KILLER SUDOKU GENERATION & UNIQUENESS VERIFICATION TESTS")
     print("================================================================\n")
 
-    gen = KillerSudokuGenerator(seed=42)
+    plugin = KillerPuzzle()
 
     # Test 1: Easy (4x4, 2x2 boxes, digits 1-4)
     print("Test 1: Verifying EASY 4x4 Killer Sudoku Generation & Contiguity...")
     t0 = time.time()
     for _ in range(30):
-        puzzle = gen.generate("easy")
-        verify_puzzle_integrity(puzzle, gen)
+        res = plugin.generate("easy")
+        verify_puzzle_integrity(res.to_dict(), plugin)
     dt_easy = (time.time() - t0) * 1000 / 30
     print(f"  -> Passed! 30 Easy puzzles verified (Avg {dt_easy:.2f} ms per puzzle, 100% contiguous & unique).\n")
 
@@ -109,8 +108,8 @@ def test_killer_sudoku():
     print("Test 2: Verifying MEDIUM 4x4 Killer Sudoku Generation & Contiguity...")
     t0 = time.time()
     for _ in range(50):
-        puzzle = gen.generate("medium")
-        verify_puzzle_integrity(puzzle, gen)
+        res = plugin.generate("medium")
+        verify_puzzle_integrity(res.to_dict(), plugin)
     dt_med = (time.time() - t0) * 1000 / 50
     print(f"  -> Passed! 50 Medium puzzles verified (Avg {dt_med:.2f} ms per puzzle, 100% contiguous & unique).\n")
 
@@ -118,17 +117,16 @@ def test_killer_sudoku():
     print("Test 3: Verifying EXTREME 6x6 Killer Sudoku Generation & Contiguity...")
     t0 = time.time()
     for _ in range(20):
-        puzzle = gen.generate("extreme")
-        verify_puzzle_integrity(puzzle, gen)
+        res = plugin.generate("extreme")
+        verify_puzzle_integrity(res.to_dict(), plugin)
     dt_ext = (time.time() - t0) * 1000 / 20
     print(f"  -> Passed! 20 Extreme puzzles verified (Avg {dt_ext:.2f} ms per puzzle, 100% contiguous & unique).\n")
 
     # Test 4: BasePuzzle Plugin compliance
     print("Test 4: Verifying KillerPuzzle Plugin Output...")
-    plugin = KillerPuzzle()
     res = plugin.generate(difficulty="medium", seed=123)
     raw = res.to_dict()
-    verify_puzzle_integrity(raw, gen)
+    verify_puzzle_integrity(raw, plugin)
     assert res.puzzle_type == "killer"
     assert "Fill every row, column, and box" in res.instruction
     print("  -> Passed! KillerPuzzle plugin output verified.\n")
@@ -140,4 +138,3 @@ def test_killer_sudoku():
 
 if __name__ == "__main__":
     test_killer_sudoku()
-

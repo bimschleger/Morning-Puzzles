@@ -17,17 +17,23 @@ import sys
 import os
 
 # Add server directory to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "server"))
+import json
+from pathlib import Path
 
-from app.generators.wordsearch_dataset import (
-    WORDSEARCH_THEMES_EASY,
-    WORDSEARCH_THEMES_MEDIUM,
-    WORDSEARCH_THEMES_HARD,
-    THEMES_BY_DIFFICULTY,
+DATASET_PATH = Path(__file__).resolve().parent / "data" / "wordsearch_dataset.json"
+with open(DATASET_PATH, "r", encoding="utf-8") as f:
+    THEMES_BY_DIFFICULTY = json.load(f)
+
+WORDSEARCH_THEMES_EASY = THEMES_BY_DIFFICULTY["easy"]
+WORDSEARCH_THEMES_MEDIUM = THEMES_BY_DIFFICULTY["medium"]
+WORDSEARCH_THEMES_HARD = THEMES_BY_DIFFICULTY["hard"]
+
+from app.puzzles.wordsearch import (
+    WordSearchPuzzle,
+    DIRECTIONS,
     get_random_theme,
     get_theme_words,
 )
-from app.generators.wordsearch_gen import WordSearchGenerator, DIRECTIONS
 
 
 def test_dataset_integrity():
@@ -83,7 +89,7 @@ def test_theme_retrieval():
 
 def test_puzzle_generation():
     print("\nTest 3: Verifying Puzzle Generation & Directional Constraints...")
-    gen = WordSearchGenerator(seed=42)
+    gen = WordSearchPuzzle()
 
     expected_dirs = {
         "easy": {"E"},
@@ -114,11 +120,14 @@ def test_puzzle_generation():
 
             # Verify directional validity
             for word, placement in res["placements"].items():
-                d = placement["direction"]
+                d = placement.get("dir") or placement.get("direction")
                 assert d in expected_dirs[diff], f"Direction '{d}' not allowed for {diff}"
 
                 # Verify word actually exists at grid coordinates
-                r, c = placement["start"]
+                if "start" in placement:
+                    r, c = placement["start"]
+                else:
+                    r, c = placement["row"], placement["col"]
                 dr, dc = DIRECTIONS[d]
                 for idx, ch in enumerate(word):
                     grid_ch = res["grid"][r + dr * idx][c + dc * idx]
