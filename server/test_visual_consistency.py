@@ -175,6 +175,7 @@ def test_visual_consistency():
                 "phrase": item["phrase"],
                 "author": item["author"],
                 "ciphertext": item["ciphertext"],
+                "clues": item.get("clues", []),
                 "clue_str": item.get("clue_str", ""),
                 "difficulty": item.get("difficulty", "easy"),
             }

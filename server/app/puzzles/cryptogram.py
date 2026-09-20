@@ -109,7 +109,7 @@ class CryptogramPuzzle(BasePuzzle):
         else:
             clue_str = "CLUES: " + ", ".join(f"{c['cipher']} = {c['plain']}" for c in clues)
 
-        formatted_text = self._format_ascii_text(ciphertext, author, clue_str=clue_str)
+        formatted_text = self._format_ascii_text(ciphertext, author, clue_str=clue_str, clues=clues)
 
         raw_data = {
             "type": "cryptogram",
@@ -148,7 +148,8 @@ class CryptogramPuzzle(BasePuzzle):
         ciphertext = str(puzzle_data.get("ciphertext", "")).strip()
         author = str(puzzle_data.get("author", "")).strip()
         clue_str = puzzle_data.get("clue_str", "")
-        return self._format_ascii_text(ciphertext, author, clue_str=clue_str)
+        clues = puzzle_data.get("clues", [])
+        return self._format_ascii_text(ciphertext, author, clue_str=clue_str, clues=clues)
 
     def format_solution_key(self, puzzle_data: Union[BasePuzzleResult, Dict[str, Any]]) -> List[str]:
         phrase = puzzle_data.get("phrase") or puzzle_data.get("solution", "")
@@ -190,22 +191,13 @@ class CryptogramPuzzle(BasePuzzle):
         row_gap = 20
         header_gap = 16
         author_height = 36 if author else 0
-        tracker_height = 80
-        scratchpad_height = 140
-        badge_total_h = (36 + 16) if clue_str else 0
-        total_h = header_gap + badge_total_h + len(lines) * (row_height + row_gap) + author_height + tracker_height + scratchpad_height + 40
+        tracker_height = 276
+
+        total_h = header_gap + len(lines) * (row_height + row_gap) + author_height + 18 + tracker_height + 16
         total_h = ((total_h + 7) // 8) * 8  # Multiple of 8 dots
 
         tb = ThermalBitmap(target_width, total_h)
         cur_y = 16
-
-        # 0. Clue badge
-        if clue_str:
-            badge_y = 12
-            badge_h = 36
-            tb.draw_rect(padding, badge_y, inner_width, badge_h, thickness=2)
-            tb.draw_centered_text(badge_y + 11, clue_str, scale=2, color=1)
-            cur_y = badge_y + badge_h + 16
 
         # 1. Ciphertext rows with handwriting slot underlines
         for line_str in lines:
@@ -237,26 +229,56 @@ class CryptogramPuzzle(BasePuzzle):
             tb.draw_hline(dx, cur_y, w, thickness=2)
         cur_y += 18
 
-        # 4. Alphabet Tracker
+        # 4. Multi-Row Alphabet Tracker (4 rows of 7 columns, replacing scratchpad)
         tb.draw_text(padding, cur_y, "ALPHABET TRACKER:", scale=2, color=1)
-        cur_y += 20
-        col_w = inner_width // 26  # 20 dots per letter
-        for i in range(26):
-            lx = padding + i * col_w
-            tb.draw_char(lx + 4, cur_y, chr(ord('A') + i), scale=2, color=1)
-            bar_w = max(1, col_w - 4)
-            tb.draw_hline(lx + 2, cur_y + 18, bar_w, thickness=2)
+        cur_y += 26
 
-        cur_y += 32
+        # Build clue mapping (cipher letter -> plain letter)
+        cipher_to_clue = {}
+        for c in puzzle_data.get("clues", []):
+            if isinstance(c, dict) and "cipher" in c and "plain" in c:
+                cipher_to_clue[str(c["cipher"]).upper()] = str(c["plain"]).upper()
+        if not cipher_to_clue and clue_str:
+            parts = clue_str.replace("CLUES:", "").replace("CLUE:", "").split(",")
+            for p in parts:
+                if "=" in p:
+                    c_part, p_part = p.split("=", 1)
+                    cipher_to_clue[c_part.strip().upper()] = p_part.strip().upper()
 
-        # 5. Scratchpad (4 handwriting dashed lines)
-        tb.draw_text(padding, cur_y, "SCRATCHPAD:", scale=2, color=1)
-        cur_y += 22
-        for _ in range(4):
-            for dx in range(padding, padding + inner_width, 10):
-                w = 5 if dx + 5 <= padding + inner_width else padding + inner_width - dx
-                tb.draw_hline(dx, cur_y, w, thickness=1)
-            cur_y += 26
+        col_w = 75
+        start_x = padding + (inner_width - 7 * col_w) // 2  # 25
+        bar_w = 40
+        row_h = 60
+
+        alpha_rows = [
+            "ABCDEFG",
+            "HIJKLMN",
+            "OPQRSTU",
+            "VWXYZ",
+        ]
+
+        for row_chars in alpha_rows:
+            slot_y = cur_y + 20
+            for col_idx, ch in enumerate(row_chars):
+                cx = start_x + col_idx * col_w
+                line_x = cx + (col_w - bar_w) // 2
+
+                # Pre-printed clue (if available) in scale=2 above underline
+                if ch in cipher_to_clue:
+                    clue_char = cipher_to_clue[ch]
+                    clue_x = cx + (col_w - 10) // 2
+                    clue_y = slot_y - 17
+                    tb.draw_char(clue_x, clue_y, clue_char, scale=2, color=1)
+
+                # Handwriting slot line
+                tb.draw_hline(line_x, slot_y, bar_w, thickness=2)
+
+                # Base alphabet cipher letter in scale=3 below underline
+                base_x = cx + (col_w - 15) // 2
+                base_y = slot_y + 8
+                tb.draw_char(base_x, base_y, ch, scale=3, color=1)
+
+            cur_y += row_h
 
         return tb.to_escpos()
 
@@ -293,7 +315,13 @@ class CryptogramPuzzle(BasePuzzle):
         clues.sort(key=lambda x: x["cipher"])
         return clues
 
-    def _format_ascii_text(self, ciphertext: str, author: str = "", clue_str: str = "") -> str:
+    def _format_ascii_text(
+        self,
+        ciphertext: str,
+        author: str = "",
+        clue_str: str = "",
+        clues: Optional[List[Dict[str, str]]] = None,
+    ) -> str:
         words = ciphertext.split(" ")
         lines_of_words: List[List[str]] = []
         current_line: List[str] = []
@@ -314,9 +342,6 @@ class CryptogramPuzzle(BasePuzzle):
             lines_of_words.append(current_line)
 
         output_lines: List[str] = []
-        if clue_str:
-            output_lines.append("   " + clue_str)
-            output_lines.append("")
 
         for line_words in lines_of_words:
             slot_parts = []
@@ -344,14 +369,38 @@ class CryptogramPuzzle(BasePuzzle):
             output_lines.append(f"   -- {author}")
             output_lines.append("")
 
+        # Build clue mapping (cipher letter -> plain letter)
+        cipher_to_clue = {}
+        if clues:
+            for c in clues:
+                if isinstance(c, dict) and "cipher" in c and "plain" in c:
+                    cipher_to_clue[str(c["cipher"]).upper()] = str(c["plain"]).upper()
+        if not cipher_to_clue and clue_str:
+            parts = clue_str.replace("CLUES:", "").replace("CLUE:", "").split(",")
+            for p in parts:
+                if "=" in p:
+                    c_part, p_part = p.split("=", 1)
+                    cipher_to_clue[c_part.strip().upper()] = p_part.strip().upper()
+
         output_lines.append("  - - - - - - - - - - - - - - - - - - - - - - - -")
         output_lines.append("  ALPHABET TRACKER:")
-        output_lines.append("  A B C D E F G H I J K L M N O P Q R S T U V W X Y Z")
-        output_lines.append("  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _")
-        output_lines.append("")
-        output_lines.append("  SCRATCHPAD:")
-        for _ in range(4):
-            output_lines.append("  ______________________________________________")
+        alpha_rows = [
+            "ABCDEFG",
+            "HIJKLMN",
+            "OPQRSTU",
+            "VWXYZ",
+        ]
+        for row_chars in alpha_rows:
+            clue_slots = []
+            underlines = []
+            base_letters = []
+            for ch in row_chars:
+                clue_slots.append(cipher_to_clue.get(ch, " "))
+                underlines.append("_")
+                base_letters.append(ch)
+            output_lines.append("   " + "     ".join(clue_slots))
+            output_lines.append("   " + "     ".join(underlines))
+            output_lines.append("   " + "     ".join(base_letters))
             output_lines.append("")
 
         return "\n".join(output_lines)

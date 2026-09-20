@@ -529,6 +529,12 @@ int main(int argc, char** argv) {
         std::cout << "    \"author\": \"" << cGen.getAuthor() << "\",\n";
         std::cout << "    \"ciphertext\": \"" << cGen.getCiphertext() << "\",\n";
         std::cout << "    \"clue_str\": \"" << cGen.getClueString() << "\",\n";
+        std::cout << "    \"clues\": [";
+        for (uint8_t i = 0; i < cGen.getClueCount(); i++) {
+            if (i > 0) std::cout << ", ";
+            std::cout << "{\"cipher\": \"" << cGen.getClue(i).cipher << "\", \"plain\": \"" << cGen.getClue(i).plain << "\"}";
+        }
+        std::cout << "],\n";
         std::cout << "    \"raster_hex\": \"" << toHex(printer->lastBitmap) << "\"\n";
         std::cout << "  }";
     }

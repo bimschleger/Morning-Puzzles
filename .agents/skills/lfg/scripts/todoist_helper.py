@@ -184,6 +184,13 @@ class TodoistClient:
             err_body = e.read().decode("utf-8") if e.fp else ""
             raise RuntimeError(f"Sync API item_move failed (HTTP {e.code}): {err_body}")
 
+    def get_comments(self, task_id: str) -> list[dict]:
+        """Fetches comments for a given task ID."""
+        try:
+            return self._http_get("comments", {"task_id": task_id})
+        except Exception:
+            return []
+
     def pop_backlog(self, project_name: str = "Morning Puzzles", move_to_in_progress: bool = True) -> dict:
         project = self.find_project(project_name)
         project_id = project["id"]
@@ -215,6 +222,19 @@ class TodoistClient:
 
         top_task = tasks[0]
 
+        # Fetch comments and attachments
+        comments = self.get_comments(top_task["id"])
+        attachments = []
+        for c in comments:
+            att = c.get("attachment") or c.get("fileAttachment")
+            if att:
+                attachments.append({
+                    "file_name": att.get("file_name") or att.get("fileName", ""),
+                    "file_type": att.get("file_type") or att.get("fileType", ""),
+                    "file_url": att.get("file_url") or att.get("fileUrl", ""),
+                    "resource_type": att.get("resource_type") or att.get("resourceType", ""),
+                })
+
         if move_to_in_progress:
             in_progress_sec = self.get_or_create_section(project_id, "In Progress")
             self.move_task_to_section(top_task["id"], in_progress_sec["id"])
@@ -239,6 +259,8 @@ class TodoistClient:
                 "url": top_task.get("url", ""),
                 "due": top_task.get("due"),
                 "order": top_task.get("order", 0),
+                "comments": [{"id": c.get("id"), "content": c.get("content", ""), "posted_at": c.get("posted_at")} for c in comments],
+                "attachments": attachments,
             }
         }
 

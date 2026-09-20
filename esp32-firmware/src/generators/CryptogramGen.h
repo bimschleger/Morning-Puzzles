@@ -29,6 +29,7 @@ public:
     const char* getCiphertext() const { return _ciphertext.c_str(); }
     const char* getClueString() const { return _clueStr.c_str(); }
     uint8_t getClueCount() const { return _clueCount; }
+    const CryptogramClue& getClue(uint8_t idx) const { return _clues[idx]; }
     CryptogramDifficulty getDifficulty() const { return _difficulty; }
 
     // Seeded generation for deterministic verification testing

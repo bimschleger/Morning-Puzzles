@@ -19,18 +19,25 @@ Check for available Todoist tools or use the local fallback helper:
 
 #### Path A: MCP Server Available
 If Todoist MCP tools are present in your environment:
-1. Search for project `Morning Puzzles` (or `Morning Games`, case-insensitive).
-2. Find the `Backlog` (or `Todo`) section and fetch its tasks, sorted by display order (ascending).
+1. Search for project `Morning Puzzles` (or `Morning Games`, case-insensitive) using `find-projects`.
+2. Find the `Backlog` (or `Todo`) section using `find-sections` and fetch its tasks using `find-tasks`, sorted by display order (ascending).
 3. If no tasks exist in `Backlog`/`Todo`, report that the backlog is empty and stop.
 4. Select the top task (first in list).
-5. Locate the `In Progress` (or `Doing`) section (create it under the project if it does not already exist).
-6. Move the selected task to the `In Progress`/`Doing` section.
+5. **Inspect Comments & Attachments**:
+   - Call `find-comments` with `taskId`.
+   - If any comment has a `fileAttachment`:
+     - Extract `fileUrl` and call `view-attachment` with `fileUrl`.
+     - For images, inspect the visual reference using `view_file` on the saved image path or view the inline image directly.
+     - Note any additional notes or instructions in comment text.
+6. Locate the `In Progress` (or `Doing`) section (create it under the project if it does not already exist).
+7. Move the selected task to the `In Progress`/`Doing` section.
 
 #### Path B: Fallback via Helper Script (Zero-Restart)
 If Todoist MCP tools are not registered in the current session, run the project's helper script:
 ```bash
 python3 .agents/skills/lfg/scripts/todoist_helper.py pop-backlog --project "Morning Puzzles"
 ```
+The script will automatically fetch comments and attached file metadata into `task["attachments"]` and `task["comments"]`.
 
 ### 2. Handle Execution Responses
 
@@ -49,6 +56,8 @@ python3 .agents/skills/lfg/scripts/todoist_helper.py pop-backlog --project "Morn
   Extract the task attributes:
   - **Task Title / Content**: `task["content"]`
   - **Description & Details**: `task["description"]`
+  - **Attachments**: `task.get("attachments", [])` (or comments with `fileAttachment`)
+  - **Comments**: `task.get("comments", [])`
   - **Labels / Tags**: `task["labels"]`
   - **Task ID & Link**: `task["url"]`
   - **Moved Destination**: `In Progress`
@@ -61,14 +70,16 @@ Print a clean summary card for the user:
 - **Project**: Morning Puzzles
 - **Section**: Moved to `In Progress`
 - **Description**: [Task Description or "(No description provided)"]
+- **Attachments**: [List filenames/types, or "(None)"]
 - **Labels**: [Labels or None]
 ```
 
 ### 4. Synthesize Goal Prompt & Immediately Launch `/grill-me`
 
-1. Synthesize a clear, outcome-focused goal prompt combining the task title, description, and context of the Morning Puzzles codebase:
-   `[Outcome Goal]: <Interpolated description of what needs to be built, fixed, or updated>`
+1. Synthesize a clear, outcome-focused goal prompt combining the task title, description, attached reference images/documents, and context of the Morning Puzzles codebase:
+   `[Outcome Goal]: <Interpolated description of what needs to be built, fixed, or updated, referencing any attached visual artifacts or mockups>`
 2. **Immediate Grilling**: Do **NOT** stop and wait for the user to manually type `/grill-me`. Transition directly into the `/grill-me` interview:
+   - Factor in any visual details observed from attachments (e.g. alignment issues, unwanted borders, spacing discrepancies).
    - Identify the primary architectural/design fork for this task.
    - Formulate the first clarifying question with concrete options and a recommended answer.
    - Immediately invoke the `ask_question` tool to present Question 1 to the user.

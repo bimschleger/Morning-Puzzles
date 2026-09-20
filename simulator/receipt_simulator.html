@@ -6532,23 +6532,12 @@
       const rowGap = 20;
       const headerGap = 16;
       const authorHeight = cData.author ? 36 : 0;
-      const trackerHeight = 80;
-      const scratchpadHeight = 140;
-      const badgeTotalH = cData.clueStr ? (36 + 16) : 0;
-      let totalH = headerGap + badgeTotalH + lines.length * (rowHeight + rowGap) + authorHeight + trackerHeight + scratchpadHeight + 40;
+      const trackerHeight = 276;
+      let totalH = headerGap + lines.length * (rowHeight + rowGap) + authorHeight + 18 + trackerHeight + 16;
       totalH = Math.floor((totalH + 7) / 8) * 8;
 
       const tc = new ThermalCanvasSimulator(576, totalH);
       let curY = 16;
-
-      // 0. Clue badge
-      if (cData.clueStr) {
-        const badgeY = 12;
-        const badgeH = 36;
-        tc.drawRect(padding, badgeY, innerWidth, badgeH, 2);
-        tc.drawCenteredText(badgeY + 11, cData.clueStr, 2);
-        curY = badgeY + badgeH + 16;
-      }
 
       // 1. Ciphertext rows with handwriting slot underlines
       for (const lineStr of lines) {
@@ -6583,28 +6572,56 @@
       }
       curY += 18;
 
-      // 4. Alphabet Tracker
+      // 4. Alphabet Tracker (4 rows of 7 columns, replacing scratchpad)
       tc.drawText(padding, curY, "ALPHABET TRACKER:", 2, 1);
-      curY += 20;
-      const colW = Math.floor(innerWidth / 26);
-      const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-      for (let i = 0; i < 26; i++) {
-        const lx = padding + i * colW;
-        tc.drawChar(lx + 4, curY, letters[i], 2, 1);
-        const barW = Math.max(1, colW - 4);
-        tc.drawHLine(lx + 2, curY + 18, barW, 2);
-      }
-      curY += 32;
+      curY += 26;
 
-      // 5. Scratchpad (4 handwriting dashed lines)
-      tc.drawText(padding, curY, "SCRATCHPAD:", 2, 1);
-      curY += 22;
-      for (let line = 0; line < 4; line++) {
-        for (let dx = padding; dx < padding + innerWidth; dx += 10) {
-          const w = (dx + 5 <= padding + innerWidth) ? 5 : (padding + innerWidth - dx);
-          tc.drawHLine(dx, curY, w, 1);
+      // Build clue map
+      const cipherToClue = {};
+      if (cData.clues && Array.isArray(cData.clues)) {
+        for (const cl of cData.clues) {
+          if (cl.cipher && cl.plain) cipherToClue[cl.cipher.toUpperCase()] = cl.plain.toUpperCase();
         }
-        curY += 26;
+      }
+      if (Object.keys(cipherToClue).length === 0 && cData.clueStr) {
+        const parts = cData.clueStr.replace(/CLUES?:/i, '').split(',');
+        for (const p of parts) {
+          if (p.includes('=')) {
+            const [cPart, pPart] = p.split('=');
+            cipherToClue[cPart.trim().toUpperCase()] = pPart.trim().toUpperCase();
+          }
+        }
+      }
+
+      const colW = 75;
+      const startX = padding + Math.floor((innerWidth - 7 * colW) / 2); // 25
+      const barW = 40;
+      const rowH = 60;
+
+      const alphaRows = ["ABCDEFG", "HIJKLMN", "OPQRSTU", "VWXYZ"];
+      for (const rowChars of alphaRows) {
+        const slotY = curY + 20;
+        for (let c = 0; c < rowChars.length; c++) {
+          const ch = rowChars[c];
+          const cx = startX + c * colW;
+          const lineX = cx + Math.floor((colW - barW) / 2);
+
+          // Pre-printed clue (if available) in scale=2 above underline
+          if (cipherToClue[ch]) {
+            const clueX = cx + Math.floor((colW - 10) / 2);
+            const clueY = slotY - 17;
+            tc.drawChar(clueX, clueY, cipherToClue[ch], 2, 1);
+          }
+
+          // Handwriting slot line
+          tc.drawHLine(lineX, slotY, barW, 2);
+
+          // Base alphabet cipher letter in scale=3 below underline
+          const baseX = cx + Math.floor((colW - 15) / 2);
+          const baseY = slotY + 8;
+          tc.drawChar(baseX, baseY, ch, 3, 1);
+        }
+        curY += rowH;
       }
 
       tc.renderToCanvas(canvas);
