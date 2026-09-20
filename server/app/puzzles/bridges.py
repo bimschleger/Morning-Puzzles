@@ -234,17 +234,6 @@ class BridgesPuzzle(BasePuzzle):
         total_h = padding + board_size + padding
 
         tb = ThermalBitmap(target_width, total_h)
-
-        corner_len = 16
-        tb.draw_hline(padding, padding, corner_len, thickness=2)
-        tb.draw_vline(padding, padding, corner_len, thickness=2)
-        tb.draw_hline(padding + board_size - corner_len, padding, corner_len, thickness=2)
-        tb.draw_vline(padding + board_size, padding, corner_len, thickness=2)
-        tb.draw_hline(padding, padding + board_size, corner_len, thickness=2)
-        tb.draw_vline(padding, padding + board_size - corner_len, corner_len, thickness=2)
-        tb.draw_hline(padding + board_size - corner_len, padding + board_size, corner_len, thickness=2)
-        tb.draw_vline(padding + board_size, padding + board_size - corner_len, corner_len, thickness=2)
-
         island_radius = max(18, min(24, step // 3))
         for isl in islands:
             r, c = isl.get("r", 0), isl.get("c", 0)

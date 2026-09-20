@@ -3817,16 +3817,7 @@
       ctx.fillStyle = '#fafaf7';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // 2. Corner Bracket Markers
-      const cornerLen = 12;
-      ctx.lineWidth = 1.5;
-      ctx.strokeStyle = '#888888';
-      ctx.strokeRect(offsetX, offsetY, cornerLen, 0);
-      ctx.strokeRect(offsetX + actualSize - cornerLen, offsetY, cornerLen, 0);
-      ctx.strokeRect(offsetX, offsetY + actualSize, cornerLen, 0);
-      ctx.strokeRect(offsetX + actualSize - cornerLen, offsetY + actualSize, cornerLen, 0);
-
-      // 3. Islands
+      // 2. Islands
       const islandRadius = Math.max(12, Math.min(16, Math.floor(step / 3)));
       for (const isl of bData.islands) {
         const cx = offsetX + isl.c * step;
@@ -6409,17 +6400,6 @@
       const totalH = padding + boardSize + padding;
 
       const tc = new ThermalCanvasSimulator(576, totalH);
-
-      // Corner framing brackets
-      const cornerLen = 16;
-      tc.drawHLine(padding, padding, cornerLen, 2);
-      tc.drawVLine(padding, padding, cornerLen, 2);
-      tc.drawHLine(padding + boardSize - cornerLen, padding, cornerLen, 2);
-      tc.drawVLine(padding + boardSize, padding, cornerLen, 2);
-      tc.drawHLine(padding, padding + boardSize, cornerLen, 2);
-      tc.drawVLine(padding, padding + boardSize - cornerLen, cornerLen, 2);
-      tc.drawHLine(padding + boardSize - cornerLen, padding + boardSize, cornerLen, 2);
-      tc.drawVLine(padding + boardSize, padding + boardSize - cornerLen, cornerLen, 2);
 
       // Islands
       const islandRadius = Math.max(18, Math.min(24, Math.floor(step / 3)));

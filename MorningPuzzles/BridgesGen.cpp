@@ -217,17 +217,6 @@ bool BridgesGen::printRasterToReceipt(EscPosPrinter& printer, BridgesDifficulty 
         return false;
     }
 
-    // Corner framing brackets
-    int16_t cornerLen = 16;
-    canvas.drawHLine(padding, padding, cornerLen, 2);
-    canvas.drawVLine(padding, padding, cornerLen, 2);
-    canvas.drawHLine(padding + boardSize - cornerLen, padding, cornerLen, 2);
-    canvas.drawVLine(padding + boardSize, padding, cornerLen, 2);
-    canvas.drawHLine(padding, padding + boardSize, cornerLen, 2);
-    canvas.drawVLine(padding, padding + boardSize - cornerLen, cornerLen, 2);
-    canvas.drawHLine(padding + boardSize - cornerLen, padding + boardSize, cornerLen, 2);
-    canvas.drawVLine(padding + boardSize, padding + boardSize - cornerLen, cornerLen, 2);
-
     // Islands
     int16_t islandRadius = max((int16_t)18, min((int16_t)24, (int16_t)(step / 3)));
     for (uint8_t i = 0; i < _islandCount; i++) {
