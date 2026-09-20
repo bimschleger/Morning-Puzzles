@@ -308,15 +308,67 @@ void OfflineTimeManager::printConfigSavedTicket(EscPosPrinter& printer, const Of
     printer.printDoubleLine();
     printer.println("");
 
-    printer.setAlign(ALIGN_LEFT);
-    uint8_t enabledCount = config.getEnabledGameCount();
-    printer.println(String("Active Games (") + enabledCount + " of " + String((int)OFFLINE_PUZZLE_TOTAL) + "):");
+    // Categorize active and inactive games
+    OfflinePuzzleType activeGames[OFFLINE_PUZZLE_TOTAL];
+    uint8_t activeCount = 0;
+    OfflinePuzzleType inactiveGames[OFFLINE_PUZZLE_TOTAL];
+    uint8_t inactiveCount = 0;
+
     for (uint8_t i = 0; i < (uint8_t)OFFLINE_PUZZLE_TOTAL; i++) {
         if (config.isGameEnabled((OfflinePuzzleType)i)) {
-            printer.println(String("  * ") + config.getPuzzleName((OfflinePuzzleType)i));
+            activeGames[activeCount++] = (OfflinePuzzleType)i;
+        } else {
+            inactiveGames[inactiveCount++] = (OfflinePuzzleType)i;
         }
     }
+
+    // Two-column game list (24 cols left, 24 cols right)
+    printer.setAlign(ALIGN_LEFT);
+    String leftHdr = String("ACTIVE (") + activeCount + ")";
+    while (leftHdr.length() < 24) {
+        leftHdr += ' ';
+    }
+    String rightHdr = String("INACTIVE (") + inactiveCount + ")";
+    printer.setBold(true);
+    printer.println(leftHdr + rightHdr);
+    printer.setBold(false);
+
+    uint8_t maxRows = (activeCount > inactiveCount) ? activeCount : inactiveCount;
+    if (maxRows == 0) {
+        maxRows = 1;
+    }
+
+    for (uint8_t row = 0; row < maxRows; row++) {
+        String leftCol = "";
+        if (row < activeCount) {
+            leftCol = String(" * ") + config.getPuzzleName(activeGames[row]);
+        } else if (activeCount == 0 && row == 0) {
+            leftCol = "  (None)";
+        }
+        while (leftCol.length() < 24) {
+            leftCol += ' ';
+        }
+
+        String rightCol = "";
+        if (row < inactiveCount) {
+            rightCol = String(" * ") + config.getPuzzleName(inactiveGames[row]);
+        } else if (inactiveCount == 0 && row == 0) {
+            rightCol = "  (None)";
+        }
+
+        printer.println(leftCol + rightCol);
+    }
+
+    // Settings Section with Standard Separator
     printer.println("");
+    printer.printHorizontalLine('-');
+    printer.setAlign(ALIGN_CENTER);
+    printer.setBold(true);
+    printer.println("--- SETTINGS ---");
+    printer.setBold(false);
+    printer.println("");
+
+    printer.setAlign(ALIGN_LEFT);
     printer.printKeyValue("Print Count:", String(config.getPuzzleCount()) + " Puzzles");
     printer.printKeyValue("Difficulty:", config.getGradeName(config.getPuzzleGrade()));
     printer.printKeyValue("Daily Schedule:", config.getDailyScheduleTimeString());
@@ -324,16 +376,23 @@ void OfflineTimeManager::printConfigSavedTicket(EscPosPrinter& printer, const Of
     if (!_ds3231Present) {
         printer.println("  (No RTC detected - resync after power loss)");
     }
+
+    // Quick Controls Section
     printer.println("");
     printer.printHorizontalLine('-');
     printer.setAlign(ALIGN_CENTER);
     printer.println("Setup complete. Ready for printing!");
     printer.println("");
     printer.setBold(true);
-    printer.println("[ QUICK CONTROLS ]");
+    printer.println("--- QUICK CONTROLS ---");
     printer.setBold(false);
-    printer.println("Print on demand: Flip printer switch OFF then ON");
-    printer.println("Setup mode: Leave printer ON and replug power");
+    printer.setAlign(ALIGN_LEFT);
+    printer.println("1. Scheduled: Runs daily at configured time");
+    printer.println("   as long as printer is powered on.");
+    printer.println("2. On-demand: Flip printer switch OFF then ON");
+    printer.println("   to print a fresh set of puzzles.");
+    printer.println("3. Setup mode: Leave printer ON and replug");
+    printer.println("   power to re-enter setup portal.");
     printer.printHorizontalLine('-');
 
     printer.feed(4);
