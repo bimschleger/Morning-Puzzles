@@ -224,10 +224,13 @@ void OfflineTimeManager::printSetupTicket(EscPosPrinter& printer) {
     printer.println("");
 
     // Step 1: Wi-Fi
+    printer.printHorizontalLine('-');
     printer.setAlign(ALIGN_CENTER);
     printer.setBold(true);
-    printer.println("[ STEP 1: SCAN TO JOIN THE NETWORK ]");
+    printer.println("--- STEP 1: JOIN WI-FI ---");
     printer.setBold(false);
+    printer.println("Connect your device to the setup hotspot:");
+    printer.println("");
 
     ThermalCanvas canvas;
     if (canvas.begin(240)) {
@@ -242,9 +245,13 @@ void OfflineTimeManager::printSetupTicket(EscPosPrinter& printer) {
     printer.println("");
 
     // Step 2: Settings URL
+    printer.printHorizontalLine('-');
+    printer.setAlign(ALIGN_CENTER);
     printer.setBold(true);
-    printer.println("[ STEP 2: SCAN TO VIEW SETTINGS ]");
+    printer.println("--- STEP 2: OPEN SETTINGS ---");
     printer.setBold(false);
+    printer.println("Open the setup page in your web browser:");
+    printer.println("");
 
     if (canvas.begin(216)) {
         canvas.clear(0);
@@ -257,10 +264,13 @@ void OfflineTimeManager::printSetupTicket(EscPosPrinter& printer) {
     printer.println("");
 
     // Step 3: Choose Games
+    printer.printHorizontalLine('-');
+    printer.setAlign(ALIGN_CENTER);
     printer.setBold(true);
-    printer.println("[ STEP 3: CHOOSE GAMES ]");
+    printer.println("--- STEP 3: CHOOSE GAMES ---");
     printer.setBold(false);
-    printer.println("In your browser, customize your device:");
+    printer.println("Customize your game selection and schedule:");
+    printer.println("");
     printer.setAlign(ALIGN_LEFT);
     printer.println("      * Select which games to get");
     printer.println("      * How many games to print");
@@ -276,11 +286,22 @@ void OfflineTimeManager::printSetupTicket(EscPosPrinter& printer) {
     printer.println("(A confirmation ticket prints automatically)");
     printer.println("(Hotspot auto-closes after 5 minutes)");
     printer.println("");
+
+    // Controls Section
+    printer.printHorizontalLine('-');
+    printer.setAlign(ALIGN_CENTER);
     printer.setBold(true);
-    printer.println("[ QUICK CONTROLS ]");
+    printer.println("--- CONTROLS ---");
     printer.setBold(false);
-    printer.println("Print on demand: Flip printer switch OFF then ON");
-    printer.println("Setup mode: Leave printer ON and replug power");
+    printer.println("Use these three modes to operate your printer:");
+    printer.println("");
+    printer.setAlign(ALIGN_LEFT);
+    printer.println("1. Scheduled: Runs every day if configured");
+    printer.println("   as long as the printer is powered on.");
+    printer.println("2. On-demand: Turn printer off and back on");
+    printer.println("   to print fresh puzzles immediately.");
+    printer.println("3. Setup: Leave printer power switch ON,");
+    printer.println("   unplug the power strip, and plug it back in.");
     printer.printHorizontalLine('-');
 
     printer.feed(4);
@@ -377,22 +398,24 @@ void OfflineTimeManager::printConfigSavedTicket(EscPosPrinter& printer, const Of
         printer.println("  (No RTC detected - resync after power loss)");
     }
 
-    // Quick Controls Section
+    // Controls Section
     printer.println("");
     printer.printHorizontalLine('-');
     printer.setAlign(ALIGN_CENTER);
     printer.println("Setup complete. Ready for printing!");
     printer.println("");
     printer.setBold(true);
-    printer.println("--- QUICK CONTROLS ---");
+    printer.println("--- CONTROLS ---");
     printer.setBold(false);
+    printer.println("Use these three modes to operate your printer:");
+    printer.println("");
     printer.setAlign(ALIGN_LEFT);
-    printer.println("1. Scheduled: Runs daily at configured time");
-    printer.println("   as long as printer is powered on.");
-    printer.println("2. On-demand: Flip printer switch OFF then ON");
-    printer.println("   to print a fresh set of puzzles.");
-    printer.println("3. Setup mode: Leave printer ON and replug");
-    printer.println("   power to re-enter setup portal.");
+    printer.println("1. Scheduled: Runs every day if configured");
+    printer.println("   as long as the printer is powered on.");
+    printer.println("2. On-demand: Turn printer off and back on");
+    printer.println("   to print fresh puzzles immediately.");
+    printer.println("3. Setup: Leave printer power switch ON,");
+    printer.println("   unplug the power strip, and plug it back in.");
     printer.printHorizontalLine('-');
 
     printer.feed(4);
