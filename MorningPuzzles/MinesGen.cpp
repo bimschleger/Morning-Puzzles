@@ -309,7 +309,7 @@ bool MinesGen::printRasterToReceipt(EscPosPrinter& printer, MinesDifficulty /*di
     canvas.drawRect(padding, 12, innerWidth, badgeH, 3);
     char badgeBuf[32];
     snprintf(badgeBuf, sizeof(badgeBuf), "TOTAL MINES: %d", _totalMines);
-    canvas.drawCenteredText(18, badgeBuf, 2);
+    canvas.drawCenteredText(23, badgeBuf, 2);
 
     int16_t boardY = 12 + badgeH + 12;
 
