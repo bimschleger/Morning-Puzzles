@@ -394,9 +394,6 @@ void OfflineTimeManager::printConfigSavedTicket(EscPosPrinter& printer, const Of
     printer.printKeyValue("Difficulty:", config.getGradeName(config.getPuzzleGrade()));
     printer.printKeyValue("Daily Schedule:", config.getDailyScheduleTimeString());
     printer.printKeyValue("Clock:", getFormattedTime());
-    if (!_ds3231Present) {
-        printer.println("  (No RTC detected - resync after power loss)");
-    }
 
     // Controls Section
     printer.println("");
