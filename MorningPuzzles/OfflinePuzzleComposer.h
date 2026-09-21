@@ -38,6 +38,10 @@ public:
     PuzzleGrade getCurrentGrade() const;
     const char* getGradeName(PuzzleGrade grade) const;
 
+    // Prints a comprehensive on-demand tutorial / cheat-sheet receipt for a single game
+    bool printGameGuide(EscPosPrinter& printer, uint8_t gameId);
+    static void renderGameGuideRaster(class ThermalCanvas& canvas, uint8_t gameId);
+
     PuzzleGrade getGradeForSlot(uint8_t index, uint8_t totalCount) const;
     bool supportsExtreme(OfflinePuzzleType type) const;
 

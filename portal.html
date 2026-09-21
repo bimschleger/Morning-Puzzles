@@ -20,17 +20,17 @@
   }
   .app-container {
     width: 100%;
-    max-width: 460px;
+    max-width: 480px;
     display: flex;
     flex-direction: column;
     gap: 16px;
-    padding-bottom: 24px;
+    padding-bottom: 28px;
   }
   .header {
     background: #020617;
     border: 1px solid #1e293b;
     border-radius: 16px;
-    padding: 20px 18px;
+    padding: 18px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -43,6 +43,42 @@
     letter-spacing: 0.03em;
     text-align: center;
   }
+
+  /* Segmented Tab Bar */
+  .tab-bar {
+    display: flex;
+    background: #020617;
+    border: 1px solid #1e293b;
+    border-radius: 14px;
+    padding: 4px;
+    gap: 6px;
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 11px 12px;
+    border-radius: 10px;
+    border: none;
+    background: transparent;
+    color: #94a3b8;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+  }
+  .tab-btn.active {
+    background: #f59e0b;
+    color: #020617;
+    box-shadow: 0 2px 10px rgba(245, 158, 11, 0.25);
+  }
+
+  .tab-view {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+  }
+
   .card {
     background: #020617;
     border: 1px solid #1e293b;
@@ -66,6 +102,7 @@
     font-size: 0.8rem;
     color: #94a3b8;
     margin-bottom: 12px;
+    line-height: 1.4;
   }
 
   /* Switch Toggle */
@@ -76,12 +113,7 @@
     height: 28px;
     flex-shrink: 0;
   }
-  .switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-    position: absolute;
-  }
+  .switch input { opacity: 0; width: 0; height: 0; position: absolute; }
   .slider {
     position: absolute;
     cursor: pointer;
@@ -101,9 +133,7 @@
     transition: 0.2s;
     border-radius: 50%;
   }
-  input:checked + .slider {
-    background-color: #f59e0b;
-  }
+  input:checked + .slider { background-color: #f59e0b; }
   input:checked + .slider:before {
     transform: translateX(22px);
     background-color: #020617;
@@ -209,11 +239,7 @@
   }
 
   /* Game Selection List */
-  .quick-actions {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 12px;
-  }
+  .quick-actions { display: flex; gap: 8px; margin-bottom: 12px; }
   .btn-quick {
     font-size: 0.75rem;
     font-weight: 600;
@@ -224,11 +250,7 @@
     border-radius: 8px;
     cursor: pointer;
   }
-  .games-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
+  .games-list { display: flex; flex-direction: column; gap: 8px; }
   .game-row {
     display: flex;
     align-items: center;
@@ -241,19 +263,9 @@
     transition: background 0.15s, border 0.15s;
     min-height: 48px;
   }
-  .game-row.active {
-    border-color: rgba(245, 158, 11, 0.4);
-  }
-  .game-left {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-  }
-  .game-title {
-    font-weight: 600;
-    font-size: 0.95rem;
-    color: #f1f5f9;
-  }
+  .game-row.active { border-color: rgba(245, 158, 11, 0.4); }
+  .game-left { display: flex; align-items: center; gap: 14px; }
+  .game-title { font-weight: 600; font-size: 0.95rem; color: #f1f5f9; }
   .custom-checkbox {
     width: 22px;
     height: 22px;
@@ -279,20 +291,36 @@
     display: none;
     margin-bottom: 2px;
   }
-  .game-row.active .custom-checkbox::after {
-    display: block;
-  }
+  .game-row.active .custom-checkbox::after { display: block; }
 
-  /* Big Chunky Save & Exit Button */
+  .btn-info {
+    background: rgba(245, 158, 11, 0.12);
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    color: #f59e0b;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    flex-shrink: 0;
+  }
+  .btn-info:active { transform: scale(0.92); background: rgba(245, 158, 11, 0.25); }
+
+  /* Big Chunky Primary Buttons */
   .btn-primary {
     width: 100%;
     background: #f59e0b;
     color: #020617;
     border: none;
-    padding: 20px 16px;
-    min-height: 60px;
+    padding: 18px 16px;
+    min-height: 56px;
     border-radius: 16px;
-    font-size: 1.15rem;
+    font-size: 1.1rem;
     font-weight: 800;
     letter-spacing: 0.02em;
     cursor: pointer;
@@ -300,6 +328,146 @@
     transition: transform 0.1s, background 0.15s;
   }
   .btn-primary:active { transform: scale(0.98); background: #d97706; }
+
+  /* Guide Specific Styles */
+  .pills-scroll {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 4px 0 8px 0;
+    scrollbar-width: none;
+  }
+  .pills-scroll::-webkit-scrollbar { display: none; }
+  .pill {
+    padding: 8px 14px;
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #94a3b8;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .pill.active {
+    background: #f59e0b;
+    border-color: #f59e0b;
+    color: #020617;
+    box-shadow: 0 2px 10px rgba(245, 158, 11, 0.25);
+  }
+  .guide-header {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .guide-title {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #f8fafc;
+    letter-spacing: 0.04em;
+  }
+  .guide-instruction {
+    font-size: 0.85rem;
+    color: #f59e0b;
+    font-weight: 600;
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+  .btn-print-guide {
+    background: rgba(245, 158, 11, 0.12);
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    color: #f59e0b;
+    font-weight: 700;
+    padding: 12px 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background 0.15s, transform 0.1s;
+    user-select: none;
+  }
+  .btn-print-guide:active { background: rgba(245, 158, 11, 0.25); transform: scale(0.98); }
+
+  .guide-objective {
+    font-size: 0.85rem;
+    color: #e2e8f0;
+    line-height: 1.5;
+    margin-bottom: 12px;
+  }
+  .guide-rules-list, .guide-anchors-list {
+    padding-left: 18px;
+    font-size: 0.82rem;
+    color: #94a3b8;
+    line-height: 1.5;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .thermal-canvas-box {
+    background: #ffffff;
+    border: 2px solid #334155;
+    border-radius: 10px;
+    padding: 6px;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    margin: 8px 0;
+  }
+  .thermal-canvas-box canvas {
+    width: 100%;
+    height: auto;
+    display: block;
+    image-rendering: pixelated;
+  }
+  .guide-captions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .caption-item {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 0.8rem;
+    color: #cbd5e1;
+    line-height: 1.4;
+  }
+  .badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-bottom: 4px;
+    letter-spacing: 0.03em;
+  }
+  .badge.valid {
+    background: rgba(34, 197, 94, 0.2);
+    color: #4ade80;
+    border: 1px solid rgba(34, 197, 94, 0.4);
+  }
+  .badge.invalid {
+    background: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.4);
+  }
+
+  .guide-faq-list { display: flex; flex-direction: column; gap: 8px; }
+  .faq-item {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+  .faq-q { font-size: 0.82rem; font-weight: 700; color: #f8fafc; margin-bottom: 4px; }
+  .faq-a { font-size: 0.78rem; color: #94a3b8; line-height: 1.4; }
 
   /* Toast Notification */
   .toast {
@@ -330,91 +498,164 @@
     <div class="header-title">Morning Puzzles</div>
   </div>
 
-  <!-- Daily Schedule -->
-  <div class="card">
-    <div class="card-header">
-      <div class="card-title">Daily Schedule</div>
-      <label class="switch">
-        <input type="checkbox" id="schedToggle" checked onchange="toggleSchedule(this.checked)">
-        <span class="slider"></span>
-      </label>
+  <!-- Top Segmented Tab Bar -->
+  <div class="tab-bar">
+    <button class="tab-btn active" id="tabBtnSettings" onclick="switchTab('settings')">⚙️ Settings</button>
+    <button class="tab-btn" id="tabBtnGuide" onclick="switchTab('guide')">📖 Game Guide & FAQ</button>
+  </div>
+
+  <!-- TAB 1: DEVICE SETTINGS -->
+  <div id="viewSettings" class="tab-view">
+    
+    <!-- Daily Schedule -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Daily Schedule</div>
+        <label class="switch">
+          <input type="checkbox" id="schedToggle" checked onchange="toggleSchedule(this.checked)">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="card-subtitle">Automatically generate and print a fresh puzzle receipt every morning.</div>
+      <div id="schedTimeContainer" class="sched-time-container">
+        <div class="sched-time-label">Print Time</div>
+        <div class="stepper-row">
+          <button class="btn-step" onclick="changeTime(-15)" aria-label="Subtract 15 minutes">-</button>
+          <div class="time-display" id="timeDisplay">7:00 AM</div>
+          <button class="btn-step" onclick="changeTime(15)" aria-label="Add 15 minutes">+</button>
+        </div>
+      </div>
     </div>
-    <div class="card-subtitle">Automatically generate and print a fresh puzzle receipt every morning.</div>
-    <div id="schedTimeContainer" class="sched-time-container">
-      <div class="sched-time-label">Print Time</div>
+
+    <!-- Daily Puzzle Count -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Daily Puzzle Count</div>
+        <div id="countSub" style="font-size:0.8rem; color:#94a3b8;">Max: 18</div>
+      </div>
+      <div class="card-subtitle">Number of games to randomly draw and print per daily mix receipt.</div>
       <div class="stepper-row">
-        <button class="btn-step" onclick="changeTime(-15)" aria-label="Subtract 15 minutes">-</button>
-        <div class="time-display" id="timeDisplay">7:00 AM</div>
-        <button class="btn-step" onclick="changeTime(15)" aria-label="Add 15 minutes">+</button>
+        <button class="btn-step" onclick="changeCount(-1)">-</button>
+        <div class="count-display" id="countDisplay">5</div>
+        <button class="btn-step" onclick="changeCount(1)">+</button>
       </div>
     </div>
+
+    <!-- Puzzle Difficulty -->
+    <div class="card">
+      <div class="card-title">Puzzle Difficulty</div>
+      <div class="card-subtitle">Select progression curve or uniform difficulty for all selected puzzles.</div>
+      <div class="diff-grid">
+        <div class="diff-option active" id="diff-opt-3" onclick="setDiff(3)">
+          <div>
+            <div class="diff-name">Escalating (Easy &rarr; Hard)</div>
+            <div class="diff-desc">Starts easy, scales progressively, ending with hard/extreme</div>
+          </div>
+          <div class="diff-radio"></div>
+        </div>
+        <div class="diff-option" id="diff-opt-0" onclick="setDiff(0)">
+          <div>
+            <div class="diff-name">Easy</div>
+            <div class="diff-desc">All selected games generated at Easy difficulty</div>
+          </div>
+          <div class="diff-radio"></div>
+        </div>
+        <div class="diff-option" id="diff-opt-1" onclick="setDiff(1)">
+          <div>
+            <div class="diff-name">Medium</div>
+            <div class="diff-desc">All selected games generated at Medium difficulty</div>
+          </div>
+          <div class="diff-radio"></div>
+        </div>
+        <div class="diff-option" id="diff-opt-2" onclick="setDiff(2)">
+          <div>
+            <div class="diff-name">Hard</div>
+            <div class="diff-desc">All selected games generated at Hard difficulty</div>
+          </div>
+          <div class="diff-radio"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Eligible Games -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Eligible Games (<span id="enabledNum">18</span>/18)</div>
+        <div class="quick-actions">
+          <button class="btn-quick" onclick="selectAllGames(true)">All</button>
+          <button class="btn-quick" onclick="selectAllGames(false)">None</button>
+        </div>
+      </div>
+      <div class="card-subtitle">Uncheck games to disable them from the daily receipt draw. Tap ℹ️ to view rules.</div>
+      <div class="games-list" id="gamesList"></div>
+    </div>
+
+    <!-- Save Button -->
+    <button class="btn-primary" onclick="saveAndExit()">Save Settings & Exit Setup</button>
   </div>
 
-  <!-- Daily Puzzle Count -->
-  <div class="card">
-    <div class="card-header">
-      <div class="card-title">Daily Puzzle Count</div>
-      <div id="countSub" style="font-size:0.8rem; color:#94a3b8;">Max: 16</div>
+  <!-- TAB 2: GAME GUIDE & FAQ -->
+  <div id="viewGuide" class="tab-view" style="display:none;">
+    
+    <!-- Game Selector Pills -->
+    <div class="card" style="padding: 12px 14px;">
+      <div class="card-subtitle" style="margin-bottom: 8px;">Select a game to view instructions & valid moves:</div>
+      <div class="pills-scroll" id="guidePills"></div>
     </div>
-    <div class="card-subtitle">Number of games to randomly draw and print per daily mix receipt.</div>
-    <div class="stepper-row">
-      <button class="btn-step" onclick="changeCount(-1)">-</button>
-      <div class="count-display" id="countDisplay">5</div>
-      <button class="btn-step" onclick="changeCount(1)">+</button>
-    </div>
-  </div>
 
-  <!-- Puzzle Difficulty -->
-  <div class="card">
-    <div class="card-title">Puzzle Difficulty</div>
-    <div class="card-subtitle">Select progression curve or uniform difficulty for all selected puzzles.</div>
-    <div class="diff-grid">
-      <div class="diff-option active" id="diff-opt-3" onclick="setDiff(3)">
+    <!-- Header & Action Card -->
+    <div class="card">
+      <div class="guide-header">
         <div>
-          <div class="diff-name">Escalating (Easy &rarr; Hard)</div>
-          <div class="diff-desc">Starts easy, scales progressively, ending with hard/extreme</div>
+          <div class="guide-title" id="guideTitle">--- SUDOKU ---</div>
+          <div class="guide-instruction" id="guideInstruction"></div>
         </div>
-        <div class="diff-radio"></div>
-      </div>
-      <div class="diff-option" id="diff-opt-0" onclick="setDiff(0)">
-        <div>
-          <div class="diff-name">Easy</div>
-          <div class="diff-desc">All selected games generated at Easy difficulty</div>
-        </div>
-        <div class="diff-radio"></div>
-      </div>
-      <div class="diff-option" id="diff-opt-1" onclick="setDiff(1)">
-        <div>
-          <div class="diff-name">Medium</div>
-          <div class="diff-desc">All selected games generated at Medium difficulty</div>
-        </div>
-        <div class="diff-radio"></div>
-      </div>
-      <div class="diff-option" id="diff-opt-2" onclick="setDiff(2)">
-        <div>
-          <div class="diff-name">Hard</div>
-          <div class="diff-desc">All selected games generated at Hard difficulty</div>
-        </div>
-        <div class="diff-radio"></div>
+        <button class="btn-print-guide" onclick="printCurrentGuide()">
+          <span>🖨️</span>
+          <span>Print Receipt Cheat Sheet</span>
+        </button>
       </div>
     </div>
-  </div>
 
-  <!-- Eligible Games -->
-  <div class="card">
-    <div class="card-header">
-      <div class="card-title">Eligible Games (<span id="enabledNum">16</span>/16)</div>
-      <div class="quick-actions">
-        <button class="btn-quick" onclick="selectAllGames(true)">All</button>
-        <button class="btn-quick" onclick="selectAllGames(false)">None</button>
+    <!-- Objective & Rules -->
+    <div class="card">
+      <div class="card-title">Objective & Rules</div>
+      <div class="guide-objective" id="guideObjective"></div>
+      <ul class="guide-rules-list" id="guideRulesList"></ul>
+    </div>
+
+    <!-- Visual Move Examples (1-Bit Thermal Replica) -->
+    <div class="card">
+      <div class="card-title">Visual Move Examples</div>
+      <div class="card-subtitle">Authentic 1-bit thermal printhead replica showing legal vs illegal moves.</div>
+      <div class="thermal-canvas-box">
+        <canvas id="guideCanvas" width="576" height="216"></canvas>
+      </div>
+      <div class="guide-captions">
+        <div class="caption-item">
+          <span class="badge valid">✓ VALID MOVE</span>
+          <div id="guideValidCaption"></div>
+        </div>
+        <div class="caption-item">
+          <span class="badge invalid">✗ INVALID MOVE</span>
+          <div id="guideInvalidCaption"></div>
+        </div>
       </div>
     </div>
-    <div class="card-subtitle">Uncheck games to disable them from the daily receipt draw.</div>
-    <div class="games-list" id="gamesList"></div>
-  </div>
 
-  <!-- Save Button -->
-  <button class="btn-primary" onclick="saveAndExit()">Save Settings & Exit Setup</button>
+    <!-- Opening Deductions -->
+    <div class="card">
+      <div class="card-title">Where to Start (First Deductions)</div>
+      <ul class="guide-anchors-list" id="guideAnchorsList"></ul>
+    </div>
+
+    <!-- FAQ -->
+    <div class="card">
+      <div class="card-title">Frequently Asked Questions</div>
+      <div class="guide-faq-list" id="guideFaqList"></div>
+    </div>
+
+  </div>
 
 </div>
 
@@ -431,16 +672,1197 @@ const GAMES = [
   { id: 6,  name: "Mines" },
   { id: 7,  name: "Tents" },
   { id: 8,  name: "Bridges" },
-  { id: 9,  name: "Tango" },
-  { id: 10, name: "Wheel" },
-  { id: 11, name: "Lights" },
-  { id: 12, name: "Loop" },
-  { id: 13, name: "Killer" },
-  { id: 14, name: "Cryptogram" },
-  { id: 15, name: "Ladder" },
+  { id: 9,  name: "Killer" },
+  { id: 10, name: "Cryptogram" },
+  { id: 11, name: "Tango" },
+  { id: 12, name: "Ladder" },
+  { id: 13, name: "Wheel" },
+  { id: 14, name: "Lights" },
+  { id: 15, name: "Loop" },
   { id: 16, name: "Towers" },
   { id: 17, name: "Futoshiki" }
 ];
+
+/* [[START_GAME_RULES_DATA]] */
+const GAME_RULES = [
+  {
+    "id": 0,
+    "key": "sudoku",
+    "title": "SUDOKU",
+    "instruction": "Fill every row, column, and 3x3 box with digits 1-9 without repeating.",
+    "objective": "Complete the 9x9 grid with digits 1 through 9 so that no number is repeated within any horizontal row, vertical column, or outlined 3x3 box.",
+    "rules": [
+      "Every row must contain digits 1-9 exactly once.",
+      "Every column must contain digits 1-9 exactly once.",
+      "Every 3x3 bold box must contain digits 1-9 exactly once.",
+      "Given clues are permanent and cannot be altered or moved."
+    ],
+    "valid_move": {
+      "caption": "Digit 5 placed in an empty square where 5 does not exist in its row, column, or 3x3 box.",
+      "highlight": [
+        1,
+        1
+      ],
+      "grid": [
+        [
+          "\u00b7",
+          "\u00b7",
+          "\u00b7"
+        ],
+        [
+          "\u00b7",
+          "5",
+          "\u00b7"
+        ],
+        [
+          "\u00b7",
+          "\u00b7",
+          "\u00b7"
+        ]
+      ]
+    },
+    "invalid_move": {
+      "caption": "Digit 5 placed in a row or box that already contains another 5 (duplicate violation).",
+      "highlight": [
+        1,
+        1
+      ],
+      "grid": [
+        [
+          "5",
+          "\u00b7",
+          "\u00b7"
+        ],
+        [
+          "\u00b7",
+          "5",
+          "\u00b7"
+        ],
+        [
+          "\u00b7",
+          "\u00b7",
+          "\u00b7"
+        ]
+      ]
+    },
+    "opening_anchors": [
+      "Scan rows, columns, and 3x3 boxes that already have 6 or 7 numbers filled; only 2 or 3 candidates remain.",
+      "Use cross-hatching: trace a common digit (like 1 or 7) across perpendicular lines into an empty 3x3 box to eliminate squares."
+    ],
+    "faq": [
+      {
+        "q": "Do the numbers in a line need to be in numerical order?",
+        "a": "No. Digits can appear in any order as long as each number from 1 to 9 appears exactly once."
+      },
+      {
+        "q": "Do arithmetic or mathematical sums matter in classic Sudoku?",
+        "a": "No. Sudoku is purely deductive placement. The numbers could just as easily be 9 letters or symbols."
+      }
+    ]
+  },
+  {
+    "id": 1,
+    "key": "search",
+    "title": "SEARCH",
+    "instruction": "Find all hidden words horizontally, vertically, or diagonally.",
+    "objective": "Locate every target theme word concealed within the letter grid in straight continuous lines.",
+    "rules": [
+      "Words are spelled in straight lines: horizontal, vertical, or diagonal.",
+      "Words can run forwards or backwards in any direction.",
+      "Letters may overlap and be shared by multiple intersecting words.",
+      "Lines never bend, turn corners, or zig-zag."
+    ],
+    "valid_move": {
+      "caption": "Straight diagonal line tracing the word C-A-T forwards.",
+      "highlight": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          2,
+          2
+        ]
+      ],
+      "grid": [
+        [
+          "C",
+          "\u00b7",
+          "\u00b7"
+        ],
+        [
+          "\u00b7",
+          "A",
+          "\u00b7"
+        ],
+        [
+          "\u00b7",
+          "\u00b7",
+          "T"
+        ]
+      ]
+    },
+    "invalid_move": {
+      "caption": "Bent or zig-zag line tracing C-A-T around a corner (words must be straight).",
+      "highlight": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      "grid": [
+        [
+          "C",
+          "A",
+          "\u00b7"
+        ],
+        [
+          "\u00b7",
+          "T",
+          "\u00b7"
+        ],
+        [
+          "\u00b7",
+          "\u00b7",
+          "\u00b7"
+        ]
+      ]
+    },
+    "opening_anchors": [
+      "Search for rare letters in the word list (like Z, X, Q, or K) first, as they appear rarely in the grid.",
+      "Scan the word list for consecutive double letters (like EE, LL, or OO) and skim the grid for those pairs."
+    ],
+    "faq": [
+      {
+        "q": "Can words run backwards from right to left or bottom to top?",
+        "a": "Yes. Words can be oriented in any of the 8 standard compass directions."
+      },
+      {
+        "q": "Can one letter belong to more than one word?",
+        "a": "Yes. Crossing words frequently share an intersecting common letter."
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "key": "nonogram",
+    "title": "NONOGRAM",
+    "instruction": "Shade cells to match row and column run counts with at least one blank between runs.",
+    "objective": "Deduce which cells to shade black so that consecutive shaded runs match every outer row and column clue.",
+    "rules": [
+      "Numbers outside the grid indicate the lengths of consecutive shaded blocks in that line.",
+      "Multiple numbers mean multiple shaded blocks in that exact sequential order.",
+      "Every pair of distinct shaded blocks must be separated by at least one empty white cell.",
+      "Lines with a 0 or empty clue contain zero shaded cells."
+    ],
+    "valid_move": {
+      "caption": "Clue '1 1' with one shaded cell, a white blank space, and a second shaded cell.",
+      "highlight": [
+        0,
+        2
+      ],
+      "grid": [
+        [
+          "\u2588",
+          "\u00b7",
+          "\u2588"
+        ]
+      ]
+    },
+    "invalid_move": {
+      "caption": "Clue '1 1' drawn as two touching shaded cells, forming an illegal block of 2.",
+      "highlight": [
+        0,
+        1
+      ],
+      "grid": [
+        [
+          "\u2588",
+          "\u2588",
+          "\u00b7"
+        ]
+      ]
+    },
+    "opening_anchors": [
+      "Look for full-line clues: if a line clue equals the grid width, shade the entire line immediately.",
+      "Use clue overlap: when a clue number is greater than half the grid width, the middle cells must always be shaded regardless of alignment."
+    ],
+    "faq": [
+      {
+        "q": "Must there be an empty space between two shaded blocks?",
+        "a": "Yes. Separate numbers in a clue always require at least one blank cell between their blocks."
+      },
+      {
+        "q": "Do the clues specify the order of the blocks?",
+        "a": "Yes. Row clues read left-to-right; column clues read top-to-bottom."
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "key": "stars",
+    "title": "STARS",
+    "instruction": "Place 2 stars in every row, column, and outlined region without touching, even diagonally.",
+    "objective": "Position stars on the board so that every row, column, and outlined region has the required star count with no adjacent stars.",
+    "rules": [
+      "Every row and column must contain exactly the target star quota (1 or 2 stars).",
+      "Every outlined geometric region must contain exactly the target star quota.",
+      "No two stars may touch each other anywhere\u2014not orthogonally, and not diagonally.",
+      "Every placed star creates an 8-cell empty buffer zone surrounding it."
+    ],
+    "valid_move": {
+      "caption": "Stars placed with a gap of at least one empty square between them in all directions.",
+      "highlight": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          2
+        ]
+      ],
+      "grid": [
+        [
+          "\u2605",
+          "\u00b7",
+          "\u00b7"
+        ],
+        [
+          "\u00b7",
+          "\u00b7",
+          "\u2605"
+        ],
+        [
+          "\u00b7",
+          "\u00b7",
+          "\u00b7"
+        ]
+      ]
+    },
+    "invalid_move": {
+      "caption": "Two stars touching at their diagonal corners (stars can never touch diagonally).",
+      "highlight": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      "grid": [
+        [
+          "\u2605",
+          "\u00b7",
+          "\u00b7"
+        ],
+        [
+          "\u00b7",
+          "\u2605",
+          "\u00b7"
+        ],
+        [
+          "\u00b7",
+          "\u00b7",
+          "\u00b7"
+        ]
+      ]
+    },
+    "opening_anchors": [
+      "Find anchor regions with only 1 or 2 total cells. A 1-cell region requiring 1 star must immediately hold a star!",
+      "Whenever a star is placed, immediately dot all 8 surrounding cells\u2014none of them can ever hold a star."
+    ],
+    "faq": [
+      {
+        "q": "Can two stars be in the same row if they belong to different regions?",
+        "a": "No. The row quota is strict; every row across the entire board has the exact same limit."
+      },
+      {
+        "q": "Does 'not touching diagonally' apply across the whole board?",
+        "a": "No. It applies only to immediate neighboring squares that share a corner point."
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "key": "jumble",
+    "title": "JUMBLE",
+    "instruction": "Unscramble each clue word, then use the circled letters to solve the final pun.",
+    "objective": "Unscramble each anagram word into its letter boxes, collect the circled letters, and arrange them to answer the pun riddle.",
+    "rules": [
+      "Each jumbled word unscrambles into a single valid English word matching the box count.",
+      "Circled letter boxes highlight specific letters needed for the bonus pun.",
+      "The collected circled letters form an anagram pool for the punchline answer.",
+      "Letter blanks and punctuation in the final punchline guide word boundaries."
+    ],
+    "valid_move": {
+      "caption": "Unscrambled clue word 'BRAIN' with circled letters correctly placed into clue boxes.",
+      "highlight": [
+        1,
+        4
+      ],
+      "grid": [
+        [
+          "B",
+          "\u24c7",
+          "A",
+          "I",
+          "\u24c3"
+        ]
+      ]
+    },
+    "invalid_move": {
+      "caption": "Misspelled or incorrect anagram that leaves circled letters unusable for the riddle.",
+      "highlight": [
+        0
+      ],
+      "grid": [
+        [
+          "X",
+          "\u00b7",
+          "\u00b7",
+          "\u00b7",
+          "\u00b7"
+        ]
+      ]
+    },
+    "opening_anchors": [
+      "Unscramble the shortest clue words first to quickly secure your first circled mystery letters.",
+      "Read the punchline riddle carefully; humor and puns usually reveal the theme of the bonus answer."
+    ],
+    "faq": [
+      {
+        "q": "Are the circled letters in order when copied to the final answer?",
+        "a": "No. The circled letters form an anagram pool and must be unscrambled to solve the pun."
+      },
+      {
+        "q": "What if an anagram word has multiple valid English solutions?",
+        "a": "Only one solution will yield the exact letters needed to solve the final riddle pun."
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "key": "binary",
+    "title": "BINARY",
+    "instruction": "Fill every cell with 0 or 1 so no more than two identical numbers are adjacent.",
+    "objective": "Fill the entire grid with 0s and 1s adhering to adjacency, equal balance, and line uniqueness rules.",
+    "rules": [
+      "No more than two identical numbers may be placed side-by-side (no '000' or '111').",
+      "Every row and column must contain an equal number of 0s and 1s.",
+      "No two rows may be identical, and no two columns may be identical.",
+      "All given numbers are fixed and permanent."
+    ],
+    "valid_move": {
+      "caption": "Alternating sequence '1 0 1 0' with no three identical digits in a row.",
+      "highlight": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "grid": [
+        [
+          "1",
+          "0",
+          "1",
+          "0"
+        ]
+      ]
+    },
+    "invalid_move": {
+      "caption": "Three identical numbers in a row '1 1 1' (maximum allowed adjacent is two).",
+      "highlight": [
+        1,
+        2,
+        3
+      ],
+      "grid": [
+        [
+          "0",
+          "1",
+          "1",
+          "1"
+        ]
+      ]
+    },
+    "opening_anchors": [
+      "Look for pairs: whenever you see two identical digits ('00' or '11'), the cells on both ends must be the opposite digit.",
+      "Look for sandwiches: whenever two identical digits are separated by one blank ('0_0' or '1_1'), the middle cell must be the opposite."
+    ],
+    "faq": [
+      {
+        "q": "Can diagonal lines have three identical digits?",
+        "a": "Yes. The 'no three in a row' rule applies strictly to horizontal rows and vertical columns."
+      },
+      {
+        "q": "What does equal balance mean?",
+        "a": "On an 8x8 board, every single row and column must contain exactly four 0s and four 1s."
+      }
+    ]
+  },
+  {
+    "id": 6,
+    "key": "mines",
+    "title": "MINES",
+    "instruction": "Deduce all hidden mines using numbers showing how many adjacent cells contain mines.",
+    "objective": "Deduce the exact locations of all hidden mines without guessing, using numeric neighbor hints.",
+    "rules": [
+      "A number in a cell indicates how many of its 8 surrounding neighbors contain a mine.",
+      "Empty unnumbered cells are safe playable territory.",
+      "Mark confirmed mines with a flag or star.",
+      "Every puzzle is logically solvable from given clues with zero guesswork."
+    ],
+    "valid_move": {
+      "caption": "Cell with clue '1' having exactly one flagged mine neighbor.",
+      "highlight": [
+        0,
+        0
+      ],
+      "grid": [
+        [
+          "\ud83d\udca3",
+          "\u00b7"
+        ],
+        [
+          "1",
+          "\u00b7"
+        ]
+      ]
+    },
+    "invalid_move": {
+      "caption": "Cell with clue '1' having two flagged mine neighbors (overloaded clue).",
+      "highlight": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ]
+      ],
+      "grid": [
+        [
+          "\ud83d\udca3",
+          "\ud83d\udca3"
+        ],
+        [
+          "1",
+          "\u00b7"
+        ]
+      ]
+    },
+    "opening_anchors": [
+      "Zero clues ('0') are instant safe zones: all 8 surrounding neighbor cells are completely mine-free.",
+      "Corner clues: a '1' in a corner cell with only one hidden neighbor must have the mine in that single neighbor."
+    ],
+    "faq": [
+      {
+        "q": "Do diagonal cells count toward a number clue?",
+        "a": "Yes. Clue numbers count all 8 neighboring cells (orthogonal and diagonal)."
+      },
+      {
+        "q": "Can a numbered cell contain a mine?",
+        "a": "No. Numbered cells are always safe revealed territory; mines are hidden in blank cells."
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "key": "tents",
+    "title": "TENTS",
+    "instruction": "Pitch tents next to trees without any tents touching, matching row and column quotas.",
+    "objective": "Pitch a tent for every tree on the board such that tents pair 1:1 orthogonally and never touch each other.",
+    "rules": [
+      "Every tree must have exactly one tent pitched orthogonally adjacent to it (up, down, left, right).",
+      "Tents can never touch another tent\u2014neither orthogonally nor diagonally.",
+      "Numbers outside the grid specify the exact count of tents in that row or column.",
+      "Tents may be adjacent to trees other than their own assigned partner."
+    ],
+    "valid_move": {
+      "caption": "Tent pitched orthogonally adjacent to a tree with an empty buffer around the tent.",
+      "highlight": [
+        0,
+        1
+      ],
+      "grid": [
+        [
+          "\ud83c\udf32",
+          "\u26fa",
+          "\u00b7"
+        ],
+        [
+          "\u00b7",
+          "\u00b7",
+          "\u00b7"
+        ]
+      ]
+    },
+    "invalid_move": {
+      "caption": "Two tents touching diagonally (tents can never touch even at corners).",
+      "highlight": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          2
+        ]
+      ],
+      "grid": [
+        [
+          "\ud83c\udf32",
+          "\u26fa",
+          "\u00b7"
+        ],
+        [
+          "\u00b7",
+          "\u00b7",
+          "\u26fa"
+        ]
+      ]
+    },
+    "opening_anchors": [
+      "Check rows and columns with a clue of '0': immediately eliminate and cross out all cells in that line.",
+      "Trees with only one available empty orthogonal neighbor must pitch their tent into that single spot."
+    ],
+    "faq": [
+      {
+        "q": "Can a tent be attached diagonally to its tree?",
+        "a": "No. A tent must connect to its tree orthogonally (sharing a flat side, not a corner)."
+      },
+      {
+        "q": "Can a tent touch a tree that belongs to another tent?",
+        "a": "Yes. Tents can touch other trees, but tents can NEVER touch another tent."
+      }
+    ]
+  },
+  {
+    "id": 8,
+    "key": "bridges",
+    "title": "BRIDGES",
+    "instruction": "Connect islands with up to two orthogonal bridges matching numbers into one network.",
+    "objective": "Connect all numbered islands together into a single continuous interconnected network using horizontal and vertical bridges.",
+    "rules": [
+      "Bridges run horizontally or vertically between islands, never crossing each other or islands.",
+      "At most two bridges can connect any single pair of islands.",
+      "The number on an island equals the total count of bridges connected to it.",
+      "All islands must form one single connected network when complete."
+    ],
+    "valid_move": {
+      "caption": "Two parallel orthogonal bridges connecting island 3 to island 2.",
+      "highlight": [
+        0,
+        1
+      ],
+      "grid": [
+        [
+          "\u2462",
+          "\u2550\u2550",
+          "\u2461"
+        ]
+      ]
+    },
+    "invalid_move": {
+      "caption": "Three bridges connecting two islands (maximum allowed between two islands is two).",
+      "highlight": [
+        0,
+        1
+      ],
+      "grid": [
+        [
+          "\u2463",
+          "\u2261\u2261",
+          "\u2462"
+        ]
+      ]
+    },
+    "opening_anchors": [
+      "Look for high-value corner islands: a corner island marked '4' with only 2 directions available must send 2 bridges each way.",
+      "An island marked '1' that only has one possible neighbor must immediately connect its single bridge."
+    ],
+    "faq": [
+      {
+        "q": "Can bridges be drawn diagonally?",
+        "a": "No. Bridges must run strictly horizontal or vertical."
+      },
+      {
+        "q": "Can the completed puzzle have isolated subnetworks?",
+        "a": "No. All islands must link together into a single unified continuous group."
+      }
+    ]
+  },
+  {
+    "id": 9,
+    "key": "killer",
+    "title": "KILLER",
+    "instruction": "Fill the grid with digits 1-9 so cages sum to their clue without repeating digits.",
+    "objective": "Solve the Sudoku grid while satisfying all dotted cage boundary sums with non-repeating digits.",
+    "rules": [
+      "Standard Sudoku rules apply: digits 1-9 once per row, column, and 3x3 block.",
+      "Dashed outline cages display a target sum in their upper-left corner.",
+      "Digits inside a cage must add up exactly to the cage's clue sum.",
+      "Digits can never repeat within the same cage."
+    ],
+    "valid_move": {
+      "caption": "Cage of size 2 with sum '3' filled with digits 1 and 2 (1 + 2 = 3).",
+      "highlight": [
+        0,
+        1
+      ],
+      "grid": [
+        [
+          "\u00b9",
+          "\u00b2"
+        ]
+      ]
+    },
+    "invalid_move": {
+      "caption": "Cage with sum '4' filled with repeating digits 2 and 2 (digits cannot repeat in a cage).",
+      "highlight": [
+        0,
+        1
+      ],
+      "grid": [
+        [
+          "\u00b2",
+          "\u00b2"
+        ]
+      ]
+    },
+    "opening_anchors": [
+      "Look for unique sum combinations: a 2-cell sum of 3 must be [1, 2]; a 2-cell sum of 4 must be [1, 3]; a 2-cell sum of 17 must be [8, 9].",
+      "Use the Rule of 45: every row, column, and 3x3 block always sums up to exactly 45."
+    ],
+    "faq": [
+      {
+        "q": "Can a digit repeat in a cage if it spans across different 3x3 boxes?",
+        "a": "No. Digits can NEVER repeat within any cage, regardless of boundaries."
+      },
+      {
+        "q": "Are starting clues printed as regular Sudoku numbers?",
+        "a": "Usually Killer Sudoku boards begin completely empty, relying entirely on cage sums."
+      }
+    ]
+  },
+  {
+    "id": 10,
+    "key": "cryptogram",
+    "title": "CRYPTOGRAM",
+    "instruction": "Deduce the hidden quotation where each letter is consistently substituted with another.",
+    "objective": "Decode the secret cipher quotation by discovering which letter replaces each ciphertext letter throughout the puzzle.",
+    "rules": [
+      "Each ciphertext letter represents one unique substitute plaintext letter throughout the entire puzzle.",
+      "Punctuation, apostrophes, and word spacing remain unchanged and preserved.",
+      "No letter substitutes for itself.",
+      "Once a substitution is determined, it applies to every occurrence of that letter."
+    ],
+    "valid_move": {
+      "caption": "Consistent substitution: every ciphertext 'K' is decoded as plaintext 'E'.",
+      "highlight": [
+        0,
+        2
+      ],
+      "grid": [
+        [
+          "T",
+          "H",
+          "E"
+        ],
+        [
+          "W",
+          "Z",
+          "K"
+        ]
+      ]
+    },
+    "invalid_move": {
+      "caption": "Inconsistent substitution: decoding ciphertext 'K' as 'E' in one word and 'O' in another.",
+      "highlight": [
+        1,
+        2
+      ],
+      "grid": [
+        [
+          "T",
+          "O"
+        ],
+        [
+          "W",
+          "K"
+        ]
+      ]
+    },
+    "opening_anchors": [
+      "Identify single-letter words: in English, single-letter words are almost always 'A' or 'I'.",
+      "Look for common short words like 'THE', 'AND', 'THAT', and letters following apostrophes ('T, 'S, 'LL)."
+    ],
+    "faq": [
+      {
+        "q": "Can a ciphertext letter stand for itself?",
+        "a": "No. In standard cryptograms, a letter never encodes to itself."
+      },
+      {
+        "q": "What is the most common letter in English text?",
+        "a": "The letter 'E' is by far the most frequent, followed by 'T', 'A', 'O', and 'I'."
+      }
+    ]
+  },
+  {
+    "id": 11,
+    "key": "tango",
+    "title": "TANGO",
+    "instruction": "Fill grid with suns and moons so equal symbols match and opposite symbols differ.",
+    "objective": "Place suns (\u2600\ufe0f) and moons (\ud83c\udf19) so that no three identical symbols touch, lines balance, and relational cues are satisfied.",
+    "rules": [
+      "No more than two identical symbols may be adjacent horizontally or vertically.",
+      "Each row and column must contain an equal number of suns and moons.",
+      "Cells separated by '=' must contain the exact same symbol.",
+      "Cells separated by 'x' must contain opposite symbols."
+    ],
+    "valid_move": {
+      "caption": "Cells with '=' clue filled with identical symbols (two suns).",
+      "highlight": [
+        0,
+        1
+      ],
+      "grid": [
+        [
+          "\u2600\ufe0f",
+          "=",
+          "\u2600\ufe0f"
+        ]
+      ]
+    },
+    "invalid_move": {
+      "caption": "Three identical symbols in a row '\u2600\ufe0f \u2600\ufe0f \u2600\ufe0f' (maximum allowed adjacent is two).",
+      "highlight": [
+        0,
+        1,
+        2
+      ],
+      "grid": [
+        [
+          "\u2600\ufe0f",
+          "\u2600\ufe0f",
+          "\u2600\ufe0f"
+        ]
+      ]
+    },
+    "opening_anchors": [
+      "Satisfy 'x' (opposite) clues: if one cell is given, the adjacent cell is immediately known.",
+      "Watch for symbol pairs: two adjacent suns ('\u2600\ufe0f\u2600\ufe0f') must be flanked on both sides by moons ('\ud83c\udf19')."
+    ],
+    "faq": [
+      {
+        "q": "What does the 'x' mark between cells mean?",
+        "a": "It means the two cells must have opposite symbols (one sun and one moon)."
+      },
+      {
+        "q": "Does the two-in-a-row limit apply diagonally?",
+        "a": "No. The adjacency restriction applies strictly to horizontal and vertical lines."
+      }
+    ]
+  },
+  {
+    "id": 12,
+    "key": "ladder",
+    "title": "LADDER",
+    "instruction": "Deduce words changing one letter at a time to transform start word into end word.",
+    "objective": "Navigate from the top start word to the bottom target word in sequential steps, changing exactly one letter at each rung.",
+    "rules": [
+      "Each rung of the ladder must form a valid, recognized English word.",
+      "You may change exactly one letter from the previous word at each step.",
+      "Letter positions cannot be anagrammed, rearranged, or swapped.",
+      "The ladder is complete when you reach the target word in the allotted rungs."
+    ],
+    "valid_move": {
+      "caption": "Single letter change from C-A-R-T to D-A-R-T (valid English word).",
+      "highlight": [
+        0
+      ],
+      "grid": [
+        [
+          "C",
+          "A",
+          "R",
+          "T"
+        ],
+        [
+          "D",
+          "A",
+          "R",
+          "T"
+        ]
+      ]
+    },
+    "invalid_move": {
+      "caption": "Changing two letters at once from C-A-R-T to D-A-R-K (only one letter change allowed).",
+      "highlight": [
+        0,
+        3
+      ],
+      "grid": [
+        [
+          "C",
+          "A",
+          "R",
+          "T"
+        ],
+        [
+          "D",
+          "A",
+          "R",
+          "K"
+        ]
+      ]
+    },
+    "opening_anchors": [
+      "Compare the start and target words to count how many letters they already share in identical positions.",
+      "Work bidirectionally: if stuck moving downward from the start, try working upward from the target word."
+    ],
+    "faq": [
+      {
+        "q": "Can I rearrange the letters while changing one?",
+        "a": "No. All unchanged letters must remain in their exact same positions."
+      },
+      {
+        "q": "Are proper nouns like names allowed as intermediate words?",
+        "a": "No. Every step must be a standard dictionary English word."
+      }
+    ]
+  },
+  {
+    "id": 13,
+    "key": "wheel",
+    "title": "WHEEL",
+    "instruction": "Find words of 4+ letters using the wheel letters, always including the center letter.",
+    "objective": "Form as many valid English words of 4 or more letters as possible from the circular letter wheel.",
+    "rules": [
+      "Every word must be at least 4 letters long.",
+      "Every word must contain the designated central hub letter.",
+      "Letters can only be used as many times as they appear in the wheel.",
+      "At least one 9-letter pangram exists that uses every single letter in the wheel."
+    ],
+    "valid_move": {
+      "caption": "Word 'GLOW' uses letters from the wheel and contains the required center letter 'O'.",
+      "highlight": [
+        1
+      ],
+      "grid": [
+        [
+          "G",
+          "L",
+          "W"
+        ],
+        [
+          "\u00b7",
+          "O",
+          "\u00b7"
+        ]
+      ]
+    },
+    "invalid_move": {
+      "caption": "Word 'WING' spelled without using the required central hub letter 'O'.",
+      "highlight": [],
+      "grid": [
+        [
+          "W",
+          "I",
+          "N",
+          "G"
+        ]
+      ]
+    },
+    "opening_anchors": [
+      "Look for common prefixes (like RE-, UN-, DE-) and suffixes (like -ING, -ED, -TION) among the rim letters.",
+      "Keep hunting for the 9-letter master word that utilizes every letter on the wheel."
+    ],
+    "faq": [
+      {
+        "q": "Can I use letters more than once in a single word?",
+        "a": "Only if that letter appears multiple times on the wheel rim."
+      },
+      {
+        "q": "Do words without the center letter count?",
+        "a": "No. Any word that omits the central hub letter is strictly invalid."
+      }
+    ]
+  },
+  {
+    "id": 14,
+    "key": "lights",
+    "title": "LIGHTS",
+    "instruction": "Place bulbs to illuminate corridors so numbered blocks match and no bulbs shine on each other.",
+    "objective": "Place lightbulbs in corridors so every white cell is illuminated without any two bulbs facing each other.",
+    "rules": [
+      "Bulbs emit beams of light horizontally and vertically along corridors until blocked by black barrier blocks.",
+      "Every white grid square must be illuminated by at least one lightbulb.",
+      "No two lightbulbs can illuminate or shine upon each other (no shared line of sight).",
+      "Numbers on black blocks specify how many bulbs must touch that block orthogonally."
+    ],
+    "valid_move": {
+      "caption": "Two lightbulbs placed on opposite sides of a barrier block (line of sight is blocked).",
+      "highlight": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          2
+        ]
+      ],
+      "grid": [
+        [
+          "\ud83d\udca1",
+          "\u25a0",
+          "\ud83d\udca1"
+        ]
+      ]
+    },
+    "invalid_move": {
+      "caption": "Two lightbulbs in direct open line of sight of each other along a corridor.",
+      "highlight": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          2
+        ]
+      ],
+      "grid": [
+        [
+          "\ud83d\udca1",
+          "\u00b7",
+          "\ud83d\udca1"
+        ]
+      ]
+    },
+    "opening_anchors": [
+      "Locate '0' barrier blocks: place small dots or crosses on all 4 adjacent cells; no bulbs can go there.",
+      "Locate '4' barrier blocks (or corner '2's): all available orthogonal spaces around them must immediately hold bulbs."
+    ],
+    "faq": [
+      {
+        "q": "Can light beams shine diagonally?",
+        "a": "No. Light travels strictly in orthogonal horizontal and vertical straight lines."
+      },
+      {
+        "q": "Can light pass through black barrier blocks?",
+        "a": "No. Black blocks completely obstruct and stop light beams."
+      }
+    ]
+  },
+  {
+    "id": 15,
+    "key": "loop",
+    "title": "LOOP",
+    "instruction": "Draw a single continuous closed loop around numbers indicating surrounding line count.",
+    "objective": "Connect dots with horizontal and vertical line segments to form one continuous closed loop that never branches or crosses.",
+    "rules": [
+      "A number inside a cell specifies exactly how many of its 4 boundary edges belong to the loop.",
+      "Cells with no number may have any count of boundary edges (0, 1, 2, or 3).",
+      "The loop must form a single continuous closed circuit.",
+      "The loop can never branch, fork, intersect, or cross itself."
+    ],
+    "valid_move": {
+      "caption": "Cell with clue '3' having exactly three connected boundary edges drawn around it.",
+      "highlight": [
+        0,
+        0
+      ],
+      "grid": [
+        [
+          "\u250c",
+          "\u2500",
+          "\u2510"
+        ],
+        [
+          "\u2502",
+          "3",
+          " "
+        ],
+        [
+          "\u2514",
+          "\u2500",
+          "\u2518"
+        ]
+      ]
+    },
+    "invalid_move": {
+      "caption": "Fork or branch in the line (loop must be a single path without intersections).",
+      "highlight": [
+        1,
+        1
+      ],
+      "grid": [
+        [
+          " ",
+          "\u2502",
+          " "
+        ],
+        [
+          "\u2500",
+          "\u253c",
+          "\u2500"
+        ],
+        [
+          " ",
+          "\u2502",
+          " "
+        ]
+      ]
+    },
+    "opening_anchors": [
+      "Clue '0' is an absolute barrier: cross out all four edges around every 0 cell immediately.",
+      "Adjacent '3' clues: two neighboring 3s always share an outer line pattern and have their common divider filled."
+    ],
+    "faq": [
+      {
+        "q": "Can there be multiple small loops on the board?",
+        "a": "No. There must be exactly one single closed loop incorporating all satisfied clues."
+      },
+      {
+        "q": "Can the loop line connect dots diagonally?",
+        "a": "No. Lines run strictly horizontally or vertically between adjacent grid dots."
+      }
+    ]
+  },
+  {
+    "id": 16,
+    "key": "towers",
+    "title": "TOWERS",
+    "instruction": "Place building heights 1-5 so edge clues match how many towers are visible in that line.",
+    "objective": "Fill each row and column with skyscrapers of heights 1 to N such that outside clues match visible towers from that vantage point.",
+    "rules": [
+      "Every row and column must contain building heights 1 through N with no duplicates.",
+      "Numbers outside the grid indicate how many buildings can be seen looking into that line.",
+      "Taller buildings conceal and hide any shorter buildings situated behind them.",
+      "All given starting numbers and edge clues are fixed."
+    ],
+    "valid_move": {
+      "caption": "Line with clue '1' seeing tallest building (5) first, hiding all others behind it.",
+      "highlight": [
+        0
+      ],
+      "grid": [
+        [
+          "[1]",
+          "5",
+          "4",
+          "3",
+          "2",
+          "1"
+        ]
+      ]
+    },
+    "invalid_move": {
+      "caption": "Line with clue '1' placed with shorter building (2) in front (at least two towers would be seen).",
+      "highlight": [
+        0
+      ],
+      "grid": [
+        [
+          "[1]",
+          "2",
+          "5",
+          "1",
+          "3",
+          "4"
+        ]
+      ]
+    },
+    "opening_anchors": [
+      "Clues of '1': the very first building in that line must be the maximum height (e.g., 5).",
+      "Clues of '5' (on a 5x5): the buildings in that line must ascend in strict sequential order: 1, 2, 3, 4, 5."
+    ],
+    "faq": [
+      {
+        "q": "Does a taller building hide buildings that are further down the line?",
+        "a": "Yes. Any building shorter than a preceding building in the line of sight is hidden."
+      },
+      {
+        "q": "Can heights repeat in a row or column?",
+        "a": "No. Each row and column forms a Latin square where each height appears exactly once."
+      }
+    ]
+  },
+  {
+    "id": 17,
+    "key": "futoshiki",
+    "title": "FUTOSHIKI",
+    "instruction": "Fill grid with digits 1-5 so each digit appears once per line and inequality signs hold.",
+    "objective": "Fill the grid with numbers 1 to N so no digit repeats in any row or column and all '<' and '>' signs are honored.",
+    "rules": [
+      "Each row and column must contain digits 1 through N exactly once.",
+      "Inequality signs ('<' and '>') between adjacent cells must be strictly honored.",
+      "The open end of the sign always points to the larger number.",
+      "Initial starting digits and inequality signs cannot be changed."
+    ],
+    "valid_move": {
+      "caption": "Digits satisfying inequality: 2 < 4 correctly placed in adjacent cells.",
+      "highlight": [
+        0,
+        2
+      ],
+      "grid": [
+        [
+          "2",
+          "<",
+          "4"
+        ]
+      ]
+    },
+    "invalid_move": {
+      "caption": "Violation of inequality: placing 5 < 3 (5 is greater than 3).",
+      "highlight": [
+        0,
+        2
+      ],
+      "grid": [
+        [
+          "5",
+          "<",
+          "3"
+        ]
+      ]
+    },
+    "opening_anchors": [
+      "Look for chains of inequality signs: a chain of A < B < C < D on a 5x5 grid heavily restricts the possible values.",
+      "The cell at the largest end of multiple inequality signs can never be 1; the smallest end can never be N."
+    ],
+    "faq": [
+      {
+        "q": "Do inequality signs apply to non-adjacent cells?",
+        "a": "No. They apply strictly to the two adjacent squares directly bordering the sign."
+      },
+      {
+        "q": "Can digits repeat in the same row if they satisfy the inequality?",
+        "a": "No. Every digit must be unique within its row and within its column."
+      }
+    ]
+  }
+];
+/* [[END_GAME_RULES_DATA]] */
 
 let currentMask = 0x3FFFF;
 let currentCount = 5;
@@ -448,6 +1870,25 @@ let currentGrade = 3;
 let currentSchedEnabled = true;
 let currentSchedHour = 7;
 let currentSchedMinute = 0;
+let activeGuideGameId = 0;
+
+// TAB SWITCHING
+function switchTab(tab) {
+  const isSettings = (tab === 'settings');
+  document.getElementById("viewSettings").style.display = isSettings ? "flex" : "none";
+  document.getElementById("viewGuide").style.display = isSettings ? "none" : "flex";
+  document.getElementById("tabBtnSettings").className = "tab-btn" + (isSettings ? " active" : "");
+  document.getElementById("tabBtnGuide").className = "tab-btn" + (!isSettings ? " active" : "");
+  if (!isSettings) {
+    selectGuideGame(activeGuideGameId);
+  }
+}
+
+function openGameGuide(id) {
+  switchTab('guide');
+  selectGuideGame(id);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
 function renderGames() {
   const list = document.getElementById("gamesList");
@@ -466,6 +1907,7 @@ function renderGames() {
         <div class="custom-checkbox"></div>
         <div class="game-title">${g.name}</div>
       </div>
+      <button class="btn-info" onclick="event.stopPropagation(); openGameGuide(${g.id});" title="View Rules & FAQ">ℹ️</button>
     `;
     list.appendChild(row);
   });
@@ -479,18 +1921,18 @@ function renderGames() {
 function toggleGame(id) {
   const willDisable = (currentMask & (1 << id)) !== 0;
   let newMask = willDisable ? (currentMask & ~(1 << id)) : (currentMask | (1 << id));
-  if ((newMask & 0x3FFFF) === 0) return; // Prevent disabling all games
+  if ((newMask & 0x3FFFF) === 0) return;
   currentMask = newMask;
   renderGames();
 }
 
 function selectAllGames(selectAll) {
-  currentMask = selectAll ? 0x3FFFF : 0x0001; // Keep at least Sudoku if none
+  currentMask = selectAll ? 0x3FFFF : 0x0001;
   renderGames();
 }
 
 function changeCount(delta) {
-  const maxAllowed = parseInt(document.getElementById("enabledNum").innerText, 10) || 16;
+  const maxAllowed = parseInt(document.getElementById("enabledNum").innerText, 10) || 18;
   let next = currentCount + delta;
   if (next < 1) next = 1;
   if (next > maxAllowed) next = maxAllowed;
@@ -516,9 +1958,7 @@ function formatTime12h(hour, minute) {
 
 function updateTimeDisplay() {
   const el = document.getElementById("timeDisplay");
-  if (el) {
-    el.innerText = formatTime12h(currentSchedHour, currentSchedMinute);
-  }
+  if (el) el.innerText = formatTime12h(currentSchedHour, currentSchedMinute);
 }
 
 function changeTime(deltaMinutes) {
@@ -533,9 +1973,7 @@ function changeTime(deltaMinutes) {
 function toggleSchedule(enabled) {
   currentSchedEnabled = enabled;
   const container = document.getElementById("schedTimeContainer");
-  if (container) {
-    container.style.display = enabled ? "flex" : "none";
-  }
+  if (container) container.style.display = enabled ? "flex" : "none";
 }
 
 function showToast(msg) {
@@ -568,7 +2006,473 @@ function saveAndExit() {
     });
 }
 
-// Initial fetch from device
+// GUIDE SYSTEM FUNCTIONS
+function initGuidePills() {
+  const container = document.getElementById("guidePills");
+  if (!container) return;
+  container.innerHTML = "";
+  GAMES.forEach(g => {
+    const pill = document.createElement("button");
+    pill.className = "pill" + (g.id === activeGuideGameId ? " active" : "");
+    pill.id = "guide-pill-" + g.id;
+    pill.innerText = g.name;
+    pill.onclick = () => selectGuideGame(g.id);
+    container.appendChild(pill);
+  });
+}
+
+function selectGuideGame(id) {
+  activeGuideGameId = id;
+  GAMES.forEach(g => {
+    const p = document.getElementById("guide-pill-" + g.id);
+    if (p) p.className = "pill" + (g.id === id ? " active" : "");
+  });
+
+  const rule = (typeof GAME_RULES !== "undefined") ? GAME_RULES.find(r => r.id === id) : null;
+  if (!rule) return;
+
+  document.getElementById("guideTitle").innerText = `--- ${rule.title} ---`;
+  document.getElementById("guideInstruction").innerText = rule.instruction;
+  document.getElementById("guideObjective").innerText = rule.objective;
+
+  const rulesList = document.getElementById("guideRulesList");
+  rulesList.innerHTML = (rule.rules || []).map(r => `<li>${r}</li>`).join("");
+
+  document.getElementById("guideValidCaption").innerText = rule.valid_move ? rule.valid_move.caption : "";
+  document.getElementById("guideInvalidCaption").innerText = rule.invalid_move ? rule.invalid_move.caption : "";
+
+  const anchorsList = document.getElementById("guideAnchorsList");
+  anchorsList.innerHTML = (rule.opening_anchors || []).map(a => `<li>${a}</li>`).join("");
+
+  const faqList = document.getElementById("guideFaqList");
+  faqList.innerHTML = (rule.faq || []).map(f => `
+    <div class="faq-item">
+      <div class="faq-q">Q: ${f.q}</div>
+      <div class="faq-a">A: ${f.a}</div>
+    </div>
+  `).join("");
+
+  drawThermalGuideCanvas(id);
+}
+
+function printCurrentGuide() {
+  showToast("Sending cheat sheet to printer...");
+  fetch("/api/print-guide?game=" + activeGuideGameId)
+    .then(r => r.json())
+    .then(d => {
+      showToast("Printing cheat sheet on printer!");
+    })
+    .catch(() => {
+      showToast("Printed cheat sheet command issued.");
+    });
+}
+
+// 1-BIT THERMAL CANVAS RENDERER IN JAVASCRIPT
+function drawThermalGuideCanvas(gameId) {
+  const canvas = document.getElementById("guideCanvas");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  const w = canvas.width;
+  const h = canvas.height;
+  const midX = w / 2;
+
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, w, h);
+
+  ctx.strokeStyle = "#000000";
+  ctx.fillStyle = "#000000";
+  ctx.lineWidth = 2;
+
+  // Outer border
+  ctx.strokeRect(10, 8, w - 20, h - 16);
+
+  // Center dashed divider
+  ctx.setLineDash([4, 4]);
+  ctx.beginPath();
+  ctx.moveTo(midX, 10);
+  ctx.lineTo(midX, h - 10);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Headers
+  ctx.font = "bold 15px monospace";
+  ctx.textAlign = "center";
+  ctx.fillText("VALID MOVE", 144, 28);
+  ctx.fillText("INVALID MOVE", 432, 28);
+
+  // Bottom labels
+  ctx.font = "bold 14px monospace";
+  ctx.fillText("[ OK ]", 144, h - 26);
+  ctx.fillText("[ ERROR ]", 432, h - 26);
+
+  const ly = 46;
+  const ry = 46;
+
+  switch (gameId) {
+    case 0: { // SUDOKU
+      const sz = 32;
+      const lx0 = 144 - (3 * sz) / 2, rx0 = 432 - (3 * sz) / 2;
+      ctx.strokeRect(lx0, ly, 3 * sz, 3 * sz);
+      ctx.strokeRect(rx0, ry, 3 * sz, 3 * sz);
+      ctx.lineWidth = 1;
+      for (let i = 1; i < 3; i++) {
+        ctx.beginPath();
+        ctx.moveTo(lx0, ly + i * sz); ctx.lineTo(lx0 + 3 * sz, ly + i * sz);
+        ctx.moveTo(lx0 + i * sz, ly); ctx.lineTo(lx0 + i * sz, ly + 3 * sz);
+        ctx.moveTo(rx0, ry + i * sz); ctx.lineTo(rx0 + 3 * sz, ry + i * sz);
+        ctx.moveTo(rx0 + i * sz, ry); ctx.lineTo(rx0 + i * sz, ry + 3 * sz);
+        ctx.stroke();
+      }
+      ctx.font = "bold 20px monospace";
+      ctx.fillText("5", lx0 + sz + sz / 2, ly + sz + 23);
+      ctx.fillText("5", rx0 + sz / 2, ry + 23);
+      ctx.fillText("5", rx0 + sz + sz / 2, ry + sz + 23);
+      break;
+    }
+    case 1: { // SEARCH
+      const sz = 28;
+      const lx0 = 144 - (3 * sz) / 2, rx0 = 432 - (3 * sz) / 2;
+      ctx.strokeRect(lx0, ly, 3 * sz, 3 * sz);
+      ctx.strokeRect(rx0, ry, 3 * sz, 3 * sz);
+      ctx.lineWidth = 1;
+      for (let i = 1; i < 3; i++) {
+        ctx.beginPath();
+        ctx.moveTo(lx0, ly + i * sz); ctx.lineTo(lx0 + 3 * sz, ly + i * sz);
+        ctx.moveTo(lx0 + i * sz, ly); ctx.lineTo(lx0 + i * sz, ly + 3 * sz);
+        ctx.moveTo(rx0, ry + i * sz); ctx.lineTo(rx0 + 3 * sz, ry + i * sz);
+        ctx.moveTo(rx0 + i * sz, ry); ctx.lineTo(rx0 + i * sz, ry + 3 * sz);
+        ctx.stroke();
+      }
+      ctx.font = "bold 18px monospace";
+      ctx.fillText("C", lx0 + 14, ly + 20);
+      ctx.fillText("A", lx0 + sz + 14, ly + sz + 20);
+      ctx.fillText("T", lx0 + 2 * sz + 14, ly + 2 * sz + 20);
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(lx0 + 6, ly + 6); ctx.lineTo(lx0 + 3 * sz - 6, ly + 3 * sz - 6); ctx.stroke();
+      ctx.fillText("C", rx0 + 14, ry + 20);
+      ctx.fillText("A", rx0 + sz + 14, ry + 20);
+      ctx.fillText("T", rx0 + sz + 14, ry + sz + 20);
+      ctx.beginPath(); ctx.moveTo(rx0 + 6, ry + 14); ctx.lineTo(rx0 + sz + 14, ry + 14); ctx.lineTo(rx0 + sz + 14, ry + sz + 20); ctx.stroke();
+      break;
+    }
+    case 2: { // NONOGRAM
+      const sz = 24;
+      const lx0 = 144 - (4 * sz) / 2, rx0 = 432 - (4 * sz) / 2;
+      const ny = ly + 24;
+      ctx.strokeRect(lx0, ny, 4 * sz, sz);
+      ctx.strokeRect(rx0, ny, 4 * sz, sz);
+      ctx.lineWidth = 1;
+      for (let i = 1; i < 4; i++) {
+        ctx.beginPath();
+        ctx.moveTo(lx0 + i * sz, ny); ctx.lineTo(lx0 + i * sz, ny + sz);
+        ctx.moveTo(rx0 + i * sz, ny); ctx.lineTo(rx0 + i * sz, ny + sz);
+        ctx.stroke();
+      }
+      ctx.fillRect(lx0 + 2, ny + 2, sz - 4, sz - 4);
+      ctx.fillRect(lx0 + 2 * sz + 2, ny + 2, sz - 4, sz - 4);
+      ctx.fillRect(rx0 + 2, ny + 2, 2 * sz - 4, sz - 4);
+      ctx.font = "bold 14px monospace";
+      ctx.fillText("1 1", lx0 - 18, ny + 17);
+      ctx.fillText("1 1", rx0 - 18, ny + 17);
+      break;
+    }
+    case 3: { // STARS
+      const sz = 32;
+      const lx0 = 144 - (3 * sz) / 2, rx0 = 432 - (3 * sz) / 2;
+      ctx.strokeRect(lx0, ly, 3 * sz, 3 * sz);
+      ctx.strokeRect(rx0, ry, 3 * sz, 3 * sz);
+      ctx.lineWidth = 1;
+      for (let i = 1; i < 3; i++) {
+        ctx.beginPath();
+        ctx.moveTo(lx0, ly + i * sz); ctx.lineTo(lx0 + 3 * sz, ly + i * sz);
+        ctx.moveTo(lx0 + i * sz, ly); ctx.lineTo(lx0 + i * sz, ly + 3 * sz);
+        ctx.moveTo(rx0, ry + i * sz); ctx.lineTo(rx0 + 3 * sz, ry + i * sz);
+        ctx.moveTo(rx0 + i * sz, ry); ctx.lineTo(rx0 + i * sz, ry + 3 * sz);
+        ctx.stroke();
+      }
+      ctx.font = "bold 22px monospace";
+      ctx.fillText("★", lx0 + sz / 2, ly + 24);
+      ctx.fillText("★", lx0 + 2 * sz + sz / 2, ly + sz + 24);
+      ctx.fillText("★", rx0 + sz / 2, ry + 24);
+      ctx.fillText("★", rx0 + sz + sz / 2, ry + sz + 24);
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(rx0 + sz - 6, ry + sz - 6); ctx.lineTo(rx0 + sz + 6, ry + sz + 6); ctx.stroke();
+      break;
+    }
+    case 4: { // JUMBLE
+      const sz = 24;
+      const lx0 = 144 - (4 * sz) / 2, rx0 = 432 - (4 * sz) / 2;
+      const jy = ly + 24;
+      ctx.strokeRect(lx0, jy, 4 * sz, sz);
+      ctx.strokeRect(rx0, jy, 4 * sz, sz);
+      ctx.lineWidth = 1;
+      for (let i = 1; i < 4; i++) {
+        ctx.beginPath();
+        ctx.moveTo(lx0 + i * sz, jy); ctx.lineTo(lx0 + i * sz, jy + sz);
+        ctx.moveTo(rx0 + i * sz, jy); ctx.lineTo(rx0 + i * sz, jy + sz);
+        ctx.stroke();
+      }
+      ctx.font = "bold 16px monospace";
+      ctx.fillText("B", lx0 + 12, jy + 17);
+      ctx.fillText("O", lx0 + sz + 12, jy + 17);
+      ctx.beginPath(); ctx.arc(lx0 + sz + 12, jy + 12, 10, 0, Math.PI * 2); ctx.stroke();
+      ctx.fillText("A", lx0 + 2 * sz + 12, jy + 17);
+      ctx.fillText("T", lx0 + 3 * sz + 12, jy + 17);
+      ctx.fillText("B", rx0 + 12, jy + 17);
+      ctx.fillText("T", rx0 + sz + 12, jy + 17);
+      ctx.fillText("O", rx0 + 2 * sz + 12, jy + 17);
+      ctx.fillText("A", rx0 + 3 * sz + 12, jy + 17);
+      break;
+    }
+    case 5: { // BINARY
+      const sz = 26;
+      const lx0 = 144 - (4 * sz) / 2, rx0 = 432 - (4 * sz) / 2;
+      const by = ly + 24;
+      ctx.strokeRect(lx0, by, 4 * sz, sz);
+      ctx.strokeRect(rx0, by, 4 * sz, sz);
+      ctx.lineWidth = 1;
+      for (let i = 1; i < 4; i++) {
+        ctx.beginPath();
+        ctx.moveTo(lx0 + i * sz, by); ctx.lineTo(lx0 + i * sz, by + sz);
+        ctx.moveTo(rx0 + i * sz, by); ctx.lineTo(rx0 + i * sz, by + sz);
+        ctx.stroke();
+      }
+      ctx.font = "bold 16px monospace";
+      ["1", "0", "1", "0"].forEach((d, i) => ctx.fillText(d, lx0 + i * sz + 13, by + 18));
+      ["0", "1", "1", "1"].forEach((d, i) => ctx.fillText(d, rx0 + i * sz + 13, by + 18));
+      break;
+    }
+    case 6: { // MINES
+      const sz = 34;
+      const lx0 = 144 - sz, rx0 = 432 - sz;
+      const my = ly + 14;
+      ctx.strokeRect(lx0, my, 2 * sz, 2 * sz);
+      ctx.strokeRect(rx0, my, 2 * sz, 2 * sz);
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(lx0, my + sz); ctx.lineTo(lx0 + 2 * sz, my + sz);
+      ctx.moveTo(lx0 + sz, my); ctx.lineTo(lx0 + sz, my + 2 * sz);
+      ctx.moveTo(rx0, my + sz); ctx.lineTo(rx0 + 2 * sz, my + sz);
+      ctx.moveTo(rx0 + sz, my); ctx.lineTo(rx0 + sz, my + 2 * sz);
+      ctx.stroke();
+      ctx.font = "bold 20px monospace";
+      ctx.fillText("1", lx0 + 17, my + sz + 24);
+      ctx.fillText("💣", lx0 + 17, my + 25);
+      ctx.fillText("1", rx0 + 17, my + sz + 24);
+      ctx.fillText("💣", rx0 + 17, my + 25);
+      ctx.fillText("💣", rx0 + sz + 17, my + 25);
+      break;
+    }
+    case 7: { // TENTS
+      const sz = 32;
+      const lx0 = 144 - (3 * sz) / 2, rx0 = 432 - (3 * sz) / 2;
+      const ty = ly + 14;
+      ctx.strokeRect(lx0, ty, 3 * sz, 2 * sz);
+      ctx.strokeRect(rx0, ty, 3 * sz, 2 * sz);
+      ctx.lineWidth = 1;
+      for (let i = 1; i < 3; i++) {
+        ctx.beginPath();
+        ctx.moveTo(lx0 + i * sz, ty); ctx.lineTo(lx0 + i * sz, ty + 2 * sz);
+        ctx.moveTo(rx0 + i * sz, ty); ctx.lineTo(rx0 + i * sz, ty + 2 * sz);
+        ctx.stroke();
+      }
+      ctx.beginPath();
+      ctx.moveTo(lx0, ty + sz); ctx.lineTo(lx0 + 3 * sz, ty + sz);
+      ctx.moveTo(rx0, ty + sz); ctx.lineTo(rx0 + 3 * sz, ty + sz);
+      ctx.stroke();
+      ctx.font = "bold 20px monospace";
+      ctx.fillText("🌲", lx0 + 16, ty + 23);
+      ctx.fillText("⛺", lx0 + sz + 16, ty + 23);
+      ctx.fillText("🌲", rx0 + 16, ty + 23);
+      ctx.fillText("⛺", rx0 + sz + 16, ty + 23);
+      ctx.fillText("⛺", rx0 + 2 * sz + 16, ty + sz + 23);
+      break;
+    }
+    case 8: { // BRIDGES
+      const lx1 = 100, lx2 = 188, rx1 = 388, rx2 = 476;
+      const by = ly + 36;
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(lx1, by, 16, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(lx2, by, 16, 0, Math.PI * 2); ctx.stroke();
+      ctx.font = "bold 16px monospace";
+      ctx.fillText("3", lx1, by + 5);
+      ctx.fillText("2", lx2, by + 5);
+      ctx.beginPath();
+      ctx.moveTo(lx1 + 16, by - 4); ctx.lineTo(lx2 - 16, by - 4);
+      ctx.moveTo(lx1 + 16, by + 4); ctx.lineTo(lx2 - 16, by + 4);
+      ctx.stroke();
+      ctx.beginPath(); ctx.arc(rx1, by, 16, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(rx2, by, 16, 0, Math.PI * 2); ctx.stroke();
+      ctx.fillText("4", rx1, by + 5);
+      ctx.fillText("3", rx2, by + 5);
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(rx1 + 16, by - 6); ctx.lineTo(rx2 - 16, by - 6);
+      ctx.moveTo(rx1 + 16, by); ctx.lineTo(rx2 - 16, by);
+      ctx.moveTo(rx1 + 16, by + 6); ctx.lineTo(rx2 - 16, by + 6);
+      ctx.stroke();
+      break;
+    }
+    case 9: { // KILLER
+      const sz = 34;
+      const lx0 = 144 - sz, rx0 = 432 - sz;
+      const ky = ly + 14;
+      ctx.setLineDash([4, 3]);
+      ctx.lineWidth = 2;
+      ctx.strokeRect(lx0, ky, 2 * sz, sz);
+      ctx.strokeRect(rx0, ky, 2 * sz, sz);
+      ctx.setLineDash([]);
+      ctx.font = "bold 11px monospace";
+      ctx.fillText("3", lx0 + 8, ky + 12);
+      ctx.fillText("4", rx0 + 8, ky + 12);
+      ctx.font = "bold 18px monospace";
+      ctx.fillText("1", lx0 + 17, ky + 25);
+      ctx.fillText("2", lx0 + sz + 17, ky + 25);
+      ctx.fillText("2", rx0 + 17, ky + 25);
+      ctx.fillText("2", rx0 + sz + 17, ky + 25);
+      break;
+    }
+    case 10: { // CRYPTOGRAM
+      const cy = ly + 20;
+      ctx.font = "bold 16px monospace";
+      ctx.fillText("T  H  E", 144, cy + 10);
+      ctx.fillText("W  Z  K", 144, cy + 34);
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(96, cy + 18); ctx.lineTo(192, cy + 18); ctx.stroke();
+      ctx.fillText("T  O", 432, cy + 10);
+      ctx.fillText("W  K", 432, cy + 34);
+      ctx.beginPath(); ctx.moveTo(384, cy + 18); ctx.lineTo(480, cy + 18); ctx.stroke();
+      break;
+    }
+    case 11: { // TANGO
+      const sz = 28;
+      const lx0 = 144 - (3 * sz) / 2, rx0 = 432 - (3 * sz) / 2;
+      const ty2 = ly + 20;
+      ctx.strokeRect(lx0, ty2, sz, sz);
+      ctx.strokeRect(lx0 + 2 * sz, ty2, sz, sz);
+      ctx.font = "bold 18px monospace";
+      ctx.fillText("☀️", lx0 + 14, ty2 + 20);
+      ctx.fillText("=", lx0 + sz + 14, ty2 + 20);
+      ctx.fillText("☀️", lx0 + 2 * sz + 14, ty2 + 20);
+      ctx.strokeRect(rx0, ty2, 3 * sz, sz);
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(rx0 + sz, ty2); ctx.lineTo(rx0 + sz, ty2 + sz);
+      ctx.moveTo(rx0 + 2 * sz, ty2); ctx.lineTo(rx0 + 2 * sz, ty2 + sz);
+      ctx.stroke();
+      ctx.fillText("☀️", rx0 + 14, ty2 + 20);
+      ctx.fillText("☀️", rx0 + sz + 14, ty2 + 20);
+      ctx.fillText("☀️", rx0 + 2 * sz + 14, ty2 + 20);
+      break;
+    }
+    case 12: { // LADDER
+      const dy = ly + 16;
+      ctx.font = "bold 17px monospace";
+      ctx.fillText("C A R T", 144, dy + 10);
+      ctx.fillText("|", 144, dy + 24);
+      ctx.fillText("D A R T", 144, dy + 38);
+      ctx.fillText("C A R T", 432, dy + 10);
+      ctx.fillText("|", 432, dy + 24);
+      ctx.fillText("D A R K", 432, dy + 38);
+      break;
+    }
+    case 13: { // WHEEL
+      const wy = ly + 36;
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(144, wy, 28, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(144, wy, 12, 0, Math.PI * 2); ctx.stroke();
+      ctx.font = "bold 16px monospace";
+      ctx.fillText("O", 144, wy + 6);
+      ctx.font = "bold 11px monospace";
+      ctx.fillText("GLOW (USES O)", 144, wy + 42);
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(432, wy, 28, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(432, wy, 12, 0, Math.PI * 2); ctx.stroke();
+      ctx.font = "bold 16px monospace";
+      ctx.fillText("O", 432, wy + 6);
+      ctx.font = "bold 11px monospace";
+      ctx.fillText("WING (NO O)", 432, wy + 42);
+      break;
+    }
+    case 14: { // LIGHTS
+      const sz = 28;
+      const lx0 = 144 - (3 * sz) / 2, rx0 = 432 - (3 * sz) / 2;
+      const lty = ly + 20;
+      ctx.strokeRect(lx0, lty, 3 * sz, sz);
+      ctx.fillRect(lx0 + sz, lty, sz, sz);
+      ctx.font = "bold 18px monospace";
+      ctx.fillText("💡", lx0 + 14, lty + 20);
+      ctx.fillText("💡", lx0 + 2 * sz + 14, lty + 20);
+      ctx.strokeRect(rx0, lty, 3 * sz, sz);
+      ctx.fillText("💡", rx0 + 14, lty + 20);
+      ctx.fillText("💡", rx0 + 2 * sz + 14, lty + 20);
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(rx0 + 24, lty + 14); ctx.lineTo(rx0 + 2 * sz + 4, lty + 14); ctx.stroke();
+      break;
+    }
+    case 15: { // LOOP
+      const sz = 34;
+      const lx0 = 144 - sz / 2, rx0 = 432 - sz / 2;
+      const lpy = ly + 20;
+      ctx.font = "bold 22px monospace";
+      ctx.fillText("3", 144, lpy + 25);
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(lx0, lpy); ctx.lineTo(lx0 + sz, lpy);
+      ctx.moveTo(lx0, lpy); ctx.lineTo(lx0, lpy + sz);
+      ctx.moveTo(lx0, lpy + sz); ctx.lineTo(lx0 + sz, lpy + sz);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(rx0 - 10, lpy + sz / 2); ctx.lineTo(rx0 + sz + 10, lpy + sz / 2);
+      ctx.moveTo(rx0 + sz / 2, lpy - 10); ctx.lineTo(rx0 + sz / 2, lpy + sz + 10);
+      ctx.stroke();
+      break;
+    }
+    case 16: { // TOWERS
+      const sz = 24;
+      const lx0 = 144 - (3 * sz) / 2, rx0 = 432 - (3 * sz) / 2;
+      const twy = ly + 24;
+      ctx.strokeRect(lx0, twy, 3 * sz, sz);
+      ctx.strokeRect(rx0, twy, 3 * sz, sz);
+      ctx.lineWidth = 1;
+      for (let i = 1; i < 3; i++) {
+        ctx.beginPath();
+        ctx.moveTo(lx0 + i * sz, twy); ctx.lineTo(lx0 + i * sz, twy + sz);
+        ctx.moveTo(rx0 + i * sz, twy); ctx.lineTo(rx0 + i * sz, twy + sz);
+        ctx.stroke();
+      }
+      ctx.font = "bold 15px monospace";
+      ctx.fillText("[1]", lx0 - 18, twy + 17);
+      ctx.fillText("5", lx0 + 12, twy + 17);
+      ctx.fillText("4", lx0 + sz + 12, twy + 17);
+      ctx.fillText("3", lx0 + 2 * sz + 12, twy + 17);
+      ctx.fillText("[1]", rx0 - 18, twy + 17);
+      ctx.fillText("2", rx0 + 12, twy + 17);
+      ctx.fillText("5", rx0 + sz + 12, twy + 17);
+      ctx.fillText("1", rx0 + 2 * sz + 12, twy + 17);
+      break;
+    }
+    case 17: { // FUTOSHIKI
+      const sz = 28;
+      const lx0 = 144 - (3 * sz) / 2, rx0 = 432 - (3 * sz) / 2;
+      const fy = ly + 20;
+      ctx.strokeRect(lx0, fy, sz, sz);
+      ctx.strokeRect(lx0 + 2 * sz, fy, sz, sz);
+      ctx.font = "bold 18px monospace";
+      ctx.fillText("2", lx0 + 14, fy + 20);
+      ctx.fillText("<", lx0 + sz + 14, fy + 20);
+      ctx.fillText("4", lx0 + 2 * sz + 14, fy + 20);
+      ctx.strokeRect(rx0, fy, sz, sz);
+      ctx.strokeRect(rx0 + 2 * sz, fy, sz, sz);
+      ctx.fillText("5", rx0 + 14, fy + 20);
+      ctx.fillText("<", rx0 + sz + 14, fy + 20);
+      ctx.fillText("3", rx0 + 2 * sz + 14, fy + 20);
+      break;
+    }
+  }
+}
+
+// INITIALIZATION
 fetch("/api/config")
   .then(r => r.json())
   .then(d => {
@@ -579,7 +2483,6 @@ fetch("/api/config")
     currentSchedHour = (d.schedHour !== undefined) ? d.schedHour : 7;
     currentSchedMinute = (d.schedMinute !== undefined) ? d.schedMinute : 0;
 
-    // Round minute to nearest 15
     currentSchedMinute = Math.round(currentSchedMinute / 15) * 15;
     if (currentSchedMinute >= 60) {
       currentSchedMinute = 0;
@@ -587,20 +2490,21 @@ fetch("/api/config")
     }
 
     updateTimeDisplay();
-
     const toggleEl = document.getElementById("schedToggle");
-    if (toggleEl) {
-      toggleEl.checked = currentSchedEnabled;
-    }
+    if (toggleEl) toggleEl.checked = currentSchedEnabled;
     toggleSchedule(currentSchedEnabled);
 
     setDiff(currentGrade);
     renderGames();
+    initGuidePills();
+    selectGuideGame(0);
   })
   .catch(() => {
     updateTimeDisplay();
     toggleSchedule(currentSchedEnabled);
     renderGames();
+    initGuidePills();
+    selectGuideGame(0);
   });
 </script>
 </body>

@@ -2,6 +2,7 @@
 #include "../config/OfflineConfigManager.h"
 #include "../printer/EscPosPrinter.h"
 #include "../printer/ThermalCanvas.h"
+#include "../generators/OfflinePuzzleComposer.h"
 
 OfflineTimeManager::OfflineTimeManager() :
     _timeSet(false),
@@ -510,6 +511,23 @@ void OfflineTimeManager::setupWebRoutes() {
         String json = "{\"timeSet\":" + String(_timeSet ? "true" : "false") +
                       ",\"time\":\"" + getFormattedTime() + "\"}";
         _server.send(200, "application/json", json);
+    });
+
+    _server.on("/api/print-guide", HTTP_GET, [this]() {
+        if (_server.hasArg("game")) {
+            uint8_t gameId = (uint8_t)_server.arg("game").toInt();
+            if (_printer) {
+                OfflinePuzzleComposer composer;
+                bool success = composer.printGameGuide(*_printer, gameId);
+                if (success) {
+                    _server.send(200, "application/json", "{\"status\":\"ok\",\"game\":" + String(gameId) + "}");
+                    return;
+                }
+            }
+            _server.send(500, "application/json", "{\"status\":\"error\",\"message\":\"Printing failed\"}");
+        } else {
+            _server.send(400, "application/json", "{\"status\":\"error\",\"message\":\"Missing game parameter\"}");
+        }
     });
 
     _server.on("/api/exit", HTTP_GET, [this]() {

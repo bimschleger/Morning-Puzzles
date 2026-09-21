@@ -167,3 +167,92 @@ class BasePuzzle(ABC):
                               or (False, "<detailed failure reason>") if invalid.
         """
         pass
+
+    def render_guide_raster(self, target_width: int = 576) -> bytes:
+        """
+        Renders an authentic 1-bit thermal raster graphic (576 dots wide) demonstrating
+        a VALID move versus an INVALID move side-by-side.
+        """
+        from .rules import get_game_rule
+        from ..renderer.canvas import ThermalBitmap
+
+        rule = get_game_rule(self.puzzle_id) or get_game_rule(self.title)
+        height = 240
+        tb = ThermalBitmap(target_width, height)
+
+        # Outer border & vertical column divider
+        tb.draw_rect(10, 8, target_width - 20, height - 16, thickness=2)
+        mid_x = target_width // 2
+        tb.draw_dashed_hline(mid_x, 8, 1, dash_len=4, gap_len=4, thickness=1)
+        for y in range(8, height - 8, 8):
+            tb.draw_vline(mid_x, y, 4, thickness=1)
+
+        # Headers
+        valid_hdr = "[ VALID MOVE ]"
+        invalid_hdr = "[ INVALID MOVE ]"
+        tb.draw_text(mid_x // 2 - (len(valid_hdr) * 6), 18, valid_hdr, scale=2)
+        tb.draw_text(mid_x + (mid_x // 2) - (len(invalid_hdr) * 6), 18, invalid_hdr, scale=2)
+
+        # Mini grids from rule definition if present
+        if rule:
+            valid_spec = rule.get("valid_move", {})
+            invalid_spec = rule.get("invalid_move", {})
+
+            def _draw_mini_matrix(spec, offset_x):
+                grid = spec.get("grid", [])
+                if not grid:
+                    return
+                rows = len(grid)
+                cols = max(len(r) for r in grid) if rows > 0 else 0
+                if rows == 0 or cols == 0:
+                    return
+                cell_sz = min(36, 160 // max(rows, cols))
+                start_x = offset_x + (mid_x - (cols * cell_sz)) // 2
+                start_y = 52
+
+                tb.draw_rect(start_x, start_y, cols * cell_sz, rows * cell_sz, thickness=2)
+                for r in range(rows):
+                    for c in range(len(grid[r])):
+                        cx = start_x + c * cell_sz
+                        cy = start_y + r * cell_sz
+                        tb.draw_rect(cx, cy, cell_sz, cell_sz, thickness=1)
+                        val = str(grid[r][c])
+                        if val not in ("·", " ", ""):
+                            tb.draw_text(cx + (cell_sz - 12) // 2, cy + (cell_sz - 14) // 2, val[:1], scale=2)
+
+            _draw_mini_matrix(valid_spec, 0)
+            _draw_mini_matrix(invalid_spec, mid_x)
+
+        return tb.to_escpos()
+
+    def format_guide_ascii(self) -> List[str]:
+        """
+        Returns monospaced ASCII lines for the tutorial cheat sheet.
+        """
+        from .rules import get_game_rule
+        rule = get_game_rule(self.puzzle_id) or get_game_rule(self.title)
+        if not rule:
+            return [f"--- {self.title} ---", self.get_instruction({})]
+
+        lines = [
+            f"--- {rule['title']} ---",
+            rule["instruction"],
+            "",
+            "OBJECTIVE:",
+            f"  {rule['objective']}",
+            "",
+            "RULES:"
+        ]
+        for r in rule.get("rules", []):
+            lines.append(f"  * {r}")
+        lines.append("")
+        lines.append("WHERE TO START:")
+        for a in rule.get("opening_anchors", []):
+            lines.append(f"  * {a}")
+        lines.append("")
+        lines.append("COMMON QUESTIONS:")
+        for faq in rule.get("faq", []):
+            lines.append(f"  Q: {faq['q']}")
+            lines.append(f"  A: {faq['a']}")
+        return lines
+

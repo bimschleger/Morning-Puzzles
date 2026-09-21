@@ -15,6 +15,9 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, List
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import build_game_rules
+
 ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 SERVER_DATA_DIR = ROOT_DIR / "server" / "data"
 FW_GEN_DIR = ROOT_DIR / "esp32-firmware" / "src" / "generators"
@@ -834,6 +837,7 @@ def main() -> None:
     build_wheel_dataset()
     build_towers_dataset()
     build_futoshiki_dataset()
+    build_game_rules.main()
 
     print("\nSynchronizing Arduino IDE sketch target...")
     subprocess.check_call([str(SYNC_SCRIPT)])
