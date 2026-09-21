@@ -29,6 +29,15 @@ public:
         return 2;
     }
 
+    uint32_t getUInt(const char* key, uint32_t defaultValue = 0) {
+        if (storage().find(key) != storage().end()) return storage()[key];
+        return defaultValue;
+    }
+    size_t putUInt(const char* key, uint32_t value) {
+        storage()[key] = value;
+        return 4;
+    }
+
     uint8_t getUChar(const char* key, uint8_t defaultValue = 0) {
         if (storage().find(key) != storage().end()) return (uint8_t)storage()[key];
         return defaultValue;

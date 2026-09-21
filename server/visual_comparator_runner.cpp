@@ -63,6 +63,14 @@
 #include "../esp32-firmware/src/generators/TangoGen.h"
 #include "../esp32-firmware/src/generators/TangoGen.cpp"
 
+#include "../esp32-firmware/src/generators/TowersDataset.h"
+#include "../esp32-firmware/src/generators/TowersGen.h"
+#include "../esp32-firmware/src/generators/TowersGen.cpp"
+
+#include "../esp32-firmware/src/generators/FutoshikiDataset.h"
+#include "../esp32-firmware/src/generators/FutoshikiGen.h"
+#include "../esp32-firmware/src/generators/FutoshikiGen.cpp"
+
 #include <iostream>
 #include <iomanip>
 #include <sstream>
@@ -664,6 +672,124 @@ int main(int argc, char** argv) {
             for (uint8_t c = 0; c < tgGen.getSize(); c++) {
                 if (c > 0) std::cout << ", ";
                 std::cout << (int)tgGen.getEdgeV(r, c);
+            }
+            std::cout << "]";
+        }
+        std::cout << "],\n";
+        std::cout << "    \"raster_hex\": \"" << toHex(printer->lastBitmap) << "\"\n";
+        std::cout << "  }";
+    }
+
+    // 17. TOWERS
+    {
+        TowersGen twGen;
+        twGen.generate(TOWERS_MEDIUM, 42);
+        printer->lastBitmap.clear();
+        twGen.printRasterToReceipt(*printer);
+
+        printSep();
+        std::cout << "  {\n";
+        std::cout << "    \"puzzle\": \"towers\",\n";
+        std::cout << "    \"difficulty\": \"medium\",\n";
+        std::cout << "    \"width\": " << printer->lastWidth << ",\n";
+        std::cout << "    \"height\": " << printer->lastHeight << ",\n";
+        std::cout << "    \"size\": " << (int)twGen.getSize() << ",\n";
+        std::cout << "    \"clues\": {\n";
+        std::cout << "      \"top\": [";
+        for (uint8_t i = 0; i < twGen.getSize(); i++) {
+            if (i > 0) std::cout << ", ";
+            std::cout << (int)twGen.getTopClue(i);
+        }
+        std::cout << "],\n";
+        std::cout << "      \"bottom\": [";
+        for (uint8_t i = 0; i < twGen.getSize(); i++) {
+            if (i > 0) std::cout << ", ";
+            std::cout << (int)twGen.getBottomClue(i);
+        }
+        std::cout << "],\n";
+        std::cout << "      \"left\": [";
+        for (uint8_t i = 0; i < twGen.getSize(); i++) {
+            if (i > 0) std::cout << ", ";
+            std::cout << (int)twGen.getLeftClue(i);
+        }
+        std::cout << "],\n";
+        std::cout << "      \"right\": [";
+        for (uint8_t i = 0; i < twGen.getSize(); i++) {
+            if (i > 0) std::cout << ", ";
+            std::cout << (int)twGen.getRightClue(i);
+        }
+        std::cout << "]\n";
+        std::cout << "    },\n";
+        std::cout << "    \"solution\": [";
+        for (uint8_t r = 0; r < twGen.getSize(); r++) {
+            if (r > 0) std::cout << ", ";
+            std::cout << "[";
+            for (uint8_t c = 0; c < twGen.getSize(); c++) {
+                if (c > 0) std::cout << ", ";
+                std::cout << (int)twGen.getSolution(r, c);
+            }
+            std::cout << "]";
+        }
+        std::cout << "],\n";
+        std::cout << "    \"raster_hex\": \"" << toHex(printer->lastBitmap) << "\"\n";
+        std::cout << "  }";
+    }
+
+    // 18. FUTOSHIKI
+    {
+        FutoshikiGen fGen;
+        fGen.generate(FUTOSHIKI_MEDIUM, 42);
+        printer->lastBitmap.clear();
+        fGen.printRasterToReceipt(*printer);
+
+        printSep();
+        std::cout << "  {\n";
+        std::cout << "    \"puzzle\": \"futoshiki\",\n";
+        std::cout << "    \"difficulty\": \"medium\",\n";
+        std::cout << "    \"width\": " << printer->lastWidth << ",\n";
+        std::cout << "    \"height\": " << printer->lastHeight << ",\n";
+        std::cout << "    \"size\": " << (int)fGen.getSize() << ",\n";
+        std::cout << "    \"givens\": [";
+        bool firstGiv = true;
+        for (uint8_t r = 0; r < fGen.getSize(); r++) {
+            for (uint8_t c = 0; c < fGen.getSize(); c++) {
+                if (fGen.getGiven(r, c) > 0) {
+                    if (!firstGiv) std::cout << ", ";
+                    std::cout << "[" << (int)r << ", " << (int)c << ", " << (int)fGen.getGiven(r, c) << "]";
+                    firstGiv = false;
+                }
+            }
+        }
+        std::cout << "],\n";
+        std::cout << "    \"edges_h\": [";
+        for (uint8_t r = 0; r < fGen.getSize(); r++) {
+            if (r > 0) std::cout << ", ";
+            std::cout << "[";
+            for (uint8_t c = 0; c < fGen.getSize() - 1; c++) {
+                if (c > 0) std::cout << ", ";
+                std::cout << (int)fGen.getEdgeH(r, c);
+            }
+            std::cout << "]";
+        }
+        std::cout << "],\n";
+        std::cout << "    \"edges_v\": [";
+        for (uint8_t r = 0; r < fGen.getSize() - 1; r++) {
+            if (r > 0) std::cout << ", ";
+            std::cout << "[";
+            for (uint8_t c = 0; c < fGen.getSize(); c++) {
+                if (c > 0) std::cout << ", ";
+                std::cout << (int)fGen.getEdgeV(r, c);
+            }
+            std::cout << "]";
+        }
+        std::cout << "],\n";
+        std::cout << "    \"solution\": [";
+        for (uint8_t r = 0; r < fGen.getSize(); r++) {
+            if (r > 0) std::cout << ", ";
+            std::cout << "[";
+            for (uint8_t c = 0; c < fGen.getSize(); c++) {
+                if (c > 0) std::cout << ", ";
+                std::cout << (int)fGen.getSolution(r, c);
             }
             std::cout << "]";
         }

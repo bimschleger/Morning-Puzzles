@@ -31,6 +31,8 @@ enum OfflinePuzzleType : uint8_t {
     PUZZLE_KILLER,
     PUZZLE_CRYPTOGRAM,
     PUZZLE_LADDER,
+    PUZZLE_TOWERS,
+    PUZZLE_FUTOSHIKI,
     OFFLINE_PUZZLE_TOTAL
 };
 
@@ -45,8 +47,8 @@ public:
     // Enabled games
     bool isGameEnabled(OfflinePuzzleType type) const;
     void setGameEnabled(OfflinePuzzleType type, bool enabled);
-    uint16_t getGameMask() const { return _gameMask; }
-    void setGameMask(uint16_t mask);
+    uint32_t getGameMask() const { return _gameMask; }
+    void setGameMask(uint32_t mask);
 
     // Number of puzzles to draw and print
     uint8_t getPuzzleCount() const { return _puzzleCount; }
@@ -73,7 +75,7 @@ public:
     const char* getGradeName(PuzzleGrade grade) const;
 
 private:
-    uint16_t    _gameMask;
+    uint32_t    _gameMask;
     uint8_t     _puzzleCount;
     PuzzleGrade _puzzleGrade;
     bool        _dailyScheduleEnabled;

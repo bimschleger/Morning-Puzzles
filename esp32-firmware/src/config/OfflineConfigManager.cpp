@@ -2,7 +2,7 @@
 #include "config.h"
 
 OfflineConfigManager::OfflineConfigManager() :
-    _gameMask(0xFFFF),
+    _gameMask(0x3FFFF),
     _puzzleCount(5),
     _puzzleGrade(GRADE_ESCALATING),
     _dailyScheduleEnabled(DAILY_PRINT_ENABLED_DEFAULT),
@@ -12,7 +12,7 @@ OfflineConfigManager::OfflineConfigManager() :
 
 void OfflineConfigManager::begin() {
     _prefs.begin("mp_config", false);
-    _gameMask = _prefs.getUShort("mask", 0xFFFF);
+    _gameMask = _prefs.getUInt("mask", 0x3FFFF);
     _puzzleCount = _prefs.getUChar("count", 5);
     uint8_t savedGrade = _prefs.getUChar("grade", (uint8_t)GRADE_ESCALATING);
     _puzzleGrade = (PuzzleGrade)savedGrade;
@@ -21,8 +21,9 @@ void OfflineConfigManager::begin() {
     _dailyScheduleMinute = _prefs.getUChar("daily_min", DAILY_PRINT_MINUTE_DEFAULT);
 
     // Validate mask (ensure at least 1 game is enabled)
-    if ((_gameMask & 0xFFFF) == 0) {
-        _gameMask = 0xFFFF;
+    const uint32_t allMask = (1UL << (uint8_t)OFFLINE_PUZZLE_TOTAL) - 1UL;
+    if ((_gameMask & allMask) == 0) {
+        _gameMask = allMask;
     }
 
     // Validate count
@@ -41,7 +42,7 @@ void OfflineConfigManager::begin() {
 }
 
 void OfflineConfigManager::save() {
-    _prefs.putUShort("mask", _gameMask);
+    _prefs.putUInt("mask", _gameMask);
     _prefs.putUChar("count", _puzzleCount);
     _prefs.putUChar("grade", (uint8_t)_puzzleGrade);
     _prefs.putBool("daily_en", _dailyScheduleEnabled);
@@ -50,7 +51,7 @@ void OfflineConfigManager::save() {
 }
 
 void OfflineConfigManager::resetToDefaults() {
-    _gameMask = 0xFFFF;
+    _gameMask = (1UL << (uint8_t)OFFLINE_PUZZLE_TOTAL) - 1UL;
     _puzzleCount = 5;
     _puzzleGrade = GRADE_ESCALATING;
     _dailyScheduleEnabled = DAILY_PRINT_ENABLED_DEFAULT;
@@ -61,19 +62,20 @@ void OfflineConfigManager::resetToDefaults() {
 
 bool OfflineConfigManager::isGameEnabled(OfflinePuzzleType type) const {
     if ((uint8_t)type >= OFFLINE_PUZZLE_TOTAL) return false;
-    return (_gameMask & (1 << (uint8_t)type)) != 0;
+    return (_gameMask & (1UL << (uint8_t)type)) != 0;
 }
 
 void OfflineConfigManager::setGameEnabled(OfflinePuzzleType type, bool enabled) {
     if ((uint8_t)type >= OFFLINE_PUZZLE_TOTAL) return;
     if (enabled) {
-        _gameMask |= (1 << (uint8_t)type);
+        _gameMask |= (1UL << (uint8_t)type);
     } else {
-        _gameMask &= ~(1 << (uint8_t)type);
+        _gameMask &= ~(1UL << (uint8_t)type);
     }
     // Guard against all disabled
-    if ((_gameMask & 0xFFFF) == 0) {
-        _gameMask = (1 << (uint8_t)type);
+    const uint32_t allMask = (1UL << (uint8_t)OFFLINE_PUZZLE_TOTAL) - 1UL;
+    if ((_gameMask & allMask) == 0) {
+        _gameMask = (1UL << (uint8_t)type);
     }
     // Re-clamp puzzle count
     uint8_t enabledCount = getEnabledGameCount();
@@ -82,9 +84,10 @@ void OfflineConfigManager::setGameEnabled(OfflinePuzzleType type, bool enabled) 
     }
 }
 
-void OfflineConfigManager::setGameMask(uint16_t mask) {
-    uint16_t validMask = mask & 0xFFFF;
-    if (validMask == 0) validMask = 0xFFFF;
+void OfflineConfigManager::setGameMask(uint32_t mask) {
+    const uint32_t allMask = (1UL << (uint8_t)OFFLINE_PUZZLE_TOTAL) - 1UL;
+    uint32_t validMask = mask & allMask;
+    if (validMask == 0) validMask = allMask;
     _gameMask = validMask;
 
     uint8_t enabledCount = getEnabledGameCount();
@@ -136,7 +139,7 @@ String OfflineConfigManager::getDailyScheduleTimeString() const {
 uint8_t OfflineConfigManager::getEnabledGameCount() const {
     uint8_t count = 0;
     for (uint8_t i = 0; i < (uint8_t)OFFLINE_PUZZLE_TOTAL; i++) {
-        if (_gameMask & (1 << i)) count++;
+        if (_gameMask & (1UL << i)) count++;
     }
     return count;
 }
@@ -145,7 +148,7 @@ uint8_t OfflineConfigManager::getEnabledPuzzles(OfflinePuzzleType* outBuffer, ui
     if (!outBuffer || maxCapacity == 0) return 0;
     uint8_t count = 0;
     for (uint8_t i = 0; i < (uint8_t)OFFLINE_PUZZLE_TOTAL && count < maxCapacity; i++) {
-        if (_gameMask & (1 << i)) {
+        if (_gameMask & (1UL << i)) {
             outBuffer[count++] = (OfflinePuzzleType)i;
         }
     }
@@ -170,6 +173,8 @@ const char* OfflineConfigManager::getPuzzleName(OfflinePuzzleType type) const {
         case PUZZLE_KILLER:     return "Killer";
         case PUZZLE_CRYPTOGRAM: return "Cryptogram";
         case PUZZLE_LADDER:     return "Ladder";
+        case PUZZLE_TOWERS:     return "Towers";
+        case PUZZLE_FUTOSHIKI:  return "Futoshiki";
         default:                return "Unknown Puzzle";
     }
 }

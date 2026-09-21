@@ -289,6 +289,34 @@ void OfflinePuzzleComposer::printSinglePuzzle(EscPosPrinter& printer, OfflinePuz
             }
             break;
         }
+        case PUZZLE_TOWERS: {
+            TowersDifficulty diff = (grade == GRADE_EASY) ? TOWERS_EASY : ((grade == GRADE_HARD || grade == GRADE_EXTREME) ? TOWERS_HARD : TOWERS_MEDIUM);
+            const char* diffStr = (diff == TOWERS_EASY) ? "EASY" : ((diff == TOWERS_HARD) ? "HARD" : "MEDIUM");
+            Serial.println("[COMPOSER] Generating Towers...");
+            TowersGen towers;
+            towers.generate(diff);
+            char towersInstr[100];
+            snprintf(towersInstr, sizeof(towersInstr), "Place heights 1-%d per line so exterior numbers match the count of visible taller buildings.", (int)towers.getSize());
+            printPuzzleHeader(printer, "TOWERS", diffStr, towersInstr);
+            if (!useRaster || !towers.printRasterToReceipt(printer)) {
+                towers.printToReceipt(printer);
+            }
+            break;
+        }
+        case PUZZLE_FUTOSHIKI: {
+            FutoshikiDifficulty diff = (grade == GRADE_EASY) ? FUTOSHIKI_EASY : ((grade == GRADE_HARD || grade == GRADE_EXTREME) ? FUTOSHIKI_HARD : FUTOSHIKI_MEDIUM);
+            const char* diffStr = (diff == FUTOSHIKI_EASY) ? "EASY" : ((diff == FUTOSHIKI_HARD) ? "HARD" : "MEDIUM");
+            Serial.println("[COMPOSER] Generating Futoshiki...");
+            FutoshikiGen futoshiki;
+            futoshiki.generate(diff);
+            char futoshikiInstr[100];
+            snprintf(futoshikiInstr, sizeof(futoshikiInstr), "Fill digits 1-%d in every line while satisfying all inequality signs between adjacent cells.", (int)futoshiki.getSize());
+            printPuzzleHeader(printer, "FUTOSHIKI", diffStr, futoshikiInstr);
+            if (!useRaster || !futoshiki.printRasterToReceipt(printer)) {
+                futoshiki.printToReceipt(printer);
+            }
+            break;
+        }
         default:
             break;
     }

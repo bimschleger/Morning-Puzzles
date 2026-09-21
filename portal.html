@@ -437,10 +437,12 @@ const GAMES = [
   { id: 12, name: "Loop" },
   { id: 13, name: "Killer" },
   { id: 14, name: "Cryptogram" },
-  { id: 15, name: "Ladder" }
+  { id: 15, name: "Ladder" },
+  { id: 16, name: "Towers" },
+  { id: 17, name: "Futoshiki" }
 ];
 
-let currentMask = 0xFFFF;
+let currentMask = 0x3FFFF;
 let currentCount = 5;
 let currentGrade = 3;
 let currentSchedEnabled = true;
@@ -477,13 +479,13 @@ function renderGames() {
 function toggleGame(id) {
   const willDisable = (currentMask & (1 << id)) !== 0;
   let newMask = willDisable ? (currentMask & ~(1 << id)) : (currentMask | (1 << id));
-  if ((newMask & 0xFFFF) === 0) return; // Prevent disabling all games
+  if ((newMask & 0x3FFFF) === 0) return; // Prevent disabling all games
   currentMask = newMask;
   renderGames();
 }
 
 function selectAllGames(selectAll) {
-  currentMask = selectAll ? 0xFFFF : 0x0001; // Keep at least Sudoku if none
+  currentMask = selectAll ? 0x3FFFF : 0x0001; // Keep at least Sudoku if none
   renderGames();
 }
 
@@ -570,7 +572,7 @@ function saveAndExit() {
 fetch("/api/config")
   .then(r => r.json())
   .then(d => {
-    currentMask = d.mask || 0xFFFF;
+    currentMask = d.mask || 0x3FFFF;
     currentCount = d.count || 5;
     currentGrade = (d.grade !== undefined) ? d.grade : 3;
     currentSchedEnabled = (d.schedEnabled !== undefined) ? d.schedEnabled : true;

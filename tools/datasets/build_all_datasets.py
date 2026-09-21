@@ -588,6 +588,223 @@ def build_wheel_dataset() -> None:
             print(f"  -> Updated WheelSimulator.puzzles in {SIMULATOR_HTML}")
 
 
+# =============================================================================
+# 8. TOWERS DATASET
+# =============================================================================
+def build_towers_dataset() -> None:
+    json_path = SERVER_DATA_DIR / "towers_dataset.json"
+    header_path = FW_GEN_DIR / "TowersDataset.h"
+    print(f"Building TowersDataset from {json_path}...")
+
+    with open(json_path, "r", encoding="utf-8") as f:
+        dataset = json.load(f)
+
+    def pack_nibbles(arr: List[int]) -> List[int]:
+        out = []
+        for i in range(0, len(arr), 2):
+            high = arr[i] & 0x0F
+            low = (arr[i + 1] & 0x0F) if i + 1 < len(arr) else 0
+            out.append((high << 4) | low)
+        return out
+
+    lines = [
+        "// Automatically generated from server/data/towers_dataset.json by tools/datasets/build_all_datasets.py",
+        "// Do not edit directly!",
+        "#ifndef TOWERS_DATASET_H",
+        "#define TOWERS_DATASET_H",
+        "",
+        "#include <Arduino.h>",
+        "",
+        "static const size_t NUM_TOWERS_EASY = 100;",
+        "static const size_t NUM_TOWERS_MEDIUM = 100;",
+        "static const size_t NUM_TOWERS_HARD = 100;",
+        "",
+        "struct Towers4x4Entry {",
+        "    uint8_t solution[8]; // 16 cells packed as nibbles",
+        "    uint8_t clues[8];    // 16 clues: top(4), bottom(4), left(4), right(4)",
+        "};",
+        "",
+        "struct Towers5x5Entry {",
+        "    uint8_t solution[13]; // 25 cells packed as nibbles (last byte low nibble 0)",
+        "    uint8_t clues[10];    // 20 clues: top(5), bottom(5), left(5), right(5)",
+        "};",
+        "",
+        "struct Towers6x6Entry {",
+        "    uint8_t solution[18]; // 36 cells packed as nibbles",
+        "    uint8_t clues[12];    // 24 clues: top(6), bottom(6), left(6), right(6)",
+        "};",
+        "",
+    ]
+
+    # EASY (4x4)
+    lines.append("// --- EASY (4x4, Heights 1-4) ---")
+    lines.append("static const Towers4x4Entry TOWERS_EASY_DATASET[100] PROGMEM = {")
+    for p in dataset["easy"]:
+        size = 4
+        sol_flat = [p["solution"][r][c] for r in range(size) for c in range(size)]
+        sol_packed = pack_nibbles(sol_flat)
+        clues_flat = p["clues"]["top"] + p["clues"]["bottom"] + p["clues"]["left"] + p["clues"]["right"]
+        clues_packed = pack_nibbles(clues_flat)
+        s_str = "{" + ", ".join(str(x) for x in sol_packed) + "}"
+        c_str = "{" + ", ".join(str(x) for x in clues_packed) + "}"
+        lines.append(f"    {{{s_str}, {c_str}}},")
+    lines.append("};\n")
+
+    # MEDIUM (5x5)
+    lines.append("// --- MEDIUM (5x5, Heights 1-5) ---")
+    lines.append("static const Towers5x5Entry TOWERS_MEDIUM_DATASET[100] PROGMEM = {")
+    for p in dataset["medium"]:
+        size = 5
+        sol_flat = [p["solution"][r][c] for r in range(size) for c in range(size)]
+        sol_packed = pack_nibbles(sol_flat)
+        clues_flat = p["clues"]["top"] + p["clues"]["bottom"] + p["clues"]["left"] + p["clues"]["right"]
+        clues_packed = pack_nibbles(clues_flat)
+        s_str = "{" + ", ".join(str(x) for x in sol_packed) + "}"
+        c_str = "{" + ", ".join(str(x) for x in clues_packed) + "}"
+        lines.append(f"    {{{s_str}, {c_str}}},")
+    lines.append("};\n")
+
+    # HARD (6x6)
+    lines.append("// --- HARD (6x6, Heights 1-6) ---")
+    lines.append("static const Towers6x6Entry TOWERS_HARD_DATASET[100] PROGMEM = {")
+    for p in dataset["hard"]:
+        size = 6
+        sol_flat = [p["solution"][r][c] for r in range(size) for c in range(size)]
+        sol_packed = pack_nibbles(sol_flat)
+        clues_flat = p["clues"]["top"] + p["clues"]["bottom"] + p["clues"]["left"] + p["clues"]["right"]
+        clues_packed = pack_nibbles(clues_flat)
+        s_str = "{" + ", ".join(str(x) for x in sol_packed) + "}"
+        c_str = "{" + ", ".join(str(x) for x in clues_packed) + "}"
+        lines.append(f"    {{{s_str}, {c_str}}},")
+    lines.append("};\n")
+
+    lines.append("#endif // TOWERS_DATASET_H\n")
+    header_path.write_text("\n".join(lines), encoding="utf-8")
+    print(f"  -> Wrote {header_path}")
+
+    # Update simulator
+    if SIMULATOR_HTML.exists():
+        js_code = "    const TOWERS_DATASET = " + json.dumps(dataset, separators=(",", ":")) + ";"
+        content = SIMULATOR_HTML.read_text(encoding="utf-8")
+        pattern = r"    const TOWERS_DATASET = \{.*?\};"
+        if re.search(pattern, content):
+            content = re.sub(pattern, lambda m: js_code, content)
+            SIMULATOR_HTML.write_text(content, encoding="utf-8")
+            print(f"  -> Updated TOWERS_DATASET in {SIMULATOR_HTML}")
+        else:
+            stars_pattern = r"(const STARS_DATASET = \{.*?\};)"
+            if re.search(stars_pattern, content):
+                content = re.sub(stars_pattern, r"\1\n" + js_code, content, count=1)
+                SIMULATOR_HTML.write_text(content, encoding="utf-8")
+                print(f"  -> Injected TOWERS_DATASET into {SIMULATOR_HTML}")
+
+
+# =============================================================================
+# 9. FUTOSHIKI DATASET
+# =============================================================================
+def build_futoshiki_dataset() -> None:
+    json_path = SERVER_DATA_DIR / "futoshiki_dataset.json"
+    header_path = FW_GEN_DIR / "FutoshikiDataset.h"
+    print(f"Building FutoshikiDataset from {json_path}...")
+
+    with open(json_path, "r", encoding="utf-8") as f:
+        dataset = json.load(f)
+
+    def pack_nibbles(arr: List[int]) -> List[int]:
+        out = []
+        for i in range(0, len(arr), 2):
+            high = arr[i] & 0x0F
+            low = (arr[i + 1] & 0x0F) if i + 1 < len(arr) else 0
+            out.append((high << 4) | low)
+        return out
+
+    lines = [
+        "// Automatically generated from server/data/futoshiki_dataset.json by tools/datasets/build_all_datasets.py",
+        "// Do not edit directly!",
+        "#ifndef FUTOSHIKI_DATASET_H",
+        "#define FUTOSHIKI_DATASET_H",
+        "",
+        "#include <Arduino.h>",
+        "",
+        "static const size_t NUM_FUTOSHIKI_EASY = 100;",
+        "static const size_t NUM_FUTOSHIKI_MEDIUM = 100;",
+        "static const size_t NUM_FUTOSHIKI_HARD = 100;",
+        "",
+        "struct Futoshiki4x4Entry {",
+        "    uint8_t solution[8]; // 16 cells packed nibbles",
+        "    uint8_t givens[8];   // 16 cells packed nibbles (0=empty, 1..4=given)",
+        "    uint8_t edges_h[12]; // 4 rows x 3 cols",
+        "    uint8_t edges_v[12]; // 3 rows x 4 cols",
+        "};",
+        "",
+        "struct Futoshiki5x5Entry {",
+        "    uint8_t solution[13]; // 25 cells packed nibbles (last low nibble 0)",
+        "    uint8_t givens[13];   // 25 cells packed nibbles",
+        "    uint8_t edges_h[20];  // 5 rows x 4 cols",
+        "    uint8_t edges_v[20];  // 4 rows x 5 cols",
+        "};",
+        "",
+        "struct Futoshiki6x6Entry {",
+        "    uint8_t solution[18]; // 36 cells packed nibbles",
+        "    uint8_t givens[18];   // 36 cells packed nibbles",
+        "    uint8_t edges_h[30];  // 6 rows x 5 cols",
+        "    uint8_t edges_v[30];  // 5 rows x 6 cols",
+        "};",
+        "",
+    ]
+
+    tier_specs = [
+        ("EASY", 4),
+        ("MEDIUM", 5),
+        ("HARD", 6),
+    ]
+
+    for tier, size in tier_specs:
+        puzzles = dataset[tier.lower()]
+        entry_type = f"Futoshiki{size}x{size}Entry"
+        lines.append(f"// --- {tier} ({size}x{size}, Digits 1-{size}) ---")
+        lines.append(f"static const {entry_type} FUTOSHIKI_{tier}_DATASET[100] PROGMEM = {{")
+        for p in puzzles:
+            sol_flat = [p["solution"][r][c] for r in range(size) for c in range(size)]
+            sol_packed = pack_nibbles(sol_flat)
+
+            givens_grid = [0] * (size * size)
+            for r, c, val in p["givens"]:
+                givens_grid[r * size + c] = val
+            givens_packed = pack_nibbles(givens_grid)
+
+            eh_flat = [p["edges_h"][r][c] for r in range(size) for c in range(size - 1)]
+            ev_flat = [p["edges_v"][r][c] for r in range(size - 1) for c in range(size)]
+
+            s_str = "{" + ", ".join(str(x) for x in sol_packed) + "}"
+            g_str = "{" + ", ".join(str(x) for x in givens_packed) + "}"
+            eh_str = "{" + ", ".join(str(x) for x in eh_flat) + "}"
+            ev_str = "{" + ", ".join(str(x) for x in ev_flat) + "}"
+
+            lines.append(f"    {{{s_str}, {g_str}, {eh_str}, {ev_str}}},")
+        lines.append("};\n")
+
+    lines.append("#endif // FUTOSHIKI_DATASET_H\n")
+    header_path.write_text("\n".join(lines), encoding="utf-8")
+    print(f"  -> Wrote {header_path}")
+
+    # Update simulator
+    if SIMULATOR_HTML.exists():
+        js_code = "    const FUTOSHIKI_DATASET = " + json.dumps(dataset, separators=(",", ":")) + ";"
+        content = SIMULATOR_HTML.read_text(encoding="utf-8")
+        pattern = r"    const FUTOSHIKI_DATASET = \{.*?\};"
+        if re.search(pattern, content):
+            content = re.sub(pattern, lambda m: js_code, content)
+            SIMULATOR_HTML.write_text(content, encoding="utf-8")
+            print(f"  -> Updated FUTOSHIKI_DATASET in {SIMULATOR_HTML}")
+        else:
+            towers_pattern = r"(const TOWERS_DATASET = \{.*?\};)"
+            if re.search(towers_pattern, content):
+                content = re.sub(towers_pattern, r"\1\n" + js_code, content, count=1)
+                SIMULATOR_HTML.write_text(content, encoding="utf-8")
+                print(f"  -> Injected FUTOSHIKI_DATASET into {SIMULATOR_HTML}")
+
+
 def main() -> None:
     print("==================================================================")
     print("STARTING UNIFIED CURATED DATASETS COMPILATION PIPELINE")
@@ -599,6 +816,8 @@ def main() -> None:
     build_cryptogram_dataset()
     build_jumble_dataset()
     build_wheel_dataset()
+    build_towers_dataset()
+    build_futoshiki_dataset()
 
     print("\nSynchronizing Arduino IDE sketch target...")
     subprocess.check_call([str(SYNC_SCRIPT)])
@@ -610,3 +829,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

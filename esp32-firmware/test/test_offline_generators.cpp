@@ -94,6 +94,14 @@ public:
 #include "../src/generators/LadderGen.h"
 #include "../src/generators/LadderGen.cpp"
 
+#include "../src/generators/TowersDataset.h"
+#include "../src/generators/TowersGen.h"
+#include "../src/generators/TowersGen.cpp"
+
+#include "../src/generators/FutoshikiDataset.h"
+#include "../src/generators/FutoshikiGen.h"
+#include "../src/generators/FutoshikiGen.cpp"
+
 #include "../src/generators/OfflinePuzzleComposer.h"
 #include "../src/generators/OfflinePuzzleComposer.cpp"
 
@@ -146,8 +154,8 @@ int main() {
     OfflineConfigManager config;
     config.begin();
     // Enable 7 games: Sudoku, Queens, Mines, Bridges, Tango, Lights, Wheel
-    uint16_t mask = (1 << PUZZLE_SUDOKU) | (1 << PUZZLE_QUEENS) | (1 << PUZZLE_MINES) |
-                    (1 << PUZZLE_BRIDGES) | (1 << PUZZLE_TANGO) | (1 << PUZZLE_LIGHTS) | (1 << PUZZLE_WHEEL);
+    uint32_t mask = (1UL << PUZZLE_SUDOKU) | (1UL << PUZZLE_QUEENS) | (1UL << PUZZLE_MINES) |
+                    (1UL << PUZZLE_BRIDGES) | (1UL << PUZZLE_TANGO) | (1UL << PUZZLE_LIGHTS) | (1UL << PUZZLE_WHEEL);
     config.setGameMask(mask);
     config.setPuzzleCount(4);
     config.setPuzzleGrade(GRADE_ESCALATING);

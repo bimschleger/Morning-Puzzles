@@ -24,6 +24,8 @@ from .ladder import LadderPuzzle
 from .wheel import WheelPuzzle
 from .lights import LightsPuzzle
 from .loop import LoopPuzzle
+from .towers import TowersPuzzle
+from .futoshiki import FutoshikiPuzzle
 
 
 class PuzzleRegistry:
@@ -152,4 +154,6 @@ DEFAULT_REGISTRY = PuzzleRegistry([
     WheelPuzzle(),
     LightsPuzzle(),
     LoopPuzzle(),
+    TowersPuzzle(),
+    FutoshikiPuzzle(),
 ])

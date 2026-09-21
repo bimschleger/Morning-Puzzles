@@ -20,6 +20,8 @@ class EscPosPrinter;
 #include "KillerGen.h"
 #include "CryptogramGen.h"
 #include "LadderGen.h"
+#include "TowersGen.h"
+#include "FutoshikiGen.h"
 
 class OfflinePuzzleComposer {
 public:

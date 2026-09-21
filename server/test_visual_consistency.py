@@ -209,6 +209,22 @@ def test_visual_consistency():
                 "edges_h": item["edges_h"],
                 "edges_v": item["edges_v"],
             }
+        elif p_name == "towers":
+            py_data = {
+                "size": item["size"],
+                "clues": item["clues"],
+                "solution": item["solution"],
+                "difficulty": item.get("difficulty", "medium"),
+            }
+        elif p_name == "futoshiki":
+            py_data = {
+                "size": item["size"],
+                "givens": item["givens"],
+                "edges_h": item["edges_h"],
+                "edges_v": item["edges_v"],
+                "solution": item["solution"],
+                "difficulty": item.get("difficulty", "medium"),
+            }
         else:
             print(f"Unknown puzzle {p_name}")
             continue

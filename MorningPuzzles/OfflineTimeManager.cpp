@@ -428,7 +428,7 @@ void OfflineTimeManager::setupWebRoutes() {
     });
 
     _server.on("/api/config", HTTP_GET, [this]() {
-        uint16_t mask = _configManager ? _configManager->getGameMask() : 0xFFFF;
+        uint32_t mask = _configManager ? _configManager->getGameMask() : 0x3FFFF;
         uint8_t count = _configManager ? _configManager->getPuzzleCount() : 5;
         uint8_t grade = _configManager ? (uint8_t)_configManager->getPuzzleGrade() : 3;
         bool schedEn = _configManager ? _configManager->isDailyScheduleEnabled() : true;
@@ -447,7 +447,7 @@ void OfflineTimeManager::setupWebRoutes() {
 
     _server.on("/api/save-config", HTTP_GET, [this]() {
         if (_server.hasArg("mask") && _server.hasArg("count") && _server.hasArg("grade")) {
-            uint16_t mask = (uint16_t)_server.arg("mask").toInt();
+            uint32_t mask = (uint32_t)strtoul(_server.arg("mask").c_str(), NULL, 10);
             uint8_t count = (uint8_t)_server.arg("count").toInt();
             uint8_t grade = (uint8_t)_server.arg("grade").toInt();
 
