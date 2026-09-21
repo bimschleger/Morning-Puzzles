@@ -43,7 +43,7 @@ PuzzleGrade OfflinePuzzleComposer::getGradeForSlot(uint8_t index, uint8_t totalC
 }
 
 bool OfflinePuzzleComposer::supportsExtreme(OfflinePuzzleType type) const {
-    return (type == PUZZLE_LIGHTS || type == PUZZLE_QUEENS || type == PUZZLE_KILLER);
+    return (type == PUZZLE_LIGHTS || type == PUZZLE_QUEENS || type == PUZZLE_KILLER || type == PUZZLE_TOWERS);
 }
 
 void OfflinePuzzleComposer::printSinglePuzzle(EscPosPrinter& printer, OfflinePuzzleType type, bool useRaster, PuzzleGrade grade) {
@@ -290,8 +290,8 @@ void OfflinePuzzleComposer::printSinglePuzzle(EscPosPrinter& printer, OfflinePuz
             break;
         }
         case PUZZLE_TOWERS: {
-            TowersDifficulty diff = (grade == GRADE_EASY) ? TOWERS_EASY : ((grade == GRADE_HARD || grade == GRADE_EXTREME) ? TOWERS_HARD : TOWERS_MEDIUM);
-            const char* diffStr = (diff == TOWERS_EASY) ? "EASY" : ((diff == TOWERS_HARD) ? "HARD" : "MEDIUM");
+            TowersDifficulty diff = (grade == GRADE_EASY) ? TOWERS_EASY : ((grade == GRADE_EXTREME) ? TOWERS_EXTREME : ((grade == GRADE_HARD) ? TOWERS_HARD : TOWERS_MEDIUM));
+            const char* diffStr = (diff == TOWERS_EASY) ? "EASY" : ((diff == TOWERS_EXTREME) ? "EXTREME" : ((diff == TOWERS_HARD) ? "HARD" : "MEDIUM"));
             Serial.println("[COMPOSER] Generating Towers...");
             TowersGen towers;
             towers.generate(diff);

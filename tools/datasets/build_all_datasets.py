@@ -618,6 +618,7 @@ def build_towers_dataset() -> None:
         "static const size_t NUM_TOWERS_EASY = 100;",
         "static const size_t NUM_TOWERS_MEDIUM = 100;",
         "static const size_t NUM_TOWERS_HARD = 100;",
+        "static const size_t NUM_TOWERS_EXTREME = 100;",
         "",
         "struct Towers4x4Entry {",
         "    uint8_t solution[8]; // 16 cells packed as nibbles",
@@ -678,6 +679,20 @@ def build_towers_dataset() -> None:
         lines.append(f"    {{{s_str}, {c_str}}},")
     lines.append("};\n")
 
+    # EXTREME (6x6)
+    lines.append("// --- EXTREME (6x6, Heights 1-6, Sparse Clues) ---")
+    lines.append("static const Towers6x6Entry TOWERS_EXTREME_DATASET[100] PROGMEM = {")
+    for p in dataset["extreme"]:
+        size = 6
+        sol_flat = [p["solution"][r][c] for r in range(size) for c in range(size)]
+        sol_packed = pack_nibbles(sol_flat)
+        clues_flat = p["clues"]["top"] + p["clues"]["bottom"] + p["clues"]["left"] + p["clues"]["right"]
+        clues_packed = pack_nibbles(clues_flat)
+        s_str = "{" + ", ".join(str(x) for x in sol_packed) + "}"
+        c_str = "{" + ", ".join(str(x) for x in clues_packed) + "}"
+        lines.append(f"    {{{s_str}, {c_str}}},")
+    lines.append("};\n")
+
     lines.append("#endif // TOWERS_DATASET_H\n")
     header_path.write_text("\n".join(lines), encoding="utf-8")
     print(f"  -> Wrote {header_path}")
@@ -697,6 +712,7 @@ def build_towers_dataset() -> None:
                 content = re.sub(stars_pattern, r"\1\n" + js_code, content, count=1)
                 SIMULATOR_HTML.write_text(content, encoding="utf-8")
                 print(f"  -> Injected TOWERS_DATASET into {SIMULATOR_HTML}")
+
 
 
 # =============================================================================

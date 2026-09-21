@@ -5,9 +5,10 @@
 class EscPosPrinter;
 
 enum TowersDifficulty {
-    TOWERS_EASY   = 0, // 4x4
-    TOWERS_MEDIUM = 1, // 5x5
-    TOWERS_HARD   = 2  // 6x6
+    TOWERS_EASY    = 0, // 4x4
+    TOWERS_MEDIUM  = 1, // 5x5
+    TOWERS_HARD    = 2, // 6x6
+    TOWERS_EXTREME = 3  // 6x6 (Sparse)
 };
 
 class TowersGen {

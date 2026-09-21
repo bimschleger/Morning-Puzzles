@@ -108,11 +108,11 @@ void TowersGen::generate(TowersDifficulty difficulty, uint32_t seed) {
             uint8_t bR = pgm_read_byte(&p->clues[idxR >> 1]);
             _right[i] = (idxR & 1) ? (bR & 0x0F) : (bR >> 4);
         }
-    } else if (difficulty == TOWERS_HARD) {
+    } else if (difficulty == TOWERS_HARD || difficulty == TOWERS_EXTREME) {
         _size = 6;
         _cellSize = 66;
         _height = 480;
-        const Towers6x6Entry* p = &TOWERS_HARD_DATASET[puzzleIdx];
+        const Towers6x6Entry* p = (difficulty == TOWERS_EXTREME) ? &TOWERS_EXTREME_DATASET[puzzleIdx] : &TOWERS_HARD_DATASET[puzzleIdx];
         for (uint8_t r = 0; r < 6; r++) {
             for (uint8_t c = 0; c < 6; c++) {
                 uint8_t idx = r * 6 + c;

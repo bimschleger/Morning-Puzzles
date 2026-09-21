@@ -154,7 +154,7 @@ class TestTowersDeduction(unittest.TestCase):
 
     def test_dataset_completeness(self):
         """Verify each tier has exactly 100 base puzzles with valid dimensions."""
-        expected_sizes = {"easy": 4, "medium": 5, "hard": 6}
+        expected_sizes = {"easy": 4, "medium": 5, "hard": 6, "extreme": 6}
         for tier, size in expected_sizes.items():
             puzzles = self.dataset.get(tier, [])
             self.assertEqual(len(puzzles), 100, f"Tier {tier} must have 100 puzzles, found {len(puzzles)}")
@@ -170,13 +170,29 @@ class TestTowersDeduction(unittest.TestCase):
                     self.assertEqual(sorted(col_vals), list(range(1, size + 1)))
 
     def test_opening_anchors(self):
-        """Verify every base puzzle contains at least one opening anchor clue (1 or N)."""
-        for tier, puzzles in self.dataset.items():
+        """Verify easy and medium base puzzles contain at least one opening anchor clue (1 or N)."""
+        for tier in ["easy", "medium"]:
+            puzzles = self.dataset[tier]
             for idx, p in enumerate(puzzles):
                 N = p["size"]
                 all_clues = p["clues"]["top"] + p["clues"]["bottom"] + p["clues"]["left"] + p["clues"]["right"]
                 has_anchor = (1 in all_clues) or (N in all_clues)
                 self.assertTrue(has_anchor, f"Puzzle {tier}[{idx}] lacks an opening anchor (1 or {N})")
+
+    def test_clue_counts(self):
+        """Verify clue count ranges for each tier."""
+        clue_ranges = {
+            "easy": (10, 12),
+            "medium": (11, 13),
+            "hard": (13, 15),
+            "extreme": (8, 10),
+        }
+        for tier, (min_c, max_c) in clue_ranges.items():
+            for idx, p in enumerate(self.dataset[tier]):
+                all_clues = p["clues"]["top"] + p["clues"]["bottom"] + p["clues"]["left"] + p["clues"]["right"]
+                active_clues = sum(1 for c in all_clues if c > 0)
+                self.assertTrue(min_c <= active_clues <= max_c,
+                    f"{tier}[{idx}] clue count {active_clues} out of range [{min_c}, {max_c}]")
 
     def test_clue_consistency(self):
         """Verify that ground-truth solution satisfies all exterior sight line clues."""
@@ -210,13 +226,12 @@ class TestTowersDeduction(unittest.TestCase):
 
     def test_unique_solvability(self):
         """Sample test solver uniqueness across base puzzles."""
-        # Test all 100 easy, 30 medium, and 20 hard base puzzles
         perms_cache = {
             4: list(itertools.permutations(range(1, 5))),
             5: list(itertools.permutations(range(1, 6))),
             6: list(itertools.permutations(range(1, 7))),
         }
-        for tier, max_samples in [("easy", 50), ("medium", 20), ("hard", 5)]:
+        for tier, max_samples in [("easy", 50), ("medium", 20), ("hard", 5), ("extreme", 5)]:
             puzzles = self.dataset[tier][:max_samples]
             for idx, p in enumerate(puzzles):
                 N = p["size"]

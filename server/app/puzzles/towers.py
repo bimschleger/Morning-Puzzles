@@ -75,6 +75,7 @@ class TowersPuzzle(BasePuzzle):
         "easy": {"size": 4, "max_val": 4, "cell_size": 80, "height": 400},
         "medium": {"size": 5, "max_val": 5, "cell_size": 72, "height": 440},
         "hard": {"size": 6, "max_val": 6, "cell_size": 66, "height": 480},
+        "extreme": {"size": 6, "max_val": 6, "cell_size": 66, "height": 480},
     }
 
     @property
@@ -83,7 +84,7 @@ class TowersPuzzle(BasePuzzle):
 
     @property
     def supported_difficulties(self) -> List[str]:
-        return ["easy", "medium", "hard"]
+        return ["easy", "medium", "hard", "extreme"]
 
     def generate(
         self,
@@ -306,8 +307,10 @@ class TowersPuzzle(BasePuzzle):
                 if v != right[r]:
                     return False, f"Right clue mismatch at row {r}: expected {right[r]}, got {v}"
 
-        all_clues = top + bottom + left + right
-        if (1 not in all_clues) and (size not in all_clues):
-            return False, f"No opening anchor clue (1 or {size}) found"
+        diff = puzzle_data.get("difficulty", "medium").lower()
+        if diff in ("easy", "medium"):
+            all_clues = top + bottom + left + right
+            if (1 not in all_clues) and (size not in all_clues):
+                return False, f"No opening anchor clue (1 or {size}) found on {diff}"
 
         return True, "All rules satisfied"

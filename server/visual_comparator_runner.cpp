@@ -735,6 +735,61 @@ int main(int argc, char** argv) {
         std::cout << "  }";
     }
 
+    // 17b. TOWERS EXTREME (6x6 Sparse Clues)
+    {
+        TowersGen twGen;
+        twGen.generate(TOWERS_EXTREME, 42);
+        printer->lastBitmap.clear();
+        twGen.printRasterToReceipt(*printer);
+
+        printSep();
+        std::cout << "  {\n";
+        std::cout << "    \"puzzle\": \"towers\",\n";
+        std::cout << "    \"difficulty\": \"extreme\",\n";
+        std::cout << "    \"width\": " << printer->lastWidth << ",\n";
+        std::cout << "    \"height\": " << printer->lastHeight << ",\n";
+        std::cout << "    \"size\": " << (int)twGen.getSize() << ",\n";
+        std::cout << "    \"clues\": {\n";
+        std::cout << "      \"top\": [";
+        for (uint8_t i = 0; i < twGen.getSize(); i++) {
+            if (i > 0) std::cout << ", ";
+            std::cout << (int)twGen.getTopClue(i);
+        }
+        std::cout << "],\n";
+        std::cout << "      \"bottom\": [";
+        for (uint8_t i = 0; i < twGen.getSize(); i++) {
+            if (i > 0) std::cout << ", ";
+            std::cout << (int)twGen.getBottomClue(i);
+        }
+        std::cout << "],\n";
+        std::cout << "      \"left\": [";
+        for (uint8_t i = 0; i < twGen.getSize(); i++) {
+            if (i > 0) std::cout << ", ";
+            std::cout << (int)twGen.getLeftClue(i);
+        }
+        std::cout << "],\n";
+        std::cout << "      \"right\": [";
+        for (uint8_t i = 0; i < twGen.getSize(); i++) {
+            if (i > 0) std::cout << ", ";
+            std::cout << (int)twGen.getRightClue(i);
+        }
+        std::cout << "]\n";
+        std::cout << "    },\n";
+        std::cout << "    \"solution\": [";
+        for (uint8_t r = 0; r < twGen.getSize(); r++) {
+            if (r > 0) std::cout << ", ";
+            std::cout << "[";
+            for (uint8_t c = 0; c < twGen.getSize(); c++) {
+                if (c > 0) std::cout << ", ";
+                std::cout << (int)twGen.getSolution(r, c);
+            }
+            std::cout << "]";
+        }
+        std::cout << "],\n";
+        std::cout << "    \"raster_hex\": \"" << toHex(printer->lastBitmap) << "\"\n";
+        std::cout << "  }";
+    }
+
     // 18. FUTOSHIKI
     {
         FutoshikiGen fGen;

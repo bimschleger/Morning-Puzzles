@@ -144,11 +144,24 @@ int main() {
     mt19937 rng(42);
     cout << "{" << endl;
 
-    vector<pair<string, int>> tiers = {{"easy", 4}, {"medium", 5}, {"hard", 6}};
+    struct TierSpec {
+        string name;
+        int N;
+        int min_clues;
+        int max_clues;
+        bool require_1_or_N;
+    };
+    vector<TierSpec> tiers = {
+        {"easy", 4, 10, 12, true},
+        {"medium", 5, 11, 13, true},
+        {"hard", 6, 13, 15, false},
+        {"extreme", 6, 8, 10, false}
+    };
     for (size_t t_idx = 0; t_idx < tiers.size(); t_idx++) {
-        string tier_name = tiers[t_idx].first;
-        int N = tiers[t_idx].second;
-        int target_clues = (N == 4) ? 9 : (N == 5 ? 12 : 15);
+        const auto& spec = tiers[t_idx];
+        string tier_name = spec.name;
+        int N = spec.N;
+        int target_clues = spec.min_clues;
 
         vector<int> base(N);
         iota(base.begin(), base.end(), 1);
@@ -158,6 +171,7 @@ int main() {
         } while (next_permutation(base.begin(), base.end()));
 
         cout << "  \"" << tier_name << "\": [" << endl;
+        cerr << "Generating tier: " << tier_name << " (" << N << "x" << N << ", clues " << spec.min_clues << "-" << spec.max_clues << ")..." << endl;
 
         int generated_count = 0;
         while (generated_count < 100) {
@@ -229,7 +243,7 @@ int main() {
                 int old_val = *val_ptr;
                 *val_ptr = 0;
 
-                if (!has_anchor(N, clues)) {
+                if (spec.require_1_or_N && !has_anchor(N, clues)) {
                     *val_ptr = old_val;
                     continue;
                 }
@@ -243,8 +257,10 @@ int main() {
                 if (current_clues <= target_clues) break;
             }
 
-            // Final safety check: must be strictly uniquely solvable with anchor
-            if (count_solutions(N, clues, perms) != 1 || !has_anchor(N, clues)) continue;
+            // Final safety check: must be strictly uniquely solvable and within target clue range
+            if (current_clues < spec.min_clues || current_clues > spec.max_clues) continue;
+            if (spec.require_1_or_N && !has_anchor(N, clues)) continue;
+            if (count_solutions(N, clues, perms) != 1) continue;
 
             // Output JSON object
             cout << "    {" << endl;
@@ -272,6 +288,9 @@ int main() {
             cout << "      ]" << endl;
             cout << "    }" << (generated_count + 1 < 100 ? "," : "") << endl;
             generated_count++;
+            if (generated_count % 10 == 0) {
+                cerr << "  [" << tier_name << "] Generated " << generated_count << "/100 puzzles..." << endl;
+            }
         }
 
         cout << "  ]" << (t_idx + 1 < tiers.size() ? "," : "") << endl;
@@ -292,7 +311,7 @@ def main():
             "clang++", "-O3", "-std=c++17", str(src_path), "-o", str(bin_path)
         ])
 
-        print(f"Generating 300 base puzzles (Easy 4x4, Medium 5x5, Hard 6x6)...")
+        print(f"Generating 400 base puzzles (Easy 4x4, Medium 5x5, Hard 6x6, Extreme 6x6)...")
         res = subprocess.check_output([str(bin_path)], text=True)
 
         # Validate JSON parses correctly
@@ -300,12 +319,13 @@ def main():
         assert len(data["easy"]) == 100
         assert len(data["medium"]) == 100
         assert len(data["hard"]) == 100
+        assert len(data["extreme"]) == 100
 
         OUTPUT_JSON.parent.mkdir(parents=True, exist_ok=True)
         with open(OUTPUT_JSON, "w", encoding="utf-8") as f:
             f.write(res)
 
-        print(f"Wrote canonical dataset to {OUTPUT_JSON} (total {len(data['easy']) + len(data['medium']) + len(data['hard'])} puzzles).")
+        print(f"Wrote canonical dataset to {OUTPUT_JSON} (total {len(data['easy']) + len(data['medium']) + len(data['hard']) + len(data['extreme'])} puzzles).")
 
 if __name__ == "__main__":
     main()
