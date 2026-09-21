@@ -765,16 +765,10 @@ bool OfflinePuzzleComposer::printGameGuide(EscPosPrinter& printer, uint8_t gameI
         return false;
     }
 
-    printer.initialize();
+    printer.init();
 
     // Master Header
-    printer.setAlign(ALIGN_CENTER);
-    printer.printHorizontalLine('=');
-    printer.setDoubleStrike(true);
-    printer.println("MORNING PUZZLES");
-    printer.setDoubleStrike(false);
-    printer.println("GAME GUIDE & QUICK REFERENCE");
-    printer.printHorizontalLine('=');
+    printer.printHeader("MORNING PUZZLES", "GAME GUIDE & QUICK REFERENCE");
     printer.println("");
 
     // Game Title

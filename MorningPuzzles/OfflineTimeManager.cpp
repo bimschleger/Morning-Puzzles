@@ -2,7 +2,7 @@
 #include "OfflineConfigManager.h"
 #include "EscPosPrinter.h"
 #include "ThermalCanvas.h"
-#include "../generators/OfflinePuzzleComposer.h"
+#include "OfflinePuzzleComposer.h"
 
 OfflineTimeManager::OfflineTimeManager() :
     _timeSet(false),
