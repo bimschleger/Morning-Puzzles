@@ -12,7 +12,19 @@ OfflineConfigManager::OfflineConfigManager() :
 
 void OfflineConfigManager::begin() {
     _prefs.begin("mp_config", false);
-    _gameMask = _prefs.getUInt("mask", 0x3FFFF);
+    const uint8_t CONFIG_SCHEMA_VERSION = 2;
+    uint8_t storedVersion = _prefs.getUChar("ver", 0);
+    const uint32_t allMask = (1UL << (uint8_t)OFFLINE_PUZZLE_TOTAL) - 1UL;
+
+    if (storedVersion < CONFIG_SCHEMA_VERSION) {
+        // Upgrade / reset mask to defaults to guarantee no legacy scrambled masks persist
+        _gameMask = allMask;
+        _prefs.putUChar("ver", CONFIG_SCHEMA_VERSION);
+        _prefs.putUInt("mask", _gameMask);
+    } else {
+        _gameMask = _prefs.getUInt("mask", allMask);
+    }
+
     _puzzleCount = _prefs.getUChar("count", 5);
     uint8_t savedGrade = _prefs.getUChar("grade", (uint8_t)GRADE_ESCALATING);
     _puzzleGrade = (PuzzleGrade)savedGrade;
@@ -21,7 +33,6 @@ void OfflineConfigManager::begin() {
     _dailyScheduleMinute = _prefs.getUChar("daily_min", DAILY_PRINT_MINUTE_DEFAULT);
 
     // Validate mask (ensure at least 1 game is enabled)
-    const uint32_t allMask = (1UL << (uint8_t)OFFLINE_PUZZLE_TOTAL) - 1UL;
     if ((_gameMask & allMask) == 0) {
         _gameMask = allMask;
     }
@@ -42,6 +53,8 @@ void OfflineConfigManager::begin() {
 }
 
 void OfflineConfigManager::save() {
+    const uint8_t CONFIG_SCHEMA_VERSION = 2;
+    _prefs.putUChar("ver", CONFIG_SCHEMA_VERSION);
     _prefs.putUInt("mask", _gameMask);
     _prefs.putUChar("count", _puzzleCount);
     _prefs.putUChar("grade", (uint8_t)_puzzleGrade);
@@ -166,13 +179,13 @@ const char* OfflineConfigManager::getPuzzleName(OfflinePuzzleType type) const {
         case PUZZLE_MINES:      return "Mines";
         case PUZZLE_TENTS:      return "Tents";
         case PUZZLE_BRIDGES:    return "Bridges";
+        case PUZZLE_KILLER:     return "Killer";
+        case PUZZLE_CRYPTOGRAM: return "Cryptogram";
         case PUZZLE_TANGO:      return "Tango";
+        case PUZZLE_LADDER:     return "Ladder";
         case PUZZLE_WHEEL:      return "Wheel";
         case PUZZLE_LIGHTS:     return "Lights";
         case PUZZLE_LOOP:       return "Loop";
-        case PUZZLE_KILLER:     return "Killer";
-        case PUZZLE_CRYPTOGRAM: return "Cryptogram";
-        case PUZZLE_LADDER:     return "Ladder";
         case PUZZLE_TOWERS:     return "Towers";
         case PUZZLE_FUTOSHIKI:  return "Futoshiki";
         default:                return "Unknown Puzzle";

@@ -209,6 +209,63 @@ def test_softap_portal_parity():
     print("  -> Passed! PortalHtml.h accurately reflects compressed portal.html.")
 
 
+def test_offline_puzzle_enum_ordering_parity():
+    print("\nTest 7: Verifying OfflinePuzzleType Enum Ordering Parity with DEFAULT_REGISTRY...")
+    config_h_path = os.path.join(FW_DIR, "src", "config", "OfflineConfigManager.h")
+    assert os.path.exists(config_h_path), f"OfflineConfigManager.h not found at {config_h_path}"
+
+    with open(config_h_path, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    match = re.search(r"enum\s+OfflinePuzzleType\s*:\s*uint8_t\s*\{([^}]+)\};", content)
+    assert match, "Could not find enum OfflinePuzzleType in OfflineConfigManager.h"
+
+    raw_items = [item.strip() for item in match.group(1).split(",") if item.strip()]
+    enum_names = []
+    for item in raw_items:
+        # Strip comments and assignments
+        name = item.split("//")[0].split("/*")[0].split("=")[0].strip()
+        if name and name != "OFFLINE_PUZZLE_TOTAL":
+            enum_names.append(name)
+
+    all_plugins = DEFAULT_REGISTRY.get_all()
+    assert len(enum_names) == len(all_plugins), (
+        f"Enum length mismatch: OfflinePuzzleType has {len(enum_names)} items, "
+        f"DEFAULT_REGISTRY has {len(all_plugins)} plugins"
+    )
+
+    ENUM_MAP = {
+        "PUZZLE_SUDOKU": "sudoku",
+        "PUZZLE_WORDSEARCH": "wordsearch",
+        "PUZZLE_NONOGRAM": "nonogram",
+        "PUZZLE_QUEENS": "queens",
+        "PUZZLE_JUMBLE": "jumble",
+        "PUZZLE_BINARY": "binary",
+        "PUZZLE_MINES": "mines",
+        "PUZZLE_TENTS": "tents",
+        "PUZZLE_BRIDGES": "bridges",
+        "PUZZLE_KILLER": "killer",
+        "PUZZLE_CRYPTOGRAM": "cryptogram",
+        "PUZZLE_TANGO": "tango",
+        "PUZZLE_LADDER": "ladder",
+        "PUZZLE_WHEEL": "wheel",
+        "PUZZLE_LIGHTS": "lights",
+        "PUZZLE_LOOP": "loop",
+        "PUZZLE_TOWERS": "towers",
+        "PUZZLE_FUTOSHIKI": "futoshiki",
+    }
+
+    for i, enum_name in enumerate(enum_names):
+        expected_id = ENUM_MAP.get(enum_name)
+        actual_id = all_plugins[i].puzzle_id.lower()
+        assert expected_id == actual_id, (
+            f"Enum parity mismatch at index {i} (bit {i}): "
+            f"C++ has '{enum_name}' (maps to '{expected_id}'), but DEFAULT_REGISTRY has '{actual_id}'!"
+        )
+
+    print(f"  -> Passed! All {len(enum_names)} enum entries in OfflinePuzzleType match DEFAULT_REGISTRY 1:1.")
+
+
 def run_firmware_tests(strict: bool = False):
     print("=" * 60)
     print("RUNNING TIER 4: Firmware Parity & C++ Compilation Verification")
@@ -219,6 +276,7 @@ def run_firmware_tests(strict: bool = False):
     test_rule_7_flat_includes()
     test_rule_14_offline_appliance_libraries()
     test_softap_portal_parity()
+    test_offline_puzzle_enum_ordering_parity()
     print("\n[SUCCESS] Tier 4 Firmware verification completed!\n")
 
 
