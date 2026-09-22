@@ -25,7 +25,7 @@ from .wheel import WheelPuzzle
 from .lights import LightsPuzzle
 from .loop import LoopPuzzle
 from .towers import TowersPuzzle
-from .futoshiki import FutoshikiPuzzle
+from .inequality import InequalityPuzzle
 
 
 class PuzzleRegistry:
@@ -155,5 +155,5 @@ DEFAULT_REGISTRY = PuzzleRegistry([
     LightsPuzzle(),
     LoopPuzzle(),
     TowersPuzzle(),
-    FutoshikiPuzzle(),
+    InequalityPuzzle(),
 ])

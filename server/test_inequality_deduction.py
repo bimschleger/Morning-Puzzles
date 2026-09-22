@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Unit test suite for FUTOSHIKI (Latin Square with Inequality Operators) Dataset & Deductive Solver
+Unit test suite for INEQUALITY (Latin Square with Inequality Operators) Dataset & Deductive Solver
 Validates:
   - Dataset presence and structure (100 base puzzles per tier: easy, medium, hard)
   - Solution uniqueness for all curated base puzzles (count_solutions == 1)
@@ -14,10 +14,10 @@ import os
 import unittest
 from typing import Dict, List, Tuple
 
-DATA_PATH = os.path.join(os.path.dirname(__file__), "data", "futoshiki_dataset.json")
+DATA_PATH = os.path.join(os.path.dirname(__file__), "data", "inequality_dataset.json")
 
 
-def count_futoshiki_solutions(size: int, givens: List[List[int]], edges_h: List[List[int]], edges_v: List[List[int]], limit: int = 2) -> int:
+def count_inequality_solutions(size: int, givens: List[List[int]], edges_h: List[List[int]], edges_v: List[List[int]], limit: int = 2) -> int:
     grid = [[0] * size for _ in range(size)]
     for r, c, val in givens:
         grid[r][c] = val
@@ -84,7 +84,7 @@ def count_futoshiki_solutions(size: int, givens: List[List[int]], edges_h: List[
     return count
 
 
-def transform_futoshiki(size: int, givens: List[List[int]], edges_h: List[List[int]], edges_v: List[List[int]], sol: List[List[int]], transform_id: int):
+def transform_inequality(size: int, givens: List[List[int]], edges_h: List[List[int]], edges_v: List[List[int]], sol: List[List[int]], transform_id: int):
     def map_coord(r: int, c: int) -> Tuple[int, int]:
         if transform_id == 0: return (r, c)
         if transform_id == 1: return (c, size - 1 - r) # rot90
@@ -151,7 +151,7 @@ def transform_futoshiki(size: int, givens: List[List[int]], edges_h: List[List[i
     return new_givens, new_edges_h, new_edges_v, new_sol
 
 
-class TestFutoshikiDeduction(unittest.TestCase):
+class TestInequalityDeduction(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         if not os.path.exists(DATA_PATH):
@@ -159,33 +159,31 @@ class TestFutoshikiDeduction(unittest.TestCase):
         with open(DATA_PATH, "r", encoding="utf-8") as f:
             cls.dataset = json.load(f)
 
-    def test_tier_counts(self):
-        self.assertIn("easy", self.dataset)
-        self.assertIn("medium", self.dataset)
-        self.assertIn("hard", self.dataset)
-        self.assertEqual(len(self.dataset["easy"]), 100)
-        self.assertEqual(len(self.dataset["medium"]), 100)
-        self.assertEqual(len(self.dataset["hard"]), 100)
-
-    def test_latin_square_validity(self):
+    def test_dataset_structure_and_counts(self):
         for tier in ["easy", "medium", "hard"]:
-            for i, p in enumerate(self.dataset[tier]):
-                N = p["size"]
-                sol = p["solution"]
-                self.assertEqual(len(sol), N)
-                for r in range(N):
-                    self.assertEqual(sorted(sol[r]), list(range(1, N + 1)), f"{tier} #{i} row {r} invalid")
-                for c in range(N):
-                    col_vals = sorted(sol[r][c] for r in range(N))
-                    self.assertEqual(col_vals, list(range(1, N + 1)), f"{tier} #{i} col {c} invalid")
+            self.assertIn(tier, self.dataset)
+            self.assertEqual(len(self.dataset[tier]), 100, f"{tier} tier must have 100 puzzles")
 
-    def test_edges_and_givens_consistency(self):
+    def test_latin_square_properties(self):
+        expected_sizes = {"easy": 4, "medium": 5, "hard": 6}
+        for tier, size in expected_sizes.items():
+            for i, p in enumerate(self.dataset[tier]):
+                self.assertEqual(p["size"], size)
+                sol = p["solution"]
+                self.assertEqual(len(sol), size)
+                for r in range(size):
+                    self.assertEqual(sorted(sol[r]), list(range(1, size + 1)), f"{tier} #{i} row {r} not 1..N")
+                for c in range(size):
+                    col = [sol[r][c] for r in range(size)]
+                    self.assertEqual(sorted(col), list(range(1, size + 1)), f"{tier} #{i} col {c} not 1..N")
+
+    def test_clue_satisfaction(self):
         for tier in ["easy", "medium", "hard"]:
             for i, p in enumerate(self.dataset[tier]):
                 N = p["size"]
                 sol = p["solution"]
                 for r, c, val in p["givens"]:
-                    self.assertEqual(sol[r][c], val, f"{tier} #{i} given mismatch at ({r},{c})")
+                    self.assertEqual(sol[r][c], val, f"{tier} #{i} given ({r},{c}) mismatch")
                 for r in range(N):
                     for c in range(N - 1):
                         op = p["edges_h"][r][c]
@@ -205,7 +203,7 @@ class TestFutoshikiDeduction(unittest.TestCase):
         for tier in ["easy", "medium", "hard"]:
             for i in range(20):
                 p = self.dataset[tier][i]
-                sols = count_futoshiki_solutions(p["size"], p["givens"], p["edges_h"], p["edges_v"], limit=2)
+                sols = count_inequality_solutions(p["size"], p["givens"], p["edges_h"], p["edges_v"], limit=2)
                 self.assertEqual(sols, 1, f"{tier} #{i} does not have unique solution")
 
     def test_d4_symmetry_transform_invariance(self):
@@ -213,13 +211,13 @@ class TestFutoshikiDeduction(unittest.TestCase):
             for i in range(5):
                 p = self.dataset[tier][i]
                 for tid in range(8):
-                    t_givens, t_edges_h, t_edges_v, t_sol = transform_futoshiki(
+                    t_givens, t_edges_h, t_edges_v, t_sol = transform_inequality(
                         p["size"], p["givens"], p["edges_h"], p["edges_v"], p["solution"], tid
                     )
                     N = p["size"]
                     for r in range(N):
                         self.assertEqual(sorted(t_sol[r]), list(range(1, N + 1)))
-                    sols = count_futoshiki_solutions(N, t_givens, t_edges_h, t_edges_v, limit=2)
+                    sols = count_inequality_solutions(N, t_givens, t_edges_h, t_edges_v, limit=2)
                     self.assertEqual(sols, 1, f"{tier} #{i} transform {tid} failed unique solvability")
 
 

@@ -67,9 +67,9 @@
 #include "../esp32-firmware/src/generators/TowersGen.h"
 #include "../esp32-firmware/src/generators/TowersGen.cpp"
 
-#include "../esp32-firmware/src/generators/FutoshikiDataset.h"
-#include "../esp32-firmware/src/generators/FutoshikiGen.h"
-#include "../esp32-firmware/src/generators/FutoshikiGen.cpp"
+#include "../esp32-firmware/src/generators/InequalityDataset.h"
+#include "../esp32-firmware/src/generators/InequalityGen.h"
+#include "../esp32-firmware/src/generators/InequalityGen.cpp"
 
 #include <iostream>
 #include <iomanip>
@@ -790,16 +790,16 @@ int main(int argc, char** argv) {
         std::cout << "  }";
     }
 
-    // 18. FUTOSHIKI
+    // 18. INEQUALITY
     {
-        FutoshikiGen fGen;
-        fGen.generate(FUTOSHIKI_MEDIUM, 42);
+        InequalityGen fGen;
+        fGen.generate(INEQUALITY_MEDIUM, 42);
         printer->lastBitmap.clear();
         fGen.printRasterToReceipt(*printer);
 
         printSep();
         std::cout << "  {\n";
-        std::cout << "    \"puzzle\": \"futoshiki\",\n";
+        std::cout << "    \"puzzle\": \"inequality\",\n";
         std::cout << "    \"difficulty\": \"medium\",\n";
         std::cout << "    \"width\": " << printer->lastWidth << ",\n";
         std::cout << "    \"height\": " << printer->lastHeight << ",\n";

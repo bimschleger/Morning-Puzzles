@@ -216,7 +216,7 @@ def test_visual_consistency():
                 "solution": item["solution"],
                 "difficulty": item.get("difficulty", "medium"),
             }
-        elif p_name == "futoshiki":
+        elif p_name == "inequality":
             py_data = {
                 "size": item["size"],
                 "givens": item["givens"],

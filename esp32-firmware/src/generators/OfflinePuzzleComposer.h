@@ -21,7 +21,7 @@ class EscPosPrinter;
 #include "CryptogramGen.h"
 #include "LadderGen.h"
 #include "TowersGen.h"
-#include "FutoshikiGen.h"
+#include "InequalityGen.h"
 
 class OfflinePuzzleComposer {
 public:

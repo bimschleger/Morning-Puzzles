@@ -285,8 +285,8 @@ static const GameRuleDef GAME_RULES[TOTAL_GAME_RULES] PROGMEM = {
     },
     {
         17,
-        "futoshiki",
-        "FUTOSHIKI",
+        "inequality",
+        "INEQUALITY",
         "Fill grid with digits 1-5 so each digit appears once per line and inequality signs hold.",
         "Fill the grid with numbers 1 to N so no digit repeats in any row or column and all '<' and '>' signs are honored.",
         { "Each row and column must contain digits 1 through N exactly once.", "Inequality signs ('<' and '>') between adjacent cells must be strictly honored.", "The open end of the sign always points to the larger number.", "Initial starting digits and inequality signs cannot be changed." },

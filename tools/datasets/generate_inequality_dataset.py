@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Generates canonical server/data/futoshiki_dataset.json containing 100 verified
+Generates canonical server/data/inequality_dataset.json containing 100 verified
 puzzles each for easy (4x4), medium (5x5), and hard (6x6).
 
 Uses a compiled C++ backtracking solver and generator to guarantee:
@@ -17,7 +17,7 @@ import tempfile
 from pathlib import Path
 
 ROOT_DIR = Path(__file__).resolve().parent.parent.parent
-OUTPUT_JSON = ROOT_DIR / "server" / "data" / "futoshiki_dataset.json"
+OUTPUT_JSON = ROOT_DIR / "server" / "data" / "inequality_dataset.json"
 
 CPP_SOURCE = r"""#include <iostream>
 #include <vector>
@@ -260,10 +260,10 @@ int main() {
 """
 
 def main():
-    print("Compiling Futoshiki dataset generator in C++...")
+    print("Compiling Inequality dataset generator in C++...")
     with tempfile.TemporaryDirectory() as tmpdir:
-        src_path = os.path.join(tmpdir, "generate_futoshiki.cpp")
-        bin_path = os.path.join(tmpdir, "generate_futoshiki")
+        src_path = os.path.join(tmpdir, "generate_inequality.cpp")
+        bin_path = os.path.join(tmpdir, "generate_inequality")
 
         with open(src_path, "w") as f:
             f.write(CPP_SOURCE)
@@ -271,7 +271,7 @@ def main():
         cmd_compile = ["g++", "-O3", "-std=c++17", src_path, "-o", bin_path]
         subprocess.check_call(cmd_compile)
 
-        print("Executing generator (producing 300 unique Futoshiki puzzles)...")
+        print("Executing generator (producing 300 unique Inequality puzzles)...")
         raw_output = subprocess.check_output([bin_path], encoding="utf-8")
 
         data = json.loads(raw_output)

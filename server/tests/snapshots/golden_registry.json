@@ -169,8 +169,8 @@
     "max_consecutive_dense_lines": 0,
     "is_safe": true
   },
-  "futoshiki": {
-    "title": "FUTOSHIKI",
+  "inequality": {
+    "title": "INEQUALITY",
     "sha256": "cf388b4c557df1e50f7e3b780ac9ede9bacdf0946921de8c2d304e93e9339ccb",
     "byte_length": 35144,
     "width_dots": 576,

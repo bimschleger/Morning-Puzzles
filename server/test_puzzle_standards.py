@@ -38,7 +38,7 @@ APPROVED_TITLES = [
     "LIGHTS",
     "LOOP",
     "TOWERS",
-    "FUTOSHIKI",
+    "INEQUALITY",
 ]
 
 FORBIDDEN_TITLE_PATTERNS = [
@@ -122,7 +122,7 @@ def test_difficulty_presentation_and_theme_rules():
             )
 
     # 2. Puzzles with difficulty must have DIFFICULTY: [LEVEL] directly below title
-    difficulty_puzzles = ["SUDOKU", "NONOGRAM", "STARS", "JUMBLE", "BINARY", "MINES", "TENTS", "BRIDGES", "KILLER", "CRYPTOGRAM", "TANGO", "LADDER", "WHEEL", "TOWERS", "FUTOSHIKI"]
+    difficulty_puzzles = ["SUDOKU", "NONOGRAM", "STARS", "JUMBLE", "BINARY", "MINES", "TENTS", "BRIDGES", "KILLER", "CRYPTOGRAM", "TANGO", "LADDER", "WHEEL", "TOWERS", "INEQUALITY"]
     for title in difficulty_puzzles:
         header_str = f"--- {title} ---"
         assert header_str in receipt_text, f"Missing header {header_str}"
@@ -277,7 +277,7 @@ def test_solution_key_spec():
         )
 
     # 4. Check safe indent (6 spaces) for grid and stacked solutions
-    for grid_title in ["SUDOKU", "NONOGRAM", "BINARY", "MINES", "KILLER", "TANGO", "STARS", "LADDER", "BRIDGES", "TENTS", "LIGHTS", "LOOP", "TOWERS", "FUTOSHIKI"]:
+    for grid_title in ["SUDOKU", "NONOGRAM", "BINARY", "MINES", "KILLER", "TANGO", "STARS", "LADDER", "BRIDGES", "TENTS", "LIGHTS", "LOOP", "TOWERS", "INEQUALITY"]:
         idx = clean_key_text.find(f"\n{grid_title}\n")
         assert idx != -1
         grid_section = clean_key_text[idx + len(grid_title) + 2 : idx + len(grid_title) + 200]

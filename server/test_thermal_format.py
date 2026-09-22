@@ -50,7 +50,7 @@ from app.renderer.text_formatter import (
 def test_bundle_completeness():
     print("Test 1: Verifying Daily Bundle Completeness (All 16 Puzzles)...")
     bundle = generate_daily_bundle(difficulty="medium")
-    required_keys = ["title", "date", "difficulty", "sudoku", "wordsearch", "nonogram", "queens", "jumble", "binary", "mines", "tents", "bridges", "killer", "cryptogram", "tango", "ladder", "wheel", "lights", "loop", "towers", "futoshiki"]
+    required_keys = ["title", "date", "difficulty", "sudoku", "wordsearch", "nonogram", "queens", "jumble", "binary", "mines", "tents", "bridges", "killer", "cryptogram", "tango", "ladder", "wheel", "lights", "loop", "towers", "inequality"]
     for k in required_keys:
         assert k in bundle, f"Missing key '{k}' in generated bundle"
     print(f"  -> Passed! All {len(required_keys) - 3} puzzles present in daily bundle.\n")
@@ -77,7 +77,7 @@ def test_raster_specifications(bundle):
         ("Lights", render_lights_raster, "lights"),
         ("Loop", render_loop_raster, "loop"),
         ("Towers", lambda d: DEFAULT_REGISTRY.get("towers").render_raster(d), "towers"),
-        ("Futoshiki", lambda d: DEFAULT_REGISTRY.get("futoshiki").render_raster(d), "futoshiki"),
+        ("Inequality", lambda d: DEFAULT_REGISTRY.get("inequality").render_raster(d), "inequality"),
     ]
 
     for name, fn, key in rasterizers:
@@ -141,7 +141,7 @@ def test_text_receipt_format(bundle):
 
     # 4. PUZZLE_HEADER_SPEC compliance: check strict one-word titles
     receipt_text = receipt_bytes.decode("latin-1")
-    for title in ["--- SUDOKU ---", "--- SEARCH ---", "--- NONOGRAM ---", "--- STARS ---", "--- JUMBLE ---", "--- BINARY ---", "--- MINES ---", "--- TENTS ---", "--- BRIDGES ---", "--- KILLER ---", "--- CRYPTOGRAM ---", "--- TANGO ---", "--- LADDER ---", "--- WHEEL ---", "--- LIGHTS ---", "--- LOOP ---", "--- TOWERS ---", "--- FUTOSHIKI ---"]:
+    for title in ["--- SUDOKU ---", "--- SEARCH ---", "--- NONOGRAM ---", "--- STARS ---", "--- JUMBLE ---", "--- BINARY ---", "--- MINES ---", "--- TENTS ---", "--- BRIDGES ---", "--- KILLER ---", "--- CRYPTOGRAM ---", "--- TANGO ---", "--- LADDER ---", "--- WHEEL ---", "--- LIGHTS ---", "--- LOOP ---", "--- TOWERS ---", "--- INEQUALITY ---"]:
         assert title in receipt_text, f"Missing canonical title '{title}' in text receipt"
 
     # 5. Master Receipt Header & Footer Standards (Section 9)

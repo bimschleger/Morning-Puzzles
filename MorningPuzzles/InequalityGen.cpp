@@ -1,16 +1,16 @@
-#include "FutoshikiGen.h"
-#include "FutoshikiDataset.h"
-#include "../printer/EscPosPrinter.h"
-#include "../printer/ThermalCanvas.h"
+#include "InequalityGen.h"
+#include "InequalityDataset.h"
+#include "EscPosPrinter.h"
+#include "ThermalCanvas.h"
 
-FutoshikiGen::FutoshikiGen() : _size(5), _cellSize(88), _height(488) {
+InequalityGen::InequalityGen() : _size(5), _cellSize(88), _height(488) {
     memset(_solution, 0, sizeof(_solution));
     memset(_givens, 0, sizeof(_givens));
     memset(_edges_h, 0, sizeof(_edges_h));
     memset(_edges_v, 0, sizeof(_edges_v));
 }
 
-void FutoshikiGen::applyTransform(uint8_t transform) {
+void InequalityGen::applyTransform(uint8_t transform) {
     if (transform == 0) return;
 
     auto mapCoord = [this, transform](uint8_t r, uint8_t c, uint8_t& nr, uint8_t& nc) {
@@ -45,50 +45,60 @@ void FutoshikiGen::applyTransform(uint8_t transform) {
 
     for (uint8_t r = 0; r < _size; r++) {
         for (uint8_t c = 0; c < _size - 1; c++) {
-            if (_edges_h[r][c] != 0) {
-                uint8_t r1, c1, r2, c2;
-                mapCoord(r, c, r1, c1);
-                mapCoord(r, c + 1, r2, c2);
-                uint8_t v1 = _solution[r][c];
-                uint8_t v2 = _solution[r][c + 1];
-                if (r1 == r2) {
-                    uint8_t rNew = r1;
-                    uint8_t cLeft = (c1 < c2) ? c1 : c2;
-                    uint8_t vLeft = (c1 < c2) ? v1 : v2;
-                    uint8_t vRight = (c1 < c2) ? v2 : v1;
-                    newEdgesH[rNew][cLeft] = (vLeft < vRight) ? 1 : 2;
-                } else {
-                    uint8_t cNew = c1;
-                    uint8_t rTop = (r1 < r2) ? r1 : r2;
-                    uint8_t vTop = (r1 < r2) ? v1 : v2;
-                    uint8_t vBot = (r1 < r2) ? v2 : v1;
-                    newEdgesV[rTop][cNew] = (vTop < vBot) ? 1 : 2;
-                }
+            uint8_t eh = _edges_h[r][c];
+            if (eh == 0) continue;
+
+            uint8_t r1 = r, c1 = c;
+            uint8_t r2 = r, c2 = c + 1;
+            uint8_t nr1, nc1, nr2, nc2;
+            mapCoord(r1, c1, nr1, nc1);
+            mapCoord(r2, c2, nr2, nc2);
+
+            uint8_t v1 = (eh == 1) ? 1 : 2;
+            uint8_t v2 = (eh == 1) ? 2 : 1;
+
+            if (nr1 == nr2) {
+                uint8_t r_new = nr1;
+                uint8_t c_left = min(nc1, nc2);
+                uint8_t val_left = (nc1 < nc2) ? v1 : v2;
+                uint8_t val_right = (nc1 < nc2) ? v2 : v1;
+                newEdgesH[r_new][c_left] = (val_left < val_right) ? 1 : 2;
+            } else {
+                uint8_t c_new = nc1;
+                uint8_t r_top = min(nr1, nr2);
+                uint8_t val_top = (nr1 < nr2) ? v1 : v2;
+                uint8_t val_bot = (nr1 < nr2) ? v2 : v1;
+                newEdgesV[r_top][c_new] = (val_top < val_bot) ? 1 : 2;
             }
         }
     }
 
     for (uint8_t r = 0; r < _size - 1; r++) {
         for (uint8_t c = 0; c < _size; c++) {
-            if (_edges_v[r][c] != 0) {
-                uint8_t r1, c1, r2, c2;
-                mapCoord(r, c, r1, c1);
-                mapCoord(r + 1, c, r2, c2);
-                uint8_t v1 = _solution[r][c];
-                uint8_t v2 = _solution[r + 1][c];
-                if (r1 == r2) {
-                    uint8_t rNew = r1;
-                    uint8_t cLeft = (c1 < c2) ? c1 : c2;
-                    uint8_t vLeft = (c1 < c2) ? v1 : v2;
-                    uint8_t vRight = (c1 < c2) ? v2 : v1;
-                    newEdgesH[rNew][cLeft] = (vLeft < vRight) ? 1 : 2;
-                } else {
-                    uint8_t cNew = c1;
-                    uint8_t rTop = (r1 < r2) ? r1 : r2;
-                    uint8_t vTop = (r1 < r2) ? v1 : v2;
-                    uint8_t vBot = (r1 < r2) ? v2 : v1;
-                    newEdgesV[rTop][cNew] = (vTop < vBot) ? 1 : 2;
-                }
+            uint8_t ev = _edges_v[r][c];
+            if (ev == 0) continue;
+
+            uint8_t r1 = r, c1 = c;
+            uint8_t r2 = r + 1, c2 = c;
+            uint8_t nr1, nc1, nr2, nc2;
+            mapCoord(r1, c1, nr1, nc1);
+            mapCoord(r2, c2, nr2, nc2);
+
+            uint8_t v1 = (ev == 1) ? 1 : 2;
+            uint8_t v2 = (ev == 1) ? 2 : 1;
+
+            if (nr1 == nr2) {
+                uint8_t r_new = nr1;
+                uint8_t c_left = min(nc1, nc2);
+                uint8_t val_left = (nc1 < nc2) ? v1 : v2;
+                uint8_t val_right = (nc1 < nc2) ? v2 : v1;
+                newEdgesH[r_new][c_left] = (val_left < val_right) ? 1 : 2;
+            } else {
+                uint8_t c_new = nc1;
+                uint8_t r_top = min(nr1, nr2);
+                uint8_t val_top = (nr1 < nr2) ? v1 : v2;
+                uint8_t val_bot = (nr1 < nr2) ? v2 : v1;
+                newEdgesV[r_top][c_new] = (val_top < val_bot) ? 1 : 2;
             }
         }
     }
@@ -99,7 +109,7 @@ void FutoshikiGen::applyTransform(uint8_t transform) {
     memcpy(_edges_v, newEdgesV, sizeof(_edges_v));
 }
 
-void FutoshikiGen::generate(FutoshikiDifficulty difficulty, uint32_t seed) {
+void InequalityGen::generate(InequalityDifficulty difficulty, uint32_t seed) {
     if (seed == 0) {
         seed = (uint32_t)random(800);
     }
@@ -113,10 +123,10 @@ void FutoshikiGen::generate(FutoshikiDifficulty difficulty, uint32_t seed) {
 
     _cellSize = 88;
 
-    if (difficulty == FUTOSHIKI_EASY) {
+    if (difficulty == INEQUALITY_EASY) {
         _size = 4;
         _height = 400;
-        const Futoshiki4x4Entry* p = &FUTOSHIKI_EASY_DATASET[puzzleIdx];
+        const Inequality4x4Entry* p = &INEQUALITY_EASY_DATASET[puzzleIdx];
         for (uint8_t r = 0; r < 4; r++) {
             for (uint8_t c = 0; c < 4; c++) {
                 uint8_t idx = r * 4 + c;
@@ -137,10 +147,10 @@ void FutoshikiGen::generate(FutoshikiDifficulty difficulty, uint32_t seed) {
                 _edges_v[r][c] = pgm_read_byte(&p->edges_v[r * 4 + c]);
             }
         }
-    } else if (difficulty == FUTOSHIKI_HARD) {
+    } else if (difficulty == INEQUALITY_HARD) {
         _size = 6;
         _height = 576;
-        const Futoshiki6x6Entry* p = &FUTOSHIKI_HARD_DATASET[puzzleIdx];
+        const Inequality6x6Entry* p = &INEQUALITY_HARD_DATASET[puzzleIdx];
         for (uint8_t r = 0; r < 6; r++) {
             for (uint8_t c = 0; c < 6; c++) {
                 uint8_t idx = r * 6 + c;
@@ -165,7 +175,7 @@ void FutoshikiGen::generate(FutoshikiDifficulty difficulty, uint32_t seed) {
         // Medium 5x5
         _size = 5;
         _height = 488;
-        const Futoshiki5x5Entry* p = &FUTOSHIKI_MEDIUM_DATASET[puzzleIdx];
+        const Inequality5x5Entry* p = &INEQUALITY_MEDIUM_DATASET[puzzleIdx];
         for (uint8_t r = 0; r < 5; r++) {
             for (uint8_t c = 0; c < 5; c++) {
                 uint8_t idx = r * 5 + c;
@@ -191,7 +201,7 @@ void FutoshikiGen::generate(FutoshikiDifficulty difficulty, uint32_t seed) {
     applyTransform(transform);
 }
 
-void FutoshikiGen::printToReceipt(EscPosPrinter& printer) {
+void InequalityGen::printToReceipt(EscPosPrinter& printer) {
     for (uint8_t r = 0; r < _size; r++) {
         String rowStr = "      ";
         for (uint8_t c = 0; c < _size; c++) {
@@ -225,7 +235,7 @@ void FutoshikiGen::printToReceipt(EscPosPrinter& printer) {
     }
 }
 
-bool FutoshikiGen::printRasterToReceipt(EscPosPrinter& printer) {
+bool InequalityGen::printRasterToReceipt(EscPosPrinter& printer) {
     ThermalCanvas canvas;
     if (!canvas.begin(_height)) {
         return false;

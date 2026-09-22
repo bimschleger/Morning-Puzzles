@@ -40,7 +40,7 @@ APPROVED_TITLES = [
     "LIGHTS",
     "LOOP",
     "TOWERS",
-    "FUTOSHIKI",
+    "INEQUALITY",
 ]
 
 APPROVED_VERBS = [

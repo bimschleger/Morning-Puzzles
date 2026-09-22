@@ -79,7 +79,7 @@ Candidates are organized into five priority tiers. **Tier 1 (Word, Language & Pa
 | **P3** | **`SHIKAKU`** | Shikaku / Rectangles | Shading & Region | Simon Tatham (`rect.c`) / Exact Cover | MIT | **9.4 / 10** | Medium (Disjoint rectangle partitioning) | **High** |
 | **P3** | **`NURIKABE`** | Nurikabe / Islands | Shading & Region | Nikoli Solver / CP-SAT Solver | MIT / Apache 2.0 | **9.2 / 10** | High (White island sizing + black sea 2x2)| **Medium** |
 | **P4** | **`CALCU`** | Calcudoku / KenKen | Arithmetic Latin Sq | Simon Tatham (`keen.c`) / Latin Solver | MIT | **9.0 / 10** | Medium (Latin square + polyomino cages) | **Very High** (Direct C port) |
-| **P4** | **`FUTOSHIKI`** | Futoshiki / Unequal | Arithmetic Latin Sq | Simon Tatham (`unequal.c`) / Latin Solver | MIT | **9.0 / 10** | Medium (Latin square + inequality poset) | **Very High** (Direct C port) |
+| **P4** | **`INEQUALITY`** | Inequality / Unequal | Arithmetic Latin Sq | Simon Tatham (`unequal.c`) / Latin Solver | MIT | **9.0 / 10** | Medium (Latin square + inequality poset) | **Very High** (Direct C port) |
 | **P4** | **`KAKURO`** | Kakuro / Cross Sums | Arithmetic Latin Sq | Simon Tatham (`kakuro.c`) / Partition | MIT | **8.7 / 10** | High (Crossword geometry + sum partition) | **High** |
 | **P4** | **`SKYSCRAPERS`**| Skyscrapers / Towers | Arithmetic Latin Sq | Simon Tatham (`towers.c`) / Latin Solver | MIT | **9.1 / 10** | Medium-High (Latin square + exterior sight)| **Very High** (Direct C port) |
 | **P5** | **`FLEET`** | Battleships / Bimaru | Placement & Sight | Simon Tatham (`pearl.c` variant) / CP-SAT | MIT / Apache 2.0 | **8.8 / 10** | Medium-High (Fleet placer + SAT pruner) | **High** |
@@ -284,8 +284,8 @@ Candidates are organized into five priority tiers. **Tier 1 (Word, Language & Pa
 
 ---
 
-#### 11. FUTOSHIKI (`--- FUTOSHIKI ---`)
-*   **Traditional Names**: Futoshiki, Unequal.
+#### 11. INEQUALITY (`--- INEQUALITY ---`)
+*   **Traditional Names**: Inequality, Unequal.
 *   **Canonical Instruction**: `Fill digits 1-[N] in every line while satisfying all inequality signs between adjacent cells.` ($\le 95$ chars)
 *   **Core Rules**:
     1. $N \times N$ Latin square: digits $1..N$ appear once in each row and column.

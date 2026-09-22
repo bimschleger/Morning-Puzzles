@@ -680,7 +680,7 @@ const GAMES = [
   { id: 14, name: "Lights" },
   { id: 15, name: "Loop" },
   { id: 16, name: "Towers" },
-  { id: 17, name: "Futoshiki" }
+  { id: 17, name: "Inequality" }
 ];
 
 /* [[START_GAME_RULES_DATA]] */
@@ -1808,8 +1808,8 @@ const GAME_RULES = [
   },
   {
     "id": 17,
-    "key": "futoshiki",
-    "title": "FUTOSHIKI",
+    "key": "inequality",
+    "title": "INEQUALITY",
     "instruction": "Fill grid with digits 1-5 so each digit appears once per line and inequality signs hold.",
     "objective": "Fill the grid with numbers 1 to N so no digit repeats in any row or column and all '<' and '>' signs are honored.",
     "rules": [
@@ -2452,7 +2452,7 @@ function drawThermalGuideCanvas(gameId) {
       ctx.fillText("1", rx0 + 2 * sz + 12, twy + 17);
       break;
     }
-    case 17: { // FUTOSHIKI
+    case 17: { // INEQUALITY
       const sz = 28;
       const lx0 = 144 - (3 * sz) / 2, rx0 = 432 - (3 * sz) / 2;
       const fy = ly + 20;

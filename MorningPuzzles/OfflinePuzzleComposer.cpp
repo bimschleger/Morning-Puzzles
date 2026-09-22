@@ -305,17 +305,17 @@ void OfflinePuzzleComposer::printSinglePuzzle(EscPosPrinter& printer, OfflinePuz
             }
             break;
         }
-        case PUZZLE_FUTOSHIKI: {
-            FutoshikiDifficulty diff = (grade == GRADE_EASY) ? FUTOSHIKI_EASY : ((grade == GRADE_HARD || grade == GRADE_EXTREME) ? FUTOSHIKI_HARD : FUTOSHIKI_MEDIUM);
-            const char* diffStr = (diff == FUTOSHIKI_EASY) ? "EASY" : ((diff == FUTOSHIKI_HARD) ? "HARD" : "MEDIUM");
-            Serial.println("[COMPOSER] Generating Futoshiki...");
-            FutoshikiGen futoshiki;
-            futoshiki.generate(diff);
-            char futoshikiInstr[100];
-            snprintf(futoshikiInstr, sizeof(futoshikiInstr), "Fill digits 1-%d in every line while satisfying all inequality signs between adjacent cells.", (int)futoshiki.getSize());
-            printPuzzleHeader(printer, "FUTOSHIKI", diffStr, futoshikiInstr);
-            if (!useRaster || !futoshiki.printRasterToReceipt(printer)) {
-                futoshiki.printToReceipt(printer);
+        case PUZZLE_INEQUALITY: {
+            InequalityDifficulty diff = (grade == GRADE_EASY) ? INEQUALITY_EASY : ((grade == GRADE_HARD || grade == GRADE_EXTREME) ? INEQUALITY_HARD : INEQUALITY_MEDIUM);
+            const char* diffStr = (diff == INEQUALITY_EASY) ? "EASY" : ((diff == INEQUALITY_HARD) ? "HARD" : "MEDIUM");
+            Serial.println("[COMPOSER] Generating Inequality...");
+            InequalityGen inequality;
+            inequality.generate(diff);
+            char inequalityInstr[100];
+            snprintf(inequalityInstr, sizeof(inequalityInstr), "Fill digits 1-%d in every line while satisfying all inequality signs between adjacent cells.", (int)inequality.getSize());
+            printPuzzleHeader(printer, "INEQUALITY", diffStr, inequalityInstr);
+            if (!useRaster || !inequality.printRasterToReceipt(printer)) {
+                inequality.printToReceipt(printer);
             }
             break;
         }
@@ -733,7 +733,7 @@ void OfflinePuzzleComposer::renderGameGuideRaster(ThermalCanvas& canvas, uint8_t
             canvas.drawChar(rx0 + 2 * sz + 6, twy + 4, '1', 2);
             break;
         }
-        case 17: { // FUTOSHIKI
+        case 17: { // INEQUALITY
             int16_t sz = 28;
             int16_t lx0 = 144 - (3 * sz) / 2;
             int16_t rx0 = 432 - (3 * sz) / 2;

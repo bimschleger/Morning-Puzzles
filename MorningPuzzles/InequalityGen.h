@@ -1,22 +1,22 @@
-#ifndef FUTOSHIKI_GEN_H
-#define FUTOSHIKI_GEN_H
+#ifndef INEQUALITY_GEN_H
+#define INEQUALITY_GEN_H
 
 #include <Arduino.h>
 class EscPosPrinter;
 
-enum FutoshikiDifficulty {
-    FUTOSHIKI_EASY   = 0, // 4x4
-    FUTOSHIKI_MEDIUM = 1, // 5x5
-    FUTOSHIKI_HARD   = 2  // 6x6
+enum InequalityDifficulty {
+    INEQUALITY_EASY   = 0, // 4x4
+    INEQUALITY_MEDIUM = 1, // 5x5
+    INEQUALITY_HARD   = 2  // 6x6
 };
 
-class FutoshikiGen {
+class InequalityGen {
 public:
     static const uint8_t MAX_SIZE = 6;
 
-    FutoshikiGen();
+    InequalityGen();
 
-    void generate(FutoshikiDifficulty difficulty = FUTOSHIKI_MEDIUM, uint32_t seed = 0);
+    void generate(InequalityDifficulty difficulty = INEQUALITY_MEDIUM, uint32_t seed = 0);
     void printToReceipt(EscPosPrinter& printer);
     bool printRasterToReceipt(EscPosPrinter& printer);
 
@@ -38,4 +38,4 @@ private:
     void applyTransform(uint8_t transform);
 };
 
-#endif // FUTOSHIKI_GEN_H
+#endif // INEQUALITY_GEN_H

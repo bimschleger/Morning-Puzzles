@@ -1,29 +1,29 @@
-// Automatically generated from server/data/futoshiki_dataset.json by tools/datasets/build_all_datasets.py
+// Automatically generated from server/data/inequality_dataset.json by tools/datasets/build_all_datasets.py
 // Do not edit directly!
-#ifndef FUTOSHIKI_DATASET_H
-#define FUTOSHIKI_DATASET_H
+#ifndef INEQUALITY_DATASET_H
+#define INEQUALITY_DATASET_H
 
 #include <Arduino.h>
 
-static const size_t NUM_FUTOSHIKI_EASY = 100;
-static const size_t NUM_FUTOSHIKI_MEDIUM = 100;
-static const size_t NUM_FUTOSHIKI_HARD = 100;
+static const size_t NUM_INEQUALITY_EASY = 100;
+static const size_t NUM_INEQUALITY_MEDIUM = 100;
+static const size_t NUM_INEQUALITY_HARD = 100;
 
-struct Futoshiki4x4Entry {
+struct Inequality4x4Entry {
     uint8_t solution[8]; // 16 cells packed nibbles
     uint8_t givens[8];   // 16 cells packed nibbles (0=empty, 1..4=given)
     uint8_t edges_h[12]; // 4 rows x 3 cols
     uint8_t edges_v[12]; // 3 rows x 4 cols
 };
 
-struct Futoshiki5x5Entry {
+struct Inequality5x5Entry {
     uint8_t solution[13]; // 25 cells packed nibbles (last low nibble 0)
     uint8_t givens[13];   // 25 cells packed nibbles
     uint8_t edges_h[20];  // 5 rows x 4 cols
     uint8_t edges_v[20];  // 4 rows x 5 cols
 };
 
-struct Futoshiki6x6Entry {
+struct Inequality6x6Entry {
     uint8_t solution[18]; // 36 cells packed nibbles
     uint8_t givens[18];   // 36 cells packed nibbles
     uint8_t edges_h[30];  // 6 rows x 5 cols
@@ -31,7 +31,7 @@ struct Futoshiki6x6Entry {
 };
 
 // --- EASY (4x4, Digits 1-4) ---
-static const Futoshiki4x4Entry FUTOSHIKI_EASY_DATASET[100] PROGMEM = {
+static const Inequality4x4Entry INEQUALITY_EASY_DATASET[100] PROGMEM = {
     {{65, 50, 52, 33, 35, 20, 18, 67}, {0, 48, 48, 0, 32, 4, 2, 0}, {2, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0}, {0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 1, 0}},
     {{67, 18, 33, 67, 52, 33, 18, 52}, {3, 0, 1, 0, 0, 1, 0, 48}, {0, 0, 0, 0, 0, 2, 0, 2, 0, 1, 0, 0}, {0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1}},
     {{66, 49, 33, 67, 19, 36, 52, 18}, {0, 0, 32, 3, 0, 0, 48, 0}, {0, 0, 0, 2, 0, 2, 0, 2, 1, 0, 0, 0}, {0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0}},
@@ -135,7 +135,7 @@ static const Futoshiki4x4Entry FUTOSHIKI_EASY_DATASET[100] PROGMEM = {
 };
 
 // --- MEDIUM (5x5, Digits 1-5) ---
-static const Futoshiki5x5Entry FUTOSHIKI_MEDIUM_DATASET[100] PROGMEM = {
+static const Inequality5x5Entry INEQUALITY_MEDIUM_DATASET[100] PROGMEM = {
     {{84, 49, 36, 50, 81, 18, 67, 83, 21, 36, 37, 20, 48}, {0, 0, 0, 0, 0, 0, 3, 0, 16, 0, 5, 16, 0}, {0, 0, 0, 0, 2, 2, 0, 2, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 1, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2}},
     {{53, 36, 18, 21, 52, 20, 50, 84, 33, 83, 83, 65, 32}, {0, 32, 0, 0, 0, 20, 0, 4, 0, 0, 0, 0, 0}, {0, 2, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0}, {0, 0, 0, 2, 1, 0, 1, 0, 2, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0}},
     {{53, 66, 18, 21, 67, 83, 33, 65, 67, 82, 66, 19, 80}, {0, 0, 0, 0, 0, 3, 0, 0, 64, 0, 0, 3, 80}, {0, 0, 0, 2, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1, 0}, {2, 0, 0, 0, 0, 0, 0, 2, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 1}},
@@ -239,7 +239,7 @@ static const Futoshiki5x5Entry FUTOSHIKI_MEDIUM_DATASET[100] PROGMEM = {
 };
 
 // --- HARD (6x6, Digits 1-6) ---
-static const Futoshiki6x6Entry FUTOSHIKI_HARD_DATASET[100] PROGMEM = {
+static const Inequality6x6Entry INEQUALITY_HARD_DATASET[100] PROGMEM = {
     {{66, 22, 53, 101, 49, 66, 84, 35, 22, 33, 69, 99, 54, 84, 33, 19, 98, 84}, {0, 16, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 16, 0, 4}, {0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 1, 2, 0, 0, 0, 1, 1, 2, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 1, 0, 0, 1, 0, 2, 0, 0, 1, 0, 1, 2, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
     {{22, 52, 37, 37, 70, 19, 82, 19, 70, 100, 81, 50, 49, 98, 84, 67, 37, 97}, {16, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 96}, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 2, 1, 0, 1, 0, 0, 1, 0, 0, 2, 0, 0, 0, 0, 0}, {0, 0, 1, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 2}},
     {{18, 70, 83, 99, 82, 65, 36, 99, 21, 54, 21, 36, 81, 52, 98, 69, 33, 54}, {0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 5, 4, 0, 0, 96, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 2, 0, 2, 0, 0, 0, 0, 1, 0, 2, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 2, 0, 0}, {0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 2, 0, 0, 0}},
@@ -342,4 +342,4 @@ static const Futoshiki6x6Entry FUTOSHIKI_HARD_DATASET[100] PROGMEM = {
     {{66, 22, 53, 52, 81, 38, 83, 36, 97, 37, 99, 20, 22, 53, 66, 97, 66, 83}, {0, 22, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 80}, {0, 0, 1, 2, 0, 0, 0, 0, 1, 0, 2, 2, 0, 0, 0, 1, 0, 0, 2, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 2, 0, 0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
 };
 
-#endif // FUTOSHIKI_DATASET_H
+#endif // INEQUALITY_DATASET_H

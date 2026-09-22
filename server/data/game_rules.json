@@ -726,8 +726,8 @@
     },
     {
       "id": 17,
-      "key": "futoshiki",
-      "title": "FUTOSHIKI",
+      "key": "inequality",
+      "title": "INEQUALITY",
       "instruction": "Fill grid with digits 1-5 so each digit appears once per line and inequality signs hold.",
       "objective": "Fill the grid with numbers 1 to N so no digit repeats in any row or column and all '<' and '>' signs are honored.",
       "rules": [

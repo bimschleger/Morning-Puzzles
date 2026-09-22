@@ -98,9 +98,9 @@ public:
 #include "../src/generators/TowersGen.h"
 #include "../src/generators/TowersGen.cpp"
 
-#include "../src/generators/FutoshikiDataset.h"
-#include "../src/generators/FutoshikiGen.h"
-#include "../src/generators/FutoshikiGen.cpp"
+#include "../src/generators/InequalityDataset.h"
+#include "../src/generators/InequalityGen.h"
+#include "../src/generators/InequalityGen.cpp"
 
 #include "../src/generators/OfflinePuzzleComposer.h"
 #include "../src/generators/OfflinePuzzleComposer.cpp"

@@ -23,7 +23,7 @@ This authoritative guide contains complete rules, core objectives, opening deduc
 - [LIGHTS](#lights) - Place bulbs to illuminate corridors so numbered blocks match and no bulbs shine on each other.
 - [LOOP](#loop) - Draw a single continuous closed loop around numbers indicating surrounding line count.
 - [TOWERS](#towers) - Place building heights 1-5 so edge clues match how many towers are visible in that line.
-- [FUTOSHIKI](#futoshiki) - Fill grid with digits 1-5 so each digit appears once per line and inequality signs hold.
+- [INEQUALITY](#inequality) - Fill grid with digits 1-5 so each digit appears once per line and inequality signs hold.
 
 ---
 
@@ -681,8 +681,8 @@ This authoritative guide contains complete rules, core objectives, opening deduc
 
 ---
 
-<a name="futoshiki"></a>
-## --- FUTOSHIKI ---
+<a name="inequality"></a>
+## --- INEQUALITY ---
 
 > **Instruction**: `Fill grid with digits 1-5 so each digit appears once per line and inequality signs hold.`
 

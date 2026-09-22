@@ -1,7 +1,7 @@
 """
-FUTOSHIKI Puzzle Plugin (Latin Square with Inequality Operators)
+INEQUALITY Puzzle Plugin (Latin Square with Inequality Operators)
 Morning Puzzles standard implementation adhering to Rules 1-16:
-- Rule 1: Single-word title '--- FUTOSHIKI ---', solution key subtitle 'FUTOSHIKI'
+- Rule 1: Single-word title '--- INEQUALITY ---', solution key subtitle 'INEQUALITY'
 - Rule 2: DIFFICULTY: EASY / MEDIUM / HARD
 - Rule 3: Single sentence instruction <= 100 characters
 - Rule 4: ESC/POS 48-column solution key with 6-space indented digits
@@ -23,10 +23,10 @@ from ..renderer.canvas import THERMAL_WIDTH_DOTS, ThermalBitmap
 _DATASET_CACHE = None
 
 
-def _get_futoshiki_dataset() -> Dict[str, Any]:
+def _get_inequality_dataset() -> Dict[str, Any]:
     global _DATASET_CACHE
     if _DATASET_CACHE is None:
-        data_path = os.path.join(os.path.dirname(__file__), "..", "..", "data", "futoshiki_dataset.json")
+        data_path = os.path.join(os.path.dirname(__file__), "..", "..", "data", "inequality_dataset.json")
         if os.path.exists(data_path):
             with open(data_path, "r", encoding="utf-8") as f:
                 _DATASET_CACHE = json.load(f)
@@ -35,7 +35,7 @@ def _get_futoshiki_dataset() -> Dict[str, Any]:
     return _DATASET_CACHE
 
 
-def transform_futoshiki(
+def transform_inequality(
     size: int,
     givens: List[List[int]],
     edges_h: List[List[int]],
@@ -117,9 +117,9 @@ def transform_futoshiki(
     return new_givens, new_edges_h, new_edges_v, new_sol
 
 
-class FutoshikiPuzzle(BasePuzzle):
-    puzzle_id = "futoshiki"
-    title = "FUTOSHIKI"
+class InequalityPuzzle(BasePuzzle):
+    puzzle_id = "inequality"
+    title = "INEQUALITY"
 
     DIFFICULTY_CONFIGS = {
         "easy": {"size": 4, "cell_size": 88, "height": 400},
@@ -148,11 +148,11 @@ class FutoshikiPuzzle(BasePuzzle):
         cfg = self.DIFFICULTY_CONFIGS[diff_key]
         size = cfg["size"]
 
-        dataset = _get_futoshiki_dataset()
+        dataset = _get_inequality_dataset()
         puzzles = dataset.get(diff_key, [])
 
         if not puzzles:
-            raise RuntimeError(f"No curated Futoshiki puzzles found for difficulty '{diff_key}'")
+            raise RuntimeError(f"No curated Inequality puzzles found for difficulty '{diff_key}'")
 
         if seed is not None:
             idx = (seed // 8) % len(puzzles)
@@ -162,7 +162,7 @@ class FutoshikiPuzzle(BasePuzzle):
             d4_op = random.randint(0, 7)
 
         base_p = puzzles[idx]
-        givens, edges_h, edges_v, sol = transform_futoshiki(
+        givens, edges_h, edges_v, sol = transform_inequality(
             size=size,
             givens=base_p["givens"],
             edges_h=base_p["edges_h"],

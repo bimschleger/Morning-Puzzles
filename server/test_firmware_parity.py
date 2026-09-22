@@ -252,7 +252,7 @@ def test_offline_puzzle_enum_ordering_parity():
         "PUZZLE_LIGHTS": "lights",
         "PUZZLE_LOOP": "loop",
         "PUZZLE_TOWERS": "towers",
-        "PUZZLE_FUTOSHIKI": "futoshiki",
+        "PUZZLE_INEQUALITY": "inequality",
     }
 
     for i, enum_name in enumerate(enum_names):
