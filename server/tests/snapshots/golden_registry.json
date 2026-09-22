@@ -158,5 +158,25 @@
     "average_duty_cycle_pct": 1.57,
     "max_consecutive_dense_lines": 0,
     "is_safe": true
+  },
+  "towers": {
+    "title": "TOWERS",
+    "sha256": "f80dd7812547229aef9586d4a3abb3356c4cbeab0867fff87a444b6c3d9ec900",
+    "byte_length": 31688,
+    "width_dots": 576,
+    "height_dots": 440,
+    "average_duty_cycle_pct": 3.65,
+    "max_consecutive_dense_lines": 0,
+    "is_safe": true
+  },
+  "futoshiki": {
+    "title": "FUTOSHIKI",
+    "sha256": "cf388b4c557df1e50f7e3b780ac9ede9bacdf0946921de8c2d304e93e9339ccb",
+    "byte_length": 35144,
+    "width_dots": 576,
+    "height_dots": 488,
+    "average_duty_cycle_pct": 3.88,
+    "max_consecutive_dense_lines": 4,
+    "is_safe": true
   }
 }

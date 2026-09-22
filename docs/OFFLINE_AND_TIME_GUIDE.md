@@ -33,11 +33,11 @@ You can configure your puzzle preferences and sync the exact clock from your pho
 
 1. **Enter Setup Mode**:
    - **Press and hold the `BOOT` button (GPIO 0) for 2.5 seconds** (or type `'W'` in the Serial monitor).
-   - The thermal printer automatically prints a **SETUP MODE** instruction ticket with dual QR codes!
+   - The thermal printer automatically prints a **WELCOME TO PUZZLES** setup instruction ticket showing active games, default print settings, and dual QR codes!
 2. **Follow the 3 Ticket Steps**:
    - **Step 1: Scan to Join the Network**: Scan the Wi-Fi QR code (or manually connect to SSID `Morning-Puzzles-Setup` - Open Network, no password).
    - **Step 2: Scan to View Settings**: Scan the URL QR code (or navigate to `http://192.168.4.1`).
-   - **Step 3: Choose Games & Settings**: In your browser, pick which games you want, how many to print, your difficulty level, and your daily morning print schedule.
+   - **Step 3: Customize & Save**: In your browser, pick which games you want, how many to print, your difficulty level, and your daily morning print schedule.
 3. **Save & Confirm**:
    - Tap **"Save Settings & Exit Setup"**.
    - The printer immediately prints a **CONFIGURATION SAVED** ticket summarizing all your active settings, the hotspot turns off, and your printer is ready to go!

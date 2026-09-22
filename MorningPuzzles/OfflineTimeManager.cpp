@@ -199,7 +199,11 @@ void OfflineTimeManager::handleClient() {
     }
 }
 
-void OfflineTimeManager::printSetupTicket(EscPosPrinter& printer) {
+void OfflineTimeManager::printSetupTicket(EscPosPrinter& printer, const OfflineConfigManager* config) {
+    if (!config) {
+        config = _configManager;
+    }
+
     if (!printer.isConnected()) {
         if (!printer.connect()) {
             Serial.println("[PORTAL] ERROR: Failed to connect to printer for setup ticket.");
@@ -212,16 +216,77 @@ void OfflineTimeManager::printSetupTicket(EscPosPrinter& printer) {
     printer.setAlign(ALIGN_CENTER);
     printer.setBold(true);
     printer.setTextSize(2, 2);
-    printer.println("SETUP MODE");
+    printer.println("WELCOME TO PUZZLES");
     printer.setTextSize(1, 1);
     printer.setBold(false);
     printer.printDoubleLine();
     printer.println("");
 
-    // Instructions intro
+    // Welcome intro
     printer.setAlign(ALIGN_CENTER);
-    printer.println("Follow the instructions below to get your");
-    printer.println("Morning Puzzles ready to go:");
+    printer.println("These are the games that are currently");
+    printer.println("active to print:");
+    printer.println("");
+
+    if (config) {
+        // Categorize active games
+        OfflinePuzzleType activeGames[OFFLINE_PUZZLE_TOTAL];
+        uint8_t activeCount = 0;
+
+        for (uint8_t i = 0; i < (uint8_t)OFFLINE_PUZZLE_TOTAL; i++) {
+            if (config->isGameEnabled((OfflinePuzzleType)i)) {
+                activeGames[activeCount++] = (OfflinePuzzleType)i;
+            }
+        }
+
+        // Two-column active games list in newspaper order (24 cols left, 24 cols right)
+        printer.setAlign(ALIGN_LEFT);
+        uint8_t rows = (activeCount + 1) / 2;
+        if (rows == 0) {
+            rows = 1;
+        }
+
+        for (uint8_t r = 0; r < rows; r++) {
+            String leftCol = "";
+            if (r < activeCount) {
+                leftCol = String(" * ") + config->getPuzzleName(activeGames[r]);
+            } else if (activeCount == 0 && r == 0) {
+                leftCol = "  (None)";
+            }
+            while (leftCol.length() < 24) {
+                leftCol += ' ';
+            }
+
+            String rightCol = "";
+            uint8_t rightIdx = r + rows;
+            if (rightIdx < activeCount) {
+                rightCol = String(" * ") + config->getPuzzleName(activeGames[rightIdx]);
+            }
+
+            printer.println(leftCol + rightCol);
+        }
+
+        // Current default settings summary
+        printer.println("");
+        printer.setAlign(ALIGN_LEFT);
+        printer.printKeyValue("Daily Count:", String(config->getPuzzleCount()) + " Puzzles");
+        printer.printKeyValue("Difficulty:", config->getGradeName(config->getPuzzleGrade()));
+        if (!_timeSet) {
+            printer.printKeyValue("Daily Schedule:", "(Setup instructions below)");
+        } else {
+            printer.printKeyValue("Daily Schedule:", config->getDailyScheduleTimeString());
+        }
+        printer.println("");
+    }
+
+    // Setup Mode Section
+    printer.printHorizontalLine('-');
+    printer.setAlign(ALIGN_CENTER);
+    printer.setBold(true);
+    printer.println("--- SETUP MODE ---");
+    printer.setBold(false);
+    printer.println("To customize your games, schedule, or clock,");
+    printer.println("follow the instructions below:");
     printer.println("");
 
     // Step 1: Wi-Fi
@@ -264,11 +329,11 @@ void OfflineTimeManager::printSetupTicket(EscPosPrinter& printer) {
     printer.println("URL: http://192.168.4.1");
     printer.println("");
 
-    // Step 3: Choose Games
+    // Step 3: Customize & Save
     printer.printHorizontalLine('-');
     printer.setAlign(ALIGN_CENTER);
     printer.setBold(true);
-    printer.println("--- STEP 3: CHOOSE GAMES ---");
+    printer.println("--- STEP 3: CUSTOMIZE & SAVE ---");
     printer.setBold(false);
     printer.println("Customize your game selection and schedule:");
     printer.println("");
@@ -389,7 +454,7 @@ void OfflineTimeManager::printConfigSavedTicket(EscPosPrinter& printer, const Of
     printer.println("");
 
     printer.setAlign(ALIGN_LEFT);
-    printer.printKeyValue("Print Count:", String(config.getPuzzleCount()) + " Puzzles");
+    printer.printKeyValue("Daily Count:", String(config.getPuzzleCount()) + " Puzzles");
     printer.printKeyValue("Difficulty:", config.getGradeName(config.getPuzzleGrade()));
     printer.printKeyValue("Daily Schedule:", config.getDailyScheduleTimeString());
     printer.printKeyValue("Clock:", getFormattedTime());

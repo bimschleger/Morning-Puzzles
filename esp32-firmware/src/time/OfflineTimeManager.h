@@ -35,7 +35,7 @@ public:
     void handleClient(); // Call in loop() when portal is active
 
     // Thermal Tickets
-    void printSetupTicket(EscPosPrinter& printer);
+    void printSetupTicket(EscPosPrinter& printer, const OfflineConfigManager* config = nullptr);
     void printConfigSavedTicket(EscPosPrinter& printer, const OfflineConfigManager& config);
 
     // Direct Time Setter (Unix epoch seconds)
