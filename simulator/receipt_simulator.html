@@ -4141,20 +4141,20 @@
           if (eh === 1 || eh === 2) {
             const cx = gridX + (c + 1) * cellSize;
             const cy = gridY + r * cellSize + Math.floor(cellSize / 2);
-            tc.fillRect(cx - 8, cy - 8, 17, 17, 0);
+            tc.fillRect(cx - 12, cy - 12, 25, 25, 0);
             if (eh === 1) { // <
-              for (let d = 0; d < 6; d++) {
+              for (let d = 0; d < 8; d++) {
                 tc.setPixel(cx - 4 + d, cy - d, 1);
                 tc.setPixel(cx - 4 + d, cy - d + 1, 1);
                 tc.setPixel(cx - 4 + d, cy + d, 1);
                 tc.setPixel(cx - 4 + d, cy + d - 1, 1);
               }
             } else if (eh === 2) { // >
-              for (let d = 0; d < 6; d++) {
-                tc.setPixel(cx + 4 - d, cy - d, 1);
-                tc.setPixel(cx + 4 - d, cy - d + 1, 1);
-                tc.setPixel(cx + 4 - d, cy + d, 1);
-                tc.setPixel(cx + 4 - d, cy + d - 1, 1);
+              for (let d = 0; d < 8; d++) {
+                tc.setPixel(cx + 3 - d, cy - d, 1);
+                tc.setPixel(cx + 3 - d, cy - d + 1, 1);
+                tc.setPixel(cx + 3 - d, cy + d, 1);
+                tc.setPixel(cx + 3 - d, cy + d - 1, 1);
               }
             }
           }
@@ -4168,20 +4168,20 @@
           if (ev === 1 || ev === 2) {
             const cx = gridX + c * cellSize + Math.floor(cellSize / 2);
             const cy = gridY + (r + 1) * cellSize;
-            tc.fillRect(cx - 8, cy - 8, 17, 17, 0);
+            tc.fillRect(cx - 12, cy - 12, 25, 25, 0);
             if (ev === 1) { // ^
-              for (let d = 0; d < 6; d++) {
+              for (let d = 0; d < 8; d++) {
                 tc.setPixel(cx - d, cy - 4 + d, 1);
                 tc.setPixel(cx - d + 1, cy - 4 + d, 1);
                 tc.setPixel(cx + d, cy - 4 + d, 1);
                 tc.setPixel(cx + d - 1, cy - 4 + d, 1);
               }
             } else if (ev === 2) { // v
-              for (let d = 0; d < 6; d++) {
-                tc.setPixel(cx - d, cy + 4 - d, 1);
-                tc.setPixel(cx - d + 1, cy + 4 - d, 1);
-                tc.setPixel(cx + d, cy + 4 - d, 1);
-                tc.setPixel(cx + d - 1, cy + 4 - d, 1);
+              for (let d = 0; d < 8; d++) {
+                tc.setPixel(cx - d, cy + 3 - d, 1);
+                tc.setPixel(cx - d + 1, cy + 3 - d, 1);
+                tc.setPixel(cx + d, cy + 3 - d, 1);
+                tc.setPixel(cx + d - 1, cy + 3 - d, 1);
               }
             }
           }

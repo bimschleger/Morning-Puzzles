@@ -293,19 +293,19 @@ class InequalityPuzzle(BasePuzzle):
                 if eh in (1, 2):
                     cx = grid_x + (c + 1) * cell_size
                     cy = grid_y + r * cell_size + cell_size // 2
-                    tb.fill_rect(cx - 8, cy - 8, 17, 17, color=0)
+                    tb.fill_rect(cx - 12, cy - 12, 25, 25, color=0)
                     if eh == 1:  # < (left < right)
-                        for d in range(6):
+                        for d in range(8):
                             tb.set_pixel(cx - 4 + d, cy - d, 1)
                             tb.set_pixel(cx - 4 + d, cy - d + 1, 1)
                             tb.set_pixel(cx - 4 + d, cy + d, 1)
                             tb.set_pixel(cx - 4 + d, cy + d - 1, 1)
                     elif eh == 2:  # > (left > right)
-                        for d in range(6):
-                            tb.set_pixel(cx + 4 - d, cy - d, 1)
-                            tb.set_pixel(cx + 4 - d, cy - d + 1, 1)
-                            tb.set_pixel(cx + 4 - d, cy + d, 1)
-                            tb.set_pixel(cx + 4 - d, cy + d - 1, 1)
+                        for d in range(8):
+                            tb.set_pixel(cx + 3 - d, cy - d, 1)
+                            tb.set_pixel(cx + 3 - d, cy - d + 1, 1)
+                            tb.set_pixel(cx + 3 - d, cy + d, 1)
+                            tb.set_pixel(cx + 3 - d, cy + d - 1, 1)
 
         # Vertical inequality operators
         for r in range(size - 1):
@@ -314,19 +314,19 @@ class InequalityPuzzle(BasePuzzle):
                 if ev in (1, 2):
                     cx = grid_x + c * cell_size + cell_size // 2
                     cy = grid_y + (r + 1) * cell_size
-                    tb.fill_rect(cx - 8, cy - 8, 17, 17, color=0)
+                    tb.fill_rect(cx - 12, cy - 12, 25, 25, color=0)
                     if ev == 1:  # ^ (top < bottom)
-                        for d in range(6):
+                        for d in range(8):
                             tb.set_pixel(cx - d, cy - 4 + d, 1)
                             tb.set_pixel(cx - d + 1, cy - 4 + d, 1)
                             tb.set_pixel(cx + d, cy - 4 + d, 1)
                             tb.set_pixel(cx + d - 1, cy - 4 + d, 1)
                     elif ev == 2:  # v (top > bottom)
-                        for d in range(6):
-                            tb.set_pixel(cx - d, cy + 4 - d, 1)
-                            tb.set_pixel(cx - d + 1, cy + 4 - d, 1)
-                            tb.set_pixel(cx + d, cy + 4 - d, 1)
-                            tb.set_pixel(cx + d - 1, cy + 4 - d, 1)
+                        for d in range(8):
+                            tb.set_pixel(cx - d, cy + 3 - d, 1)
+                            tb.set_pixel(cx - d + 1, cy + 3 - d, 1)
+                            tb.set_pixel(cx + d, cy + 3 - d, 1)
+                            tb.set_pixel(cx + d - 1, cy + 3 - d, 1)
 
         # Given numbers inside cells (scale 3: 15x21px glyph, 18px char width)
         givens = puzzle_data.get("givens", [])

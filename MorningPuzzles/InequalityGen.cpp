@@ -262,20 +262,20 @@ bool InequalityGen::printRasterToReceipt(EscPosPrinter& printer) {
             if (eh == 1 || eh == 2) {
                 uint16_t cx = grid_x + (c + 1) * _cellSize;
                 uint16_t cy = grid_y + r * _cellSize + _cellSize / 2;
-                canvas.fillRect(cx - 8, cy - 8, 17, 17, 0);
+                canvas.fillRect(cx - 12, cy - 12, 25, 25, 0);
                 if (eh == 1) { // <
-                    for (int8_t d = 0; d < 6; d++) {
+                    for (int8_t d = 0; d < 8; d++) {
                         canvas.setPixel(cx - 4 + d, cy - d, 1);
                         canvas.setPixel(cx - 4 + d, cy - d + 1, 1);
                         canvas.setPixel(cx - 4 + d, cy + d, 1);
                         canvas.setPixel(cx - 4 + d, cy + d - 1, 1);
                     }
                 } else if (eh == 2) { // >
-                    for (int8_t d = 0; d < 6; d++) {
-                        canvas.setPixel(cx + 4 - d, cy - d, 1);
-                        canvas.setPixel(cx + 4 - d, cy - d + 1, 1);
-                        canvas.setPixel(cx + 4 - d, cy + d, 1);
-                        canvas.setPixel(cx + 4 - d, cy + d - 1, 1);
+                    for (int8_t d = 0; d < 8; d++) {
+                        canvas.setPixel(cx + 3 - d, cy - d, 1);
+                        canvas.setPixel(cx + 3 - d, cy - d + 1, 1);
+                        canvas.setPixel(cx + 3 - d, cy + d, 1);
+                        canvas.setPixel(cx + 3 - d, cy + d - 1, 1);
                     }
                 }
             }
@@ -289,20 +289,20 @@ bool InequalityGen::printRasterToReceipt(EscPosPrinter& printer) {
             if (ev == 1 || ev == 2) {
                 uint16_t cx = grid_x + c * _cellSize + _cellSize / 2;
                 uint16_t cy = grid_y + (r + 1) * _cellSize;
-                canvas.fillRect(cx - 8, cy - 8, 17, 17, 0);
+                canvas.fillRect(cx - 12, cy - 12, 25, 25, 0);
                 if (ev == 1) { // ^
-                    for (int8_t d = 0; d < 6; d++) {
+                    for (int8_t d = 0; d < 8; d++) {
                         canvas.setPixel(cx - d, cy - 4 + d, 1);
                         canvas.setPixel(cx - d + 1, cy - 4 + d, 1);
                         canvas.setPixel(cx + d, cy - 4 + d, 1);
                         canvas.setPixel(cx + d - 1, cy - 4 + d, 1);
                     }
                 } else if (ev == 2) { // v
-                    for (int8_t d = 0; d < 6; d++) {
-                        canvas.setPixel(cx - d, cy + 4 - d, 1);
-                        canvas.setPixel(cx - d + 1, cy + 4 - d, 1);
-                        canvas.setPixel(cx + d, cy + 4 - d, 1);
-                        canvas.setPixel(cx + d - 1, cy + 4 - d, 1);
+                    for (int8_t d = 0; d < 8; d++) {
+                        canvas.setPixel(cx - d, cy + 3 - d, 1);
+                        canvas.setPixel(cx - d + 1, cy + 3 - d, 1);
+                        canvas.setPixel(cx + d, cy + 3 - d, 1);
+                        canvas.setPixel(cx + d - 1, cy + 3 - d, 1);
                     }
                 }
             }
