@@ -3974,11 +3974,11 @@
     }
 
     function renderOfflineWheel(canvas, wData) {
-      const totalHeight = 368;
+      const totalHeight = 400;
       const tc = new ThermalCanvasSimulator(576, totalHeight);
 
       const xc = 288;
-      const yc = 135;
+      const yc = 130;
       const hexRadius = 46;
       const spacing = 80; // 46 * sqrt(3) ~ 79.67px
 
@@ -4013,23 +4013,26 @@
       tc.drawPolygon(getHexPolygon(xc, yc, hexRadius - 4), 2);
       tc.drawChar(xc - 9, yc - 10, wData.center || 'A', 3);
 
-      // Consolidated 2-Row Target Benchmarks & Lengths box
-      const boxW = 420;
-      const boxH = 50;
+      // Consolidated 2-Row Target Benchmarks & Lengths box with internal divider
+      const boxW = 500;
+      const boxH = 64;
       const boxX = Math.floor((576 - boxW) / 2);
-      const boxY = 252;
+      const boxY = 258;
       tc.drawRect(boxX, boxY, boxW, boxH, 2);
 
       const benchText = `GOOD: ${wData.good || 15}   GREAT: ${wData.great || 25}   GENIUS: ${wData.genius || 35}+`;
-      tc.drawCenteredText(boxY + 8, benchText, 2);
+      tc.drawCenteredText(boxY + 9, benchText, 2);
+      tc.drawHLine(boxX, boxY + 32, boxW, 1);
       const lenText = `4L: ${wData.count4 || 0}   5L: ${wData.count5 || 0}   6L: ${wData.count6 || 0}   7+: ${wData.count7plus || 0}`;
-      tc.drawCenteredText(boxY + 28, lenText, 2);
+      tc.drawCenteredText(boxY + 41, lenText, 2);
 
-      // Ruled handwriting lines
-      tc.drawHLine(48, 318, 220, 1);
-      tc.drawHLine(308, 318, 220, 1);
-      tc.drawHLine(48, 348, 220, 1);
-      tc.drawHLine(308, 348, 220, 1);
+      // Ruled handwriting lines (3 rows, 2 columns)
+      tc.drawHLine(48, 340, 220, 1);
+      tc.drawHLine(308, 340, 220, 1);
+      tc.drawHLine(48, 362, 220, 1);
+      tc.drawHLine(308, 362, 220, 1);
+      tc.drawHLine(48, 384, 220, 1);
+      tc.drawHLine(308, 384, 220, 1);
 
       tc.renderToCanvas(canvas);
     }

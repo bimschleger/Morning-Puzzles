@@ -79,20 +79,20 @@ static void drawHexCell(ThermalCanvas& canvas, int16_t cx, int16_t cy, int16_t r
 }
 
 bool WheelGen::printRasterToReceipt(EscPosPrinter& printer) {
-    const int16_t totalHeight = 368;
+    const int16_t totalHeight = 400;
     ThermalCanvas canvas;
     if (!canvas.begin(totalHeight)) {
         return false;
     }
 
     const int16_t xc = 288;
-    const int16_t yc = 135;
+    const int16_t yc = 130;
     const int16_t hexRadius = 46;
 
     // 6 outer honeycomb positions around (xc, yc)
     // Distance spacing ~ 80 dots
     const int16_t outerX[6] = { 288, 357, 357, 288, 219, 219 };
-    const int16_t outerY[6] = {  55,  95, 175, 215, 175,  95 };
+    const int16_t outerY[6] = {  50,  90, 170, 210, 170,  90 };
 
     // Draw outer 6 honeycomb cells
     for (int i = 0; i < 6; i++) {
@@ -106,23 +106,26 @@ bool WheelGen::printRasterToReceipt(EscPosPrinter& printer) {
     drawHexCell(canvas, xc, yc, hexRadius - 4, 2);
     canvas.drawChar(xc - 9, yc - 10, _center, 3);
 
-    // Consolidated 2-Row Target Benchmarks & Lengths box
-    const int16_t boxW = 420;
-    const int16_t boxH = 50;
+    // Consolidated 2-Row Target Benchmarks & Lengths box with internal divider
+    const int16_t boxW = 500;
+    const int16_t boxH = 64;
     const int16_t boxX = (THERMAL_CANVAS_WIDTH - boxW) / 2;
-    const int16_t boxY = 252;
+    const int16_t boxY = 258;
     canvas.drawRect(boxX, boxY, boxW, boxH, 2);
 
     String benchText = "GOOD: " + String(_good) + "   GREAT: " + String(_great) + "   GENIUS: " + String(_genius) + "+";
-    canvas.drawCenteredText(boxY + 8, benchText.c_str(), 2);
+    canvas.drawCenteredText(boxY + 9, benchText.c_str(), 2);
+    canvas.drawHLine(boxX, boxY + 32, boxW, 1);
     String lenText = "4L: " + String(_count4) + "   5L: " + String(_count5) + "   6L: " + String(_count6) + "   7+: " + String(_count7plus);
-    canvas.drawCenteredText(boxY + 28, lenText.c_str(), 2);
+    canvas.drawCenteredText(boxY + 41, lenText.c_str(), 2);
 
-    // Ruled handwriting lines
-    canvas.drawHLine(48, 318, 220, 1);
-    canvas.drawHLine(308, 318, 220, 1);
-    canvas.drawHLine(48, 348, 220, 1);
-    canvas.drawHLine(308, 348, 220, 1);
+    // Ruled handwriting lines (3 rows, 2 columns)
+    canvas.drawHLine(48, 340, 220, 1);
+    canvas.drawHLine(308, 340, 220, 1);
+    canvas.drawHLine(48, 362, 220, 1);
+    canvas.drawHLine(308, 362, 220, 1);
+    canvas.drawHLine(48, 384, 220, 1);
+    canvas.drawHLine(308, 384, 220, 1);
 
     bool ok = canvas.printTo(printer);
     canvas.end();

@@ -131,12 +131,12 @@
   },
   "wheel": {
     "title": "WHEEL",
-    "sha256": "2daa012bec054a92002917395412cfc307930950feb27404c95d0a93fd5b4c8d",
-    "byte_length": 26504,
+    "sha256": "0bb40b1ab6de24aa9f29dd2f50007327db9ce6f1ac7859c8e118ceed4570804a",
+    "byte_length": 28808,
     "width_dots": 576,
-    "height_dots": 368,
-    "average_duty_cycle_pct": 4.61,
-    "max_consecutive_dense_lines": 1,
+    "height_dots": 400,
+    "average_duty_cycle_pct": 4.82,
+    "max_consecutive_dense_lines": 2,
     "is_safe": true
   },
   "lights": {
@@ -171,7 +171,7 @@
   },
   "inequality": {
     "title": "INEQUALITY",
-    "sha256": "cf388b4c557df1e50f7e3b780ac9ede9bacdf0946921de8c2d304e93e9339ccb",
+    "sha256": "9cb311ff9ebcaf764d1eba1461226022f0b7d6cd533f4838a4ca9d6285435495",
     "byte_length": 35144,
     "width_dots": 576,
     "height_dots": 488,

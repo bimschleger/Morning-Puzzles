@@ -383,9 +383,9 @@ class WheelPuzzle(BasePuzzle):
             c6 = sum(1 for w in words_list if len(w) == 6)
             c7 = sum(1 for w in words_list if len(w) >= 7)
 
-        total_height = 368  # Multiple of 8
+        total_height = 400  # Multiple of 8
         xc = target_width // 2
-        yc = 135
+        yc = 130
         hex_radius = 46
         spacing = hex_radius * math.sqrt(3)  # ~79.6px
 
@@ -426,22 +426,25 @@ class WheelPuzzle(BasePuzzle):
         tb.draw_polygon(center_inner, thickness=2, color=1)
         tb.draw_char(xc - 9, yc - 10, center, scale=3)
 
-        # Draw Consolidated 2-Row Target Benchmarks & Lengths box
-        box_y = 252
-        box_h = 50
-        box_w = 420
+        # Draw Consolidated 2-Row Target Benchmarks & Lengths box with internal divider
+        box_y = 258
+        box_h = 64
+        box_w = 500
         box_x = (target_width - box_w) // 2
         tb.draw_rect(box_x, box_y, box_w, box_h, thickness=2, color=1)
         bench_text = f"GOOD: {b_good}   GREAT: {b_great}   GENIUS: {b_genius}+"
-        tb.draw_centered_text(box_y + 8, bench_text, scale=2, color=1)
+        tb.draw_centered_text(box_y + 9, bench_text, scale=2, color=1)
+        tb.draw_hline(box_x, box_y + 32, box_w, thickness=1, color=1)
         len_text = f"4L: {c4}   5L: {c5}   6L: {c6}   7+: {c7}"
-        tb.draw_centered_text(box_y + 28, len_text, scale=2, color=1)
+        tb.draw_centered_text(box_y + 41, len_text, scale=2, color=1)
 
-        # Ruled handwriting lines (2 columns)
-        tb.draw_hline(48, 318, 220, thickness=1, color=1)
-        tb.draw_hline(308, 318, 220, thickness=1, color=1)
-        tb.draw_hline(48, 348, 220, thickness=1, color=1)
-        tb.draw_hline(308, 348, 220, thickness=1, color=1)
+        # Ruled handwriting lines (3 rows, 2 columns)
+        tb.draw_hline(48, 340, 220, thickness=1, color=1)
+        tb.draw_hline(308, 340, 220, thickness=1, color=1)
+        tb.draw_hline(48, 362, 220, thickness=1, color=1)
+        tb.draw_hline(308, 362, 220, thickness=1, color=1)
+        tb.draw_hline(48, 384, 220, thickness=1, color=1)
+        tb.draw_hline(308, 384, 220, thickness=1, color=1)
 
         return tb.to_escpos()
 
