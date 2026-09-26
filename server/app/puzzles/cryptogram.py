@@ -191,7 +191,7 @@ class CryptogramPuzzle(BasePuzzle):
         row_gap = 20
         header_gap = 16
         author_height = 36 if author else 0
-        tracker_height = 276
+        tracker_height = 324
 
         total_h = header_gap + len(lines) * (row_height + row_gap) + author_height + 18 + tracker_height + 16
         total_h = ((total_h + 7) // 8) * 8  # Multiple of 8 dots
@@ -248,7 +248,7 @@ class CryptogramPuzzle(BasePuzzle):
         col_w = 75
         start_x = padding + (inner_width - 7 * col_w) // 2  # 25
         bar_w = 40
-        row_h = 60
+        row_h = 72
 
         alpha_rows = [
             "ABCDEFG",
@@ -258,25 +258,25 @@ class CryptogramPuzzle(BasePuzzle):
         ]
 
         for row_chars in alpha_rows:
-            slot_y = cur_y + 20
+            slot_y = cur_y + 28
             for col_idx, ch in enumerate(row_chars):
                 cx = start_x + col_idx * col_w
                 line_x = cx + (col_w - bar_w) // 2
 
-                # Pre-printed clue (if available) in scale=2 above underline
+                # Pre-printed clue (if available) in scale=3 above underline
                 if ch in cipher_to_clue:
                     clue_char = cipher_to_clue[ch]
-                    clue_x = cx + (col_w - 10) // 2
-                    clue_y = slot_y - 17
-                    tb.draw_char(clue_x, clue_y, clue_char, scale=2, color=1)
+                    clue_x = cx + (col_w - 15) // 2
+                    clue_y = slot_y - 24
+                    tb.draw_char(clue_x, clue_y, clue_char, scale=3, color=1)
 
                 # Handwriting slot line
                 tb.draw_hline(line_x, slot_y, bar_w, thickness=2)
 
-                # Base alphabet cipher letter in scale=3 below underline
-                base_x = cx + (col_w - 15) // 2
-                base_y = slot_y + 8
-                tb.draw_char(base_x, base_y, ch, scale=3, color=1)
+                # Base alphabet cipher letter in scale=2 below underline
+                base_x = cx + (col_w - 10) // 2
+                base_y = slot_y + 6
+                tb.draw_char(base_x, base_y, ch, scale=2, color=1)
 
             cur_y += row_h
 

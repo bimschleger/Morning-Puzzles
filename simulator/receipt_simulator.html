@@ -3696,7 +3696,7 @@
       const rowGap = 20;
       const headerGap = 16;
       const authorHeight = cData.author ? 36 : 0;
-      const trackerHeight = 276;
+      const trackerHeight = 324;
       let totalH = headerGap + lines.length * (rowHeight + rowGap) + authorHeight + 18 + trackerHeight + 16;
       totalH = Math.floor((totalH + 7) / 8) * 8;
 
@@ -3760,30 +3760,30 @@
       const colW = 75;
       const startX = padding + Math.floor((innerWidth - 7 * colW) / 2); // 25
       const barW = 40;
-      const rowH = 60;
+      const rowH = 72;
 
       const alphaRows = ["ABCDEFG", "HIJKLMN", "OPQRSTU", "VWXYZ"];
       for (const rowChars of alphaRows) {
-        const slotY = curY + 20;
+        const slotY = curY + 28;
         for (let c = 0; c < rowChars.length; c++) {
           const ch = rowChars[c];
           const cx = startX + c * colW;
           const lineX = cx + Math.floor((colW - barW) / 2);
 
-          // Pre-printed clue (if available) in scale=2 above underline
+          // Pre-printed clue (if available) in scale=3 above underline
           if (cipherToClue[ch]) {
-            const clueX = cx + Math.floor((colW - 10) / 2);
-            const clueY = slotY - 17;
-            tc.drawChar(clueX, clueY, cipherToClue[ch], 2, 1);
+            const clueX = cx + Math.floor((colW - 15) / 2);
+            const clueY = slotY - 24;
+            tc.drawChar(clueX, clueY, cipherToClue[ch], 3, 1);
           }
 
           // Handwriting slot line
           tc.drawHLine(lineX, slotY, barW, 2);
 
-          // Base alphabet cipher letter in scale=3 below underline
-          const baseX = cx + Math.floor((colW - 15) / 2);
-          const baseY = slotY + 8;
-          tc.drawChar(baseX, baseY, ch, 3, 1);
+          // Base alphabet cipher letter in scale=2 below underline
+          const baseX = cx + Math.floor((colW - 10) / 2);
+          const baseY = slotY + 6;
+          tc.drawChar(baseX, baseY, ch, 2, 1);
         }
         curY += rowH;
       }

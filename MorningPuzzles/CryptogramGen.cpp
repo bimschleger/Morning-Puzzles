@@ -295,7 +295,7 @@ bool CryptogramGen::printRasterToReceipt(EscPosPrinter& printer) {
     const int16_t rowGap = 20;
     const int16_t headerGap = 16;
     const int16_t authorHeight = (_author.length() > 0) ? 36 : 0;
-    const int16_t trackerHeight = 276;
+    const int16_t trackerHeight = 324;
 
     int16_t totalH = headerGap + numLines * (rowHeight + rowGap) + authorHeight + 18 + trackerHeight + 16;
     totalH = ((totalH + 7) / 8) * 8; // Align to 8 dots
@@ -353,25 +353,25 @@ bool CryptogramGen::printRasterToReceipt(EscPosPrinter& printer) {
     const int16_t colW = 75;
     const int16_t startX = padding + (innerWidth - 7 * colW) / 2; // 25
     const int16_t barW = 40;
-    const int16_t rowH = 60;
+    const int16_t rowH = 72;
 
     const char* alphaRows[] = { "ABCDEFG", "HIJKLMN", "OPQRSTU", "VWXYZ" };
     for (uint8_t r = 0; r < 4; r++) {
         const char* rowChars = alphaRows[r];
         uint8_t rowLen = strlen(rowChars);
-        int16_t slotY = curY + 20;
+        int16_t slotY = curY + 28;
 
         for (uint8_t c = 0; c < rowLen; c++) {
             char ch = rowChars[c];
             int16_t cx = startX + c * colW;
             int16_t lineX = cx + (colW - barW) / 2;
 
-            // Pre-printed clue (if available) in scale=2 above underline
+            // Pre-printed clue (if available) in scale=3 above underline
             for (uint8_t k = 0; k < _clueCount; k++) {
                 if (_clues[k].cipher == ch) {
-                    int16_t clueX = cx + (colW - 10) / 2;
-                    int16_t clueY = slotY - 17;
-                    canvas.drawChar(clueX, clueY, _clues[k].plain, 2, 1);
+                    int16_t clueX = cx + (colW - 15) / 2;
+                    int16_t clueY = slotY - 24;
+                    canvas.drawChar(clueX, clueY, _clues[k].plain, 3, 1);
                     break;
                 }
             }
@@ -379,10 +379,10 @@ bool CryptogramGen::printRasterToReceipt(EscPosPrinter& printer) {
             // Handwriting slot line
             canvas.drawHLine(lineX, slotY, barW, 2);
 
-            // Base alphabet cipher letter in scale=3 below underline
-            int16_t baseX = cx + (colW - 15) / 2;
-            int16_t baseY = slotY + 8;
-            canvas.drawChar(baseX, baseY, ch, 3, 1);
+            // Base alphabet cipher letter in scale=2 below underline
+            int16_t baseX = cx + (colW - 10) / 2;
+            int16_t baseY = slotY + 6;
+            canvas.drawChar(baseX, baseY, ch, 2, 1);
         }
         curY += rowH;
     }
