@@ -286,8 +286,10 @@ class LadderPuzzle(BasePuzzle):
         word_len = len(start_word)
 
         box_sep = "+---" * word_len + "+"
-        pad_len = max(0, (48 - (3 + len(box_sep))) // 2)
+        box_indent_len = max(0, (48 - len(box_sep)) // 2)
+        pad_len = max(0, box_indent_len - 3)
         indent = " " * pad_len
+        box_indent = " " * box_indent_len
 
         lines: List[str] = []
 
@@ -300,11 +302,11 @@ class LadderPuzzle(BasePuzzle):
             else:
                 cells = "|   " * word_len + "|"
 
-            lines.append(f"{indent}   {box_sep}")
+            lines.append(f"{box_indent}{box_sep}")
             lines.append(f"{indent}{num_str:>2} {cells}")
 
         # Final bottom border
-        lines.append(f"{indent}   {box_sep}")
+        lines.append(f"{box_indent}{box_sep}")
 
         return "\n".join(lines)
 
@@ -331,12 +333,8 @@ class LadderPuzzle(BasePuzzle):
         tile_size = 66
         gap_y = 14
         box_width = word_len * tile_size
-
-        num_width = 36
+        box_x = (target_width - box_width) // 2
         gap_x = 14
-        total_content_w = num_width + gap_x + box_width
-        start_x = (target_width - total_content_w) // 2
-        box_x = start_x + num_width + gap_x
 
         margin_top = 24
         ladder_height = total_rungs * tile_size + (total_rungs - 1) * gap_y

@@ -55,8 +55,13 @@ void LadderGen::printToReceipt(EscPosPrinter& printer) {
     strcat(boxSep, "+");
 
     int boxLen = strlen(boxSep);
-    int padLen = (COLS - (3 + boxLen)) / 2;
+    int boxIndentLen = (COLS - boxLen) / 2;
+    if (boxIndentLen < 0) boxIndentLen = 0;
+    int padLen = boxIndentLen - 3;
     if (padLen < 0) padLen = 0;
+    char boxIndent[32];
+    memset(boxIndent, ' ', boxIndentLen);
+    boxIndent[boxIndentLen] = '\0';
     char indent[32];
     memset(indent, ' ', padLen);
     indent[padLen] = '\0';
@@ -80,16 +85,14 @@ void LadderGen::printToReceipt(EscPosPrinter& printer) {
             strcat(cellsBuf, "|");
         }
 
-        printer.print(indent);
-        printer.print("   ");
+        printer.print(boxIndent);
         printer.println(boxSep);
 
         snprintf(lineBuf, sizeof(lineBuf), "%s%2d. %s", indent, r + 1, cellsBuf);
         printer.println(lineBuf);
     }
 
-    printer.print(indent);
-    printer.print("   ");
+    printer.print(boxIndent);
     printer.println(boxSep);
 }
 
@@ -98,11 +101,8 @@ bool LadderGen::printRasterToReceipt(EscPosPrinter& printer) {
     const uint16_t tileSize = 66;
     const uint16_t gapY = 14;
     const uint16_t boxWidth = _wordLen * tileSize;
-    const uint16_t numWidth = 36;
+    const uint16_t boxX = (targetWidth - boxWidth) / 2;
     const uint16_t gapX = 14;
-    const uint16_t totalContentW = numWidth + gapX + boxWidth;
-    const uint16_t startX = (targetWidth - totalContentW) / 2;
-    const uint16_t boxX = startX + numWidth + gapX;
 
     const uint16_t marginTop = 24;
     uint16_t ladderHeight = _totalWords * tileSize + (_totalWords - 1) * gapY;

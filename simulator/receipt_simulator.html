@@ -3858,11 +3858,8 @@
       const tileSize = 66;
       const gapY = 14;
       const boxWidth = wordLen * tileSize;
-      const numWidth = 36;
+      const boxX = Math.floor((targetWidth - boxWidth) / 2);
       const gapX = 14;
-      const totalContentW = numWidth + gapX + boxWidth;
-      const startX = Math.floor((targetWidth - totalContentW) / 2);
-      const boxX = startX + numWidth + gapX;
 
       const marginTop = 24;
       const ladderHeight = totalRungs * tileSize + (totalRungs - 1) * gapY;
@@ -4928,7 +4925,9 @@
           const wordLen = lData.wordLen;
           const totalRungs = lData.totalWords;
           const boxSep = '+---'.repeat(wordLen) + '+';
-          const padLen = Math.max(0, Math.floor((COLS - (3 + boxSep.length)) / 2));
+          const boxIndentLen = Math.max(0, Math.floor((COLS - boxSep.length) / 2));
+          const padLen = Math.max(0, boxIndentLen - 3);
+          const boxIndent = ' '.repeat(boxIndentLen);
           const indent = ' '.repeat(padLen);
 
           for (let r = 0; r < totalRungs; r++) {
@@ -4939,10 +4938,10 @@
             } else if (r === totalRungs - 1) {
               cells = lData.target.split('').map(ch => `| ${ch} `).join('') + '|';
             }
-            items.push({ type: 'text', text: `${indent}   ${boxSep}` });
+            items.push({ type: 'text', text: `${boxIndent}${boxSep}` });
             items.push({ type: 'text', text: `${indent}${numStr.padStart(2)} ${cells}` });
           }
-          items.push({ type: 'text', text: `${indent}   ${boxSep}` });
+          items.push({ type: 'text', text: `${boxIndent}${boxSep}` });
         }
 
         items.push({ type: 'blank', text: '' });
