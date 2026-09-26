@@ -80,11 +80,11 @@ void TowersGen::generate(TowersDifficulty difficulty, uint32_t seed) {
     memset(_left, 0, sizeof(_left));
     memset(_right, 0, sizeof(_right));
 
-    if (difficulty == TOWERS_EASY) {
+    if (difficulty == TOWERS_EASY || difficulty == TOWERS_MEDIUM) {
         _size = 4;
         _cellSize = 80;
         _height = 400;
-        const Towers4x4Entry* p = &TOWERS_EASY_DATASET[puzzleIdx];
+        const Towers4x4Entry* p = (difficulty == TOWERS_EASY) ? &TOWERS_EASY_DATASET[puzzleIdx] : &TOWERS_MEDIUM_DATASET[puzzleIdx];
         for (uint8_t r = 0; r < 4; r++) {
             for (uint8_t c = 0; c < 4; c++) {
                 uint8_t idx = r * 4 + c;
@@ -108,39 +108,11 @@ void TowersGen::generate(TowersDifficulty difficulty, uint32_t seed) {
             uint8_t bR = pgm_read_byte(&p->clues[idxR >> 1]);
             _right[i] = (idxR & 1) ? (bR & 0x0F) : (bR >> 4);
         }
-    } else if (difficulty == TOWERS_HARD || difficulty == TOWERS_EXTREME) {
-        _size = 6;
-        _cellSize = 66;
-        _height = 480;
-        const Towers6x6Entry* p = (difficulty == TOWERS_EXTREME) ? &TOWERS_EXTREME_DATASET[puzzleIdx] : &TOWERS_HARD_DATASET[puzzleIdx];
-        for (uint8_t r = 0; r < 6; r++) {
-            for (uint8_t c = 0; c < 6; c++) {
-                uint8_t idx = r * 6 + c;
-                uint8_t byteVal = pgm_read_byte(&p->solution[idx >> 1]);
-                _solution[r][c] = (idx & 1) ? (byteVal & 0x0F) : (byteVal >> 4);
-            }
-        }
-        for (uint8_t i = 0; i < 6; i++) {
-            uint8_t bTop = pgm_read_byte(&p->clues[i >> 1]);
-            _top[i] = (i & 1) ? (bTop & 0x0F) : (bTop >> 4);
-
-            uint8_t idxBot = 6 + i;
-            uint8_t bBot = pgm_read_byte(&p->clues[idxBot >> 1]);
-            _bottom[i] = (idxBot & 1) ? (bBot & 0x0F) : (bBot >> 4);
-
-            uint8_t idxL = 12 + i;
-            uint8_t bL = pgm_read_byte(&p->clues[idxL >> 1]);
-            _left[i] = (idxL & 1) ? (bL & 0x0F) : (bL >> 4);
-
-            uint8_t idxR = 18 + i;
-            uint8_t bR = pgm_read_byte(&p->clues[idxR >> 1]);
-            _right[i] = (idxR & 1) ? (bR & 0x0F) : (bR >> 4);
-        }
-    } else { // TOWERS_MEDIUM
+    } else { // TOWERS_HARD or TOWERS_EXTREME (5x5)
         _size = 5;
         _cellSize = 72;
         _height = 440;
-        const Towers5x5Entry* p = &TOWERS_MEDIUM_DATASET[puzzleIdx];
+        const Towers5x5Entry* p = (difficulty == TOWERS_HARD) ? &TOWERS_HARD_DATASET[puzzleIdx] : &TOWERS_EXTREME_DATASET[puzzleIdx];
         for (uint8_t r = 0; r < 5; r++) {
             for (uint8_t c = 0; c < 5; c++) {
                 uint8_t idx = r * 5 + c;

@@ -633,68 +633,29 @@ def build_towers_dataset() -> None:
         "    uint8_t clues[10];    // 20 clues: top(5), bottom(5), left(5), right(5)",
         "};",
         "",
-        "struct Towers6x6Entry {",
-        "    uint8_t solution[18]; // 36 cells packed as nibbles",
-        "    uint8_t clues[12];    // 24 clues: top(6), bottom(6), left(6), right(6)",
-        "};",
-        "",
     ]
 
-    # EASY (4x4)
-    lines.append("// --- EASY (4x4, Heights 1-4) ---")
-    lines.append("static const Towers4x4Entry TOWERS_EASY_DATASET[100] PROGMEM = {")
-    for p in dataset["easy"]:
-        size = 4
-        sol_flat = [p["solution"][r][c] for r in range(size) for c in range(size)]
-        sol_packed = pack_nibbles(sol_flat)
-        clues_flat = p["clues"]["top"] + p["clues"]["bottom"] + p["clues"]["left"] + p["clues"]["right"]
-        clues_packed = pack_nibbles(clues_flat)
-        s_str = "{" + ", ".join(str(x) for x in sol_packed) + "}"
-        c_str = "{" + ", ".join(str(x) for x in clues_packed) + "}"
-        lines.append(f"    {{{s_str}, {c_str}}},")
-    lines.append("};\n")
+    tier_specs = [
+        ("EASY", 4),
+        ("MEDIUM", 4),
+        ("HARD", 5),
+        ("EXTREME", 5),
+    ]
 
-    # MEDIUM (5x5)
-    lines.append("// --- MEDIUM (5x5, Heights 1-5) ---")
-    lines.append("static const Towers5x5Entry TOWERS_MEDIUM_DATASET[100] PROGMEM = {")
-    for p in dataset["medium"]:
-        size = 5
-        sol_flat = [p["solution"][r][c] for r in range(size) for c in range(size)]
-        sol_packed = pack_nibbles(sol_flat)
-        clues_flat = p["clues"]["top"] + p["clues"]["bottom"] + p["clues"]["left"] + p["clues"]["right"]
-        clues_packed = pack_nibbles(clues_flat)
-        s_str = "{" + ", ".join(str(x) for x in sol_packed) + "}"
-        c_str = "{" + ", ".join(str(x) for x in clues_packed) + "}"
-        lines.append(f"    {{{s_str}, {c_str}}},")
-    lines.append("};\n")
-
-    # HARD (6x6)
-    lines.append("// --- HARD (6x6, Heights 1-6) ---")
-    lines.append("static const Towers6x6Entry TOWERS_HARD_DATASET[100] PROGMEM = {")
-    for p in dataset["hard"]:
-        size = 6
-        sol_flat = [p["solution"][r][c] for r in range(size) for c in range(size)]
-        sol_packed = pack_nibbles(sol_flat)
-        clues_flat = p["clues"]["top"] + p["clues"]["bottom"] + p["clues"]["left"] + p["clues"]["right"]
-        clues_packed = pack_nibbles(clues_flat)
-        s_str = "{" + ", ".join(str(x) for x in sol_packed) + "}"
-        c_str = "{" + ", ".join(str(x) for x in clues_packed) + "}"
-        lines.append(f"    {{{s_str}, {c_str}}},")
-    lines.append("};\n")
-
-    # EXTREME (6x6)
-    lines.append("// --- EXTREME (6x6, Heights 1-6, Sparse Clues) ---")
-    lines.append("static const Towers6x6Entry TOWERS_EXTREME_DATASET[100] PROGMEM = {")
-    for p in dataset["extreme"]:
-        size = 6
-        sol_flat = [p["solution"][r][c] for r in range(size) for c in range(size)]
-        sol_packed = pack_nibbles(sol_flat)
-        clues_flat = p["clues"]["top"] + p["clues"]["bottom"] + p["clues"]["left"] + p["clues"]["right"]
-        clues_packed = pack_nibbles(clues_flat)
-        s_str = "{" + ", ".join(str(x) for x in sol_packed) + "}"
-        c_str = "{" + ", ".join(str(x) for x in clues_packed) + "}"
-        lines.append(f"    {{{s_str}, {c_str}}},")
-    lines.append("};\n")
+    for tier, size in tier_specs:
+        puzzles = dataset[tier.lower()]
+        entry_type = f"Towers{size}x{size}Entry"
+        lines.append(f"// --- {tier} ({size}x{size}, Heights 1-{size}) ---")
+        lines.append(f"static const {entry_type} TOWERS_{tier}_DATASET[100] PROGMEM = {{")
+        for p in puzzles:
+            sol_flat = [p["solution"][r][c] for r in range(size) for c in range(size)]
+            sol_packed = pack_nibbles(sol_flat)
+            clues_flat = p["clues"]["top"] + p["clues"]["bottom"] + p["clues"]["left"] + p["clues"]["right"]
+            clues_packed = pack_nibbles(clues_flat)
+            s_str = "{" + ", ".join(str(x) for x in sol_packed) + "}"
+            c_str = "{" + ", ".join(str(x) for x in clues_packed) + "}"
+            lines.append(f"    {{{s_str}, {c_str}}},")
+        lines.append("};\n")
 
     lines.append("#endif // TOWERS_DATASET_H\n")
     header_path.write_text("\n".join(lines), encoding="utf-8")
@@ -748,6 +709,7 @@ def build_inequality_dataset() -> None:
         "static const size_t NUM_INEQUALITY_EASY = 100;",
         "static const size_t NUM_INEQUALITY_MEDIUM = 100;",
         "static const size_t NUM_INEQUALITY_HARD = 100;",
+        "static const size_t NUM_INEQUALITY_EXTREME = 100;",
         "",
         "struct Inequality4x4Entry {",
         "    uint8_t solution[8]; // 16 cells packed nibbles",
@@ -763,19 +725,13 @@ def build_inequality_dataset() -> None:
         "    uint8_t edges_v[20];  // 4 rows x 5 cols",
         "};",
         "",
-        "struct Inequality6x6Entry {",
-        "    uint8_t solution[18]; // 36 cells packed nibbles",
-        "    uint8_t givens[18];   // 36 cells packed nibbles",
-        "    uint8_t edges_h[30];  // 6 rows x 5 cols",
-        "    uint8_t edges_v[30];  // 5 rows x 6 cols",
-        "};",
-        "",
     ]
 
     tier_specs = [
         ("EASY", 4),
-        ("MEDIUM", 5),
-        ("HARD", 6),
+        ("MEDIUM", 4),
+        ("HARD", 5),
+        ("EXTREME", 5),
     ]
 
     for tier, size in tier_specs:

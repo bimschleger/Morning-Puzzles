@@ -160,12 +160,12 @@ class TestInequalityDeduction(unittest.TestCase):
             cls.dataset = json.load(f)
 
     def test_dataset_structure_and_counts(self):
-        for tier in ["easy", "medium", "hard"]:
+        for tier in ["easy", "medium", "hard", "extreme"]:
             self.assertIn(tier, self.dataset)
             self.assertEqual(len(self.dataset[tier]), 100, f"{tier} tier must have 100 puzzles")
 
     def test_latin_square_properties(self):
-        expected_sizes = {"easy": 4, "medium": 5, "hard": 6}
+        expected_sizes = {"easy": 4, "medium": 4, "hard": 5, "extreme": 5}
         for tier, size in expected_sizes.items():
             for i, p in enumerate(self.dataset[tier]):
                 self.assertEqual(p["size"], size)
@@ -178,7 +178,7 @@ class TestInequalityDeduction(unittest.TestCase):
                     self.assertEqual(sorted(col), list(range(1, size + 1)), f"{tier} #{i} col {c} not 1..N")
 
     def test_clue_satisfaction(self):
-        for tier in ["easy", "medium", "hard"]:
+        for tier in ["easy", "medium", "hard", "extreme"]:
             for i, p in enumerate(self.dataset[tier]):
                 N = p["size"]
                 sol = p["solution"]
@@ -200,14 +200,14 @@ class TestInequalityDeduction(unittest.TestCase):
                             self.assertTrue(sol[r][c] > sol[r + 1][c], f"{tier} #{i} edge_v v violated")
 
     def test_unique_solvability(self):
-        for tier in ["easy", "medium", "hard"]:
+        for tier in ["easy", "medium", "hard", "extreme"]:
             for i in range(20):
                 p = self.dataset[tier][i]
                 sols = count_inequality_solutions(p["size"], p["givens"], p["edges_h"], p["edges_v"], limit=2)
                 self.assertEqual(sols, 1, f"{tier} #{i} does not have unique solution")
 
     def test_d4_symmetry_transform_invariance(self):
-        for tier in ["easy", "medium", "hard"]:
+        for tier in ["easy", "medium", "hard", "extreme"]:
             for i in range(5):
                 p = self.dataset[tier][i]
                 for tid in range(8):

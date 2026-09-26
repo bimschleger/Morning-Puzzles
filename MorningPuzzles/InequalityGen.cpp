@@ -123,10 +123,10 @@ void InequalityGen::generate(InequalityDifficulty difficulty, uint32_t seed) {
 
     _cellSize = 88;
 
-    if (difficulty == INEQUALITY_EASY) {
+    if (difficulty == INEQUALITY_EASY || difficulty == INEQUALITY_MEDIUM) {
         _size = 4;
         _height = 400;
-        const Inequality4x4Entry* p = &INEQUALITY_EASY_DATASET[puzzleIdx];
+        const Inequality4x4Entry* p = (difficulty == INEQUALITY_EASY) ? &INEQUALITY_EASY_DATASET[puzzleIdx] : &INEQUALITY_MEDIUM_DATASET[puzzleIdx];
         for (uint8_t r = 0; r < 4; r++) {
             for (uint8_t c = 0; c < 4; c++) {
                 uint8_t idx = r * 4 + c;
@@ -147,35 +147,10 @@ void InequalityGen::generate(InequalityDifficulty difficulty, uint32_t seed) {
                 _edges_v[r][c] = pgm_read_byte(&p->edges_v[r * 4 + c]);
             }
         }
-    } else if (difficulty == INEQUALITY_HARD) {
-        _size = 6;
-        _height = 576;
-        const Inequality6x6Entry* p = &INEQUALITY_HARD_DATASET[puzzleIdx];
-        for (uint8_t r = 0; r < 6; r++) {
-            for (uint8_t c = 0; c < 6; c++) {
-                uint8_t idx = r * 6 + c;
-                uint8_t bSol = pgm_read_byte(&p->solution[idx >> 1]);
-                _solution[r][c] = (idx & 1) ? (bSol & 0x0F) : (bSol >> 4);
-
-                uint8_t bGiv = pgm_read_byte(&p->givens[idx >> 1]);
-                _givens[r][c] = (idx & 1) ? (bGiv & 0x0F) : (bGiv >> 4);
-            }
-        }
-        for (uint8_t r = 0; r < 6; r++) {
-            for (uint8_t c = 0; c < 5; c++) {
-                _edges_h[r][c] = pgm_read_byte(&p->edges_h[r * 5 + c]);
-            }
-        }
-        for (uint8_t r = 0; r < 5; r++) {
-            for (uint8_t c = 0; c < 6; c++) {
-                _edges_v[r][c] = pgm_read_byte(&p->edges_v[r * 6 + c]);
-            }
-        }
-    } else {
-        // Medium 5x5
+    } else { // INEQUALITY_HARD or INEQUALITY_EXTREME (5x5)
         _size = 5;
         _height = 488;
-        const Inequality5x5Entry* p = &INEQUALITY_MEDIUM_DATASET[puzzleIdx];
+        const Inequality5x5Entry* p = (difficulty == INEQUALITY_HARD) ? &INEQUALITY_HARD_DATASET[puzzleIdx] : &INEQUALITY_EXTREME_DATASET[puzzleIdx];
         for (uint8_t r = 0; r < 5; r++) {
             for (uint8_t c = 0; c < 5; c++) {
                 uint8_t idx = r * 5 + c;

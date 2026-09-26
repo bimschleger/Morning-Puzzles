@@ -161,22 +161,22 @@
   },
   "towers": {
     "title": "TOWERS",
-    "sha256": "f80dd7812547229aef9586d4a3abb3356c4cbeab0867fff87a444b6c3d9ec900",
-    "byte_length": 31688,
+    "sha256": "c07895bd05dc0398f2d9d76e69b4bd7c71e58992ca3c3b4af1e36bddc147dff0",
+    "byte_length": 28808,
     "width_dots": 576,
-    "height_dots": 440,
-    "average_duty_cycle_pct": 3.65,
+    "height_dots": 400,
+    "average_duty_cycle_pct": 3.33,
     "max_consecutive_dense_lines": 0,
     "is_safe": true
   },
   "inequality": {
     "title": "INEQUALITY",
-    "sha256": "9cb311ff9ebcaf764d1eba1461226022f0b7d6cd533f4838a4ca9d6285435495",
-    "byte_length": 35144,
+    "sha256": "32e0a34194ed1a81e4d07b437865cd1e229e14f435400fd42ad3806f40d387cb",
+    "byte_length": 28808,
     "width_dots": 576,
-    "height_dots": 488,
-    "average_duty_cycle_pct": 3.88,
-    "max_consecutive_dense_lines": 4,
+    "height_dots": 400,
+    "average_duty_cycle_pct": 3.57,
+    "max_consecutive_dense_lines": 0,
     "is_safe": true
   }
 }

@@ -5,9 +5,10 @@
 class EscPosPrinter;
 
 enum InequalityDifficulty {
-    INEQUALITY_EASY   = 0, // 4x4
-    INEQUALITY_MEDIUM = 1, // 5x5
-    INEQUALITY_HARD   = 2  // 6x6
+    INEQUALITY_EASY    = 0, // 4x4
+    INEQUALITY_MEDIUM  = 1, // 4x4
+    INEQUALITY_HARD    = 2, // 5x5
+    INEQUALITY_EXTREME = 3  // 5x5
 };
 
 class InequalityGen {

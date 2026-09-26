@@ -306,8 +306,8 @@ void OfflinePuzzleComposer::printSinglePuzzle(EscPosPrinter& printer, OfflinePuz
             break;
         }
         case PUZZLE_INEQUALITY: {
-            InequalityDifficulty diff = (grade == GRADE_EASY) ? INEQUALITY_EASY : ((grade == GRADE_HARD || grade == GRADE_EXTREME) ? INEQUALITY_HARD : INEQUALITY_MEDIUM);
-            const char* diffStr = (diff == INEQUALITY_EASY) ? "EASY" : ((diff == INEQUALITY_HARD) ? "HARD" : "MEDIUM");
+            InequalityDifficulty diff = (grade == GRADE_EASY) ? INEQUALITY_EASY : ((grade == GRADE_EXTREME) ? INEQUALITY_EXTREME : ((grade == GRADE_HARD) ? INEQUALITY_HARD : INEQUALITY_MEDIUM));
+            const char* diffStr = (diff == INEQUALITY_EASY) ? "EASY" : ((diff == INEQUALITY_EXTREME) ? "EXTREME" : ((diff == INEQUALITY_HARD) ? "HARD" : "MEDIUM"));
             Serial.println("[COMPOSER] Generating Inequality...");
             InequalityGen inequality;
             inequality.generate(diff);

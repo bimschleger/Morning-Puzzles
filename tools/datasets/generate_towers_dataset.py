@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Generates canonical server/data/towers_dataset.json containing 100 verified
-puzzles each for easy (4x4), medium (5x5), and hard (6x6).
+puzzles each for easy (4x4), medium (4x4), hard (5x5), and extreme (5x5).
 
 Uses a compiled C++ backtracking solver to ensure:
 - 100% mathematical uniqueness (count_solutions == 1)
@@ -132,12 +132,13 @@ int count_solutions(int N, const Clues& clues, const vector<vector<int>>& perms)
     return solutions;
 }
 
-bool has_anchor(int N, const Clues& clues) {
-    for (int v : clues.top) if (v == 1 || v == N) return true;
-    for (int v : clues.bottom) if (v == 1 || v == N) return true;
-    for (int v : clues.left) if (v == 1 || v == N) return true;
-    for (int v : clues.right) if (v == 1 || v == N) return true;
-    return false;
+int count_anchors(int N, const Clues& clues) {
+    int c = 0;
+    for (int v : clues.top) if (v == 1 || v == N) c++;
+    for (int v : clues.bottom) if (v == 1 || v == N) c++;
+    for (int v : clues.left) if (v == 1 || v == N) c++;
+    for (int v : clues.right) if (v == 1 || v == N) c++;
+    return c;
 }
 
 int main() {
@@ -149,19 +150,18 @@ int main() {
         int N;
         int min_clues;
         int max_clues;
-        bool require_1_or_N;
+        int min_anchors;
     };
     vector<TierSpec> tiers = {
-        {"easy", 4, 10, 12, true},
-        {"medium", 5, 11, 13, true},
-        {"hard", 6, 13, 15, false},
-        {"extreme", 6, 8, 10, false}
+        {"easy", 4, 12, 14, 2},
+        {"medium", 4, 9, 11, 1},
+        {"hard", 5, 13, 15, 1},
+        {"extreme", 5, 10, 12, 0}
     };
     for (size_t t_idx = 0; t_idx < tiers.size(); t_idx++) {
         const auto& spec = tiers[t_idx];
         string tier_name = spec.name;
         int N = spec.N;
-        int target_clues = spec.min_clues;
 
         vector<int> base(N);
         iota(base.begin(), base.end(), 1);
@@ -232,6 +232,7 @@ int main() {
             }
             shuffle(positions.begin(), positions.end(), rng);
 
+            int target_clues = spec.min_clues + (rng() % (spec.max_clues - spec.min_clues + 1));
             int current_clues = 4 * N;
             for (const auto& pos : positions) {
                 int* val_ptr = nullptr;
@@ -243,7 +244,7 @@ int main() {
                 int old_val = *val_ptr;
                 *val_ptr = 0;
 
-                if (spec.require_1_or_N && !has_anchor(N, clues)) {
+                if (count_anchors(N, clues) < spec.min_anchors) {
                     *val_ptr = old_val;
                     continue;
                 }
@@ -259,7 +260,7 @@ int main() {
 
             // Final safety check: must be strictly uniquely solvable and within target clue range
             if (current_clues < spec.min_clues || current_clues > spec.max_clues) continue;
-            if (spec.require_1_or_N && !has_anchor(N, clues)) continue;
+            if (count_anchors(N, clues) < spec.min_anchors) continue;
             if (count_solutions(N, clues, perms) != 1) continue;
 
             // Output JSON object

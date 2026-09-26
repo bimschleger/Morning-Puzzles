@@ -73,9 +73,9 @@ class TowersPuzzle(BasePuzzle):
 
     DIFFICULTY_CONFIGS = {
         "easy": {"size": 4, "max_val": 4, "cell_size": 80, "height": 400},
-        "medium": {"size": 5, "max_val": 5, "cell_size": 72, "height": 440},
-        "hard": {"size": 6, "max_val": 6, "cell_size": 66, "height": 480},
-        "extreme": {"size": 6, "max_val": 6, "cell_size": 66, "height": 480},
+        "medium": {"size": 4, "max_val": 4, "cell_size": 80, "height": 400},
+        "hard": {"size": 5, "max_val": 5, "cell_size": 72, "height": 440},
+        "extreme": {"size": 5, "max_val": 5, "cell_size": 72, "height": 440},
     }
 
     @property

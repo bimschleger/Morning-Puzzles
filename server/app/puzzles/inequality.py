@@ -123,8 +123,9 @@ class InequalityPuzzle(BasePuzzle):
 
     DIFFICULTY_CONFIGS = {
         "easy": {"size": 4, "cell_size": 88, "height": 400},
-        "medium": {"size": 5, "cell_size": 88, "height": 488},
-        "hard": {"size": 6, "cell_size": 88, "height": 576},
+        "medium": {"size": 4, "cell_size": 88, "height": 400},
+        "hard": {"size": 5, "cell_size": 88, "height": 488},
+        "extreme": {"size": 5, "cell_size": 88, "height": 488},
     }
 
     @property
@@ -133,7 +134,7 @@ class InequalityPuzzle(BasePuzzle):
 
     @property
     def supported_difficulties(self) -> List[str]:
-        return ["easy", "medium", "hard"]
+        return ["easy", "medium", "hard", "extreme"]
 
     def generate(
         self,

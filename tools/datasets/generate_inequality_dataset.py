@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Generates canonical server/data/inequality_dataset.json containing 100 verified
-puzzles each for easy (4x4), medium (5x5), and hard (6x6).
+puzzles each for easy (4x4), medium (4x4), hard (5x5), and extreme (5x5).
 
 Uses a compiled C++ backtracking solver and generator to guarantee:
 - 100% mathematical uniqueness (count_solutions == 1)
@@ -136,16 +136,31 @@ int main() {
     mt19937 rng(1337);
     cout << "{" << endl;
 
-    vector<pair<string, int>> tiers = {{"easy", 4}, {"medium", 5}, {"hard", 6}};
+    struct TierSpec {
+        string name;
+        int N;
+        int min_givens;
+        int max_givens;
+        int min_edges;
+        int max_edges;
+    };
+    vector<TierSpec> tiers = {
+        {"easy", 4, 5, 7, 6, 8},
+        {"medium", 4, 3, 4, 5, 7},
+        {"hard", 5, 4, 6, 8, 11},
+        {"extreme", 5, 2, 3, 6, 9}
+    };
     for (size_t t_idx = 0; t_idx < tiers.size(); t_idx++) {
-        string tier_name = tiers[t_idx].first;
-        N = tiers[t_idx].second;
+        const auto& spec = tiers[t_idx];
+        string tier_name = spec.name;
+        N = spec.N;
 
-        int min_givens = (N == 4 ? 3 : (N == 5 ? 2 : 1));
-        int max_givens = (N == 4 ? 5 : (N == 5 ? 4 : 4));
-        int min_edges = (N == 4 ? 4 : (N == 5 ? 7 : 12));
-        int max_edges = (N == 4 ? 6 : (N == 5 ? 10 : 16));
+        int min_givens = spec.min_givens;
+        int max_givens = spec.max_givens;
+        int min_edges = spec.min_edges;
+        int max_edges = spec.max_edges;
 
+        cerr << "Generating tier: " << tier_name << " (" << N << "x" << N << ")..." << endl;
         cout << "  \"" << tier_name << "\": [" << endl;
 
         int count = 0;
@@ -271,11 +286,11 @@ def main():
         cmd_compile = ["g++", "-O3", "-std=c++17", src_path, "-o", bin_path]
         subprocess.check_call(cmd_compile)
 
-        print("Executing generator (producing 300 unique Inequality puzzles)...")
+        print("Executing generator (producing 400 unique Inequality puzzles across 4 tiers)...")
         raw_output = subprocess.check_output([bin_path], encoding="utf-8")
 
         data = json.loads(raw_output)
-        print(f"Loaded generated JSON: {len(data['easy'])} easy, {len(data['medium'])} medium, {len(data['hard'])} hard.")
+        print(f"Loaded generated JSON: {len(data['easy'])} easy, {len(data['medium'])} medium, {len(data['hard'])} hard, {len(data['extreme'])} extreme.")
 
         OUTPUT_JSON.parent.mkdir(parents=True, exist_ok=True)
         with open(OUTPUT_JSON, "w", encoding="utf-8") as f:
