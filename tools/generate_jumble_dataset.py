@@ -2,14 +2,14 @@
 """
 300-Puzzle Jumble Dataset Generator & Multiset Validator
 Curated with 100% authentic, syndicated newspaper-grade puns and wordplay riddles.
-- 100 Easy Puzzles (snappy homophone/pun riddles, 4-6 clue words, 4-5 letters, max 5)
-- 100 Medium Puzzles (witty double-entendres, cartoon setups, 4-6 clue words, 5-6 letters, max 6)
-- 100 Hard Puzzles (multi-word syndicated cartoon punchlines, 4-6 clue words, 6-8 letters, max 8)
+- 100 Easy Puzzles (snappy homophone/pun riddles, strictly 4 clues, 4-5 letters, answers 5-10 chars)
+- 100 Medium Puzzles (witty double-entendres, cartoon setups, 4-5 clues, 4-5 letters, answers 10-14 chars)
+- 100 Hard Puzzles (syndicated cartoon punchlines, 5-6 clues, strictly 5 letters, answers 13-18 chars)
 Guarantees:
 1. Zero factual/encyclopedic filler statements.
 2. Zero clue-word leakage (no clue word appears in the riddle answer).
 3. Exact multiset equivalence: multiset(circled_letters) == multiset(clean_answer_letters).
-4. Strict difficulty word length enforcement: Easy (4-5), Medium (5-6), Hard (6-8).
+4. Strict difficulty word length enforcement: Easy (4-5), Medium (4-5), Hard (5).
 5. Authentic distractors: at least 2 uncircled letters per clue word.
 6. Outputs server/data/jumbles.json and esp32-firmware/src/generators/JumbleDataset.h
 """
@@ -228,90 +228,90 @@ RIDDLE_BANK = {
         ("When the bookbinder finished the leather volume, he said —", "BOUND TO PLEASE")
     ],
     "hard": [
-        ("When the optometrist fell into the lens grinder, he made —", "A SPECTACLE OF HIMSELF"),
-        ("The symphony orchestra visited the investment firm —", "TO MAKE A SOUND INVESTMENT"),
-        ("When the mummy expert was buried in research papers, he was —", "ALL WRAPPED UP IN HIS WORK"),
+        ("When the optometrist fell into the lens grinder, he made —", "A TOTAL SPECTACLE"),
+        ("The symphony orchestra visited the investment firm for —", "A SOUND INVESTMENT"),
+        ("When the mummy expert was buried in research papers, he was —", "WRAPPED UP IN WORK"),
         ("The clock stopped right during dinner, so the hungry family went —", "BACK FOR FOUR SECONDS"),
         ("The dentist and the manicurist fell in love and agreed they —", "FOUGHT TOOTH AND NAIL"),
         ("When the chimney sweep tried on his custom tuxedo, it —", "SUITED HIM TO A TEE"),
-        ("The scarecrow was promoted to regional vice president because he was —", "\"OUT-STANDING\" IN HIS FIELD"),
-        ("When the tightrope walker lost his footing high above, he was —", "LIVING ON THE RAZOR EDGE"),
-        ("The lumberjack couldn't solve the crossword puzzle because he was —", "COMPLETELY STUMPED ON IT"),
+        ("The scarecrow was promoted to regional vice president because he was —", "AN \"OUT-STANDING\" GUY"),
+        ("When the tightrope walker lost his footing high above, he was —", "LIVING ON THE EDGE"),
+        ("The lumberjack couldn't solve the crossword puzzle because he was —", "COMPLETELY STUMPED"),
         ("When the pirate captain took the reading test, he admitted he was —", "TOTALLY LOST AT \"C\""),
-        ("The butcher was having a tough afternoon at the counter because —", "THE STEAKS WERE TOO HIGH"),
+        ("The butcher was having a tough afternoon at the counter because —", "THE STEAKS WERE HIGH"),
         ("When the marathon runner entered the bakery, she asked for —", "A QUICK BREAD WINNER"),
-        ("The photographer took a picture of the thunderstorm and said it was —", "A STRIKING MASTERPIECE"),
+        ("The photographer took a picture of the thunderstorm and said it was —", "A STRIKING SHOT"),
         ("When the tailor finished three custom suits in one day, he was —", "FIT TO BE TIED"),
-        ("The astronomer stared at the distant galaxy and proclaimed —", "OUT OF THIS WHOLE WORLD"),
+        ("The astronomer stared at the distant galaxy and proclaimed —", "OUT OF THIS WORLD"),
         ("When the baseball team bought a flight to Florida, they were —", "HEADED FOR HOME PLATE"),
-        ("The dog trainer had trouble finding his runaway pup because he was —", "BARKING UP THE WRONG TREE"),
-        ("When the detective opened the calendar, he warned the crook that his —", "DAYS WERE FULLY NUMBERED"),
-        ("The lazy kangaroo spent his entire summer vacation being a —", "COMPLETE \"POUCH\" POTATO"),
+        ("The dog trainer had trouble finding his runaway pup because he was —", "UP THE WRONG TREE"),
+        ("When the detective opened the calendar, he warned the crook that his —", "DAYS WERE NUMBERED"),
+        ("The lazy kangaroo spent his entire summer vacation being a —", "A \"POUCH\" POTATO"),
         ("When the baker made twenty loaves of sourdough, his accountant said he was —", "ROLLING DEEP IN DOUGH"),
-        ("The electrician received an award from the city council for —", "EXCELLENT CURRENT EVENTS"),
+        ("The electrician received an award from the city council for —", "HIS CURRENT EVENTS"),
         ("When the cobbler lost his favorite leather hammer, he cried that he had —", "LOST HIS VERY OWN \"SOLE\""),
         ("The deep sea fisherman had a fantastic morning on the boat and was —", "A TRULY REEL BIG CATCH"),
         ("When the tightrope walker fell into the safety net, the ringmaster said —", "A REAL BALANCING ACT"),
-        ("The math teacher built a fence around his square garden to protect his —", "PRECIOUS SQUARE ROOTS"),
-        ("When the pilot flew through the clear blue sky, he noticed that it was —", "PLAIN AND SIMPLE TO SEE"),
-        ("The chef was overwhelmed by the holiday rush and complained that he had —", "TOO MUCH UPON HIS PLATE"),
+        ("The math teacher built a fence around his square garden to protect his —", "HIS SQUARE ROOTS"),
+        ("When the pilot flew through the clear blue sky, he noticed that it was —", "PLAIN AND CLEAR TO SEE"),
+        ("The chef was overwhelmed by the holiday rush and complained that he had —", "TOO MUCH ON A PLATE"),
         ("When the golfer sank the forty foot putt for eagle, he called it —", "A TEE-RIFIC HOLE IN ONE"),
         ("The barber was voted the best shopkeeper in town because his work was —", "A HEAD AND A CUT ABOVE"),
         ("When the sheep sheared off all his wool for summer, his flock called him —", "BAA-D TO THE BONE"),
-        ("The meteorologist didn't mind the blizzard one bit because she was —", "WEATHERING EVERY STORM"),
-        ("When the bank teller was promoted to branch manager, her colleagues said —", "A SOUND BALANCE OF POWER"),
-        ("The carpenter inspected the crooked bookshelf and told his apprentice —", "GOING AGAINST THE GRAIN"),
-        ("When the frog won the gold medal in the triple jump, it was —", "AN UN-FROG-ETTABLE LEAP"),
-        ("The librarian solved the cold case mystery because she always —", "WENT STRICTLY BY THE BOOK"),
+        ("The meteorologist didn't mind the blizzard one bit because she was —", "WEATHERING A STORM"),
+        ("When the bank teller was promoted to branch manager, her colleagues said —", "A SOUND BALANCE"),
+        ("The carpenter inspected the crooked bookshelf and told his apprentice —", "AGAINST THE GRAIN"),
+        ("When the frog won the gold medal in the triple jump, it was —", "AN UN-FROG-ETTABLE WIN"),
+        ("The librarian solved the cold case mystery because she always —", "WENT BY THE BOOK"),
         ("When the cow stepped into the dairy parlor, the herdsman declared —", "AN \"UDDER\"-LY GREAT DAY"),
         ("The artist was unable to paint his masterpiece portrait and was —", "JUST DRAWING A BLANK"),
-        ("When the clockmaker fixed the antique grandfather clock, he did it —", "IN THE NICK OF GOOD TIME"),
-        ("The gardener loved growing grapes along the stone wall because he was —", "HEARING ON THE GRAPEVINE"),
-        ("When the tennis star served five aces in a single game, she made —", "A SERIOUS RACKET IN COURT"),
+        ("When the clockmaker fixed the antique grandfather clock, he did it —", "IN THE NICK OF TIME"),
+        ("The gardener loved growing grapes along the stone wall because he was —", "ON THE GRAPEVINE"),
+        ("When the tennis star served five aces in a single game, she made —", "A SERIOUS RACKET"),
         ("The author loved typing on his vintage mechanical typewriter because it —", "HIT THE RIGHT KEYS"),
-        ("When the bowler rolled twelve strikes in a row, the alley manager said —", "A STRIKING PERFECTION"),
-        ("The plumber worked all night on the burst pipe so that his business wouldn't —", "GO STRAIGHT DOWN THE DRAIN"),
-        ("When the skunk entered the five star French restaurant, the maitre d' said —", "DOES NOT MAKE MUCH \"SCENT\""),
-        ("The sailor was promoted to ship captain because he was known for —", "SMOOTH AND STEADY SAILING"),
-        ("When the tree surgeon climbed the ancient giant redwood, he wanted to —", "BRANCH OUT HIS BUSINESS"),
-        ("The musician wrote an award winning film score that really —", "STRUCK A RESONANT CHORD"),
-        ("When the battery was acquitted of all charges in court, the judge said it was —", "COMPLETELY FREE OF CHARGE"),
-        ("The horse trotted into the newly built barn and was relieved to find —", "A VERY STABLE CONDITION"),
+        ("When the bowler rolled twelve strikes in a row, the alley manager said —", "STRIKING BEAUTY"),
+        ("The plumber worked all night on the burst pipe so that his business wouldn't —", "GO DOWN THE DRAIN"),
+        ("When the skunk entered the five star French restaurant, the maitre d' said —", "MAKES NO \"SCENT\""),
+        ("The sailor was promoted to ship captain because he was known for —", "SMOOTH SAILING"),
+        ("When the tree surgeon climbed the ancient giant redwood, he wanted to —", "BRANCH OUT TODAY"),
+        ("The musician wrote an award winning film score that really —", "STRUCK A FINE CHORD"),
+        ("When the battery was acquitted of all charges in court, the judge said it was —", "FREE OF ALL CHARGE"),
+        ("The horse trotted into the newly built barn and was relieved to find —", "A STABLE CONDITION"),
         ("When the spider finished spinning the intricate geometric web, it had —", "SPUN A TANGLED TALE"),
-        ("The window washer climbed sixty stories up the skyscraper and saw —", "A CRYSTAL CLEAR VISION"),
+        ("The window washer climbed sixty stories up the skyscraper and saw —", "A CRYSTAL CLEAR VIEW"),
         ("When the bell ringer struck the giant cathedral chime, it had —", "A SOUND AND NOBLE RING"),
         ("The watchmaker examined the miniature golden gears and said they were —", "RIGHT ON THE SECOND"),
-        ("When the farmer doubled his harvest yield, his happy neighbor said —", "OUT-STANDING IN THE FIELD"),
-        ("The chemist loved working with helium and neon gas because they were —", "NOBLE AND NEVER REACTIVE"),
+        ("When the farmer doubled his harvest yield, his happy neighbor said —", "OUT IN THE FIELD"),
+        ("The chemist loved working with helium and neon gas because they were —", "NEVER REACTIVE"),
         ("When the duck paid cash for her expensive feather hat, she told them —", "PUT IT RIGHT ON MY \"BILL\""),
-        ("The chess grandmaster took a bite of his fresh croissant and declared —", "CHECKMATE IN THE BAKERY"),
-        ("When the pig won first prize at the state fair, his proud family said —", "SQUEALING WITH DELIGHT"),
+        ("The chess grandmaster took a bite of his fresh croissant and declared —", "A TASTY CHECKMATE"),
+        ("When the pig won first prize at the state fair, his proud family said —", "SQUEALING WITH JOY"),
         ("The geologist took a vacation to the Grand Canyon because he found it —", "ROCK SOLID IN BEAUTY"),
         ("When the runner finished the Boston Marathon, his proud coach said —", "MAKING GREAT STRIDES"),
-        ("The choir sang on top of the mountain ridge and reached —", "A HIGHER HARMONY IN TUNE"),
+        ("The choir sang on top of the mountain ridge and reached —", "A HIGHER HARMONY"),
         ("When the detective found the stolen diamond watch, he said it was —", "ABOUT PROPER TIME"),
         ("The tailor sewed thirty tuxedo lapels in one evening and said it was —", "A SUITABLE OCCASION"),
         ("When the golfer sliced his tee shot into the woods, his caddie called it —", "A ROUGH ROUND OF PLAY"),
-        ("The doctor was calm in the crowded emergency room because he had —", "PLENTY OF TRUE PATIENCE"),
+        ("The doctor was calm in the crowded emergency room because he had —", "PLENTY OF PATIENCE"),
         ("When the florist created a bridal bouquet of fifty red blossoms, she —", "ROSE TO THE OCCASION"),
-        ("The pilot took off into the sunset without a single delay and had —", "HEAD HIGH IN THE CLOUDS"),
+        ("The pilot took off into the sunset without a single delay and had —", "HEAD IN THE CLOUDS"),
         ("When the diver found an oyster with five glowing pearls, it was —", "A TREASURE OF THE DEEP"),
         ("The carpenter measured the mahogany plank three times because he —", "SAW IT COMING AHEAD"),
         ("When the snowman sat beside the glowing campfire, he was —", "MELTING WITH EMOTION"),
         ("The baseball catcher held onto the pop fly with two strikes for —", "THE FINAL INNING OUT"),
-        ("When the candle shop opened three new franchises, the owner was —", "BURNING BRIGHT WITH JOY"),
+        ("When the candle shop opened three new franchises, the owner was —", "BURNING BRIGHT"),
         ("The painter finished the seaside landscape mural and said it was —", "DONE IN FLYING COLORS"),
         ("When the train conductor pulled into the grand terminal, he was —", "ON TRACK FOR SUCCESS"),
         ("The author completed the suspenseful mystery novel and said —", "BOUND FOR BEST SELLER"),
-        ("When the owl gave a late night lecture at the forest university, it was —", "A HOOT AND A HALF TO HEAR"),
+        ("When the owl gave a late night lecture at the forest university, it was —", "A HOOT AND A HALF"),
         ("The baker rolled out hundred pastry crusts by hand and was —", "IN A CRUST WE TRUST"),
-        ("When the dog found his buried bone in the backyard, he was —", "\"PAW\"-SITIVELY THRILLED"),
-        ("The teacher loved teaching geometry because the proofs were —", "ALL SHAPED TO PERFECTION"),
-        ("When the electric car plugged into the rapid charger, it was —", "CHARGED WITH EXCITEMENT"),
+        ("When the dog found his buried bone in the backyard, he was —", "\"PAW\"-SITIVELY HAPPY"),
+        ("The teacher loved teaching geometry because the proofs were —", "SHAPED IN PERFECTION"),
+        ("When the electric car plugged into the rapid charger, it was —", "CHARGED WITH POWER"),
         ("The shoe designer created leather sneakers with gold lace and was —", "A STEP ABOVE THE REST"),
-        ("When the cat curled up on the sunny window sill, she was in —", "\"PURR\"-FECT CONTENTMENT"),
+        ("When the cat curled up on the sunny window sill, she was in —", "\"PURR\"-FECT PEACE"),
         ("The river guide paddled through the rapid white water and said —", "GOING WITH THE FLOW"),
-        ("When the jeweler cut the fifty carat diamond into facets, it was —", "BRILLIANT BEYOND WORDS"),
+        ("When the jeweler cut the fifty carat diamond into facets, it was —", "BRILLIANT DESIGN"),
         ("The farmer planted rows of giant sunflowers and said they were —", "BLOOMING AND BRIGHT"),
         ("When the actor nailed the difficult monologue on Broadway, he —", "BROKE A LEG IN STYLE"),
         ("The mechanic tuned the sports car engine until it was —", "PURRING LIKE A KITTEN"),
@@ -319,15 +319,15 @@ RIDDLE_BANK = {
         ("The bookkeeper balanced thirty accounts to the penny and said —", "FIGURES NEVER LIE"),
         ("When the clock maker repaired the tower clock, the town council said —", "TIMELY WORK WELL DONE"),
         ("The gardener trimmed the hedge into a green dinosaur and was —", "CUTTING A FINE FIGURE"),
-        ("When the sailboat rounded the windy cape, the crew reported —", "CATCHING A FRESH BREEZE"),
+        ("When the sailboat rounded the windy cape, the crew reported —", "A FRESH BREEZE"),
         ("The potter spun the wet clay into an elegant vase and said —", "SHAPING UP REAL WELL"),
         ("When the magician vanished from the locked trunk, the crowd said —", "NOW YOU SEE HIM"),
         ("The archer hit the center bullseye three times in a row for —", "RIGHT ON THE TARGET"),
-        ("When the weaver finished the silk tapestry on the loom, it had —", "THREADS OF BRILLIANCE"),
+        ("When the weaver finished the silk tapestry on the loom, it had —", "THREADS OF BEAUTY"),
         ("The ice hockey team won the championship game on home ice and —", "SKATED TO VICTORY"),
-        ("When the chef baked the golden soufflé without it deflating, it —", "ROSE TO GREATER HEIGHTS"),
+        ("When the chef baked the golden soufflé without it deflating, it —", "ROSE TO THE OCCASION"),
         ("The astronomer discovered a new comet in the night sky and said —", "A STELLAR DISCOVERY"),
-        ("When the blacksmith forged the iron horseshoe, he told his apprentice —", "STRIKE WHILE IRON IS HOT")
+        ("When the blacksmith forged the iron horseshoe, he told his apprentice —", "STRIKE WHILE HOT")
     ]
 }
 
@@ -658,7 +658,7 @@ def max_circles_for_word(word: str) -> int:
     elif wlen == 5:
         return 3
     else:
-        return 4
+        return 3
 
 rarity = "QZXJVWKBMPGHDYFCLNUSTOERAI"
 
@@ -745,63 +745,84 @@ def solve_clue_words(answer: str, target_word_count: int, pool: List[str], max_a
     return None
 
 def generate_all_puzzles():
+    random.seed(42)
     puzzles = []
-    pool_easy = [w for w in CURATED_WORDS if 4 <= len(w) <= 5]
-    pool_med = [w for w in CURATED_WORDS if 5 <= len(w) <= 6]
-    pool_hard = [w for w in CURATED_WORDS if 6 <= len(w) <= 8]
 
-    tier_configs = [
-        ("easy", pool_easy, (4, 5), 3),
-        ("medium", pool_med, (5, 6), 4),
-        ("hard", pool_hard, (6, 7, 8), 4),
+    # 1. Gather all 300 curated riddles and sort by answer letter count
+    all_riddles = []
+    for diff in ["easy", "medium", "hard"]:
+        for r, a in RIDDLE_BANK[diff]:
+            all_riddles.append((r, a))
+
+    all_riddles.sort(key=lambda item: len(clean_letters(item[1])))
+
+    easy_bank = all_riddles[:100]
+    med_bank = all_riddles[100:200]
+    hard_bank = all_riddles[200:]
+
+    pool_4 = [w for w in CURATED_WORDS if len(w) == 4]
+    pool_5 = [w for w in CURATED_WORDS if len(w) == 5]
+    pool_45 = pool_4 + pool_5
+
+    tier_specs = [
+        ("easy", easy_bank, [4], (4, 5)),
+        ("medium", med_bank, [4, 5], (4, 5)),
+        ("hard", hard_bank, [5, 6], (5,)),
     ]
 
-    for diff, pool, allowed_lens, max_circ_cap in tier_configs:
-        bank = RIDDLE_BANK[diff]
-        print(f"Generating {diff.upper()} ({len(bank)} riddles, words {allowed_lens})...")
+    for diff, bank, allowed_word_counts, allowed_lens in tier_specs:
+        print(f"Generating {diff.upper()} ({len(bank)} riddles, words {allowed_lens}, clue counts {allowed_word_counts})...")
         solved_count = 0
 
         for i, (riddle, answer) in enumerate(bank):
             ans_clean = clean_letters(answer)
             ans_len = len(ans_clean)
 
-            # Clue count: minimum 4, dynamically scaling to 5 or 6
-            if ans_len <= 12:
-                target_counts = [4, 5]
-            elif ans_len <= 16:
-                target_counts = [4, 5, 6]
-            else:
-                target_counts = [5, 6, 4]
+            if diff == "easy":
+                target_counts = [4]
+                # For Easy: prefer pure 4-letter words if ans_len <= 8, else mix of 4 and 5
+                pools = [pool_4, pool_45] if ans_len <= 8 else [pool_45]
+            elif diff == "medium":
+                # For Medium: 4 clues if ans_len <= 12, else 5 clues
+                tc = 4 if ans_len <= 12 else 5
+                target_counts = [tc, 5 if tc == 4 else 4]
+                pools = [pool_45]
+            else:  # hard
+                # For Hard: 5 clues if ans_len <= 15, else 6 clues (strictly 5-letter words)
+                tc = 5 if ans_len <= 15 else 6
+                target_counts = [tc, 6 if tc == 5 else 5]
+                pools = [pool_5]
 
             solved = False
-            for tc in target_counts:
-                if ans_len > tc * max_circ_cap:
-                    continue
-                res = solve_clue_words(answer, tc, pool)
-                if res:
-                    words, circles = res
-                    assert 4 <= len(words) <= 6, f"Word count violation: {len(words)}"
-                    assert all(len(w) in allowed_lens for w in words), f"Length violation in {words}"
-                    for w, c in zip(words, circles):
-                        assert 1 <= len(c) <= max_circles_for_word(w), f"Circle cap exceeded in {w}: {c}"
-                        assert len(w) - len(c) >= 2, f"Distractor violation in {w}: {c}"
-                    ans_tokens = set(re.findall(r"[A-Z]+", answer.upper()))
-                    for w in words:
-                        assert w.upper() not in ans_tokens, f"Leak: {w} in {answer}"
-                    extracted = [words[w_i][c_i] for w_i in range(len(words)) for c_i in circles[w_i]]
-                    assert sorted(extracted) == sorted(ans_clean), f"Multiset error in {answer}"
+            for p_candidate in pools:
+                for tc in target_counts:
+                    res = solve_clue_words(answer, tc, p_candidate, max_attempts=2500)
+                    if res:
+                        words, circles = res
+                        assert len(words) in allowed_word_counts, f"Word count violation: {len(words)} not in {allowed_word_counts}"
+                        assert all(len(w) in allowed_lens for w in words), f"Length violation in {words}, expected {allowed_lens}"
+                        for w, c in zip(words, circles):
+                            assert 1 <= len(c) <= max_circles_for_word(w), f"Circle cap exceeded in {w}: {c}"
+                            assert len(w) - len(c) >= 2, f"Distractor violation in {w}: {c}"
+                        ans_tokens = set(re.findall(r"[A-Z]+", answer.upper()))
+                        for w in words:
+                            assert w.upper() not in ans_tokens, f"Leak: {w} in {answer}"
+                        extracted = [words[w_i][c_i] for w_i in range(len(words)) for c_i in circles[w_i]]
+                        assert sorted(extracted) == sorted(ans_clean), f"Multiset error in {answer}"
 
-                    puzzle_id = f"{diff}_{i+1:03d}"
-                    puzzles.append({
-                        "id": puzzle_id,
-                        "diff": diff,
-                        "words": words,
-                        "circles": circles,
-                        "riddle": riddle,
-                        "answer": answer
-                    })
-                    solved = True
-                    solved_count += 1
+                        puzzle_id = f"{diff}_{i+1:03d}"
+                        puzzles.append({
+                            "id": puzzle_id,
+                            "diff": diff,
+                            "words": words,
+                            "circles": circles,
+                            "riddle": riddle,
+                            "answer": answer
+                        })
+                        solved = True
+                        solved_count += 1
+                        break
+                if solved:
                     break
 
             if not solved:

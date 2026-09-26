@@ -446,8 +446,8 @@ def test_jumble_difficulty_standards():
 
     tier_rules = {
         "easy": (4, 5),
-        "medium": (5, 6),
-        "hard": (6, 7, 8)
+        "medium": (4, 5),
+        "hard": (5,)
     }
 
     counts = {"easy": 0, "medium": 0, "hard": 0}
@@ -462,19 +462,28 @@ def test_jumble_difficulty_standards():
         riddle = p["riddle"]
         answer = p["answer"]
 
-        # Minimum 4 clues, maximum 6
-        assert 4 <= len(words) <= 6, f"Puzzle {p['id']} has {len(words)} clues (expected 4-6)"
+        # Tier-specific clue counts: Easy=4, Medium=4-5, Hard=5-6
+        if diff == "easy":
+            assert len(words) == 4, f"Puzzle {p['id']} (easy) has {len(words)} clues (expected strictly 4)"
+        elif diff == "medium":
+            assert len(words) in (4, 5), f"Puzzle {p['id']} (medium) has {len(words)} clues (expected 4-5)"
+        elif diff == "hard":
+            assert len(words) in (5, 6), f"Puzzle {p['id']} (hard) has {len(words)} clues (expected 5-6)"
+
         assert len(circles) == len(words), f"Mismatch between words and circles count in {p['id']}"
 
         allowed_lens = tier_rules[diff]
         ans_tokens = set(re.findall(r'[A-Z]+', answer.upper()))
+
+        clean_ans = [ch for ch in answer.upper() if 'A' <= ch <= 'Z']
+        assert len(clean_ans) <= 18, f"Puzzle {p['id']} answer exceeds 18 letters: {len(clean_ans)}"
 
         extracted_circled = []
         for w, c in zip(words, circles):
             assert len(w) in allowed_lens, (
                 f"Puzzle {p['id']} ({diff}) word '{w}' has length {len(w)}, expected in {allowed_lens}"
             )
-            max_c = 2 if len(w) == 4 else (3 if len(w) == 5 else 4)
+            max_c = 2 if len(w) == 4 else 3
             assert 1 <= len(c) <= max_c, (
                 f"Puzzle {p['id']} word '{w}' has {len(c)} circles, expected 1..{max_c}"
             )
