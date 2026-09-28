@@ -525,6 +525,16 @@
           <button class="btn-step" onclick="changeTime(15)" aria-label="Add 15 minutes">+</button>
         </div>
       </div>
+      <div id="deviceClockInfo" style="display:flex; justify-content:space-between; align-items:center; margin-top:12px; padding:10px 14px; background:#0b1329; border:1px solid #1e293b; border-radius:10px; font-size:0.85rem;">
+        <span style="color:#94a3b8; display:flex; align-items:center; gap:8px;">
+          <span id="clockStatusDot" style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#f59e0b;"></span>
+          Printer Clock:
+        </span>
+        <span id="deviceClockDisplay" style="font-weight:700; color:#38bdf8;">Checking...</span>
+      </div>
+      <div style="font-size:0.75rem; color:#64748b; margin-top:6px; text-align:center;">
+        Clock automatically syncs to your phone's local time upon saving.
+      </div>
     </div>
 
     <!-- Daily Puzzle Count -->
@@ -2494,6 +2504,20 @@ fetch("/api/config")
     if (toggleEl) toggleEl.checked = currentSchedEnabled;
     toggleSchedule(currentSchedEnabled);
 
+    const clockDisplay = document.getElementById("deviceClockDisplay");
+    const clockDot = document.getElementById("clockStatusDot");
+    if (clockDisplay && clockDot) {
+      if (d.timeSet && d.time && !d.time.includes("Not Set")) {
+        clockDisplay.innerText = d.time;
+        clockDisplay.style.color = "#38bdf8";
+        clockDot.style.background = "#22c55e";
+      } else {
+        clockDisplay.innerText = "Pending Sync";
+        clockDisplay.style.color = "#f59e0b";
+        clockDot.style.background = "#f59e0b";
+      }
+    }
+
     setDiff(currentGrade);
     renderGames();
     initGuidePills();
@@ -2502,6 +2526,15 @@ fetch("/api/config")
   .catch(() => {
     updateTimeDisplay();
     toggleSchedule(currentSchedEnabled);
+
+    const clockDisplay = document.getElementById("deviceClockDisplay");
+    const clockDot = document.getElementById("clockStatusDot");
+    if (clockDisplay && clockDot) {
+      clockDisplay.innerText = "Offline Mode";
+      clockDisplay.style.color = "#94a3b8";
+      clockDot.style.background = "#94a3b8";
+    }
+
     renderGames();
     initGuidePills();
     selectGuideGame(0);

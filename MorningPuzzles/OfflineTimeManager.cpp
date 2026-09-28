@@ -92,20 +92,26 @@ bool OfflineTimeManager::writeToDs3231(const struct tm& t) {
 }
 
 void OfflineTimeManager::setSystemTime(time_t epoch, int tzOffsetMinutes) {
-    struct timeval tv = { epoch, 0 };
+    // Convert UTC epoch to local wall-clock epoch based on client timezone offset.
+    // In JavaScript, Date.getTimezoneOffset() returns minutes that UTC is ahead of local time
+    // (e.g. UTC-5 US Central is +300 min; UTC+9 Tokyo is -540 min).
+    // Subtracting (tzOffsetMinutes * 60) converts UTC epoch to the client's local wall-clock time.
+    time_t localEpoch = epoch - ((time_t)tzOffsetMinutes * 60);
+
+    struct timeval tv = { localEpoch, 0 };
     settimeofday(&tv, nullptr);
     _timeSet = true;
 
     time_t now = time(nullptr);
     struct tm* t = localtime(&now);
 
-    Serial.printf("[TIME] System clock set to: %04d-%02d-%02d %02d:%02d:%02d (TZ Offset: %d min)\n",
+    Serial.printf("[TIME] System clock set to local wall-clock: %04d-%02d-%02d %02d:%02d:%02d (TZ Offset: %d min applied)\n",
                   t->tm_year + 1900, t->tm_mon + 1, t->tm_mday,
                   t->tm_hour, t->tm_min, t->tm_sec, tzOffsetMinutes);
 
     if (_ds3231Present) {
         writeToDs3231(*t);
-        Serial.println("[TIME] Persisted new time to DS3231 hardware RTC.");
+        Serial.println("[TIME] Persisted new local time to DS3231 hardware RTC.");
     }
 }
 
@@ -457,7 +463,7 @@ void OfflineTimeManager::printConfigSavedTicket(EscPosPrinter& printer, const Of
     printer.printKeyValue("Daily Count:", String(config.getPuzzleCount()) + " Puzzles");
     printer.printKeyValue("Difficulty:", config.getGradeName(config.getPuzzleGrade()));
     printer.printKeyValue("Daily Schedule:", config.getDailyScheduleTimeString());
-    printer.printKeyValue("Clock:", getFormattedTime());
+    printer.printKeyValue("Clock:", getFormattedTime("%I:%M %p"));
 
     // Controls Section
     printer.println("");
@@ -506,7 +512,7 @@ void OfflineTimeManager::setupWebRoutes() {
                       ",\"schedEnabled\":" + (schedEn ? "true" : "false") +
                       ",\"schedHour\":" + String(schedHr) +
                       ",\"schedMinute\":" + String(schedMin) +
-                      ",\"time\":\"" + getFormattedTime() + "\"" +
+                      ",\"time\":\"" + getFormattedTime("%I:%M %p") + "\"" +
                       ",\"timeSet\":" + (_timeSet ? "true" : "false") + "}";
         _server.send(200, "application/json", json);
     });
@@ -565,7 +571,7 @@ void OfflineTimeManager::setupWebRoutes() {
             int tzOffset = _server.hasArg("tz") ? _server.arg("tz").toInt() : 0;
             setSystemTime(epoch, tzOffset);
 
-            String json = "{\"status\":\"ok\",\"time\":\"" + getFormattedTime() + "\"}";
+            String json = "{\"status\":\"ok\",\"time\":\"" + getFormattedTime("%I:%M %p") + "\"}";
             _server.send(200, "application/json", json);
         } else {
             _server.send(400, "application/json", "{\"status\":\"error\",\"message\":\"Missing epoch\"}");
