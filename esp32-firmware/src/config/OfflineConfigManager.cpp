@@ -192,7 +192,7 @@ const char* OfflineConfigManager::getPuzzleName(OfflinePuzzleType type) const {
     }
 }
 
-const char* OfflineConfigManager::getGradeName(PuzzleGrade grade) const {
+const char* OfflineConfigManager::getGradeName(PuzzleGrade grade) {
     switch (grade) {
         case GRADE_EASY:       return "EASY";
         case GRADE_HARD:       return "HARD";

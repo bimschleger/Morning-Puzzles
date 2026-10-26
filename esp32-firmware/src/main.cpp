@@ -55,7 +55,7 @@ void executePrintJob(PuzzleGrade grade = (PuzzleGrade)-1) {
     Serial.println("\n========================================================");
     Serial.println(">>> STARTING MORNING PUZZLES 100% OFFLINE PRINT JOB <<<");
     Serial.printf(">>> Time: %s\n", timeManager.getFormattedTime().c_str());
-    Serial.printf(">>> Format: %d-Puzzle Mix (%d of 16 games enabled)\n", count, configManager.getEnabledGameCount());
+    Serial.printf(">>> Format: %d-Puzzle Mix (%d of %d games enabled)\n", count, configManager.getEnabledGameCount(), OFFLINE_PUZZLE_TOTAL);
     Serial.printf(">>> Grade: %s\n", configManager.getGradeName(activeGrade));
     Serial.println("========================================================");
 
@@ -166,8 +166,8 @@ void handleSerialCommands() {
         } else if (cmd == 's' || cmd == 'S') {
             Serial.println("\n--- MORNING PUZZLES STATUS ---");
             Serial.println("Mode:         100% Standalone Offline (Zero External APIs)");
-            Serial.printf("Format:       %d Puzzles per print (%d of 16 games enabled)\n", 
-                          configManager.getPuzzleCount(), configManager.getEnabledGameCount());
+            Serial.printf("Format:       %d Puzzles per print (%d of %d games enabled)\n", 
+                          configManager.getPuzzleCount(), configManager.getEnabledGameCount(), OFFLINE_PUZZLE_TOTAL);
             Serial.printf("Difficulty:   %s\n", configManager.getGradeName(configManager.getPuzzleGrade()));
             Serial.printf("Time:         %s\n", timeManager.getFormattedTime().c_str());
             Serial.printf("Time Set:     %s\n", timeManager.isTimeSet() ? "Yes" : "No (Hold BOOT button >= 2.5s to set)");

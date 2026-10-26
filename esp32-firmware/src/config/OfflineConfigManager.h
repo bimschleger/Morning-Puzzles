@@ -72,7 +72,7 @@ public:
     uint8_t getEnabledPuzzles(OfflinePuzzleType* outBuffer, uint8_t maxCapacity) const;
 
     const char* getPuzzleName(OfflinePuzzleType type) const;
-    const char* getGradeName(PuzzleGrade grade) const;
+    static const char* getGradeName(PuzzleGrade grade);
 
 private:
     uint32_t    _gameMask;

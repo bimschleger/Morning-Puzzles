@@ -168,7 +168,7 @@
             Game Count:
           </label>
           <select id="select-game-count" class="w-full max-w-[210px] bg-slate-800 border border-amber-500/50 text-amber-400 font-semibold rounded-lg px-2.5 py-1.5 text-xs outline-none focus:border-amber-500 transition">
-            <option value="all" selected>All Games (16)</option>
+            <option value="all" selected>All Games (18)</option>
             <option value="3">Random 3 Games</option>
             <option value="5">Random 5 Games</option>
             <option value="7">Random 7 Games</option>
@@ -6965,41 +6965,28 @@
     }
 
     function drawSimGuideCanvas(gameId, targetCanvas) {
-      const canvas = targetCanvas || document.getElementById('simGuideCanvas');
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      const w = canvas.width;
-      const h = canvas.height;
+      const targetEl = targetCanvas || document.getElementById('simGuideCanvas');
+      if (!targetEl) return;
+      const w = 576;
+      const h = 216;
       const midX = w / 2;
+      const canvas = new ThermalCanvasSimulator(w, h);
 
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, w, h);
-
-      ctx.strokeStyle = '#000000';
-      ctx.fillStyle = '#000000';
-      ctx.lineWidth = 2;
-
-      // Outer border
-      ctx.strokeRect(10, 8, w - 20, h - 16);
+      // Outer border (thickness 2)
+      canvas.drawRect(10, 8, w - 20, h - 16, 2);
 
       // Center dashed divider
-      ctx.setLineDash([4, 4]);
-      ctx.beginPath();
-      ctx.moveTo(midX, 10);
-      ctx.lineTo(midX, h - 10);
-      ctx.stroke();
-      ctx.setLineDash([]);
+      for (let y = 10; y < h - 10; y += 8) {
+        canvas.drawVLine(midX, y, 4, 1);
+      }
 
       // Headers
-      ctx.font = 'bold 15px monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText('VALID MOVE', 144, 28);
-      ctx.fillText('INVALID MOVE', 432, 28);
+      canvas.drawText(84, 16, 'VALID MOVE', 2);
+      canvas.drawText(360, 16, 'INVALID MOVE', 2);
 
-      // Bottom labels
-      ctx.font = 'bold 14px monospace';
-      ctx.fillText('[ OK ]', 144, h - 26);
-      ctx.fillText('[ ERROR ]', 432, h - 26);
+      // Callout labels below
+      canvas.drawText(108, h - 28, '[ OK ]', 2);
+      canvas.drawText(384, h - 28, '[ ERROR ]', 2);
 
       const ly = 46;
       const ry = 46;
@@ -7008,364 +6995,301 @@
         case 0: { // SUDOKU
           const sz = 32;
           const lx0 = 144 - (3 * sz) / 2, rx0 = 432 - (3 * sz) / 2;
-          ctx.strokeRect(lx0, ly, 3 * sz, 3 * sz);
-          ctx.strokeRect(rx0, ry, 3 * sz, 3 * sz);
-          ctx.lineWidth = 1;
+          canvas.drawRect(lx0, ly, 3 * sz, 3 * sz, 2);
+          canvas.drawRect(rx0, ry, 3 * sz, 3 * sz, 2);
           for (let i = 1; i < 3; i++) {
-            ctx.beginPath();
-            ctx.moveTo(lx0, ly + i * sz); ctx.lineTo(lx0 + 3 * sz, ly + i * sz);
-            ctx.moveTo(lx0 + i * sz, ly); ctx.lineTo(lx0 + i * sz, ly + 3 * sz);
-            ctx.moveTo(rx0, ry + i * sz); ctx.lineTo(rx0 + 3 * sz, ry + i * sz);
-            ctx.moveTo(rx0 + i * sz, ry); ctx.lineTo(rx0 + i * sz, ry + 3 * sz);
-            ctx.stroke();
+            canvas.drawHLine(lx0, ly + i * sz, 3 * sz, 1);
+            canvas.drawVLine(lx0 + i * sz, ly, 3 * sz, 1);
+            canvas.drawHLine(rx0, ry + i * sz, 3 * sz, 1);
+            canvas.drawVLine(rx0 + i * sz, ry, 3 * sz, 1);
           }
-          ctx.font = 'bold 20px monospace';
-          ctx.fillText('5', lx0 + sz + sz / 2, ly + sz + 23);
-          ctx.fillText('5', rx0 + sz / 2, ry + 23);
-          ctx.fillText('5', rx0 + sz + sz / 2, ry + sz + 23);
+          canvas.drawChar(lx0 + sz + 10, ly + sz + 6, '5', 3);
+          canvas.drawChar(rx0 + 10, ry + 6, '5', 3);
+          canvas.drawChar(rx0 + sz + 10, ry + sz + 6, '5', 3);
           break;
         }
         case 1: { // SEARCH
           const sz = 28;
           const lx0 = 144 - (3 * sz) / 2, rx0 = 432 - (3 * sz) / 2;
-          ctx.strokeRect(lx0, ly, 3 * sz, 3 * sz);
-          ctx.strokeRect(rx0, ry, 3 * sz, 3 * sz);
-          ctx.lineWidth = 1;
+          canvas.drawRect(lx0, ly, 3 * sz, 3 * sz, 2);
+          canvas.drawRect(rx0, ry, 3 * sz, 3 * sz, 2);
           for (let i = 1; i < 3; i++) {
-            ctx.beginPath();
-            ctx.moveTo(lx0, ly + i * sz); ctx.lineTo(lx0 + 3 * sz, ly + i * sz);
-            ctx.moveTo(lx0 + i * sz, ly); ctx.lineTo(lx0 + i * sz, ly + 3 * sz);
-            ctx.moveTo(rx0, ry + i * sz); ctx.lineTo(rx0 + 3 * sz, ry + i * sz);
-            ctx.moveTo(rx0 + i * sz, ry); ctx.lineTo(rx0 + i * sz, ry + 3 * sz);
-            ctx.stroke();
+            canvas.drawHLine(lx0, ly + i * sz, 3 * sz, 1);
+            canvas.drawVLine(lx0 + i * sz, ly, 3 * sz, 1);
+            canvas.drawHLine(rx0, ry + i * sz, 3 * sz, 1);
+            canvas.drawVLine(rx0 + i * sz, ry, 3 * sz, 1);
           }
-          ctx.font = 'bold 18px monospace';
-          ctx.fillText('C', lx0 + 14, ly + 20);
-          ctx.fillText('A', lx0 + sz + 14, ly + sz + 20);
-          ctx.fillText('T', lx0 + 2 * sz + 14, ly + 2 * sz + 20);
-          ctx.lineWidth = 2;
-          ctx.beginPath(); ctx.moveTo(lx0 + 6, ly + 6); ctx.lineTo(lx0 + 3 * sz - 6, ly + 3 * sz - 6); ctx.stroke();
-          ctx.fillText('C', rx0 + 14, ry + 20);
-          ctx.fillText('A', rx0 + sz + 14, ry + 20);
-          ctx.fillText('T', rx0 + sz + 14, ry + sz + 20);
-          ctx.beginPath(); ctx.moveTo(rx0 + 6, ry + 14); ctx.lineTo(rx0 + sz + 14, ry + 14); ctx.lineTo(rx0 + sz + 14, ry + sz + 20); ctx.stroke();
+          canvas.drawChar(lx0 + 8, ly + 4, 'C', 3);
+          canvas.drawChar(lx0 + sz + 8, ly + sz + 4, 'A', 3);
+          canvas.drawChar(lx0 + 2 * sz + 8, ly + 2 * sz + 4, 'T', 3);
+          canvas.drawLine(lx0 + 4, ly + 4, lx0 + 3 * sz - 4, ly + 3 * sz - 4, 2);
+          canvas.drawChar(rx0 + 8, ry + 4, 'C', 3);
+          canvas.drawChar(rx0 + sz + 8, ry + 4, 'A', 3);
+          canvas.drawChar(rx0 + sz + 8, ry + sz + 4, 'T', 3);
+          canvas.drawLine(rx0 + 4, ry + 14, rx0 + sz + 14, ry + 14, 2);
+          canvas.drawLine(rx0 + sz + 14, ry + 14, rx0 + sz + 14, ry + sz + 20, 2);
           break;
         }
         case 2: { // NONOGRAM
           const sz = 24;
           const lx0 = 144 - (4 * sz) / 2, rx0 = 432 - (4 * sz) / 2;
           const ny = ly + 24;
-          ctx.strokeRect(lx0, ny, 4 * sz, sz);
-          ctx.strokeRect(rx0, ny, 4 * sz, sz);
-          ctx.lineWidth = 1;
+          canvas.drawRect(lx0, ny, 4 * sz, sz, 2);
+          canvas.drawRect(rx0, ny, 4 * sz, sz, 2);
           for (let i = 1; i < 4; i++) {
-            ctx.beginPath();
-            ctx.moveTo(lx0 + i * sz, ny); ctx.lineTo(lx0 + i * sz, ny + sz);
-            ctx.moveTo(rx0 + i * sz, ny); ctx.lineTo(rx0 + i * sz, ny + sz);
-            ctx.stroke();
+            canvas.drawVLine(lx0 + i * sz, ny, sz, 1);
+            canvas.drawVLine(rx0 + i * sz, ny, sz, 1);
           }
-          ctx.fillRect(lx0 + 2, ny + 2, sz - 4, sz - 4);
-          ctx.fillRect(lx0 + 2 * sz + 2, ny + 2, sz - 4, sz - 4);
-          ctx.fillRect(rx0 + 2, ny + 2, 2 * sz - 4, sz - 4);
-          ctx.font = 'bold 14px monospace';
-          ctx.fillText('1 1', lx0 - 18, ny + 17);
-          ctx.fillText('1 1', rx0 - 18, ny + 17);
+          canvas.fillRect(lx0 + 2, ny + 2, sz - 4, sz - 4, 1);
+          canvas.fillRect(lx0 + 2 * sz + 2, ny + 2, sz - 4, sz - 4, 1);
+          canvas.drawText(lx0 - 28, ny + 4, '1 1', 2);
+          canvas.fillRect(rx0 + 2, ny + 2, 2 * sz - 4, sz - 4, 1);
+          canvas.drawText(rx0 - 28, ny + 4, '1 1', 2);
           break;
         }
         case 3: { // STARS
           const sz = 32;
           const lx0 = 144 - (3 * sz) / 2, rx0 = 432 - (3 * sz) / 2;
-          ctx.strokeRect(lx0, ly, 3 * sz, 3 * sz);
-          ctx.strokeRect(rx0, ry, 3 * sz, 3 * sz);
-          ctx.lineWidth = 1;
+          canvas.drawRect(lx0, ly, 3 * sz, 3 * sz, 2);
+          canvas.drawRect(rx0, ry, 3 * sz, 3 * sz, 2);
+          canvas.fillHatch(lx0, ly, sz * 2, sz, 1);
+          canvas.fillHatch(rx0, ry, sz * 2, sz, 1);
           for (let i = 1; i < 3; i++) {
-            ctx.beginPath();
-            ctx.moveTo(lx0, ly + i * sz); ctx.lineTo(lx0 + 3 * sz, ly + i * sz);
-            ctx.moveTo(lx0 + i * sz, ly); ctx.lineTo(lx0 + i * sz, ly + 3 * sz);
-            ctx.moveTo(rx0, ry + i * sz); ctx.lineTo(rx0 + 3 * sz, ry + i * sz);
-            ctx.moveTo(rx0 + i * sz, ry); ctx.lineTo(rx0 + i * sz, ry + 3 * sz);
-            ctx.stroke();
+            canvas.drawHLine(lx0, ly + i * sz, 3 * sz, 1);
+            canvas.drawVLine(lx0 + i * sz, ly, 3 * sz, 1);
+            canvas.drawHLine(rx0, ry + i * sz, 3 * sz, 1);
+            canvas.drawVLine(rx0 + i * sz, ry, 3 * sz, 1);
           }
-          ctx.font = 'bold 22px monospace';
-          ctx.fillText('★', lx0 + sz / 2, ly + 24);
-          ctx.fillText('★', lx0 + 2 * sz + sz / 2, ly + sz + 24);
-          ctx.fillText('★', rx0 + sz / 2, ry + 24);
-          ctx.fillText('★', rx0 + sz + sz / 2, ry + sz + 24);
-          ctx.lineWidth = 2;
-          ctx.beginPath(); ctx.moveTo(rx0 + sz - 6, ry + sz - 6); ctx.lineTo(rx0 + sz + 6, ry + sz + 6); ctx.stroke();
+          canvas.drawChar(lx0 + 10, ly + 6, '*', 3);
+          canvas.drawChar(lx0 + 2 * sz + 10, ly + sz + 6, '*', 3);
+          canvas.drawChar(rx0 + 10, ry + 6, '*', 3);
+          canvas.drawChar(rx0 + sz + 10, ry + sz + 6, '*', 3);
+          canvas.drawLine(rx0 + sz - 4, ry + sz - 4, rx0 + sz + 4, ry + sz + 4, 2);
           break;
         }
         case 4: { // JUMBLE
           const sz = 24;
           const lx0 = 144 - (4 * sz) / 2, rx0 = 432 - (4 * sz) / 2;
           const jy = ly + 24;
-          ctx.strokeRect(lx0, jy, 4 * sz, sz);
-          ctx.strokeRect(rx0, jy, 4 * sz, sz);
-          ctx.lineWidth = 1;
+          canvas.drawRect(lx0, jy, 4 * sz, sz, 2);
+          canvas.drawRect(rx0, jy, 4 * sz, sz, 2);
           for (let i = 1; i < 4; i++) {
-            ctx.beginPath();
-            ctx.moveTo(lx0 + i * sz, jy); ctx.lineTo(lx0 + i * sz, jy + sz);
-            ctx.moveTo(rx0 + i * sz, jy); ctx.lineTo(rx0 + i * sz, jy + sz);
-            ctx.stroke();
+            canvas.drawVLine(lx0 + i * sz, jy, sz, 1);
+            canvas.drawVLine(rx0 + i * sz, jy, sz, 1);
           }
-          ctx.font = 'bold 16px monospace';
-          ctx.fillText('B', lx0 + 12, jy + 17);
-          ctx.fillText('O', lx0 + sz + 12, jy + 17);
-          ctx.beginPath(); ctx.arc(lx0 + sz + 12, jy + 12, 10, 0, Math.PI * 2); ctx.stroke();
-          ctx.fillText('A', lx0 + 2 * sz + 12, jy + 17);
-          ctx.fillText('T', lx0 + 3 * sz + 12, jy + 17);
-          ctx.fillText('B', rx0 + 12, jy + 17);
-          ctx.fillText('T', rx0 + sz + 12, jy + 17);
-          ctx.fillText('O', rx0 + 2 * sz + 12, jy + 17);
-          ctx.fillText('A', rx0 + 3 * sz + 12, jy + 17);
+          canvas.drawChar(lx0 + 6, jy + 4, 'B', 2);
+          canvas.drawChar(lx0 + sz + 6, jy + 4, 'O', 2);
+          canvas.drawCircle(lx0 + sz + 12, jy + 12, 10, 1);
+          canvas.drawChar(lx0 + 2 * sz + 6, jy + 4, 'A', 2);
+          canvas.drawChar(lx0 + 3 * sz + 6, jy + 4, 'T', 2);
+          canvas.drawChar(rx0 + 6, jy + 4, 'B', 2);
+          canvas.drawChar(rx0 + sz + 6, jy + 4, 'T', 2);
+          canvas.drawChar(rx0 + 2 * sz + 6, jy + 4, 'O', 2);
+          canvas.drawChar(rx0 + 3 * sz + 6, jy + 4, 'A', 2);
           break;
         }
         case 5: { // BINARY
           const sz = 26;
           const lx0 = 144 - (4 * sz) / 2, rx0 = 432 - (4 * sz) / 2;
           const by = ly + 24;
-          ctx.strokeRect(lx0, by, 4 * sz, sz);
-          ctx.strokeRect(rx0, by, 4 * sz, sz);
-          ctx.lineWidth = 1;
+          canvas.drawRect(lx0, by, 4 * sz, sz, 2);
+          canvas.drawRect(rx0, by, 4 * sz, sz, 2);
           for (let i = 1; i < 4; i++) {
-            ctx.beginPath();
-            ctx.moveTo(lx0 + i * sz, by); ctx.lineTo(lx0 + i * sz, by + sz);
-            ctx.moveTo(rx0 + i * sz, by); ctx.lineTo(rx0 + i * sz, by + sz);
-            ctx.stroke();
+            canvas.drawVLine(lx0 + i * sz, by, sz, 1);
+            canvas.drawVLine(rx0 + i * sz, by, sz, 1);
           }
-          ctx.font = 'bold 16px monospace';
-          ['1', '0', '1', '0'].forEach((d, i) => ctx.fillText(d, lx0 + i * sz + 13, by + 18));
-          ['0', '1', '1', '1'].forEach((d, i) => ctx.fillText(d, rx0 + i * sz + 13, by + 18));
+          canvas.drawChar(lx0 + 8, by + 4, '1', 2);
+          canvas.drawChar(lx0 + sz + 8, by + 4, '0', 2);
+          canvas.drawChar(lx0 + 2 * sz + 8, by + 4, '1', 2);
+          canvas.drawChar(lx0 + 3 * sz + 8, by + 4, '0', 2);
+          canvas.drawChar(rx0 + 8, by + 4, '0', 2);
+          canvas.drawChar(rx0 + sz + 8, by + 4, '1', 2);
+          canvas.drawChar(rx0 + 2 * sz + 8, by + 4, '1', 2);
+          canvas.drawChar(rx0 + 3 * sz + 8, by + 4, '1', 2);
           break;
         }
         case 6: { // MINES
           const sz = 34;
           const lx0 = 144 - sz, rx0 = 432 - sz;
           const my = ly + 14;
-          ctx.strokeRect(lx0, my, 2 * sz, 2 * sz);
-          ctx.strokeRect(rx0, my, 2 * sz, 2 * sz);
-          ctx.lineWidth = 1;
-          ctx.beginPath();
-          ctx.moveTo(lx0, my + sz); ctx.lineTo(lx0 + 2 * sz, my + sz);
-          ctx.moveTo(lx0 + sz, my); ctx.lineTo(lx0 + sz, my + 2 * sz);
-          ctx.moveTo(rx0, my + sz); ctx.lineTo(rx0 + 2 * sz, my + sz);
-          ctx.moveTo(rx0 + sz, my); ctx.lineTo(rx0 + sz, my + 2 * sz);
-          ctx.stroke();
-          ctx.font = 'bold 20px monospace';
-          ctx.fillText('1', lx0 + 17, my + sz + 24);
-          ctx.fillText('💣', lx0 + 17, my + 25);
-          ctx.fillText('1', rx0 + 17, my + sz + 24);
-          ctx.fillText('💣', rx0 + 17, my + 25);
-          ctx.fillText('💣', rx0 + sz + 17, my + 25);
+          canvas.drawRect(lx0, my, 2 * sz, 2 * sz, 2);
+          canvas.drawRect(rx0, my, 2 * sz, 2 * sz, 2);
+          canvas.drawHLine(lx0, my + sz, 2 * sz, 1);
+          canvas.drawVLine(lx0 + sz, my, 2 * sz, 1);
+          canvas.drawHLine(rx0, my + sz, 2 * sz, 1);
+          canvas.drawVLine(rx0 + sz, my, 2 * sz, 1);
+          canvas.drawChar(lx0 + 10, my + sz + 6, '1', 3);
+          canvas.drawChar(lx0 + 10, my + 6, '*', 3);
+          canvas.drawChar(rx0 + 10, my + sz + 6, '1', 3);
+          canvas.drawChar(rx0 + 10, my + 6, '*', 3);
+          canvas.drawChar(rx0 + sz + 10, my + 6, '*', 3);
           break;
         }
         case 7: { // TENTS
           const sz = 32;
           const lx0 = 144 - (3 * sz) / 2, rx0 = 432 - (3 * sz) / 2;
           const ty = ly + 14;
-          ctx.strokeRect(lx0, ty, 3 * sz, 2 * sz);
-          ctx.strokeRect(rx0, ty, 3 * sz, 2 * sz);
-          ctx.lineWidth = 1;
+          canvas.drawRect(lx0, ty, 3 * sz, 2 * sz, 2);
+          canvas.drawRect(rx0, ty, 3 * sz, 2 * sz, 2);
           for (let i = 1; i < 3; i++) {
-            ctx.beginPath();
-            ctx.moveTo(lx0 + i * sz, ty); ctx.lineTo(lx0 + i * sz, ty + 2 * sz);
-            ctx.moveTo(rx0 + i * sz, ty); ctx.lineTo(rx0 + i * sz, ty + 2 * sz);
-            ctx.stroke();
+            canvas.drawVLine(lx0 + i * sz, ty, 2 * sz, 1);
+            canvas.drawVLine(rx0 + i * sz, ty, 2 * sz, 1);
           }
-          ctx.beginPath();
-          ctx.moveTo(lx0, ty + sz); ctx.lineTo(lx0 + 3 * sz, ty + sz);
-          ctx.moveTo(rx0, ty + sz); ctx.lineTo(rx0 + 3 * sz, ty + sz);
-          ctx.stroke();
-          ctx.font = 'bold 20px monospace';
-          ctx.fillText('🌲', lx0 + 16, ty + 23);
-          ctx.fillText('⛺', lx0 + sz + 16, ty + 23);
-          ctx.fillText('🌲', rx0 + 16, ty + 23);
-          ctx.fillText('⛺', rx0 + sz + 16, ty + 23);
-          ctx.fillText('⛺', rx0 + 2 * sz + 16, ty + sz + 23);
+          canvas.drawHLine(lx0, ty + sz, 3 * sz, 1);
+          canvas.drawHLine(rx0, ty + sz, 3 * sz, 1);
+          canvas.drawChar(lx0 + 10, ty + 6, 'T', 3);
+          canvas.drawChar(lx0 + sz + 10, ty + 6, '^', 3);
+          canvas.drawChar(rx0 + 10, ty + 6, 'T', 3);
+          canvas.drawChar(rx0 + sz + 10, ty + 6, '^', 3);
+          canvas.drawChar(rx0 + 2 * sz + 10, ty + sz + 6, '^', 3);
           break;
         }
         case 8: { // BRIDGES
           const lx1 = 100, lx2 = 188, rx1 = 388, rx2 = 476;
           const by = ly + 36;
-          ctx.lineWidth = 2;
-          ctx.beginPath(); ctx.arc(lx1, by, 16, 0, Math.PI * 2); ctx.stroke();
-          ctx.beginPath(); ctx.arc(lx2, by, 16, 0, Math.PI * 2); ctx.stroke();
-          ctx.font = 'bold 16px monospace';
-          ctx.fillText('3', lx1, by + 5);
-          ctx.fillText('2', lx2, by + 5);
-          ctx.beginPath();
-          ctx.moveTo(lx1 + 16, by - 4); ctx.lineTo(lx2 - 16, by - 4);
-          ctx.moveTo(lx1 + 16, by + 4); ctx.lineTo(lx2 - 16, by + 4);
-          ctx.stroke();
-          ctx.beginPath(); ctx.arc(rx1, by, 16, 0, Math.PI * 2); ctx.stroke();
-          ctx.beginPath(); ctx.arc(rx2, by, 16, 0, Math.PI * 2); ctx.stroke();
-          ctx.fillText('4', rx1, by + 5);
-          ctx.fillText('3', rx2, by + 5);
-          ctx.lineWidth = 1;
-          ctx.beginPath();
-          ctx.moveTo(rx1 + 16, by - 6); ctx.lineTo(rx2 - 16, by - 6);
-          ctx.moveTo(rx1 + 16, by); ctx.lineTo(rx2 - 16, by);
-          ctx.moveTo(rx1 + 16, by + 6); ctx.lineTo(rx2 - 16, by + 6);
-          ctx.stroke();
+          canvas.drawCircle(lx1, by, 16, 2);
+          canvas.drawChar(lx1 - 5, by - 8, '3', 2);
+          canvas.drawCircle(lx2, by, 16, 2);
+          canvas.drawChar(lx2 - 5, by - 8, '2', 2);
+          canvas.drawHLine(lx1 + 16, by - 4, (lx2 - 16) - (lx1 + 16), 2);
+          canvas.drawHLine(lx1 + 16, by + 4, (lx2 - 16) - (lx1 + 16), 2);
+          canvas.drawCircle(rx1, by, 16, 2);
+          canvas.drawChar(rx1 - 5, by - 8, '4', 2);
+          canvas.drawCircle(rx2, by, 16, 2);
+          canvas.drawChar(rx2 - 5, by - 8, '3', 2);
+          canvas.drawHLine(rx1 + 16, by - 6, (rx2 - 16) - (rx1 + 16), 1);
+          canvas.drawHLine(rx1 + 16, by, (rx2 - 16) - (rx1 + 16), 1);
+          canvas.drawHLine(rx1 + 16, by + 6, (rx2 - 16) - (rx1 + 16), 1);
           break;
         }
         case 9: { // KILLER
           const sz = 34;
           const lx0 = 144 - sz, rx0 = 432 - sz;
           const ky = ly + 14;
-          ctx.setLineDash([4, 3]);
-          ctx.lineWidth = 2;
-          ctx.strokeRect(lx0, ky, 2 * sz, sz);
-          ctx.strokeRect(rx0, ky, 2 * sz, sz);
-          ctx.setLineDash([]);
-          ctx.font = 'bold 11px monospace';
-          ctx.fillText('3', lx0 + 8, ky + 12);
-          ctx.fillText('4', rx0 + 8, ky + 12);
-          ctx.font = 'bold 18px monospace';
-          ctx.fillText('1', lx0 + 17, ky + 25);
-          ctx.fillText('2', lx0 + sz + 17, ky + 25);
-          ctx.fillText('2', rx0 + 17, ky + 25);
-          ctx.fillText('2', rx0 + sz + 17, ky + 25);
+          canvas.drawRect(lx0, ky, 2 * sz, sz, 1);
+          canvas.drawDashedHLine(lx0, ky, 2 * sz, 4, 3, 2);
+          canvas.drawDashedHLine(lx0, ky + sz, 2 * sz, 4, 3, 2);
+          canvas.drawRect(rx0, ky, 2 * sz, sz, 1);
+          canvas.drawDashedHLine(rx0, ky, 2 * sz, 4, 3, 2);
+          canvas.drawDashedHLine(rx0, ky + sz, 2 * sz, 4, 3, 2);
+          canvas.drawText(lx0 + 2, ky + 2, '3', 1);
+          canvas.drawChar(lx0 + 10, ky + 8, '1', 2);
+          canvas.drawChar(lx0 + sz + 10, ky + 8, '2', 2);
+          canvas.drawText(rx0 + 2, ky + 2, '4', 1);
+          canvas.drawChar(rx0 + 10, ky + 8, '2', 2);
+          canvas.drawChar(rx0 + sz + 10, ky + 8, '2', 2);
           break;
         }
         case 10: { // CRYPTOGRAM
           const cy = ly + 20;
-          ctx.font = 'bold 16px monospace';
-          ctx.fillText('T  H  E', 144, cy + 10);
-          ctx.fillText('W  Z  K', 144, cy + 34);
-          ctx.lineWidth = 1;
-          ctx.beginPath(); ctx.moveTo(96, cy + 18); ctx.lineTo(192, cy + 18); ctx.stroke();
-          ctx.fillText('T  O', 432, cy + 10);
-          ctx.fillText('W  K', 432, cy + 34);
-          ctx.beginPath(); ctx.moveTo(384, cy + 18); ctx.lineTo(480, cy + 18); ctx.stroke();
+          canvas.drawText(100, cy, 'T H E', 2);
+          canvas.drawText(100, cy + 24, 'W Z K', 2);
+          canvas.drawHLine(96, cy + 20, 96, 1);
+          canvas.drawText(390, cy, 'T O', 2);
+          canvas.drawText(390, cy + 24, 'W K', 2);
+          canvas.drawHLine(386, cy + 20, 64, 1);
           break;
         }
         case 11: { // TANGO
           const sz = 28;
           const lx0 = 144 - (3 * sz) / 2, rx0 = 432 - (3 * sz) / 2;
           const ty2 = ly + 20;
-          ctx.strokeRect(lx0, ty2, sz, sz);
-          ctx.strokeRect(lx0 + 2 * sz, ty2, sz, sz);
-          ctx.font = 'bold 18px monospace';
-          ctx.fillText('☀️', lx0 + 14, ty2 + 20);
-          ctx.fillText('=', lx0 + sz + 14, ty2 + 20);
-          ctx.fillText('☀️', lx0 + 2 * sz + 14, ty2 + 20);
-          ctx.strokeRect(rx0, ty2, 3 * sz, sz);
-          ctx.lineWidth = 1;
-          ctx.beginPath();
-          ctx.moveTo(rx0 + sz, ty2); ctx.lineTo(rx0 + sz, ty2 + sz);
-          ctx.moveTo(rx0 + 2 * sz, ty2); ctx.lineTo(rx0 + 2 * sz, ty2 + sz);
-          ctx.stroke();
-          ctx.fillText('☀️', rx0 + 14, ty2 + 20);
-          ctx.fillText('☀️', rx0 + sz + 14, ty2 + 20);
-          ctx.fillText('☀️', rx0 + 2 * sz + 14, ty2 + 20);
+          canvas.drawRect(lx0, ty2, sz, sz, 2);
+          canvas.drawChar(lx0 + 8, ty2 + 4, 'O', 2);
+          canvas.drawChar(lx0 + sz + 8, ty2 + 4, '=', 2);
+          canvas.drawRect(lx0 + 2 * sz, ty2, sz, sz, 2);
+          canvas.drawChar(lx0 + 2 * sz + 8, ty2 + 4, 'O', 2);
+          canvas.drawRect(rx0, ty2, 3 * sz, sz, 2);
+          canvas.drawVLine(rx0 + sz, ty2, sz, 1);
+          canvas.drawVLine(rx0 + 2 * sz, ty2, sz, 1);
+          canvas.drawChar(rx0 + 8, ty2 + 4, 'O', 2);
+          canvas.drawChar(rx0 + sz + 8, ty2 + 4, 'O', 2);
+          canvas.drawChar(rx0 + 2 * sz + 8, ty2 + 4, 'O', 2);
           break;
         }
         case 12: { // LADDER
           const dy = ly + 16;
-          ctx.font = 'bold 17px monospace';
-          ctx.fillText('C A R T', 144, dy + 10);
-          ctx.fillText('|', 144, dy + 24);
-          ctx.fillText('D A R T', 144, dy + 38);
-          ctx.fillText('C A R T', 432, dy + 10);
-          ctx.fillText('|', 432, dy + 24);
-          ctx.fillText('D A R K', 432, dy + 38);
+          canvas.drawText(100, dy, 'C A R T', 2);
+          canvas.drawText(100, dy + 28, 'D A R T', 2);
+          canvas.drawText(124, dy + 14, '|', 1);
+          canvas.drawText(388, dy, 'C A R T', 2);
+          canvas.drawText(388, dy + 28, 'D A R K', 2);
+          canvas.drawText(412, dy + 14, '|', 1);
           break;
         }
         case 13: { // WHEEL
           const wy = ly + 36;
-          ctx.lineWidth = 2;
-          ctx.beginPath(); ctx.arc(144, wy, 28, 0, Math.PI * 2); ctx.stroke();
-          ctx.beginPath(); ctx.arc(144, wy, 12, 0, Math.PI * 2); ctx.stroke();
-          ctx.font = 'bold 16px monospace';
-          ctx.fillText('O', 144, wy + 6);
-          ctx.font = 'bold 11px monospace';
-          ctx.fillText('GLOW (USES O)', 144, wy + 42);
-          ctx.lineWidth = 2;
-          ctx.beginPath(); ctx.arc(432, wy, 28, 0, Math.PI * 2); ctx.stroke();
-          ctx.beginPath(); ctx.arc(432, wy, 12, 0, Math.PI * 2); ctx.stroke();
-          ctx.font = 'bold 16px monospace';
-          ctx.fillText('O', 432, wy + 6);
-          ctx.font = 'bold 11px monospace';
-          ctx.fillText('WING (NO O)', 432, wy + 42);
+          canvas.drawCircle(144, wy, 28, 2);
+          canvas.drawCircle(144, wy, 12, 1);
+          canvas.drawChar(144 - 5, wy - 8, 'O', 2);
+          canvas.drawText(144 - 40, wy + 34, 'GLOW (USES O)', 1);
+          canvas.drawCircle(432, wy, 28, 2);
+          canvas.drawCircle(432, wy, 12, 1);
+          canvas.drawChar(432 - 5, wy - 8, 'O', 2);
+          canvas.drawText(432 - 40, wy + 34, 'WING (NO O)', 1);
           break;
         }
         case 14: { // LIGHTS
           const sz = 28;
           const lx0 = 144 - (3 * sz) / 2, rx0 = 432 - (3 * sz) / 2;
           const lty = ly + 20;
-          ctx.strokeRect(lx0, lty, 3 * sz, sz);
-          ctx.fillRect(lx0 + sz, lty, sz, sz);
-          ctx.font = 'bold 18px monospace';
-          ctx.fillText('💡', lx0 + 14, lty + 20);
-          ctx.fillText('💡', lx0 + 2 * sz + 14, lty + 20);
-          ctx.strokeRect(rx0, lty, 3 * sz, sz);
-          ctx.fillText('💡', rx0 + 14, lty + 20);
-          ctx.fillText('💡', rx0 + 2 * sz + 14, lty + 20);
-          ctx.lineWidth = 1;
-          ctx.beginPath(); ctx.moveTo(rx0 + 24, lty + 14); ctx.lineTo(rx0 + 2 * sz + 4, lty + 14); ctx.stroke();
+          canvas.drawRect(lx0, lty, 3 * sz, sz, 2);
+          canvas.fillHatch(lx0 + sz, lty, sz, sz, 1);
+          canvas.drawChar(lx0 + 8, lty + 4, '*', 2);
+          canvas.drawChar(lx0 + 2 * sz + 8, lty + 4, '*', 2);
+          canvas.drawRect(rx0, lty, 3 * sz, sz, 2);
+          canvas.drawChar(rx0 + 8, lty + 4, '*', 2);
+          canvas.drawLine(rx0 + 16, lty + 14, rx0 + 3 * sz - 16, lty + 14, 1);
+          canvas.drawChar(rx0 + 2 * sz + 8, lty + 4, '*', 2);
           break;
         }
         case 15: { // LOOP
-          const sz = 34;
+          const sz = 32;
           const lx0 = 144 - sz / 2, rx0 = 432 - sz / 2;
           const lpy = ly + 20;
-          ctx.font = 'bold 22px monospace';
-          ctx.fillText('3', 144, lpy + 25);
-          ctx.lineWidth = 3;
-          ctx.beginPath();
-          ctx.moveTo(lx0, lpy); ctx.lineTo(lx0 + sz, lpy);
-          ctx.moveTo(lx0, lpy); ctx.lineTo(lx0, lpy + sz);
-          ctx.moveTo(lx0, lpy + sz); ctx.lineTo(lx0 + sz, lpy + sz);
-          ctx.stroke();
-          ctx.beginPath();
-          ctx.moveTo(rx0 - 10, lpy + sz / 2); ctx.lineTo(rx0 + sz + 10, lpy + sz / 2);
-          ctx.moveTo(rx0 + sz / 2, lpy - 10); ctx.lineTo(rx0 + sz / 2, lpy + sz + 10);
-          ctx.stroke();
+          canvas.drawChar(lx0 + 10, lpy + 6, '3', 3);
+          canvas.drawHLine(lx0, lpy, sz, 3);
+          canvas.drawVLine(lx0, lpy, sz, 3);
+          canvas.drawHLine(lx0, lpy + sz, sz, 3);
+          canvas.drawHLine(rx0 - 10, lpy + sz / 2, sz + 20, 3);
+          canvas.drawVLine(rx0 + sz / 2, lpy - 10, sz + 20, 3);
           break;
         }
         case 16: { // TOWERS
           const sz = 24;
           const lx0 = 144 - (3 * sz) / 2, rx0 = 432 - (3 * sz) / 2;
           const twy = ly + 24;
-          ctx.strokeRect(lx0, twy, 3 * sz, sz);
-          ctx.strokeRect(rx0, twy, 3 * sz, sz);
-          ctx.lineWidth = 1;
-          for (let i = 1; i < 3; i++) {
-            ctx.beginPath();
-            ctx.moveTo(lx0 + i * sz, twy); ctx.lineTo(lx0 + i * sz, twy + sz);
-            ctx.moveTo(rx0 + i * sz, twy); ctx.lineTo(rx0 + i * sz, twy + sz);
-            ctx.stroke();
-          }
-          ctx.font = 'bold 15px monospace';
-          ctx.fillText('[1]', lx0 - 18, twy + 17);
-          ctx.fillText('5', lx0 + 12, twy + 17);
-          ctx.fillText('4', lx0 + sz + 12, twy + 17);
-          ctx.fillText('3', lx0 + 2 * sz + 12, twy + 17);
-          ctx.fillText('[1]', rx0 - 18, twy + 17);
-          ctx.fillText('2', rx0 + 12, twy + 17);
-          ctx.fillText('5', rx0 + sz + 12, twy + 17);
-          ctx.fillText('1', rx0 + 2 * sz + 12, twy + 17);
+          canvas.drawText(lx0 - 24, twy + 4, '1', 2);
+          canvas.drawRect(lx0, twy, 3 * sz, sz, 2);
+          canvas.drawChar(lx0 + 6, twy + 4, '5', 2);
+          canvas.drawChar(lx0 + sz + 6, twy + 4, '4', 2);
+          canvas.drawChar(lx0 + 2 * sz + 6, twy + 4, '3', 2);
+          canvas.drawText(rx0 - 24, twy + 4, '1', 2);
+          canvas.drawRect(rx0, twy, 3 * sz, sz, 2);
+          canvas.drawChar(rx0 + 6, twy + 4, '2', 2);
+          canvas.drawChar(rx0 + sz + 6, twy + 4, '5', 2);
+          canvas.drawChar(rx0 + 2 * sz + 6, twy + 4, '1', 2);
           break;
         }
         case 17: { // INEQUALITY
           const sz = 28;
           const lx0 = 144 - (3 * sz) / 2, rx0 = 432 - (3 * sz) / 2;
           const fy = ly + 20;
-          ctx.strokeRect(lx0, fy, sz, sz);
-          ctx.strokeRect(lx0 + 2 * sz, fy, sz, sz);
-          ctx.font = 'bold 18px monospace';
-          ctx.fillText('2', lx0 + 14, fy + 20);
-          ctx.fillText('<', lx0 + sz + 14, fy + 20);
-          ctx.fillText('4', lx0 + 2 * sz + 14, fy + 20);
-          ctx.strokeRect(rx0, fy, sz, sz);
-          ctx.strokeRect(rx0 + 2 * sz, fy, sz, sz);
-          ctx.fillText('5', rx0 + 14, fy + 20);
-          ctx.fillText('<', rx0 + sz + 14, fy + 20);
-          ctx.fillText('3', rx0 + 2 * sz + 14, fy + 20);
+          canvas.drawRect(lx0, fy, sz, sz, 2);
+          canvas.drawChar(lx0 + 8, fy + 4, '2', 2);
+          canvas.drawChar(lx0 + sz + 8, fy + 4, '<', 2);
+          canvas.drawRect(lx0 + 2 * sz, fy, sz, sz, 2);
+          canvas.drawChar(lx0 + 2 * sz + 8, fy + 4, '4', 2);
+          canvas.drawRect(rx0, fy, sz, sz, 2);
+          canvas.drawChar(rx0 + 8, fy + 4, '5', 2);
+          canvas.drawChar(rx0 + sz + 8, fy + 4, '<', 2);
+          canvas.drawRect(rx0 + 2 * sz, fy, sz, sz, 2);
+          canvas.drawChar(rx0 + 2 * sz + 8, fy + 4, '3', 2);
           break;
         }
       }
+
+      canvas.renderToCanvas(targetEl);
     }
 
     function renderGuideReceipt(gameId) {

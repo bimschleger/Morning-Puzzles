@@ -24,15 +24,7 @@ PuzzleGrade OfflinePuzzleComposer::getCurrentGrade() const {
 }
 
 const char* OfflinePuzzleComposer::getGradeName(PuzzleGrade grade) const {
-    switch (grade) {
-        case GRADE_EASY:     return "EASY";
-        case GRADE_HARD:     return "HARD";
-        case GRADE_ROTATING: return "ROTATING";
-        case GRADE_RANDOM:   return "RANDOM";
-        case GRADE_EXTREME:  return "EXTREME";
-        case GRADE_MEDIUM:
-        default:             return "MEDIUM";
-    }
+    return OfflineConfigManager::getGradeName(grade);
 }
 
 PuzzleGrade OfflinePuzzleComposer::getGradeForSlot(uint8_t index, uint8_t totalCount) const {
