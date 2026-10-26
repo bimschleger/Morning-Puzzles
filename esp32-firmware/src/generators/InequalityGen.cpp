@@ -1,5 +1,6 @@
 #include "InequalityGen.h"
 #include "InequalityDataset.h"
+#include "GeneratorUtils.h"
 #include "../printer/EscPosPrinter.h"
 #include "../printer/ThermalCanvas.h"
 
@@ -130,11 +131,8 @@ void InequalityGen::generate(InequalityDifficulty difficulty, uint32_t seed) {
         for (uint8_t r = 0; r < 4; r++) {
             for (uint8_t c = 0; c < 4; c++) {
                 uint8_t idx = r * 4 + c;
-                uint8_t bSol = pgm_read_byte(&p->solution[idx >> 1]);
-                _solution[r][c] = (idx & 1) ? (bSol & 0x0F) : (bSol >> 4);
-
-                uint8_t bGiv = pgm_read_byte(&p->givens[idx >> 1]);
-                _givens[r][c] = (idx & 1) ? (bGiv & 0x0F) : (bGiv >> 4);
+                _solution[r][c] = mp_unpack_nibble_pgm(p->solution, idx);
+                _givens[r][c] = mp_unpack_nibble_pgm(p->givens, idx);
             }
         }
         for (uint8_t r = 0; r < 4; r++) {
@@ -154,11 +152,8 @@ void InequalityGen::generate(InequalityDifficulty difficulty, uint32_t seed) {
         for (uint8_t r = 0; r < 5; r++) {
             for (uint8_t c = 0; c < 5; c++) {
                 uint8_t idx = r * 5 + c;
-                uint8_t bSol = pgm_read_byte(&p->solution[idx >> 1]);
-                _solution[r][c] = (idx & 1) ? (bSol & 0x0F) : (bSol >> 4);
-
-                uint8_t bGiv = pgm_read_byte(&p->givens[idx >> 1]);
-                _givens[r][c] = (idx & 1) ? (bGiv & 0x0F) : (bGiv >> 4);
+                _solution[r][c] = mp_unpack_nibble_pgm(p->solution, idx);
+                _givens[r][c] = mp_unpack_nibble_pgm(p->givens, idx);
             }
         }
         for (uint8_t r = 0; r < 5; r++) {

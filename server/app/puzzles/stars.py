@@ -4,32 +4,23 @@ Encapsulates generation, canonical instruction formatting, ASCII layout,
 solution key formatting, and 576-dot dithered thermal raster rendering.
 """
 
-import json
-import os
 import random
 import textwrap
 from collections import deque
 from typing import List, Tuple, Dict, Any, Optional, Set, Union
 
-from .base import BasePuzzle, BasePuzzleResult
+from .base import (
+    BasePuzzle,
+    BasePuzzleResult,
+    load_curated_dataset,
+    select_seeded_d4,
+    transform_coord_d4,
+    transform_grid_d4,
+)
 from ..renderer.canvas import (
     THERMAL_WIDTH_DOTS,
     ThermalBitmap,
 )
-
-DATA_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "data", "stars_dataset.json")
-_STARS_DATASET: Optional[Dict[str, List[Dict[str, Any]]]] = None
-
-
-def _get_stars_dataset() -> Optional[Dict[str, List[Dict[str, Any]]]]:
-    global _STARS_DATASET
-    if _STARS_DATASET is None and os.path.exists(DATA_PATH):
-        try:
-            with open(DATA_PATH, "r") as f:
-                _STARS_DATASET = json.load(f)
-        except Exception:
-            _STARS_DATASET = None
-    return _STARS_DATASET
 
 
 class StarsPuzzle(BasePuzzle):
@@ -69,25 +60,8 @@ class StarsPuzzle(BasePuzzle):
     ) -> Tuple[List[List[int]], List[Tuple[int, int]]]:
         rot = t % 4
         flip = (t >= 4)
-        cur_reg = [row[:] for row in regions]
-        cur_stars = list(stars)
-
-        for _ in range(rot):
-            new_reg = [[0] * n for _ in range(n)]
-            for r in range(n):
-                for c in range(n):
-                    new_reg[c][n - 1 - r] = cur_reg[r][c]
-            cur_reg = new_reg
-            cur_stars = [(c, n - 1 - r) for (r, c) in cur_stars]
-
-        if flip:
-            new_reg = [[0] * n for _ in range(n)]
-            for r in range(n):
-                for c in range(n):
-                    new_reg[r][n - 1 - c] = cur_reg[r][c]
-            cur_reg = new_reg
-            cur_stars = [(r, n - 1 - c) for (r, c) in cur_stars]
-
+        cur_reg = transform_grid_d4(regions, rot, flip)
+        cur_stars = [transform_coord_d4(r, c, n, rot, flip) for (r, c) in stars]
         return cur_reg, sorted(cur_stars)
 
     def generate(
@@ -105,16 +79,11 @@ class StarsPuzzle(BasePuzzle):
         k_stars = cfg["stars"]
 
         # 1. Try loading from curated verified dataset
-        dataset = _get_stars_dataset()
+        dataset = load_curated_dataset("stars_dataset.json")
         tier_key = difficulty
         if dataset and tier_key in dataset and dataset[tier_key]:
             puzzles = dataset[tier_key]
-            if seed is not None:
-                idx = (seed // 8) % len(puzzles)
-                transform = seed % 8
-            else:
-                idx = random.randint(0, len(puzzles) - 1)
-                transform = random.randint(0, 7)
+            idx, transform = select_seeded_d4(puzzles, seed)
 
             p = puzzles[idx]
             base_regions = p["regions"]

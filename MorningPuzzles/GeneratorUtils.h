@@ -14,6 +14,11 @@ inline void mp_shuffle(T* arr, uint8_t n) {
     }
 }
 
+inline uint8_t mp_unpack_nibble_pgm(const uint8_t* arr, uint16_t idx) {
+    uint8_t byteVal = pgm_read_byte(arr + (idx >> 1));
+    return (idx & 1) ? (byteVal & 0x0F) : (byteVal >> 4);
+}
+
 inline void printWrapped(EscPosPrinter& printer, const char* text, int maxWidth = 44) {
     if (!text || text[0] == '\0') return;
 

@@ -9,25 +9,15 @@ import string
 import textwrap
 from typing import List, Tuple, Dict, Any, Optional, Union
 
-import json
-from pathlib import Path
-
-from .base import BasePuzzle, BasePuzzleResult
+from .base import BasePuzzle, BasePuzzleResult, load_curated_dataset
 from ..renderer.canvas import (
     THERMAL_WIDTH_DOTS,
     ThermalBitmap,
 )
 
-_DATASET_CACHE: Optional[Dict[str, Dict[str, List[str]]]] = None
-
 
 def _get_wordsearch_dataset() -> Dict[str, Dict[str, List[str]]]:
-    global _DATASET_CACHE
-    if _DATASET_CACHE is None:
-        dataset_path = Path(__file__).resolve().parent.parent.parent / "data" / "wordsearch_dataset.json"
-        with open(dataset_path, "r", encoding="utf-8") as f:
-            _DATASET_CACHE = json.load(f)
-    return _DATASET_CACHE
+    return load_curated_dataset("wordsearch_dataset.json") or {}
 
 
 def get_random_theme(difficulty: str = "medium") -> Tuple[str, List[str]]:

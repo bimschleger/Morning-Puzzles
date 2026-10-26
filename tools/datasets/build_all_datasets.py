@@ -13,7 +13,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import build_game_rules
@@ -23,6 +23,38 @@ SERVER_DATA_DIR = ROOT_DIR / "server" / "data"
 FW_GEN_DIR = ROOT_DIR / "esp32-firmware" / "src" / "generators"
 SIMULATOR_HTML = ROOT_DIR / "simulator" / "receipt_simulator.html"
 SYNC_SCRIPT = ROOT_DIR / "scripts" / "sync_arduino_sketch.sh"
+
+
+def pack_nibbles(arr: List[int]) -> List[int]:
+    """Pack a sequence of 4-bit integers into big-endian nibble pairs (2 values per byte)."""
+    out = []
+    for i in range(0, len(arr), 2):
+        high = arr[i] & 0x0F
+        low = (arr[i + 1] & 0x0F) if i + 1 < len(arr) else 0
+        out.append((high << 4) | low)
+    return out
+
+
+def update_simulator_js(
+    pattern: str,
+    js_code: str,
+    label: str,
+    dotall: bool = False,
+    fallback_after_pattern: Optional[str] = None,
+) -> None:
+    """Replace or inject a JavaScript constant/property definition in receipt_simulator.html."""
+    if not SIMULATOR_HTML.exists():
+        return
+    flags = re.DOTALL if dotall else 0
+    content = SIMULATOR_HTML.read_text(encoding="utf-8")
+    if re.search(pattern, content, flags=flags):
+        content = re.sub(pattern, lambda m: js_code, content, flags=flags)
+        SIMULATOR_HTML.write_text(content, encoding="utf-8")
+        print(f"  -> Updated {label} in {SIMULATOR_HTML}")
+    elif fallback_after_pattern and re.search(fallback_after_pattern, content):
+        content = re.sub(fallback_after_pattern, r"\1\n" + js_code, content, count=1)
+        SIMULATOR_HTML.write_text(content, encoding="utf-8")
+        print(f"  -> Injected {label} into {SIMULATOR_HTML}")
 
 
 # =============================================================================
@@ -68,11 +100,7 @@ def build_stars_dataset() -> None:
         lines.append(f"static const uint8_t STARS_{tier}_REGIONS[{count}][{packed_region_bytes}] PROGMEM = {{")
         for p in puzzles:
             flat = [p["regions"][r][c] for r in range(size) for c in range(size)]
-            packed_regions = []
-            for i in range(0, total_cells, 2):
-                high = flat[i] & 0x0F
-                low = (flat[i + 1] & 0x0F) if i + 1 < total_cells else 0
-                packed_regions.append((high << 4) | low)
+            packed_regions = pack_nibbles(flat)
             lines.append("    {" + ", ".join(map(str, packed_regions)) + "},")
         lines.append("};")
         lines.append("")
@@ -99,12 +127,7 @@ def build_stars_dataset() -> None:
                 sim_res[tier].append([r_str, s_str])
 
         js_code = "    const STARS_DATASET = " + json.dumps(sim_res, separators=(",", ":")) + ";"
-        content = SIMULATOR_HTML.read_text(encoding="utf-8")
-        pattern = r"    const STARS_DATASET = \{.*?\};"
-        if re.search(pattern, content):
-            content = re.sub(pattern, lambda m: js_code, content)
-            SIMULATOR_HTML.write_text(content, encoding="utf-8")
-            print(f"  -> Updated STARS_DATASET in {SIMULATOR_HTML}")
+        update_simulator_js(r"    const STARS_DATASET = \{.*?\};", js_code, "STARS_DATASET")
 
 
 # =============================================================================
@@ -117,14 +140,6 @@ def build_killer_dataset() -> None:
 
     with open(json_path, "r", encoding="utf-8") as f:
         dataset = json.load(f)
-
-    def pack_nibbles(arr: List[int]) -> List[int]:
-        out = []
-        for i in range(0, len(arr), 2):
-            high = arr[i] & 0x0F
-            low = (arr[i + 1] & 0x0F) if i + 1 < len(arr) else 0
-            out.append((high << 4) | low)
-        return out
 
     lines = [
         "// Automatically generated from server/data/killer_dataset.json by tools/datasets/build_all_datasets.py",
@@ -228,14 +243,8 @@ def build_killer_dataset() -> None:
     print(f"  -> Wrote {header_path}")
 
     # Update simulator
-    if SIMULATOR_HTML.exists():
-        js_code = "    const KILLER_DATASET = " + json.dumps(dataset, separators=(",", ":")) + ";"
-        content = SIMULATOR_HTML.read_text(encoding="utf-8")
-        pattern = r"    const KILLER_DATASET = \{.*?\};"
-        if re.search(pattern, content):
-            content = re.sub(pattern, lambda m: js_code, content)
-            SIMULATOR_HTML.write_text(content, encoding="utf-8")
-            print(f"  -> Updated KILLER_DATASET in {SIMULATOR_HTML}")
+    js_code = "    const KILLER_DATASET = " + json.dumps(dataset, separators=(",", ":")) + ";"
+    update_simulator_js(r"    const KILLER_DATASET = \{.*?\};", js_code, "KILLER_DATASET")
 
 
 # =============================================================================
@@ -283,14 +292,8 @@ def build_ladder_dataset() -> None:
     print(f"  -> Wrote {header_path}")
 
     # Update simulator
-    if SIMULATOR_HTML.exists():
-        js_code = "    const LADDER_DATASET = " + json.dumps(dataset, separators=(",", ":")) + ";"
-        content = SIMULATOR_HTML.read_text(encoding="utf-8")
-        pattern = r"    const LADDER_DATASET = \{.*?\};"
-        if re.search(pattern, content):
-            content = re.sub(pattern, lambda m: js_code, content)
-            SIMULATOR_HTML.write_text(content, encoding="utf-8")
-            print(f"  -> Updated LADDER_DATASET in {SIMULATOR_HTML}")
+    js_code = "    const LADDER_DATASET = " + json.dumps(dataset, separators=(",", ":")) + ";"
+    update_simulator_js(r"    const LADDER_DATASET = \{.*?\};", js_code, "LADDER_DATASET")
 
 
 # =============================================================================
@@ -413,14 +416,8 @@ def build_cryptogram_dataset() -> None:
     print(f"  -> Wrote {header_path}")
 
     # Update simulator
-    if SIMULATOR_HTML.exists():
-        js_code = "        this.puzzles = " + json.dumps(quotes, separators=(",", ":")) + ";"
-        content = SIMULATOR_HTML.read_text(encoding="utf-8")
-        pattern = r"        this\.puzzles = \[.*?\];"
-        if re.search(pattern, content, re.DOTALL):
-            content = re.sub(pattern, lambda m, code=js_code: code, content, flags=re.DOTALL)
-            SIMULATOR_HTML.write_text(content, encoding="utf-8")
-            print(f"  -> Updated CryptogramSimulator.puzzles in {SIMULATOR_HTML}")
+    js_code = "        this.puzzles = " + json.dumps(quotes, separators=(",", ":")) + ";"
+    update_simulator_js(r"        this\.puzzles = \[.*?\];", js_code, "CryptogramSimulator.puzzles", dotall=True)
 
 
 # =============================================================================
@@ -485,14 +482,8 @@ def build_jumble_dataset() -> None:
     print(f"  -> Wrote {header_path}")
 
     # Update simulator
-    if SIMULATOR_HTML.exists():
-        js_code = "    const JUMBLE_RIDDLES = " + json.dumps(jumbles, separators=(",", ":")) + ";"
-        content = SIMULATOR_HTML.read_text(encoding="utf-8")
-        pattern = r"    const JUMBLE_RIDDLES = \[.*?\];"
-        if re.search(pattern, content):
-            content = re.sub(pattern, lambda m: js_code, content)
-            SIMULATOR_HTML.write_text(content, encoding="utf-8")
-            print(f"  -> Updated JUMBLE_RIDDLES in {SIMULATOR_HTML}")
+    js_code = "    const JUMBLE_RIDDLES = " + json.dumps(jumbles, separators=(",", ":")) + ";"
+    update_simulator_js(r"    const JUMBLE_RIDDLES = \[.*?\];", js_code, "JUMBLE_RIDDLES")
 
 
 # =============================================================================
@@ -583,12 +574,7 @@ def build_wheel_dataset() -> None:
                     "count7plus": lc.get("7+", 0),
                 })
         js_code = "        this.puzzles = " + json.dumps(sim_wheel, separators=(",", ":")) + ";"
-        content = SIMULATOR_HTML.read_text(encoding="utf-8")
-        pattern = r"        this\.puzzles = \{.*?\n        \};"
-        if re.search(pattern, content, re.DOTALL):
-            content = re.sub(pattern, lambda m, code=js_code: code, content, flags=re.DOTALL)
-            SIMULATOR_HTML.write_text(content, encoding="utf-8")
-            print(f"  -> Updated WheelSimulator.puzzles in {SIMULATOR_HTML}")
+        update_simulator_js(r"        this\.puzzles = \{.*?\n        \};", js_code, "WheelSimulator.puzzles", dotall=True)
 
 
 # =============================================================================
@@ -601,14 +587,6 @@ def build_towers_dataset() -> None:
 
     with open(json_path, "r", encoding="utf-8") as f:
         dataset = json.load(f)
-
-    def pack_nibbles(arr: List[int]) -> List[int]:
-        out = []
-        for i in range(0, len(arr), 2):
-            high = arr[i] & 0x0F
-            low = (arr[i + 1] & 0x0F) if i + 1 < len(arr) else 0
-            out.append((high << 4) | low)
-        return out
 
     lines = [
         "// Automatically generated from server/data/towers_dataset.json by tools/datasets/build_all_datasets.py",
@@ -662,21 +640,13 @@ def build_towers_dataset() -> None:
     print(f"  -> Wrote {header_path}")
 
     # Update simulator
-    if SIMULATOR_HTML.exists():
-        js_code = "    const TOWERS_DATASET = " + json.dumps(dataset, separators=(",", ":")) + ";"
-        content = SIMULATOR_HTML.read_text(encoding="utf-8")
-        pattern = r"    const TOWERS_DATASET = \{.*?\};"
-        if re.search(pattern, content):
-            content = re.sub(pattern, lambda m: js_code, content)
-            SIMULATOR_HTML.write_text(content, encoding="utf-8")
-            print(f"  -> Updated TOWERS_DATASET in {SIMULATOR_HTML}")
-        else:
-            stars_pattern = r"(const STARS_DATASET = \{.*?\};)"
-            if re.search(stars_pattern, content):
-                content = re.sub(stars_pattern, r"\1\n" + js_code, content, count=1)
-                SIMULATOR_HTML.write_text(content, encoding="utf-8")
-                print(f"  -> Injected TOWERS_DATASET into {SIMULATOR_HTML}")
-
+    js_code = "    const TOWERS_DATASET = " + json.dumps(dataset, separators=(",", ":")) + ";"
+    update_simulator_js(
+        r"    const TOWERS_DATASET = \{.*?\};",
+        js_code,
+        "TOWERS_DATASET",
+        fallback_after_pattern=r"(const STARS_DATASET = \{.*?\};)",
+    )
 
 
 # =============================================================================
@@ -689,14 +659,6 @@ def build_inequality_dataset() -> None:
 
     with open(json_path, "r", encoding="utf-8") as f:
         dataset = json.load(f)
-
-    def pack_nibbles(arr: List[int]) -> List[int]:
-        out = []
-        for i in range(0, len(arr), 2):
-            high = arr[i] & 0x0F
-            low = (arr[i + 1] & 0x0F) if i + 1 < len(arr) else 0
-            out.append((high << 4) | low)
-        return out
 
     lines = [
         "// Automatically generated from server/data/inequality_dataset.json by tools/datasets/build_all_datasets.py",
@@ -764,20 +726,13 @@ def build_inequality_dataset() -> None:
     print(f"  -> Wrote {header_path}")
 
     # Update simulator
-    if SIMULATOR_HTML.exists():
-        js_code = "    const INEQUALITY_DATASET = " + json.dumps(dataset, separators=(",", ":")) + ";"
-        content = SIMULATOR_HTML.read_text(encoding="utf-8")
-        pattern = r"    const INEQUALITY_DATASET = \{.*?\};"
-        if re.search(pattern, content):
-            content = re.sub(pattern, lambda m: js_code, content)
-            SIMULATOR_HTML.write_text(content, encoding="utf-8")
-            print(f"  -> Updated INEQUALITY_DATASET in {SIMULATOR_HTML}")
-        else:
-            towers_pattern = r"(const TOWERS_DATASET = \{.*?\};)"
-            if re.search(towers_pattern, content):
-                content = re.sub(towers_pattern, r"\1\n" + js_code, content, count=1)
-                SIMULATOR_HTML.write_text(content, encoding="utf-8")
-                print(f"  -> Injected INEQUALITY_DATASET into {SIMULATOR_HTML}")
+    js_code = "    const INEQUALITY_DATASET = " + json.dumps(dataset, separators=(",", ":")) + ";"
+    update_simulator_js(
+        r"    const INEQUALITY_DATASET = \{.*?\};",
+        js_code,
+        "INEQUALITY_DATASET",
+        fallback_after_pattern=r"(const TOWERS_DATASET = \{.*?\};)",
+    )
 
 
 def main() -> None:

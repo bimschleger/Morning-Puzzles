@@ -12,41 +12,21 @@ Morning Puzzles standard implementation adhering to Rules 1-16:
 - Rule 13: Floating margin numbers with >= 4-6px padding, clean playable cells
 """
 
-import json
-import os
 import random
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from .base import BasePuzzle, BasePuzzleResult
+from .base import (
+    BasePuzzle,
+    BasePuzzleResult,
+    load_curated_dataset,
+    select_seeded_d4,
+    transform_grid_d4,
+)
 from ..renderer.canvas import THERMAL_WIDTH_DOTS, ThermalBitmap
-
-_DATASET_CACHE = None
-
-
-def _get_towers_dataset() -> Dict[str, Any]:
-    global _DATASET_CACHE
-    if _DATASET_CACHE is None:
-        data_path = os.path.join(os.path.dirname(__file__), "..", "..", "data", "towers_dataset.json")
-        if os.path.exists(data_path):
-            with open(data_path, "r", encoding="utf-8") as f:
-                _DATASET_CACHE = json.load(f)
-        else:
-            _DATASET_CACHE = {}
-    return _DATASET_CACHE
 
 
 def transform_grid(grid: List[List[int]], rot: int, flip: int) -> List[List[int]]:
-    N = len(grid)
-    g = [row[:] for row in grid]
-    if flip:
-        g = [list(reversed(row)) for row in g]
-    for _ in range(rot):
-        new_g = [[0] * N for _ in range(N)]
-        for r in range(N):
-            for c in range(N):
-                new_g[c][N - 1 - r] = g[r][c]
-        g = new_g
-    return g
+    return transform_grid_d4(grid, rot, flip, flip_first=True)
 
 
 def transform_clues(clues: Dict[str, List[int]], rot: int, flip: int) -> Dict[str, List[int]]:
@@ -99,18 +79,13 @@ class TowersPuzzle(BasePuzzle):
         cfg = self.DIFFICULTY_CONFIGS[diff_key]
         size = cfg["size"]
 
-        dataset = _get_towers_dataset()
+        dataset = load_curated_dataset("towers_dataset.json") or {}
         puzzles = dataset.get(diff_key, [])
 
         if not puzzles:
             raise RuntimeError(f"No curated Towers puzzles found for difficulty '{diff_key}'")
 
-        if seed is not None:
-            idx = (seed // 8) % len(puzzles)
-            d4_op = seed % 8
-        else:
-            idx = random.randint(0, len(puzzles) - 1)
-            d4_op = random.randint(0, 7)
+        idx, d4_op = select_seeded_d4(puzzles, seed)
 
         rot = d4_op % 4
         flip = d4_op // 4
@@ -175,16 +150,6 @@ class TowersPuzzle(BasePuzzle):
         lines.append(bot_str)
 
         return "\n".join(lines)
-
-    def format_solution_key(self, puzzle_data: Union[BasePuzzleResult, Dict[str, Any]]) -> List[str]:
-        sol = puzzle_data.get("solution", [])
-        if not sol:
-            return []
-
-        lines = []
-        for row in sol:
-            lines.append("      " + " ".join(str(v) for v in row))
-        return lines
 
     def render_raster(
         self,

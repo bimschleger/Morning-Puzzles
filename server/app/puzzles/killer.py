@@ -4,30 +4,20 @@ Encapsulates generation, canonical instruction formatting, ASCII layout,
 solution key formatting, and 576-dot thermal raster rendering.
 """
 
-import os
-import json
 import random
 from typing import List, Tuple, Dict, Any, Optional, Set, Union
 
-from .base import BasePuzzle, BasePuzzleResult
+from .base import (
+    BasePuzzle,
+    BasePuzzleResult,
+    load_curated_dataset,
+    transform_coord_d4,
+    transform_grid_d4,
+)
 from ..renderer.canvas import (
     THERMAL_WIDTH_DOTS,
     ThermalBitmap,
 )
-
-DATA_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data", "killer_dataset.json")
-_KILLER_DATASET = None
-
-
-def _get_killer_dataset():
-    global _KILLER_DATASET
-    if _KILLER_DATASET is None and os.path.exists(DATA_PATH):
-        try:
-            with open(DATA_PATH, "r") as f:
-                _KILLER_DATASET = json.load(f)
-        except Exception:
-            _KILLER_DATASET = None
-    return _KILLER_DATASET
 
 
 class KillerPuzzle(BasePuzzle):
@@ -66,7 +56,7 @@ class KillerPuzzle(BasePuzzle):
             random.seed(seed)
 
         diff_key = difficulty.lower()
-        dataset = _get_killer_dataset()
+        dataset = load_curated_dataset("killer_dataset.json")
         tier_key = "extreme" if diff_key in ("extreme", "hard") else ("easy" if diff_key == "easy" else "medium")
 
         if dataset and tier_key in dataset and len(dataset[tier_key]) > 0:
@@ -253,15 +243,6 @@ class KillerPuzzle(BasePuzzle):
 
         return "\n".join(lines)
 
-    def format_solution_key(self, puzzle_data: Union[BasePuzzleResult, Dict[str, Any]]) -> List[str]:
-        sol = puzzle_data.get("solution", [])
-        if not sol:
-            return []
-        lines = []
-        for row in sol:
-            lines.append("      " + " ".join(str(c) for c in row))
-        return lines
-
     def render_raster(
         self,
         puzzle_data: Union[BasePuzzleResult, Dict[str, Any]],
@@ -350,32 +331,12 @@ class KillerPuzzle(BasePuzzle):
     ) -> Tuple[List[Dict[str, Any]], List[List[int]]]:
         rot = transform % 4
         flip = (transform >= 4)
-        cur_sol = [row[:] for row in solution]
-        for _ in range(rot):
-            nxt_sol = [[0] * size for _ in range(size)]
-            for r in range(size):
-                for c in range(size):
-                    nxt_sol[c][size - 1 - r] = cur_sol[r][c]
-            cur_sol = nxt_sol
-        if flip:
-            nxt_sol = [[0] * size for _ in range(size)]
-            for r in range(size):
-                for c in range(size):
-                    nxt_sol[r][size - 1 - c] = cur_sol[r][c]
-            cur_sol = nxt_sol
+        cur_sol = transform_grid_d4(solution, rot, flip)
 
         letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         new_cages = []
         for i, cg in enumerate(cages):
-            cells = []
-            for cell in cg["cells"]:
-                r, c = cell[0], cell[1]
-                tr, tc = r, c
-                for _ in range(rot):
-                    tr, tc = tc, size - 1 - tr
-                if flip:
-                    tc = size - 1 - tc
-                cells.append((tr, tc))
+            cells = [transform_coord_d4(cell[0], cell[1], size, rot, flip) for cell in cg["cells"]]
             new_cages.append({
                 "id": i,
                 "label": letters[i % len(letters)],

@@ -6,19 +6,19 @@ solution key representation, and 576-dot thermal raster rendering.
 """
 
 import os
-import json
 import random
 import math
 import textwrap
 from typing import List, Dict, Any, Optional, Union, Tuple, Set
 
-from .base import BasePuzzle, BasePuzzleResult
+from .base import BasePuzzle, BasePuzzleResult, load_curated_dataset
 from ..renderer.canvas import (
     THERMAL_WIDTH_DOTS,
     ThermalBitmap,
 )
 
 DATA_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "data", "wheel_dictionary.json")
+_WHEEL_MASKS_CACHE: Dict[str, List[Tuple[str, int]]] = {}
 
 # Embedded emergency fallbacks if JSON file cannot be located
 FALLBACK_PUZZLES: Dict[str, List[Dict[str, Any]]] = {
@@ -121,19 +121,17 @@ class WheelGenerator:
         self._load_data()
 
     def _load_data(self):
-        if os.path.exists(self.data_path):
-            try:
-                with open(self.data_path, "r", encoding="utf-8") as f:
-                    data = json.load(f)
-                    puzzles = data.get("puzzles", [])
-                    for p in puzzles:
-                        diff = p.get("difficulty", "medium").lower()
-                        if diff in self.puzzles_by_diff:
-                            self.puzzles_by_diff[diff].append(p)
-                    self.dictionary = data.get("dictionary", [])
-                    self._dict_masks = [(w, word_to_mask(w)) for w in self.dictionary]
-            except Exception:
-                pass
+        data = load_curated_dataset(self.data_path)
+        if isinstance(data, dict):
+            puzzles = data.get("puzzles", [])
+            for p in puzzles:
+                diff = p.get("difficulty", "medium").lower()
+                if diff in self.puzzles_by_diff:
+                    self.puzzles_by_diff[diff].append(p)
+            self.dictionary = data.get("dictionary", [])
+            if self.data_path not in _WHEEL_MASKS_CACHE:
+                _WHEEL_MASKS_CACHE[self.data_path] = [(w, word_to_mask(w)) for w in self.dictionary]
+            self._dict_masks = _WHEEL_MASKS_CACHE[self.data_path]
 
         # Ensure fallbacks if empty
         for diff in ("easy", "medium", "hard"):

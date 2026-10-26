@@ -1,5 +1,6 @@
 #include "QueensGen.h"
 #include "StarsDataset.h"
+#include "GeneratorUtils.h"
 #include "../printer/EscPosPrinter.h"
 #include "../printer/ThermalCanvas.h"
 
@@ -86,9 +87,7 @@ void QueensGen::generate(QueensDifficulty difficulty, uint32_t seed) {
     // Unpack 4-bit nibble regions (2 cells per byte)
     for (uint8_t r = 0; r < _size; r++) {
         for (uint8_t c = 0; c < _size; c++) {
-            uint8_t idx = r * _size + c;
-            uint8_t byteVal = pgm_read_byte(regionsData + (idx >> 1));
-            _regions[r][c] = (idx & 1) ? (byteVal & 0x0F) : (byteVal >> 4);
+            _regions[r][c] = mp_unpack_nibble_pgm(regionsData, r * _size + c);
         }
     }
 

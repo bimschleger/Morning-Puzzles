@@ -12,27 +12,15 @@ Morning Puzzles standard implementation adhering to Rules 1-16:
 - Rule 13: Clean playable cells, no phantom dots
 """
 
-import json
-import os
-import random
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from .base import BasePuzzle, BasePuzzleResult
+from .base import (
+    BasePuzzle,
+    BasePuzzleResult,
+    load_curated_dataset,
+    select_seeded_d4,
+)
 from ..renderer.canvas import THERMAL_WIDTH_DOTS, ThermalBitmap
-
-_DATASET_CACHE = None
-
-
-def _get_inequality_dataset() -> Dict[str, Any]:
-    global _DATASET_CACHE
-    if _DATASET_CACHE is None:
-        data_path = os.path.join(os.path.dirname(__file__), "..", "..", "data", "inequality_dataset.json")
-        if os.path.exists(data_path):
-            with open(data_path, "r", encoding="utf-8") as f:
-                _DATASET_CACHE = json.load(f)
-        else:
-            _DATASET_CACHE = {}
-    return _DATASET_CACHE
 
 
 def transform_inequality(
@@ -149,18 +137,13 @@ class InequalityPuzzle(BasePuzzle):
         cfg = self.DIFFICULTY_CONFIGS[diff_key]
         size = cfg["size"]
 
-        dataset = _get_inequality_dataset()
+        dataset = load_curated_dataset("inequality_dataset.json") or {}
         puzzles = dataset.get(diff_key, [])
 
         if not puzzles:
             raise RuntimeError(f"No curated Inequality puzzles found for difficulty '{diff_key}'")
 
-        if seed is not None:
-            idx = (seed // 8) % len(puzzles)
-            d4_op = seed % 8
-        else:
-            idx = random.randint(0, len(puzzles) - 1)
-            d4_op = random.randint(0, 7)
+        idx, d4_op = select_seeded_d4(puzzles, seed)
 
         base_p = puzzles[idx]
         givens, edges_h, edges_v, sol = transform_inequality(
@@ -247,16 +230,6 @@ class InequalityPuzzle(BasePuzzle):
                 lines.append("      " + " ".join(v_items))
 
         return "\n".join(lines)
-
-    def format_solution_key(self, puzzle_data: Union[BasePuzzleResult, Dict[str, Any]]) -> List[str]:
-        sol = puzzle_data.get("solution", [])
-        if not sol:
-            return []
-
-        lines = []
-        for row in sol:
-            lines.append("      " + " ".join(str(v) for v in row))
-        return lines
 
     def render_raster(
         self,

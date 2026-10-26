@@ -1,5 +1,6 @@
 #include "KillerGen.h"
 #include "KillerDataset.h"
+#include "GeneratorUtils.h"
 #include "EscPosPrinter.h"
 #include "ThermalCanvas.h"
 
@@ -63,11 +64,8 @@ void KillerGen::generate(KillerDifficulty difficulty, uint32_t seed) {
         const Killer4x4Entry* entry = &KILLER_EASY_DATASET[puzzleIdx];
         _numCages = pgm_read_byte(&entry->num_cages);
         for (uint8_t i = 0; i < 16; i++) {
-            uint8_t mapByte = pgm_read_byte(&entry->cage_map[i / 2]);
-            _cageMap[i / 4][i % 4] = (i % 2 == 0) ? (mapByte >> 4) : (mapByte & 0x0F);
-
-            uint8_t solByte = pgm_read_byte(&entry->solution[i / 2]);
-            _solution[i / 4][i % 4] = (i % 2 == 0) ? (solByte >> 4) : (solByte & 0x0F);
+            _cageMap[i / 4][i % 4] = mp_unpack_nibble_pgm(entry->cage_map, i);
+            _solution[i / 4][i % 4] = mp_unpack_nibble_pgm(entry->solution, i);
         }
         for (uint8_t c = 0; c < _numCages && c < MAX_CAGES; c++) {
             _cageSums[c] = pgm_read_byte(&entry->cage_sums[c]);
@@ -83,11 +81,8 @@ void KillerGen::generate(KillerDifficulty difficulty, uint32_t seed) {
         const Killer6x6Entry* entry = &KILLER_EXTREME_DATASET[puzzleIdx];
         _numCages = pgm_read_byte(&entry->num_cages);
         for (uint8_t i = 0; i < 36; i++) {
-            uint8_t mapByte = pgm_read_byte(&entry->cage_map[i / 2]);
-            _cageMap[i / 6][i % 6] = (i % 2 == 0) ? (mapByte >> 4) : (mapByte & 0x0F);
-
-            uint8_t solByte = pgm_read_byte(&entry->solution[i / 2]);
-            _solution[i / 6][i % 6] = (i % 2 == 0) ? (solByte >> 4) : (solByte & 0x0F);
+            _cageMap[i / 6][i % 6] = mp_unpack_nibble_pgm(entry->cage_map, i);
+            _solution[i / 6][i % 6] = mp_unpack_nibble_pgm(entry->solution, i);
         }
         for (uint8_t c = 0; c < _numCages && c < MAX_CAGES; c++) {
             _cageSums[c] = pgm_read_byte(&entry->cage_sums[c]);
@@ -102,11 +97,8 @@ void KillerGen::generate(KillerDifficulty difficulty, uint32_t seed) {
         const Killer4x4Entry* entry = &KILLER_MEDIUM_DATASET[puzzleIdx];
         _numCages = pgm_read_byte(&entry->num_cages);
         for (uint8_t i = 0; i < 16; i++) {
-            uint8_t mapByte = pgm_read_byte(&entry->cage_map[i / 2]);
-            _cageMap[i / 4][i % 4] = (i % 2 == 0) ? (mapByte >> 4) : (mapByte & 0x0F);
-
-            uint8_t solByte = pgm_read_byte(&entry->solution[i / 2]);
-            _solution[i / 4][i % 4] = (i % 2 == 0) ? (solByte >> 4) : (solByte & 0x0F);
+            _cageMap[i / 4][i % 4] = mp_unpack_nibble_pgm(entry->cage_map, i);
+            _solution[i / 4][i % 4] = mp_unpack_nibble_pgm(entry->solution, i);
         }
         for (uint8_t c = 0; c < _numCages && c < MAX_CAGES; c++) {
             _cageSums[c] = pgm_read_byte(&entry->cage_sums[c]);

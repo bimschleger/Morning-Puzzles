@@ -120,15 +120,6 @@ class BinaryPuzzle(BasePuzzle):
             lines.append(sep)
         return "\n".join(lines)
 
-    def format_solution_key(self, puzzle_data: Union[BasePuzzleResult, Dict[str, Any]]) -> List[str]:
-        sol = puzzle_data.get("solution", [])
-        if not sol:
-            return []
-        lines = []
-        for row in sol:
-            lines.append("      " + " ".join(str(c) for c in row))
-        return lines
-
     def render_raster(
         self,
         puzzle_data: Union[BasePuzzleResult, Dict[str, Any]],

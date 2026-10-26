@@ -4,34 +4,24 @@ Encapsulates generation, canonical instruction formatting, ASCII layout,
 solution key formatting, and 576-dot thermal raster rendering.
 """
 
-import os
-import json
 import random
 import string
 import textwrap
 from typing import List, Tuple, Dict, Any, Optional, Union
 
-from .base import BasePuzzle, BasePuzzleResult
+from .base import BasePuzzle, BasePuzzleResult, load_curated_dataset
 from ..renderer.canvas import (
     THERMAL_WIDTH_DOTS,
     ThermalBitmap,
 )
-
-DATA_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "data", "cryptograms.json")
 
 
 class CryptogramPuzzle(BasePuzzle):
     """Cryptogram letter substitution puzzle plugin."""
 
     def __init__(self, data_path: Optional[str] = None):
-        path = data_path or DATA_PATH
-        self.puzzles: List[Dict[str, Any]] = []
-        if os.path.exists(path):
-            try:
-                with open(path, "r", encoding="utf-8") as f:
-                    self.puzzles = json.load(f)
-            except Exception as e:
-                print(f"[CryptogramPuzzle] Warning: Could not load {path}: {e}")
+        loaded = load_curated_dataset(data_path or "cryptograms.json")
+        self.puzzles: List[Dict[str, Any]] = list(loaded) if isinstance(loaded, list) else []
 
         if not self.puzzles:
             self.puzzles = [

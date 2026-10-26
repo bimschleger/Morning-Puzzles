@@ -110,15 +110,6 @@ class SudokuPuzzle(BasePuzzle):
             lines.append(" ".join(row_chars))
         return "\n".join(lines)
 
-    def format_solution_key(self, puzzle_data: Union[BasePuzzleResult, Dict[str, Any]]) -> List[str]:
-        sol = puzzle_data.get("solution", [])
-        if not sol:
-            return []
-        lines = []
-        for row in sol:
-            lines.append("      " + " ".join(str(x) for x in row))
-        return lines
-
     def render_raster(
         self,
         puzzle_data: Union[BasePuzzleResult, Dict[str, Any]],

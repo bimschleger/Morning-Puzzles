@@ -6,13 +6,12 @@ solution key representation, and 576-dot thermal raster rendering.
 """
 
 import os
-import json
 import random
 import textwrap
 from collections import deque, defaultdict
 from typing import List, Tuple, Dict, Any, Optional, Union
 
-from .base import BasePuzzle, BasePuzzleResult
+from .base import BasePuzzle, BasePuzzleResult, load_curated_dataset
 from ..renderer.canvas import (
     THERMAL_WIDTH_DOTS,
     ThermalBitmap,
@@ -100,23 +99,18 @@ class LadderGenerator:
         if seed is not None:
             random.seed(seed)
 
-        path = data_path or DATA_PATH
         self.words4: List[str] = []
         self.words5: List[str] = []
         self.curated: Dict[str, List[Dict[str, Any]]] = FALLBACK_LADDERS
 
-        if os.path.exists(path):
-            try:
-                with open(path, "r", encoding="utf-8") as f:
-                    data = json.load(f)
-                    self.words4 = data.get("words4", [])
-                    self.words5 = data.get("words5", [])
-                    if "curated" in data:
-                        self.curated = data["curated"]
-                    elif "easy" in data and "medium" in data:
-                        self.curated = data
-            except Exception as e:
-                print(f"[LadderGenerator] Warning: Could not load {path}: {e}")
+        data = load_curated_dataset(data_path or "ladder_words.json")
+        if isinstance(data, dict):
+            self.words4 = data.get("words4", [])
+            self.words5 = data.get("words5", [])
+            if "curated" in data:
+                self.curated = data["curated"]
+            elif "easy" in data and "medium" in data:
+                self.curated = data
 
         # Lazy graphs
         self._graph4: Optional[Dict[str, List[str]]] = None

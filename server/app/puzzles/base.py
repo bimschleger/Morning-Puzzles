@@ -8,6 +8,103 @@ Defines the standard contracts for all puzzle types:
 from abc import ABC, abstractmethod
 from typing import Dict, Any, List, Optional, Union, Tuple
 import collections.abc
+import json
+import os
+import random
+
+_DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data"))
+_CURATED_DATASET_CACHE: Dict[str, Any] = {}
+
+
+def load_curated_dataset(filename_or_path: str) -> Any:
+    """
+    Loads and caches a canonical JSON dataset from server/data/<filename>
+    (or an explicit file path). Returns None if the file does not exist or fails to load.
+    """
+    if os.path.isabs(filename_or_path) or os.sep in filename_or_path:
+        resolved = os.path.abspath(filename_or_path)
+    else:
+        resolved = os.path.join(_DATA_DIR, filename_or_path)
+
+    if resolved in _CURATED_DATASET_CACHE:
+        return _CURATED_DATASET_CACHE[resolved]
+
+    if os.path.exists(resolved):
+        try:
+            with open(resolved, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            _CURATED_DATASET_CACHE[resolved] = data
+            return data
+        except Exception:
+            return None
+    return None
+
+
+def select_seeded_d4(puzzles: List[Any], seed: Optional[int] = None) -> Tuple[int, int]:
+    """
+    Selects a base puzzle index and D4 dihedral transform (0..7) deterministically
+    from seed, or randomly if seed is None.
+    """
+    if seed is not None:
+        return (seed // 8) % len(puzzles), seed % 8
+    return random.randint(0, len(puzzles) - 1), random.randint(0, 7)
+
+
+def transform_coord_d4(
+    r: int,
+    c: int,
+    size: int,
+    rot: int,
+    flip: Union[bool, int],
+    flip_first: bool = False,
+) -> Tuple[int, int]:
+    """
+    Applies a D4 dihedral symmetry transformation (rot 90-deg CW rotations and
+    horizontal flip) to a 2D grid coordinate (r, c).
+    """
+    tr, tc = r, c
+    if flip_first and flip:
+        tc = size - 1 - tc
+    for _ in range(rot % 4):
+        tr, tc = tc, size - 1 - tr
+    if not flip_first and flip:
+        tc = size - 1 - tc
+    return tr, tc
+
+
+def transform_grid_d4(
+    grid: List[List[int]],
+    rot: int,
+    flip: Union[bool, int],
+    flip_first: bool = False,
+) -> List[List[int]]:
+    """
+    Applies a D4 dihedral symmetry transformation (rot 90-deg CW rotations and
+    horizontal flip) to a square 2D grid.
+    """
+    n = len(grid)
+    cur = [row[:] for row in grid]
+    if flip_first and flip:
+        cur = [list(reversed(row)) for row in cur]
+    for _ in range(rot % 4):
+        nxt = [[0] * n for _ in range(n)]
+        for r in range(n):
+            for c in range(n):
+                nxt[c][n - 1 - r] = cur[r][c]
+        cur = nxt
+    if not flip_first and flip:
+        cur = [list(reversed(row)) for row in cur]
+    return cur
+
+
+def format_grid_solution(sol: List[List[Any]]) -> List[str]:
+    """
+    Formats a 2D solution matrix into 6-space indented monospaced lines
+    conforming to Rule 4 Solution Key layout standards.
+    """
+    if not sol:
+        return []
+    return ["      " + " ".join(str(c) for c in row) for row in sol]
 
 
 class BasePuzzleResult(collections.abc.Mapping):
@@ -132,15 +229,15 @@ class BasePuzzle(ABC):
         """Returns the monospaced ASCII representation of the unsolved puzzle."""
         pass
 
-    @abstractmethod
     def format_solution_key(self, puzzle_data: Union[BasePuzzleResult, Dict[str, Any]]) -> List[str]:
         """
         Returns the monospaced lines for the solution key block.
         - 2D ASCII grids must be pre-indented by exactly 6 spaces ('      ')
         - Coordinate and word lists must wrap to <= 46 characters
         - Standalone subtitle is handled by the composer, do NOT include subtitle here.
+        Defaults to formatting puzzle_data['solution'] as a 6-space indented 2D grid.
         """
-        pass
+        return format_grid_solution(puzzle_data.get("solution", []))
 
     @abstractmethod
     def render_raster(
