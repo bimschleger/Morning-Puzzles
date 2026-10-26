@@ -14,13 +14,8 @@ from typing import List, Tuple, Dict, Any, Optional, Union
 from .base import BasePuzzle, BasePuzzleResult
 from ..renderer.canvas import (
     THERMAL_WIDTH_DOTS,
-    HAS_PILLOW,
-    pil_to_escpos,
     ThermalBitmap,
 )
-
-if HAS_PILLOW:
-    from PIL import Image, ImageDraw, ImageFont
 
 DATA_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "data", "cryptograms.json")
 

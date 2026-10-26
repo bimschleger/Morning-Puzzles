@@ -242,13 +242,9 @@ class BridgesPuzzle(BasePuzzle):
             cx = padding + c * step
             cy = padding + r * step
 
-            tb.fill_rect(cx - island_radius, cy - island_radius, island_radius * 2, island_radius * 2, color=0)
-            tb.draw_circle(cx, cy, island_radius, thickness=3, color=1)
-
-            char_scale = 3 if island_radius >= 20 else 2
-            char_w = 6 * char_scale
-            char_h = 7 * char_scale
-            tb.draw_char(cx - char_w // 2, cy - char_h // 2, str(count), scale=char_scale, color=1)
+            tb.fill_circle(cx, cy, island_radius, color=0)
+            tb.draw_circle(cx, cy, island_radius, thickness=2, color=1)
+            tb.draw_char(cx - 5, cy - 7, str(count), scale=2, color=1)
 
         return tb.to_escpos()
 

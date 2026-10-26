@@ -11,12 +11,7 @@ from .base import BasePuzzle, BasePuzzleResult
 from ..renderer.canvas import (
     THERMAL_WIDTH_DOTS,
     ThermalBitmap,
-    HAS_PILLOW,
-    image_to_escpos_raster,
 )
-
-if HAS_PILLOW:
-    from PIL import Image, ImageDraw, ImageFont
 
 
 class SlitherlinkSolver:

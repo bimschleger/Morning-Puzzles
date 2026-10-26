@@ -7,19 +7,13 @@ solution key formatting, and 576-dot thermal raster rendering.
 import os
 import json
 import random
-from collections import defaultdict
 from typing import List, Tuple, Dict, Any, Optional, Set, Union
 
 from .base import BasePuzzle, BasePuzzleResult
 from ..renderer.canvas import (
     THERMAL_WIDTH_DOTS,
-    HAS_PILLOW,
-    pil_to_escpos,
     ThermalBitmap,
 )
-
-if HAS_PILLOW:
-    from PIL import Image, ImageDraw, ImageFont
 
 DATA_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data", "killer_dataset.json")
 _KILLER_DATASET = None
@@ -285,124 +279,6 @@ class KillerPuzzle(BasePuzzle):
         total_h = padding + actual_board + padding
         inset = 10 if size == 4 else 8
 
-        h_segments = []
-        v_segments = []
-        for cg in cages:
-            cell_set = {(r, c) for r, c in cg.get("cells", [])}
-
-            def in_cage(r: int, c: int) -> bool:
-                return (r, c) in cell_set
-
-            for r, c in cg.get("cells", []):
-                x0 = padding + c * c_size
-                x1 = x0 + c_size
-                y0 = padding + r * c_size
-                y1 = y0 + c_size
-
-                if not in_cage(r - 1, c):
-                    y = y0 + inset
-                    x_s = x0 + inset if not in_cage(r, c - 1) else (x0 - inset if in_cage(r - 1, c - 1) else x0)
-                    x_e = x1 - inset if not in_cage(r, c + 1) else (x1 + inset if in_cage(r - 1, c + 1) else x1)
-                    h_segments.append((min(x_s, x_e), max(x_s, x_e), y))
-
-                if not in_cage(r + 1, c):
-                    y = y1 - inset
-                    x_s = x0 + inset if not in_cage(r, c - 1) else (x0 - inset if in_cage(r + 1, c - 1) else x0)
-                    x_e = x1 - inset if not in_cage(r, c + 1) else (x1 + inset if in_cage(r + 1, c + 1) else x1)
-                    h_segments.append((min(x_s, x_e), max(x_s, x_e), y))
-
-                if not in_cage(r, c - 1):
-                    x = x0 + inset
-                    y_s = y0 + inset if not in_cage(r - 1, c) else (y0 - inset if in_cage(r - 1, c - 1) else y0)
-                    y_e = y1 - inset if not in_cage(r + 1, c) else (y1 + inset if in_cage(r + 1, c - 1) else y1)
-                    v_segments.append((x, min(y_s, y_e), max(y_s, y_e)))
-
-                if not in_cage(r, c + 1):
-                    x = x1 - inset
-                    y_s = y0 + inset if not in_cage(r - 1, c) else (y0 - inset if in_cage(r - 1, c + 1) else y0)
-                    y_e = y1 - inset if not in_cage(r + 1, c) else (y1 + inset if in_cage(r + 1, c + 1) else y1)
-                    v_segments.append((x, min(y_s, y_e), max(y_s, y_e)))
-
-        h_by_y = defaultdict(list)
-        for x1, x2, y in h_segments:
-            h_by_y[y].append((x1, x2))
-        merged_h = []
-        for y, intervals in h_by_y.items():
-            intervals.sort()
-            cur_s, cur_e = intervals[0]
-            for s, e in intervals[1:]:
-                if s <= cur_e:
-                    cur_e = max(cur_e, e)
-                else:
-                    merged_h.append((cur_s, cur_e, y))
-                    cur_s, cur_e = s, e
-            merged_h.append((cur_s, cur_e, y))
-
-        v_by_x = defaultdict(list)
-        for x, y1, y2 in v_segments:
-            v_by_x[x].append((y1, y2))
-        merged_v = []
-        for x, intervals in v_by_x.items():
-            intervals.sort()
-            cur_s, cur_e = intervals[0]
-            for s, e in intervals[1:]:
-                if s <= cur_e:
-                    cur_e = max(cur_e, e)
-                else:
-                    merged_v.append((x, cur_s, cur_e))
-                    cur_s, cur_e = s, e
-            merged_v.append((x, cur_s, cur_e))
-
-        dash_len = 8
-        gap_len = 6
-
-        if HAS_PILLOW:
-            img = Image.new("L", (target_width, total_h), 255)
-            draw = ImageDraw.Draw(img)
-
-            try:
-                font_clue = ImageFont.truetype("Courier.ttf", max(13, int(c_size * 0.16)))
-            except IOError:
-                font_clue = ImageFont.load_default()
-
-            draw.rectangle([padding, padding, padding + actual_board, padding + actual_board], outline=0, width=4)
-
-            for r in range(1, size):
-                y = padding + r * c_size
-                thick = 4 if (r % box_r == 0) else 1
-                draw.line([padding, y, padding + actual_board, y], fill=0, width=thick)
-
-            for c in range(1, size):
-                x = padding + c * c_size
-                thick = 4 if (c % box_c == 0) else 1
-                draw.line([x, padding, x, padding + actual_board], fill=0, width=thick)
-
-            for x1, x2, y in merged_h:
-                x = x1
-                while x < x2:
-                    seg = min(dash_len, x2 - x)
-                    draw.line([x, y, x + seg, y], fill=0, width=2)
-                    x += dash_len + gap_len
-
-            for x, y1, y2 in merged_v:
-                y = y1
-                while y < y2:
-                    seg = min(dash_len, y2 - y)
-                    draw.line([x, y, x, y + seg], fill=0, width=2)
-                    y += dash_len + gap_len
-
-            for cg in cages:
-                cells = sorted(cg.get("cells", []))
-                if not cells:
-                    continue
-                r0, c0 = cells[0]
-                tx = padding + c0 * c_size + inset + 8
-                ty = padding + r0 * c_size + inset + 7
-                draw.text((tx, ty), str(cg.get("sum", "")), fill=0, font=font_clue)
-
-            return pil_to_escpos(img)
-
-        # Pure Python ThermalBitmap Fallback
         tb = ThermalBitmap(target_width, total_h)
         tb.draw_rect(padding, padding, actual_board, actual_board, thickness=4)
 
@@ -416,28 +292,52 @@ class KillerPuzzle(BasePuzzle):
             thick = 4 if (c % box_c == 0) else 2
             tb.draw_vline(x, padding, actual_board, thickness=thick)
 
-        for x1, x2, y in merged_h:
-            x = x1
-            while x < x2:
-                seg = min(dash_len, x2 - x)
-                tb.draw_hline(x, y, seg, thickness=2)
-                x += dash_len + gap_len
-
-        for x, y1, y2 in merged_v:
-            y = y1
-            while y < y2:
-                seg = min(dash_len, y2 - y)
-                tb.draw_vline(x, y, seg, thickness=2)
-                y += dash_len + gap_len
+        dash_len = 8
+        gap_len = 6
+        step = dash_len + gap_len
 
         for cg in cages:
+            cell_set = {(r, c) for r, c in cg.get("cells", [])}
+            for r, c in cg.get("cells", []):
+                x0 = padding + c * c_size + inset
+                y0 = padding + r * c_size + inset
+                x1 = padding + (c + 1) * c_size - inset
+                y1 = padding + (r + 1) * c_size - inset
+
+                if (r - 1, c) not in cell_set:
+                    x = x0
+                    while x < x1:
+                        seg = min(dash_len, x1 - x)
+                        tb.draw_hline(x, y0, seg, thickness=2)
+                        x += step
+
+                if (r + 1, c) not in cell_set:
+                    x = x0
+                    while x < x1:
+                        seg = min(dash_len, x1 - x)
+                        tb.draw_hline(x, y1, seg, thickness=2)
+                        x += step
+
+                if (r, c - 1) not in cell_set:
+                    y = y0
+                    while y < y1:
+                        seg = min(dash_len, y1 - y)
+                        tb.draw_vline(x0, y, seg, thickness=2)
+                        y += step
+
+                if (r, c + 1) not in cell_set:
+                    y = y0
+                    while y < y1:
+                        seg = min(dash_len, y1 - y)
+                        tb.draw_vline(x1, y, seg, thickness=2)
+                        y += step
+
             cells = sorted(cg.get("cells", []))
-            if not cells:
-                continue
-            r0, c0 = cells[0]
-            tx = padding + c0 * c_size + inset + 8
-            ty = padding + r0 * c_size + inset + 8
-            tb.draw_text(tx, ty, str(cg.get("sum", "")), scale=2, color=1)
+            if cells:
+                r0, c0 = cells[0]
+                tx = padding + c0 * c_size + inset + 8
+                ty = padding + r0 * c_size + inset + 8
+                tb.draw_text(tx, ty, str(cg.get("sum", "")), scale=2, color=1)
 
         return tb.to_escpos()
 

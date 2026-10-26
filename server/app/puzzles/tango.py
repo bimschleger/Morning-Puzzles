@@ -214,42 +214,8 @@ class TangoPuzzle(BasePuzzle):
 
         for i in range(1, size):
             pos = padding + i * cell_size
-            tb.draw_hline(padding, pos, cell_size * size, thickness=2)
-            tb.draw_vline(pos, padding, cell_size * size, thickness=2)
-
-        for r in range(size):
-            for c in range(size - 1):
-                e = edges_h[r][c] if r < len(edges_h) and c < len(edges_h[r]) else 0
-                if e in (1, 2):
-                    cx = padding + (c + 1) * cell_size
-                    cy = padding + r * cell_size + cell_size // 2
-                    tb.fill_rect(cx - 8, cy - 8, 17, 17, color=0)
-                    if e == 1:
-                        tb.draw_hline(cx - 5, cy - 3, 11, thickness=2, color=1)
-                        tb.draw_hline(cx - 5, cy + 2, 11, thickness=2, color=1)
-                    elif e == 2:
-                        for d in range(-4, 5):
-                            tb.set_pixel(cx + d, cy + d, 1)
-                            tb.set_pixel(cx + d, cy + d + 1, 1)
-                            tb.set_pixel(cx + d, cy - d, 1)
-                            tb.set_pixel(cx + d, cy - d + 1, 1)
-
-        for r in range(size - 1):
-            for c in range(size):
-                e = edges_v[r][c] if r < len(edges_v) and c < len(edges_v[r]) else 0
-                if e in (1, 2):
-                    cx = padding + c * cell_size + cell_size // 2
-                    cy = padding + (r + 1) * cell_size
-                    tb.fill_rect(cx - 8, cy - 8, 17, 17, color=0)
-                    if e == 1:
-                        tb.draw_hline(cx - 5, cy - 3, 11, thickness=2, color=1)
-                        tb.draw_hline(cx - 5, cy + 2, 11, thickness=2, color=1)
-                    elif e == 2:
-                        for d in range(-4, 5):
-                            tb.set_pixel(cx + d, cy + d, 1)
-                            tb.set_pixel(cx + d, cy + d + 1, 1)
-                            tb.set_pixel(cx + d, cy - d, 1)
-                            tb.set_pixel(cx + d, cy - d + 1, 1)
+            tb.draw_hline(padding, pos, cell_size * size, thickness=1)
+            tb.draw_vline(pos, padding, cell_size * size, thickness=1)
 
         for r in range(size):
             for c in range(size):
@@ -258,6 +224,24 @@ class TangoPuzzle(BasePuzzle):
                     cx = padding + c * cell_size + (cell_size - 18) // 2
                     cy = padding + r * cell_size + (cell_size - 21) // 2
                     tb.draw_char(cx, cy, str(val), scale=3)
+
+        for r in range(size):
+            for c in range(size - 1):
+                e = edges_h[r][c] if r < len(edges_h) and c < len(edges_h[r]) else 0
+                if e in (1, 2):
+                    x = padding + (c + 1) * cell_size
+                    y = padding + r * cell_size + cell_size // 2
+                    tb.fill_rect(x - 8, y - 8, 16, 16, color=0)
+                    tb.draw_char(x - 5, y - 7, "=" if e == 1 else "X", scale=2, color=1)
+
+        for r in range(size - 1):
+            for c in range(size):
+                e = edges_v[r][c] if r < len(edges_v) and c < len(edges_v[r]) else 0
+                if e in (1, 2):
+                    x = padding + c * cell_size + cell_size // 2
+                    y = padding + (r + 1) * cell_size
+                    tb.fill_rect(x - 8, y - 8, 16, 16, color=0)
+                    tb.draw_char(x - 5, y - 7, "=" if e == 1 else "X", scale=2, color=1)
 
         return tb.to_escpos()
 

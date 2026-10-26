@@ -10,13 +10,8 @@ from typing import List, Tuple, Optional, Dict, Any, Union
 from .base import BasePuzzle, BasePuzzleResult
 from ..renderer.canvas import (
     THERMAL_WIDTH_DOTS,
-    HAS_PILLOW,
-    pil_to_escpos,
     ThermalBitmap,
 )
-
-if HAS_PILLOW:
-    from PIL import Image, ImageDraw, ImageFont
 
 
 class SudokuPuzzle(BasePuzzle):

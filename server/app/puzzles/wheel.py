@@ -15,13 +15,8 @@ from typing import List, Dict, Any, Optional, Union, Tuple, Set
 from .base import BasePuzzle, BasePuzzleResult
 from ..renderer.canvas import (
     THERMAL_WIDTH_DOTS,
-    HAS_PILLOW,
-    pil_to_escpos,
     ThermalBitmap,
 )
-
-if HAS_PILLOW:
-    from PIL import Image, ImageDraw, ImageFont
 
 DATA_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "data", "wheel_dictionary.json")
 
@@ -283,7 +278,7 @@ class WheelPuzzle(BasePuzzle):
             outer.append(" ")
 
         o = [str(x).upper() for x in outer[:6]]
-        benchmarks = puzzle_data.get("benchmarks", {"good": 10, "great": 18, "genius": 25})
+        benchmarks = puzzle_data.get("benchmarks") or {}
         b_good = benchmarks.get("good", puzzle_data.get("good", 10))
         b_great = benchmarks.get("great", puzzle_data.get("great", 18))
         b_genius = benchmarks.get("genius", puzzle_data.get("genius", 25))
@@ -366,7 +361,7 @@ class WheelPuzzle(BasePuzzle):
             outer.append(" ")
         outer = [str(x).upper() for x in outer[:6]]
 
-        benchmarks = puzzle_data.get("benchmarks", {"good": 10, "great": 18, "genius": 25})
+        benchmarks = puzzle_data.get("benchmarks") or {}
         b_good = benchmarks.get("good", puzzle_data.get("good", 10))
         b_great = benchmarks.get("great", puzzle_data.get("great", 18))
         b_genius = benchmarks.get("genius", puzzle_data.get("genius", 25))
