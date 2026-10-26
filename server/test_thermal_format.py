@@ -35,6 +35,8 @@ from app.renderer.receipt_rasterizer import (
     render_wheel_raster,
     render_lights_raster,
     render_loop_raster,
+    render_towers_raster,
+    render_inequality_raster,
     THERMAL_WIDTH_DOTS,
     THERMAL_WIDTH_BYTES,
 )
@@ -76,8 +78,8 @@ def test_raster_specifications(bundle):
         ("Wheel", render_wheel_raster, "wheel"),
         ("Lights", render_lights_raster, "lights"),
         ("Loop", render_loop_raster, "loop"),
-        ("Towers", lambda d: DEFAULT_REGISTRY.get("towers").render_raster(d), "towers"),
-        ("Inequality", lambda d: DEFAULT_REGISTRY.get("inequality").render_raster(d), "inequality"),
+        ("Towers", render_towers_raster, "towers"),
+        ("Inequality", render_inequality_raster, "inequality"),
     ]
 
     for name, fn, key in rasterizers:

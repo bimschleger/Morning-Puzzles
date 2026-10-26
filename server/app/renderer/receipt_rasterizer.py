@@ -81,3 +81,11 @@ def render_lights_raster(lights_data: Dict[str, Any], target_width: int = THERMA
 def render_loop_raster(loop_data: Dict[str, Any], target_width: int = THERMAL_WIDTH_DOTS) -> bytes:
     return DEFAULT_REGISTRY.get("loop").render_raster(loop_data, target_width=target_width)
 
+
+def render_towers_raster(towers_data: Dict[str, Any], target_width: int = THERMAL_WIDTH_DOTS) -> bytes:
+    return DEFAULT_REGISTRY.get("towers").render_raster(towers_data, target_width=target_width)
+
+
+def render_inequality_raster(inequality_data: Dict[str, Any], target_width: int = THERMAL_WIDTH_DOTS) -> bytes:
+    return DEFAULT_REGISTRY.get("inequality").render_raster(inequality_data, target_width=target_width)
+

@@ -118,6 +118,17 @@ class DailyReceiptComposer:
     def __init__(self, registry: Optional[PuzzleRegistry] = None):
         self.registry = registry or DEFAULT_REGISTRY
 
+    def _get_ordered_plugins(self, daily_data: Dict[str, Any]):
+        """Return registered plugins matching daily_data in explicit puzzle_order or canonical sequence."""
+        if "puzzle_order" in daily_data:
+            plugins = []
+            for pid in daily_data["puzzle_order"]:
+                p = self.registry.get(pid)
+                if p and p.puzzle_id in daily_data:
+                    plugins.append(p)
+            return plugins
+        return [p for p in self.registry.get_all() if p.puzzle_id in daily_data]
+
     def build_receipt(
         self,
         daily_data: Dict[str, Any],
@@ -144,14 +155,7 @@ class DailyReceiptComposer:
             r.align("left")
 
         # 2. Render each puzzle in progressive or canonical sequence
-        if "puzzle_order" in daily_data:
-            plugins = []
-            for pid in daily_data["puzzle_order"]:
-                p = self.registry.get(pid)
-                if p and p.puzzle_id in daily_data:
-                    plugins.append(p)
-        else:
-            plugins = [p for p in self.registry.get_all() if p.puzzle_id in daily_data]
+        plugins = self._get_ordered_plugins(daily_data)
 
         for idx, plugin in enumerate(plugins):
             p_data = daily_data[plugin.puzzle_id]
@@ -213,16 +217,7 @@ class DailyReceiptComposer:
         r.align("left")
         r.println()
 
-        if "puzzle_order" in daily_data:
-            plugins = []
-            for pid in daily_data["puzzle_order"]:
-                p = self.registry.get(pid)
-                if p and p.puzzle_id in daily_data:
-                    plugins.append(p)
-        else:
-            plugins = [p for p in self.registry.get_all() if p.puzzle_id in daily_data]
-
-        for plugin in plugins:
+        for plugin in self._get_ordered_plugins(daily_data):
             p_data = daily_data[plugin.puzzle_id]
             solution_lines = plugin.format_solution_key(p_data)
             if solution_lines:

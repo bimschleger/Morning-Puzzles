@@ -62,7 +62,7 @@ try:
     @app.get("/api/v1/daily-print")
     def get_daily_print(
         format: str = Query("escpos", regex="^(escpos|json)$"),
-        difficulty: str = Query("medium", regex="^(easy|medium|hard|random|staggered|progressive)$"),
+        difficulty: str = Query("medium", regex="^(easy|medium|hard|extreme|random|staggered|progressive)$"),
         style: str = Query("hybrid", regex="^(hybrid|text)$"),
         count: Optional[int] = Query(None)
     ):
@@ -95,7 +95,7 @@ try:
         data = r.get_bytes()
         return Response(content=data, media_type="application/octet-stream")
 
-    # Dynamic puzzle endpoint
+    # Dynamic puzzle endpoint serving all registered games uniformly
     @app.get("/api/v1/puzzles/{puzzle_id}")
     def get_puzzle(puzzle_id: str, difficulty: str = "medium", theme: Optional[str] = None):
         plugin = DEFAULT_REGISTRY.get(puzzle_id)
@@ -105,55 +105,6 @@ try:
         if theme:
             kwargs["theme"] = theme
         return plugin.generate(difficulty=difficulty, **kwargs).to_dict()
-
-    # Explicit endpoints preserved for schema documentation
-    @app.get("/api/v1/puzzles/sudoku")
-    def get_sudoku(difficulty: str = "medium"):
-        return DEFAULT_REGISTRY.get("sudoku").generate(difficulty=difficulty).to_dict()
-
-    @app.get("/api/v1/puzzles/wordsearch")
-    def get_wordsearch(difficulty: str = "medium", theme: Optional[str] = None):
-        return DEFAULT_REGISTRY.get("wordsearch").generate(difficulty=difficulty, theme=theme).to_dict()
-
-    @app.get("/api/v1/puzzles/nonogram")
-    def get_nonogram(difficulty: str = "medium"):
-        return DEFAULT_REGISTRY.get("nonogram").generate(difficulty=difficulty).to_dict()
-
-    @app.get("/api/v1/puzzles/queens")
-    def get_queens(difficulty: str = "medium"):
-        return DEFAULT_REGISTRY.get("queens").generate(difficulty=difficulty).to_dict()
-
-    @app.get("/api/v1/puzzles/jumble")
-    def get_jumble(difficulty: str = "medium"):
-        return DEFAULT_REGISTRY.get("jumble").generate(difficulty=difficulty).to_dict()
-
-    @app.get("/api/v1/puzzles/binary")
-    def get_binary(difficulty: str = "medium"):
-        return DEFAULT_REGISTRY.get("binary").generate(difficulty=difficulty).to_dict()
-
-    @app.get("/api/v1/puzzles/mines")
-    def get_mines(difficulty: str = "medium"):
-        return DEFAULT_REGISTRY.get("mines").generate(difficulty=difficulty).to_dict()
-
-    @app.get("/api/v1/puzzles/tents")
-    def get_tents(difficulty: str = "medium"):
-        return DEFAULT_REGISTRY.get("tents").generate(difficulty=difficulty).to_dict()
-
-    @app.get("/api/v1/puzzles/bridges")
-    def get_bridges(difficulty: str = "medium"):
-        return DEFAULT_REGISTRY.get("bridges").generate(difficulty=difficulty).to_dict()
-
-    @app.get("/api/v1/puzzles/killer")
-    def get_killer(difficulty: str = "medium"):
-        return DEFAULT_REGISTRY.get("killer").generate(difficulty=difficulty).to_dict()
-
-    @app.get("/api/v1/puzzles/cryptogram")
-    def get_cryptogram(difficulty: str = "medium"):
-        return DEFAULT_REGISTRY.get("cryptogram").generate(difficulty=difficulty).to_dict()
-
-    @app.get("/api/v1/puzzles/tango")
-    def get_tango(difficulty: str = "medium"):
-        return DEFAULT_REGISTRY.get("tango").generate(difficulty=difficulty).to_dict()
 
 except ImportError:
     app = None

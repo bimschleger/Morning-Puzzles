@@ -8,7 +8,6 @@ solution key representation, and 576-dot thermal raster rendering.
 import os
 import random
 import textwrap
-from collections import deque, defaultdict
 from typing import List, Tuple, Dict, Any, Optional, Union
 
 from .base import BasePuzzle, BasePuzzleResult, load_curated_dataset
@@ -111,61 +110,6 @@ class LadderGenerator:
                 self.curated = data["curated"]
             elif "easy" in data and "medium" in data:
                 self.curated = data
-
-        # Lazy graphs
-        self._graph4: Optional[Dict[str, List[str]]] = None
-        self._graph5: Optional[Dict[str, List[str]]] = None
-
-    def _build_graph(self, word_len: int) -> Dict[str, List[str]]:
-        words = self.words4 if word_len == 4 else self.words5
-        buckets = defaultdict(list)
-        for w in words:
-            for i in range(word_len):
-                p = w[:i] + "_" + w[i + 1:]
-                buckets[p].append(w)
-
-        adj = defaultdict(list)
-        for p, wlist in buckets.items():
-            for w1 in wlist:
-                for w2 in wlist:
-                    if w1 != w2:
-                        adj[w1].append(w2)
-        return adj
-
-    def find_shortest_path(self, start: str, target: str) -> Optional[List[str]]:
-        """Finds shortest path between start and target words via BFS."""
-        if len(start) != len(target):
-            return None
-        if start == target:
-            return [start]
-
-        word_len = len(start)
-        if word_len == 4:
-            if self._graph4 is None:
-                self._graph4 = self._build_graph(4)
-            graph = self._graph4
-        elif word_len == 5:
-            if self._graph5 is None:
-                self._graph5 = self._build_graph(5)
-            graph = self._graph5
-        else:
-            return None
-
-        if start not in graph or target not in graph:
-            return None
-
-        q = deque([[start]])
-        seen = {start}
-        while q:
-            path = q.popleft()
-            curr = path[-1]
-            for nxt in graph[curr]:
-                if nxt == target:
-                    return path + [nxt]
-                if nxt not in seen:
-                    seen.add(nxt)
-                    q.append(path + [nxt])
-        return None
 
     def generate(
         self,
