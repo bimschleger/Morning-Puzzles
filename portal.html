@@ -2000,7 +2000,14 @@ function saveAndExit() {
   const tz = now.getTimezoneOffset();
   const schedEnVal = currentSchedEnabled ? 1 : 0;
 
-  fetch(`/api/save-config?mask=${currentMask}&count=${currentCount}&grade=${currentGrade}&schedEnabled=${schedEnVal}&schedHour=${currentSchedHour}&schedMinute=${currentSchedMinute}&epoch=${epoch}&tz=${tz}`)
+  const y = now.getFullYear();
+  const mo = now.getMonth() + 1;
+  const d = now.getDate();
+  const h = now.getHours();
+  const mi = now.getMinutes();
+  const s = now.getSeconds();
+
+  fetch(`/api/save-config?mask=${currentMask}&count=${currentCount}&grade=${currentGrade}&schedEnabled=${schedEnVal}&schedHour=${currentSchedHour}&schedMinute=${currentSchedMinute}&epoch=${epoch}&tz=${tz}&year=${y}&month=${mo}&day=${d}&hour=${h}&min=${mi}&sec=${s}`)
     .then(r => r.json())
     .then(d => {
       document.body.innerHTML = `

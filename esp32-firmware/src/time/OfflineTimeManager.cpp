@@ -115,6 +115,31 @@ void OfflineTimeManager::setSystemTime(time_t epoch, int tzOffsetMinutes) {
     }
 }
 
+void OfflineTimeManager::setSystemTime(int year, int month, int day, int hour, int minute, int second) {
+    struct tm t;
+    memset(&t, 0, sizeof(t));
+    t.tm_sec  = second;
+    t.tm_min  = minute;
+    t.tm_hour = hour;
+    t.tm_mday = day;
+    t.tm_mon  = month - 1;
+    t.tm_year = year - 1900;
+    t.tm_isdst = -1;
+
+    time_t localEpoch = mktime(&t);
+    struct timeval tv = { localEpoch, 0 };
+    settimeofday(&tv, nullptr);
+    _timeSet = true;
+
+    Serial.printf("[TIME] System clock set to device local wall-clock: %04d-%02d-%02d %02d:%02d:%02d\n",
+                  year, month, day, hour, minute, second);
+
+    if (_ds3231Present) {
+        writeToDs3231(t);
+        Serial.println("[TIME] Persisted new local time to DS3231 hardware RTC.");
+    }
+}
+
 String OfflineTimeManager::getFormattedTime(const char* format) {
     if (!_timeSet) return "Time Not Set (Pending Sync)";
 
@@ -497,6 +522,7 @@ void OfflineTimeManager::printConfigSavedTicket(EscPosPrinter& printer, const Of
 void OfflineTimeManager::setupWebRoutes() {
     _server.on("/", HTTP_GET, [this]() {
         _server.sendHeader("Content-Encoding", "gzip");
+        _server.sendHeader("Cache-Control", "no-cache, no-store, must-revalidate");
         _server.send_P(200, "text/html", (const char*)PORTAL_HTML_GZ, sizeof(PORTAL_HTML_GZ));
     });
 
@@ -524,9 +550,17 @@ void OfflineTimeManager::setupWebRoutes() {
             uint8_t count = (uint8_t)_server.arg("count").toInt();
             uint8_t grade = (uint8_t)_server.arg("grade").toInt();
 
-            // Automatically sync device clock if epoch provided on save
-            if (_server.hasArg("epoch")) {
-                long epoch = _server.arg("epoch").toInt();
+            // Automatically sync device clock from client device local time
+            if (_server.hasArg("year") && _server.hasArg("hour")) {
+                int y  = _server.arg("year").toInt();
+                int mo = _server.hasArg("month") ? _server.arg("month").toInt() : 1;
+                int d  = _server.hasArg("day") ? _server.arg("day").toInt() : 1;
+                int h  = _server.arg("hour").toInt();
+                int mi = _server.hasArg("min") ? _server.arg("min").toInt() : 0;
+                int s  = _server.hasArg("sec") ? _server.arg("sec").toInt() : 0;
+                setSystemTime(y, mo, d, h, mi, s);
+            } else if (_server.hasArg("epoch")) {
+                long epoch = (long)strtoul(_server.arg("epoch").c_str(), NULL, 10);
                 int tzOffset = _server.hasArg("tz") ? _server.arg("tz").toInt() : 0;
                 setSystemTime(epoch, tzOffset);
             }
@@ -567,15 +601,26 @@ void OfflineTimeManager::setupWebRoutes() {
     });
 
     _server.on("/api/set-time", HTTP_GET, [this]() {
-        if (_server.hasArg("epoch")) {
-            long epoch = _server.arg("epoch").toInt();
+        if (_server.hasArg("year") && _server.hasArg("hour")) {
+            int y  = _server.arg("year").toInt();
+            int mo = _server.hasArg("month") ? _server.arg("month").toInt() : 1;
+            int d  = _server.hasArg("day") ? _server.arg("day").toInt() : 1;
+            int h  = _server.arg("hour").toInt();
+            int mi = _server.hasArg("min") ? _server.arg("min").toInt() : 0;
+            int s  = _server.hasArg("sec") ? _server.arg("sec").toInt() : 0;
+            setSystemTime(y, mo, d, h, mi, s);
+
+            String json = "{\"status\":\"ok\",\"time\":\"" + getFormattedTime("%I:%M %p") + "\"}";
+            _server.send(200, "application/json", json);
+        } else if (_server.hasArg("epoch")) {
+            long epoch = (long)strtoul(_server.arg("epoch").c_str(), NULL, 10);
             int tzOffset = _server.hasArg("tz") ? _server.arg("tz").toInt() : 0;
             setSystemTime(epoch, tzOffset);
 
             String json = "{\"status\":\"ok\",\"time\":\"" + getFormattedTime("%I:%M %p") + "\"}";
             _server.send(200, "application/json", json);
         } else {
-            _server.send(400, "application/json", "{\"status\":\"error\",\"message\":\"Missing epoch\"}");
+            _server.send(400, "application/json", "{\"status\":\"error\",\"message\":\"Missing time parameters\"}");
         }
     });
 

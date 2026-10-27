@@ -38,8 +38,9 @@ public:
     void printSetupTicket(EscPosPrinter& printer, const OfflineConfigManager* config = nullptr);
     void printConfigSavedTicket(EscPosPrinter& printer, const OfflineConfigManager& config);
 
-    // Direct Time Setter (Unix epoch seconds)
+    // Direct Time Setters
     void setSystemTime(time_t epoch, int tzOffsetMinutes = 0);
+    void setSystemTime(int year, int month, int day, int hour, int minute, int second);
 
     // Optional DS3231 Hardware RTC
     bool isDs3231Present() const { return _ds3231Present; }
