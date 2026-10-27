@@ -142,10 +142,21 @@ All games in Morning Puzzles must deliver identical, pixel-harmonized visual exp
 
 ## 15. Single Source of Truth for Curated Datasets
 - **Canonical JSON Origin**: All curated puzzle datasets must originate as canonical JSON in `server/data/*.json`.
-- **Automated Pipeline Compilation**: C++ PROGMEM headers (`*Dataset.h`) and Web Simulator JS datasets must be compiled from canonical JSON via `tools/datasets/build_all_datasets.py`.
+- **Automated Pipeline Compilation**: C++ PROGMEM headers (`*Dataset.h`) and Web Simulator JS datasets must be compiled from canonical JSON via `tools/datasets/build_all_datasets.py` using the shared top-level `pack_nibbles()` and `update_simulator_js()` helpers.
 - **Prohibition of Manual Duplication**: Manual copy-pasting or parallel maintenance of puzzle datasets across targets is strictly prohibited.
 
 ## 16. Web Simulator Hardware Emulation Standard
-- **Bit-Level Physical Thermal Emulation**: The Web Simulator must provide bit-level physical thermal emulation using `ThermalCanvasSimulator` (576-dot 1-bit raster).
-- **Prohibition of Anti-Aliased Vector Canvas**: Canvas 2D vector rendering is prohibited.
+- **Bit-Level Physical Thermal Emulation**: The Web Simulator must provide bit-level physical thermal emulation using `ThermalCanvasSimulator` (576-dot 1-bit raster) for both puzzle boards (`renderOffline<Game>`) and Game Guide visual diagrams (`drawSimGuideCanvas`, matching `OfflinePuzzleComposer::renderGameGuideRaster`).
+- **Prohibition of Anti-Aliased Vector Canvas**: HTML5 Canvas 2D vector rendering (`ctx.fillText`, `ctx.strokeRect`, `ctx.arc`, or color emojis) is strictly prohibited on simulated thermal canvases.
 - **Offline Appliance Terminology**: Simulator UI terminology must reflect standalone offline appliance concepts.
+
+## 17. Shared Utilities, DRY Primitives & Dynamic Count Standard
+- **Python Shared Dataset, $D_4$ & Solution Key Helpers (`server/app/puzzles/base.py`)**:
+  - **Dataset Loading**: Always use `load_curated_dataset(filename)` for process-wide cached JSON loading. Never write custom `os.path.join` / `json.load` boilerplate or uncached disk reads in individual puzzle plugins.
+  - **$D_4$ Dihedral Transforms**: Always use `select_seeded_d4()`, `transform_grid_d4()`, and `transform_coord_d4()` from `base.py` rather than writing inline rotation/reflection loops.
+  - **Default Grid Solution Key**: Standard 2D grid puzzles (`SUDOKU`, `BINARY`, `TANGO`, `KILLER`, `TOWERS`, `INEQUALITY`) must inherit `BasePuzzle.format_solution_key()` (which delegates to `format_grid_solution()`) rather than overriding it with duplicate list comprehensions.
+- **ESP32 C++ Shared Nibble Unpacker & Grade Lookup**:
+  - Always unpack 4-bit `PROGMEM` nibble arrays via `mp_unpack_nibble_pgm(arr, idx)` in `GeneratorUtils.h` instead of inline `pgm_read_byte` bit-shifting.
+  - Always resolve `PuzzleGrade` names via `OfflineConfigManager::getGradeName(grade)`.
+- **Dynamic Total Game Counts (`OFFLINE_PUZZLE_TOTAL`)**:
+  - Never hardcode the total number of games in C++ log strings—always reference `OFFLINE_PUZZLE_TOTAL`. When adding a new game, update `OFFLINE_PUZZLE_TOTAL`, the range comment in `esp32-firmware/include/config.h`, and the `All Games (N)` label in `simulator/receipt_simulator.html`.
