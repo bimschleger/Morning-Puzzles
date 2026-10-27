@@ -150,9 +150,9 @@ void OfflinePuzzleComposer::printSinglePuzzle(EscPosPrinter& printer, OfflinePuz
             Serial.println("[COMPOSER] Generating Tents...");
             TentsGen tents;
             tents.generate(diff);
-            char tentsInstr1[64];
-            snprintf(tentsInstr1, sizeof(tentsInstr1), "Pitch %d tents next to trees without tents", (int)tents.getTreeCount());
-            printPuzzleHeader(printer, "TENTS", diffStr, tentsInstr1, "touching, matching row and column counts.");
+            char tentsInstr[128];
+            snprintf(tentsInstr, sizeof(tentsInstr), "Pitch %d tents beside trees; no tents may touch even diagonally, matching row/column counts.", (int)tents.getTreeCount());
+            printPuzzleHeader(printer, "TENTS", diffStr, tentsInstr);
             if (!useRaster || !tents.printRasterToReceipt(printer, diff)) {
                 tents.printToReceipt(printer, diff);
             }

@@ -137,7 +137,7 @@ static const GameRuleDef GAME_RULES[TOTAL_GAME_RULES] PROGMEM = {
         7,
         "tents",
         "TENTS",
-        "Pitch tents next to trees without any tents touching, matching row and column quotas.",
+        "Pitch tents beside trees; no tents may touch even diagonally, matching row/column quotas.",
         "Pitch a tent for every tree on the board such that tents pair 1:1 orthogonally and never touch each other.",
         { "Every tree must have exactly one tent pitched orthogonally adjacent to it (up, down, left, right).", "Tents can never touch another tent—neither orthogonally nor diagonally.", "Numbers outside the grid specify the exact count of tents in that row or column.", "Tents may be adjacent to trees other than their own assigned partner." },
         4,

@@ -45,6 +45,8 @@ python3 server/test_puzzle_standards.py
 python3 server/test_thermal_format.py
 python3 server/test_visual_consistency.py
 python3 server/test_stars_deduction.py
+python3 server/test_towers_deduction.py
+python3 server/test_inequality_deduction.py
 ```
 
 ## 6. Puzzle Plugin Architecture & Extension Standards
@@ -56,8 +58,8 @@ All games in Morning Puzzles must be implemented as modular, self-contained plug
   - Solution key formatting (6-space pre-indented for grids, wrapped to $\le 46$ columns)
   - 576-dot thermal raster rendering via `ThermalCanvas` primitives conforming to Section 8 visual consistency
 - **Registry Registration**: Every puzzle must be registered in `DEFAULT_REGISTRY` (`server/app/puzzles/registry.py`).
-- **Zero Procedural Spaghetti**: Never introduce manual `elif puzzle_id == ...` branches in `main.py`, `text_formatter.py`, or `receipt_rasterizer.py`. All routing, daily bundle assembly, and receipt composition are dynamically and polymorphically driven by the registry.
-- **Thermal Drawing Safety**: Raster graphics must be 576 dots wide, height aligned to 8 dots, with an average thermal duty cycle $\le 35\%$ and no more than 16 consecutive dense rows. Use `ThermalCanvas` primitives (`draw_grid`, `draw_rect`, `draw_circle`, `draw_text`, `draw_line`, `draw_stars`) for automatic dual-backend (Pillow + pure-Python fallback) compatibility.
+- **Zero Procedural Spaghetti & Pure Dynamic Routing**: Never introduce manual `elif puzzle_id == ...` branches or static per-game FastAPI route functions (`/api/v1/puzzles/<game>`) in `main.py`, `text_formatter.py`, or `composer.py`. All HTTP routing (`/api/v1/puzzles/{puzzle_id}`), difficulty resolution (`PuzzleRegistry._resolve_plugin_difficulty`), and receipt ordering (`DailyReceiptComposer._get_ordered_plugins`) are dynamically driven by `DEFAULT_REGISTRY`. Every registered puzzle must also expose a 2-line `render_<game>_raster` facade in `server/app/renderer/receipt_rasterizer.py`.
+- **Exclusive `ThermalBitmap` Rendering (No Pillow/PIL in Plugins)**: Puzzle plugins must render 1-bit rasters exclusively through `ThermalBitmap` (`server/app/renderer/canvas.py`). Never import or branch on `HAS_PILLOW`, `PIL.ImageDraw`, `pil_to_escpos`, or `image_to_escpos_raster` inside `server/app/puzzles/*.py`. Raster graphics must be 576 dots wide, height aligned to 8 dots, with an average thermal duty cycle $\le 35\%$ and no more than 16 consecutive dense rows.
 
 ## 7. Arduino IDE Dual-Target Synchronization Standard
 Morning Puzzles supports both PlatformIO (`esp32-firmware/`) and native Arduino IDE (`MorningPuzzles/MorningPuzzles.ino`):
@@ -88,9 +90,12 @@ All games in Morning Puzzles must deliver identical, pixel-harmonized visual exp
   - **1px**: Inner cell dividers, minor grid lines, scratchpad dashed lines.
 - **Crisp 1-Bit Geometric Hatching**:
   - Region shading (e.g. `STARS` / Queens) must exclusively use the 10 standard 1-bit geometric hatch patterns (`fillHatch` / `fill_hatch` patterns 0–9). Never use continuous grayscale tones or Floyd-Steinberg dithering for region shading.
+- **Canonical Game Symbol & Geometry Decisions**:
+  - `TANGO`: Always render `0` and `1` digits (`scale=3`) and `=` / `X` edge markers (`scale=2`) across Python, C++, and Web Simulator—never sun/moon icons or custom vector bars.
+  - `BRIDGES`: Always use `padding = 32`, `islandRadius <= 24`, circle `thickness = 2`, and numeral `scale = 2`.
 - **Mandatory Visual Parity Testing**:
   - Any new puzzle generator must be registered in `server/visual_comparator_runner.cpp`.
-  - The side-by-side comparison suite (`python3 server/test_visual_consistency.py`) must pass with $\ge 95.00\%$ pixel similarity between C++ and Python raster outputs.
+  - The side-by-side comparison suite (`python3 server/test_visual_consistency.py`) must pass with **100.00% bit-for-bit pixel similarity and 100.00% ink IoU overlap** between C++ and Python raster outputs.
 
 ## 9. Master Receipt Header & Footer Offline Standards
 - **Offline-Safe Master Header**:

@@ -144,7 +144,7 @@ class TentsPuzzle(BasePuzzle):
 
     def get_instruction(self, puzzle_data: Union[BasePuzzleResult, Dict[str, Any]]) -> str:
         num_tents = puzzle_data.get("num_tents", len(puzzle_data.get("tents", [])))
-        return f"Pitch {num_tents} tents next to trees without tents touching, matching row and column counts."
+        return f"Pitch {num_tents} tents beside trees; no tents may touch even diagonally, matching row/column counts."
 
     def format_ascii_puzzle(self, puzzle_data: Union[BasePuzzleResult, Dict[str, Any]]) -> str:
         size = puzzle_data.get("size", 8)

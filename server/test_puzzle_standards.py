@@ -187,7 +187,7 @@ def test_description_length_and_canonical_formula():
         t = bundle.get("tents", {})
         t_diff = str(t.get("difficulty", diff))
         t_count = t.get("tree_count", 4 if t_diff.lower() == "easy" else (11 if t_diff.lower() == "hard" else 8))
-        descriptions.append(("Tents", f"Pitch {t_count} tents next to trees without tents touching, matching row and column counts."))
+        descriptions.append(("Tents", f"Pitch {t_count} tents beside trees; no tents may touch even diagonally, matching row/column counts."))
 
         # 9. Bridges
         descriptions.append(("Bridges", "Connect all islands into one network using 1 or 2 lines matching each island's number."))

@@ -13,7 +13,7 @@ This authoritative guide contains complete rules, core objectives, opening deduc
 - [JUMBLE](#jumble) - Unscramble each clue word, then use the circled letters to solve the final pun.
 - [BINARY](#binary) - Fill every cell with 0 or 1 so no more than two identical numbers are adjacent.
 - [MINES](#mines) - Deduce all hidden mines using numbers showing how many adjacent cells contain mines.
-- [TENTS](#tents) - Pitch tents next to trees without any tents touching, matching row and column quotas.
+- [TENTS](#tents) - Pitch tents beside trees; no tents may touch even diagonally, matching row/column quotas.
 - [BRIDGES](#bridges) - Connect islands with up to two orthogonal bridges matching numbers into one network.
 - [KILLER](#killer) - Fill the grid with digits 1-9 so cages sum to their clue without repeating digits.
 - [CRYPTOGRAM](#cryptogram) - Deduce the hidden quotation where each letter is consistently substituted with another.
@@ -303,7 +303,7 @@ This authoritative guide contains complete rules, core objectives, opening deduc
 <a name="tents"></a>
 ## --- TENTS ---
 
-> **Instruction**: `Pitch tents next to trees without any tents touching, matching row and column quotas.`
+> **Instruction**: `Pitch tents beside trees; no tents may touch even diagonally, matching row/column quotas.`
 
 **Objective**: Pitch a tent for every tree on the board such that tents pair 1:1 orthogonally and never touch each other.
 
