@@ -112,6 +112,41 @@ static std::string toHex(const std::vector<uint8_t>& bytes) {
     return oss.str();
 }
 
+static std::string escapeJson(const std::string& str) {
+    std::ostringstream o;
+    for (char c : str) {
+        if (c == '"') {
+            o << "\\\"";
+        } else if (c == '\\') {
+            o << "\\\\";
+        } else if (c == '\b') {
+            o << "\\b";
+        } else if (c == '\f') {
+            o << "\\f";
+        } else if (c == '\n') {
+            o << "\\n";
+        } else if (c == '\r') {
+            o << "\\r";
+        } else if (c == '\t') {
+            o << "\\t";
+        } else if ('\x00' <= c && c <= '\x1f') {
+            o << "\\u" << std::hex << std::setw(4) << std::setfill('0') << (int)(uint8_t)c;
+        } else {
+            o << c;
+        }
+    }
+    return o.str();
+}
+
+static std::string escapeJson(const String& str) {
+    return escapeJson(std::string(str.c_str()));
+}
+
+static std::string escapeJson(const char* str) {
+    if (!str) return "";
+    return escapeJson(std::string(str));
+}
+
 int main(int argc, char** argv) {
     std::srand(42);
     CapturePrinter* printer = new CapturePrinter();
@@ -136,18 +171,18 @@ int main(int argc, char** argv) {
         std::cout << "    \"puzzle\": \"jumble\",\n";
         std::cout << "    \"width\": " << printer->lastWidth << ",\n";
         std::cout << "    \"height\": " << printer->lastHeight << ",\n";
-        std::cout << "    \"riddle\": \"" << jGen.getRiddle() << "\",\n";
-        std::cout << "    \"answer\": \"" << jGen.getAnswer() << "\",\n";
+        std::cout << "    \"riddle\": \"" << escapeJson(jGen.getRiddle()) << "\",\n";
+        std::cout << "    \"answer\": \"" << escapeJson(jGen.getAnswer()) << "\",\n";
         std::cout << "    \"words\": [";
         for (uint8_t i = 0; i < jGen.getNumWords(); i++) {
             if (i > 0) std::cout << ", ";
-            std::cout << "\"" << jGen.getWord(i).original << "\"";
+            std::cout << "\"" << escapeJson(jGen.getWord(i).original) << "\"";
         }
         std::cout << "],\n";
         std::cout << "    \"scrambled\": [";
         for (uint8_t i = 0; i < jGen.getNumWords(); i++) {
             if (i > 0) std::cout << ", ";
-            std::cout << "\"" << jGen.getWord(i).scrambled << "\"";
+            std::cout << "\"" << escapeJson(jGen.getWord(i).scrambled) << "\"";
         }
         std::cout << "],\n";
         std::cout << "    \"circles\": [";
@@ -538,14 +573,14 @@ int main(int argc, char** argv) {
         std::cout << "    \"difficulty\": \"easy\",\n";
         std::cout << "    \"width\": " << printer->lastWidth << ",\n";
         std::cout << "    \"height\": " << printer->lastHeight << ",\n";
-        std::cout << "    \"phrase\": \"" << cGen.getPhrase() << "\",\n";
-        std::cout << "    \"author\": \"" << cGen.getAuthor() << "\",\n";
-        std::cout << "    \"ciphertext\": \"" << cGen.getCiphertext() << "\",\n";
-        std::cout << "    \"clue_str\": \"" << cGen.getClueString() << "\",\n";
+        std::cout << "    \"phrase\": \"" << escapeJson(cGen.getPhrase()) << "\",\n";
+        std::cout << "    \"author\": \"" << escapeJson(cGen.getAuthor()) << "\",\n";
+        std::cout << "    \"ciphertext\": \"" << escapeJson(cGen.getCiphertext()) << "\",\n";
+        std::cout << "    \"clue_str\": \"" << escapeJson(cGen.getClueString()) << "\",\n";
         std::cout << "    \"clues\": [";
         for (uint8_t i = 0; i < cGen.getClueCount(); i++) {
             if (i > 0) std::cout << ", ";
-            std::cout << "{\"cipher\": \"" << cGen.getClue(i).cipher << "\", \"plain\": \"" << cGen.getClue(i).plain << "\"}";
+            std::cout << "{\"cipher\": \"" << escapeJson(cGen.getClue(i).cipher) << "\", \"plain\": \"" << escapeJson(cGen.getClue(i).plain) << "\"}";
         }
         std::cout << "],\n";
         std::cout << "    \"raster_hex\": \"" << toHex(printer->lastBitmap) << "\"\n";
@@ -565,14 +600,14 @@ int main(int argc, char** argv) {
         std::cout << "    \"difficulty\": \"easy\",\n";
         std::cout << "    \"width\": " << printer->lastWidth << ",\n";
         std::cout << "    \"height\": " << printer->lastHeight << ",\n";
-        std::cout << "    \"start_word\": \"" << ladderGen.getStartWord() << "\",\n";
-        std::cout << "    \"target_word\": \"" << ladderGen.getTargetWord() << "\",\n";
+        std::cout << "    \"start_word\": \"" << escapeJson(ladderGen.getStartWord()) << "\",\n";
+        std::cout << "    \"target_word\": \"" << escapeJson(ladderGen.getTargetWord()) << "\",\n";
         std::cout << "    \"word_len\": " << (int)ladderGen.getWordLen() << ",\n";
         std::cout << "    \"total_words\": " << (int)ladderGen.getTotalWords() << ",\n";
         std::cout << "    \"solution\": [";
         for (uint8_t i = 0; i < ladderGen.getTotalWords(); i++) {
             if (i > 0) std::cout << ", ";
-            std::cout << "\"" << ladderGen.getWord(i) << "\"";
+            std::cout << "\"" << escapeJson(ladderGen.getWord(i)) << "\"";
         }
         std::cout << "],\n";
         std::cout << "    \"raster_hex\": \"" << toHex(printer->lastBitmap) << "\"\n";
