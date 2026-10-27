@@ -84,8 +84,8 @@ public:
     uint16_t lastWidth = 0;
     uint16_t lastHeight = 0;
 
-    bool connect() override { return true; }
-    void disconnect() override {}
+    bool connect() { return true; }
+    void disconnect() {}
     void init() override {}
     void setBold(bool) override {}
     void setAlign(TextAlignment) override {}
