@@ -113,8 +113,17 @@ def test_killer_sudoku():
     dt_med = (time.time() - t0) * 1000 / 50
     print(f"  -> Passed! 50 Medium puzzles verified (Avg {dt_med:.2f} ms per puzzle, 100% contiguous & unique).\n")
 
-    # Test 3: Extreme (6x6, 2x3 boxes, digits 1-6)
-    print("Test 3: Verifying EXTREME 6x6 Killer Sudoku Generation & Contiguity...")
+    # Test 3: Hard (6x6, 2x3 boxes, digits 1-6, 2-3 cell cages)
+    print("Test 3: Verifying HARD 6x6 Killer Sudoku Generation & Contiguity...")
+    t0 = time.time()
+    for _ in range(20):
+        res = plugin.generate("hard")
+        verify_puzzle_integrity(res.to_dict(), plugin)
+    dt_hard = (time.time() - t0) * 1000 / 20
+    print(f"  -> Passed! 20 Hard puzzles verified (Avg {dt_hard:.2f} ms per puzzle, 100% contiguous & unique).\n")
+
+    # Test 4: Extreme (6x6, 2x3 boxes, digits 1-6)
+    print("Test 4: Verifying EXTREME 6x6 Killer Sudoku Generation & Contiguity...")
     t0 = time.time()
     for _ in range(20):
         res = plugin.generate("extreme")
@@ -122,8 +131,8 @@ def test_killer_sudoku():
     dt_ext = (time.time() - t0) * 1000 / 20
     print(f"  -> Passed! 20 Extreme puzzles verified (Avg {dt_ext:.2f} ms per puzzle, 100% contiguous & unique).\n")
 
-    # Test 4: BasePuzzle Plugin compliance
-    print("Test 4: Verifying KillerPuzzle Plugin Output...")
+    # Test 5: BasePuzzle Plugin compliance
+    print("Test 5: Verifying KillerPuzzle Plugin Output...")
     res = plugin.generate(difficulty="medium", seed=123)
     raw = res.to_dict()
     verify_puzzle_integrity(raw, plugin)

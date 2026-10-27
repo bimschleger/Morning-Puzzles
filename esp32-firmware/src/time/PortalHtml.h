@@ -1,4 +1,4 @@
-// Automatically generated from portal.html by scripts/build_portal_header.py
+// Automatically generated from portal.html by tools/datasets/build_game_rules.py
 // Do not edit directly!
 #ifndef PORTAL_HTML_H
 #define PORTAL_HTML_H

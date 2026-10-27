@@ -244,6 +244,7 @@ class TestKillerDeduction(unittest.TestCase):
     def test_tier_counts(self):
         self.assertEqual(len(self.data["easy"]), 100)
         self.assertEqual(len(self.data["medium"]), 100)
+        self.assertEqual(len(self.data["hard"]), 100)
         self.assertEqual(len(self.data["extreme"]), 100)
 
     def test_easy_puzzles(self):
@@ -253,8 +254,10 @@ class TestKillerDeduction(unittest.TestCase):
             cages = p["cages"]
             sol = p["solution"]
 
-            # Contiguity
+            # Pure 2-cell dominoes, Zero singles in Easy
+            self.assertEqual(len(cages), 8, f"Easy #{idx} should have 8 domino cages")
             for cg in cages:
+                self.assertEqual(len(cg["cells"]), 2, f"Easy #{idx} cage {cg['id']} is not a 2-cell domino")
                 cells = [tuple(c) for c in cg["cells"]]
                 self.assertTrue(is_4_connected(cells), f"Easy #{idx} cage {cg['id']} not connected")
                 digits = [sol[r][c] for r, c in cells]
@@ -284,6 +287,26 @@ class TestKillerDeduction(unittest.TestCase):
             self.assertEqual(count_solutions(size, 2, 2, cages), 1)
             self.assertIsNotNone(solve_deductive(size, 2, 2, cages))
 
+    def test_hard_puzzles(self):
+        for idx, p in enumerate(self.data["hard"]):
+            size = p["size"]
+            self.assertEqual(size, 6)
+            cages = p["cages"]
+            sol = p["solution"]
+
+            # Zero singles in Hard (2-3 cells)
+            for cg in cages:
+                self.assertGreaterEqual(len(cg["cells"]), 2, f"Hard #{idx} has single cell cage!")
+                self.assertLessEqual(len(cg["cells"]), 3, f"Hard #{idx} has cage > 3 cells!")
+                cells = [tuple(c) for c in cg["cells"]]
+                self.assertTrue(is_4_connected(cells))
+                digits = [sol[r][c] for r, c in cells]
+                self.assertEqual(len(digits), len(set(digits)))
+                self.assertEqual(sum(digits), cg["sum"])
+
+            self.assertEqual(count_solutions(size, 2, 3, cages), 1)
+            self.assertIsNotNone(solve_deductive(size, 2, 3, cages))
+
     def test_extreme_puzzles(self):
         for idx, p in enumerate(self.data["extreme"]):
             size = p["size"]
@@ -305,7 +328,7 @@ class TestKillerDeduction(unittest.TestCase):
 
     def test_d4_symmetry_invariance(self):
         # Sample across tiers
-        for tier, (size, br, bc) in [("easy", (4, 2, 2)), ("medium", (4, 2, 2)), ("extreme", (6, 2, 3))]:
+        for tier, (size, br, bc) in [("easy", (4, 2, 2)), ("medium", (4, 2, 2)), ("hard", (6, 2, 3)), ("extreme", (6, 2, 3))]:
             for p in self.data[tier][:10]:
                 for t in range(8):
                     if br != bc and (t % 2 == 1):
