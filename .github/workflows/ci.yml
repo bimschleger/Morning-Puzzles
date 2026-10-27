@@ -1,0 +1,92 @@
+name: CI & Puzzle Standards Verification
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  puzzle-standards-and-deductions:
+    name: Standards, Thermal & Deduction Suites
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          if [ -f server/requirements.txt ]; then pip install -r server/requirements.txt; fi
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Verify Puzzle Presentation & Authoring Standards (Rules 1-4, 6)
+        run: python3 server/test_puzzle_standards.py
+
+      - name: Verify 80mm Thermal Receipt Format & Specifications (Rule 11)
+        run: python3 server/test_thermal_format.py
+
+      - name: Verify Stars Deduction Anchors & Solvability (Rule 10)
+        run: python3 server/test_stars_deduction.py
+
+      - name: Verify Towers Deduction & Solvability (Rule 10)
+        run: python3 server/test_towers_deduction.py
+
+      - name: Verify Inequality Deduction & Solvability (Rule 10)
+        run: python3 server/test_inequality_deduction.py
+
+      - name: Verify Killer Deduction & Solvability (Rule 10)
+        run: python3 server/test_killer_deduction.py
+
+  visual-parity-and-firmware:
+    name: Tri-Target Visual Parity & Firmware Consistency
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          if [ -f server/requirements.txt ]; then pip install -r server/requirements.txt; fi
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Verify Tri-Target Bit-for-Bit Visual Consistency (Rule 8)
+        run: python3 server/test_visual_consistency.py
+
+      - name: Verify Firmware Parity
+        run: python3 server/test_firmware_parity.py
+
+  arduino-sketch-synchronization:
+    name: Arduino IDE Sketch Sync Verification (Rule 7)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Run Arduino IDE Synchronization Script
+        run: |
+          chmod +x ./scripts/sync_arduino_sketch.sh
+          ./scripts/sync_arduino_sketch.sh
+
+      - name: Assert No Uncommitted Sketch Drift
+        run: |
+          if [ -n "$(git status --porcelain MorningPuzzles/)" ]; then
+            echo "::error::MorningPuzzles/ Arduino IDE sketch is out of sync with esp32-firmware/!"
+            echo "Run './scripts/sync_arduino_sketch.sh' locally and commit the mirrored files."
+            git status --porcelain MorningPuzzles/
+            exit 1
+          fi
+          echo "MorningPuzzles Arduino IDE sketch is perfectly synchronized."
