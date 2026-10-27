@@ -103,7 +103,10 @@ All games in Morning Puzzles must deliver identical, pixel-harmonized visual exp
   - Never require or display real-time clock (NTP/RTC) timestamps on receipts in offline mode.
 - **Clean Master Footer**:
   - Separated by single dashed rules (`------------------------------------------------`).
-  - Centered closing tagline: `Enjoy your day!`.
+  - Centered closing tagline: `Enjoy your day!`, followed by a blank line and centered setup instructions:
+    `To modify settings:`
+    `Leave printer on and reset power`
+    `via the cable behind the printer.`
   - Zero diagnostics or debug info: Never print hardware status, IP addresses, memory diagnostics, or paper cut debug statements on customer receipts.
 - **Mandatory Tri-Target Parity**: Header and footer implementations must remain identical across Python (`DailyReceiptComposer`), ESP32 C++ firmware (`OfflinePuzzleComposer`), Arduino IDE sketch, and Web Simulator (`receipt_simulator.html`).
 

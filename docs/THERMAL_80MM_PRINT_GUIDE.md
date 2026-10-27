@@ -179,6 +179,10 @@ For daily puzzle receipts, the optimal architecture is a **Hybrid ESC/POS Pipeli
 │                                                        │
 │  - - - - - - - - - - - - - - - - - - - - - - - - - -   │ <-- Footer Bounded by Dashed Dividers
 │                  Enjoy your day!                       │
+│                                                        │
+│                To modify settings:                     │
+│          Leave printer on and reset power              │
+│         via the cable behind the printer.              │
 │  - - - - - - - - - - - - - - - - - - - - - - - - - -   │
 │  [LF x 4] Pre-Cut Feed (15-25mm)                       │
 │  [GS V 66 3] Partial Paper Cut                         │

@@ -150,6 +150,9 @@ def test_text_receipt_format(bundle):
     assert "MORNING PUZZLES" in receipt_text, "Missing MORNING PUZZLES in text receipt header"
     assert "Enjoy your morning puzzles" in receipt_text, "Missing offline tagline in text receipt header"
     assert "Enjoy your day!" in receipt_text, "Missing 'Enjoy your day!' in text receipt footer"
+    assert "To modify settings:" in receipt_text, "Missing 'To modify settings:' in text receipt footer"
+    assert "Leave printer on and reset power" in receipt_text, "Missing 'Leave printer on and reset power' in text receipt footer"
+    assert "via the cable behind the printer." in receipt_text, "Missing 'via the cable behind the printer.' in text receipt footer"
     assert "diagnostics" not in receipt_text.lower(), "Receipt must not contain diagnostics information"
 
     print("  -> Passed! Text receipt contains all 16 canonical headers, offline header/footer, pre-cut feeds, and cutter commands.\n")

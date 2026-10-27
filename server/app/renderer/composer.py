@@ -198,6 +198,10 @@ class DailyReceiptComposer:
         r.align("center")
         r.horizontal_rule("-")
         r.println("Enjoy your day!")
+        r.println()
+        r.println("To modify settings:")
+        r.println("Leave printer on and reset power")
+        r.println("via the cable behind the printer.")
         r.horizontal_rule("-")
 
         # Mandatory 4-line feed before cutter offset

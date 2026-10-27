@@ -394,6 +394,10 @@ bool OfflinePuzzleComposer::generateAndPrintReceipt(EscPosPrinter& printer, cons
     // Footer
     printer.setAlign(ALIGN_CENTER);
     printer.println("Enjoy your day!");
+    printer.println("");
+    printer.println("To modify settings:");
+    printer.println("Leave printer on and reset power");
+    printer.println("via the cable behind the printer.");
     printer.printHorizontalLine('-');
 
     printer.feed(4);
@@ -840,6 +844,10 @@ bool OfflinePuzzleComposer::printGameGuide(EscPosPrinter& printer, uint8_t gameI
     printer.setAlign(ALIGN_CENTER);
     printer.printHorizontalLine('-');
     printer.println("Enjoy your day!");
+    printer.println("");
+    printer.println("To modify settings:");
+    printer.println("Leave printer on and reset power");
+    printer.println("via the cable behind the printer.");
     printer.printHorizontalLine('-');
 
     printer.feed(4);

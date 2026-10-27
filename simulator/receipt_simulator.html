@@ -5381,6 +5381,10 @@
         items.push({ type: 'rule', text: '-'.repeat(COLS) });
       }
       items.push({ type: 'center', text: centerLine('Enjoy your day!', COLS) });
+      items.push({ type: 'blank', text: '' });
+      items.push({ type: 'center', text: centerLine('To modify settings:', COLS) });
+      items.push({ type: 'center', text: centerLine('Leave printer on and reset power', COLS) });
+      items.push({ type: 'center', text: centerLine('via the cable behind the printer.', COLS) });
       items.push({ type: 'rule', text: '-'.repeat(COLS) });
       items.push({ type: 'center', text: centerLine('*** PAPER CUT ***', COLS) });
 
@@ -7371,6 +7375,10 @@
       // Master Footer
       items.push({ type: 'rule', text: '-'.repeat(COLS) });
       items.push({ type: 'text', text: centerLine('Enjoy your day!', COLS) });
+      items.push({ type: 'blank', text: '' });
+      items.push({ type: 'text', text: centerLine('To modify settings:', COLS) });
+      items.push({ type: 'text', text: centerLine('Leave printer on and reset power', COLS) });
+      items.push({ type: 'text', text: centerLine('via the cable behind the printer.', COLS) });
       items.push({ type: 'rule', text: '-'.repeat(COLS) });
 
       box.innerHTML = '';

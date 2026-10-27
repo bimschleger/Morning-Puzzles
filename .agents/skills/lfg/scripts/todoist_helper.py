@@ -5,10 +5,11 @@ Todoist Helper for Morning Puzzles (/lfg Skill)
 Provides robust zero-dependency integration with Todoist REST API v2 and Sync API v9.
 Supports:
   - status: Validates credentials and inspects 'Morning Puzzles' project & sections.
-  - pop-backlog: Finds 'Morning Puzzles', grabs the top task in 'Backlog',
-                 ensures 'In Progress' section exists, moves the task to 'In Progress',
-                 and outputs structured task JSON for /grill-me.
-  - peek-backlog: Previews the top task in 'Backlog' without moving it.
+  - pop-backlog: Finds 'Morning Puzzles', grabs the top task in 'To-Do' / 'Backlog',
+                 ensures 'Doing' / 'In Progress' section exists, immediately moves the task to 'Doing',
+                 and outputs structured task JSON (with comments & attachments) for planning.
+  - peek-backlog: Previews the top task in 'To-Do' / 'Backlog' without moving it.
+  - finish-task: Moves a task from 'Doing' to 'Done' and marks it as complete in Todoist.
 """
 
 from __future__ import annotations
@@ -104,8 +105,11 @@ class TodoistClient:
             raise RuntimeError(f"Network error connecting to Todoist API: {e.reason}")
 
     PROJECT_ALIASES = ["morning puzzles", "morning games"]
-    BACKLOG_ALIASES = ["backlog", "todo", "to do"]
-    IN_PROGRESS_ALIASES = ["in progress", "doing"]
+    TODO_ALIASES = ["to-do", "todo", "to do", "backlog"]
+    BACKLOG_ALIASES = TODO_ALIASES
+    DOING_ALIASES = ["doing", "in progress", "in-progress"]
+    IN_PROGRESS_ALIASES = DOING_ALIASES
+    DONE_ALIASES = ["done", "completed"]
 
     def find_project(self, project_name: str = "Morning Puzzles") -> dict:
         projects = self._http_get("projects")
@@ -130,8 +134,12 @@ class TodoistClient:
         sections = self.get_sections(project_id)
         target = section_name.strip().lower()
         candidates = [target]
-        if target in self.IN_PROGRESS_ALIASES:
-            candidates = self.IN_PROGRESS_ALIASES
+        if target in self.DOING_ALIASES:
+            candidates = self.DOING_ALIASES
+        elif target in self.TODO_ALIASES:
+            candidates = self.TODO_ALIASES
+        elif target in self.DONE_ALIASES:
+            candidates = self.DONE_ALIASES
 
         for s in sections:
             s_name = s.get("name", "").strip().lower()
@@ -184,6 +192,67 @@ class TodoistClient:
             err_body = e.read().decode("utf-8") if e.fp else ""
             raise RuntimeError(f"Sync API item_move failed (HTTP {e.code}): {err_body}")
 
+    def complete_task(self, task_id: str) -> bool:
+        """Marks a task as completed using Sync API v9 with REST API v2 fallback."""
+        cmd_uuid = str(uuid.uuid4())
+        commands = [
+            {
+                "type": "item_close",
+                "uuid": cmd_uuid,
+                "args": {
+                    "id": task_id
+                }
+            }
+        ]
+        post_data = urllib.parse.urlencode({"commands": json.dumps(commands)}).encode("utf-8")
+        headers = {
+            "Authorization": f"Bearer {self.api_token}",
+            "Content-Type": "application/x-www-form-urlencoded",
+            "User-Agent": "MorningPuzzles-LFG-Skill/1.0"
+        }
+        req = urllib.request.Request(self.SYNC_BASE_URL, data=post_data, headers=headers, method="POST")
+        try:
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                resp_json = json.loads(resp.read().decode("utf-8"))
+                sync_status = resp_json.get("sync_status", {})
+                status = sync_status.get(cmd_uuid)
+                if status == "ok":
+                    return True
+                if isinstance(status, dict) and "error" in status:
+                    raise RuntimeError(f"Sync API error completing task: {status}")
+                return True
+        except Exception:
+            pass
+
+        # Fallback to REST API v2 POST /tasks/{id}/close
+        url = f"{self.REST_BASE_URL}/tasks/{task_id}/close"
+        req_rest = urllib.request.Request(url, data=b"", headers=self.headers, method="POST")
+        try:
+            with urllib.request.urlopen(req_rest, timeout=15) as resp:
+                return resp.status in (200, 204)
+        except urllib.error.HTTPError as e:
+            if e.code == 204:
+                return True
+            err_body = e.read().decode("utf-8") if e.fp else ""
+            raise RuntimeError(f"Todoist API close failed (HTTP {e.code}): {err_body}")
+
+    def finish_task(self, task_id: str, project_name: str = "Morning Puzzles", target_section: str = "Done") -> dict:
+        """Moves a task to the Done column/section and marks it as complete."""
+        project = self.find_project(project_name)
+        project_id = project["id"]
+
+        done_sec = self.get_or_create_section(project_id, target_section)
+        self.move_task_to_section(task_id, done_sec["id"])
+        self.complete_task(task_id)
+
+        return {
+            "success": True,
+            "status": "completed",
+            "task_id": task_id,
+            "project_name": project["name"],
+            "moved_to_section": done_sec["name"]
+        }
+
     def get_comments(self, task_id: str) -> list[dict]:
         """Fetches comments for a given task ID."""
         try:
@@ -191,7 +260,14 @@ class TodoistClient:
         except Exception:
             return []
 
-    def pop_backlog(self, project_name: str = "Morning Puzzles", move_to_in_progress: bool = True) -> dict:
+    def pop_backlog(
+        self,
+        project_name: str = "Morning Puzzles",
+        move_to_in_progress: bool = True,
+        move_to_doing: Optional[bool] = None,
+        target_section: str = "Doing"
+    ) -> dict:
+        should_move = move_to_doing if move_to_doing is not None else move_to_in_progress
         project = self.find_project(project_name)
         project_id = project["id"]
 
@@ -199,7 +275,7 @@ class TodoistClient:
         backlog_sec = None
         for s in sections:
             s_name = s.get("name", "").strip().lower()
-            if s_name in self.BACKLOG_ALIASES:
+            if s_name in self.TODO_ALIASES:
                 backlog_sec = s
                 break
 
@@ -207,7 +283,7 @@ class TodoistClient:
             available_secs = [s.get("name", "") for s in sections]
             return {
                 "success": False,
-                "error": f"Section 'Backlog' (or 'Todo') not found in project '{project_name}'. Found sections: {available_secs}"
+                "error": f"Section 'To Do' (or 'Backlog') not found in project '{project_name}'. Found sections: {available_secs}"
             }
 
         tasks = self.get_tasks(project_id, backlog_sec["id"])
@@ -217,10 +293,20 @@ class TodoistClient:
                 "status": "empty",
                 "project_name": project["name"],
                 "section_name": backlog_sec["name"],
-                "message": f"Backlog in '{project_name}' is empty. No tasks to pick up!"
+                "message": f"To-Do column in '{project_name}' is empty. No tasks to pick up!"
             }
 
         top_task = tasks[0]
+
+        # Immediately move the identified top task to the Doing column
+        if should_move:
+            doing_sec = self.get_or_create_section(project_id, target_section)
+            self.move_task_to_section(top_task["id"], doing_sec["id"])
+            moved_to = doing_sec["name"]
+            moved_section_id = doing_sec["id"]
+        else:
+            moved_to = None
+            moved_section_id = None
 
         # Fetch comments and attachments
         comments = self.get_comments(top_task["id"])
@@ -234,15 +320,6 @@ class TodoistClient:
                     "file_url": att.get("file_url") or att.get("fileUrl", ""),
                     "resource_type": att.get("resource_type") or att.get("resourceType", ""),
                 })
-
-        if move_to_in_progress:
-            in_progress_sec = self.get_or_create_section(project_id, "In Progress")
-            self.move_task_to_section(top_task["id"], in_progress_sec["id"])
-            moved_to = in_progress_sec["name"]
-            moved_section_id = in_progress_sec["id"]
-        else:
-            moved_to = None
-            moved_section_id = None
 
         return {
             "success": True,
@@ -268,9 +345,10 @@ class TodoistClient:
 def main():
     import argparse
     parser = argparse.ArgumentParser(description="Todoist Helper for /lfg")
-    parser.add_argument("command", choices=["status", "pop-backlog", "peek-backlog"], help="Command to run")
+    parser.add_argument("command", choices=["status", "pop-backlog", "peek-backlog", "finish-task"], help="Command to run")
     parser.add_argument("--project", default="Morning Puzzles", help="Project name (default: 'Morning Puzzles')")
     parser.add_argument("--token", default="", help="Todoist API token (optional override)")
+    parser.add_argument("--task-id", default="", help="Task ID (required for finish-task)")
     args = parser.parse_args()
 
     token = args.token or load_api_token()
@@ -303,11 +381,21 @@ def main():
             }, indent=2))
 
         elif args.command == "pop-backlog":
-            result = client.pop_backlog(args.project, move_to_in_progress=True)
+            result = client.pop_backlog(args.project, move_to_doing=True)
             print(json.dumps(result, indent=2))
 
         elif args.command == "peek-backlog":
-            result = client.pop_backlog(args.project, move_to_in_progress=False)
+            result = client.pop_backlog(args.project, move_to_doing=False)
+            print(json.dumps(result, indent=2))
+
+        elif args.command == "finish-task":
+            if not args.task_id:
+                print(json.dumps({
+                    "success": False,
+                    "error": "Missing required argument --task-id for finish-task command."
+                }, indent=2))
+                sys.exit(1)
+            result = client.finish_task(args.task_id, args.project)
             print(json.dumps(result, indent=2))
 
     except Exception as e:
