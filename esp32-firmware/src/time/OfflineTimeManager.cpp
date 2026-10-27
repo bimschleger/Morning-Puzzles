@@ -301,7 +301,8 @@ void OfflineTimeManager::printSetupTicket(EscPosPrinter& printer, const OfflineC
     printer.setBold(true);
     printer.println("--- STEP 1: JOIN WI-FI ---");
     printer.setBold(false);
-    printer.println("Connect your device to the setup hotspot:");
+    printer.println("Scan the QR code below to");
+    printer.println("connect to the setup hotspot:");
     printer.println("");
 
     ThermalCanvas canvas;
@@ -322,7 +323,7 @@ void OfflineTimeManager::printSetupTicket(EscPosPrinter& printer, const OfflineC
     printer.setBold(true);
     printer.println("--- STEP 2: OPEN SETTINGS ---");
     printer.setBold(false);
-    printer.println("Open the setup page in your web browser:");
+    printer.println("Scan the QR code to set up your games:");
     printer.println("");
 
     if (canvas.begin(216)) {
