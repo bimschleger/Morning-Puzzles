@@ -1,3 +1,10 @@
+#include <iostream>
+#include <iomanip>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <algorithm>
+
 #include "Arduino.h"
 #include "WiFi.h"
 #include "WiFiClient.h"
@@ -71,29 +78,23 @@
 #include "../esp32-firmware/src/generators/InequalityGen.h"
 #include "../esp32-firmware/src/generators/InequalityGen.cpp"
 
-#include <iostream>
-#include <iomanip>
-#include <sstream>
-#include <string>
-#include <vector>
-
 class CapturePrinter : public EscPosPrinter {
 public:
     std::vector<uint8_t> lastBitmap;
     uint16_t lastWidth = 0;
     uint16_t lastHeight = 0;
 
-    bool connect() { return true; }
-    void disconnect() {}
-    void init() {}
-    void setBold(bool) {}
-    void setAlign(TextAlignment) {}
-    void print(const String&) {}
-    void println(const String& = "") {}
-    void print(const char*) {}
-    void println(const char* = "") {}
-    void feed(uint8_t = 1) {}
-    void cut(bool = false) {}
+    bool connect() override { return true; }
+    void disconnect() override {}
+    void init() override {}
+    void setBold(bool) override {}
+    void setAlign(TextAlignment) override {}
+    void print(const String&) override {}
+    void println(const String& = "") override {}
+    void print(const char*) override {}
+    void println(const char* = "") override {}
+    void feed(uint8_t = 1) override {}
+    void cut(bool = false) override {}
 
     void printRasterBitmap(const uint8_t* bitmapData, uint16_t widthDots, uint16_t heightDots) override {
         lastWidth = widthDots;
