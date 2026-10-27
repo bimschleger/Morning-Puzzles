@@ -89,3 +89,8 @@ def render_towers_raster(towers_data: Dict[str, Any], target_width: int = THERMA
 def render_inequality_raster(inequality_data: Dict[str, Any], target_width: int = THERMAL_WIDTH_DOTS) -> bytes:
     return DEFAULT_REGISTRY.get("inequality").render_raster(inequality_data, target_width=target_width)
 
+
+def render_maze_raster(maze_data: Dict[str, Any], target_width: int = THERMAL_WIDTH_DOTS) -> bytes:
+    return DEFAULT_REGISTRY.get("maze").render_raster(maze_data, target_width=target_width)
+
+

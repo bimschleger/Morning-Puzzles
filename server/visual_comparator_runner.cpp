@@ -78,6 +78,9 @@
 #include "../esp32-firmware/src/generators/InequalityGen.h"
 #include "../esp32-firmware/src/generators/InequalityGen.cpp"
 
+#include "../esp32-firmware/src/generators/MazeGen.h"
+#include "../esp32-firmware/src/generators/MazeGen.cpp"
+
 class CapturePrinter : public EscPosPrinter {
 public:
     std::vector<uint8_t> lastBitmap;
@@ -881,6 +884,46 @@ int main(int argc, char** argv) {
             for (uint8_t c = 0; c < fGen.getSize(); c++) {
                 if (c > 0) std::cout << ", ";
                 std::cout << (int)fGen.getSolution(r, c);
+            }
+            std::cout << "]";
+        }
+        std::cout << "],\n";
+        std::cout << "    \"raster_hex\": \"" << toHex(printer->lastBitmap) << "\"\n";
+        std::cout << "  }";
+    }
+
+    // 21. MAZE
+    {
+        MazeGen mazeGen;
+        mazeGen.generate(MAZE_MEDIUM, 42);
+        printer->lastBitmap.clear();
+        mazeGen.printRasterToReceipt(*printer, MAZE_MEDIUM);
+
+        printSep();
+        std::cout << "  {\n";
+        std::cout << "    \"puzzle\": \"maze\",\n";
+        std::cout << "    \"difficulty\": \"medium\",\n";
+        std::cout << "    \"width\": " << printer->lastWidth << ",\n";
+        std::cout << "    \"height\": " << printer->lastHeight << ",\n";
+        std::cout << "    \"size\": " << (int)mazeGen.getSize() << ",\n";
+        std::cout << "    \"walls_h\": [";
+        for (uint8_t r = 0; r < mazeGen.getSize() - 1; r++) {
+            if (r > 0) std::cout << ", ";
+            std::cout << "[";
+            for (uint8_t c = 0; c < mazeGen.getSize(); c++) {
+                if (c > 0) std::cout << ", ";
+                std::cout << (int)mazeGen.getWallH(r, c);
+            }
+            std::cout << "]";
+        }
+        std::cout << "],\n";
+        std::cout << "    \"walls_v\": [";
+        for (uint8_t r = 0; r < mazeGen.getSize(); r++) {
+            if (r > 0) std::cout << ", ";
+            std::cout << "[";
+            for (uint8_t c = 0; c < mazeGen.getSize() - 1; c++) {
+                if (c > 0) std::cout << ", ";
+                std::cout << (int)mazeGen.getWallV(r, c);
             }
             std::cout << "]";
         }

@@ -22,6 +22,7 @@ class EscPosPrinter;
 #include "LadderGen.h"
 #include "TowersGen.h"
 #include "InequalityGen.h"
+#include "MazeGen.h"
 
 class OfflinePuzzleComposer {
 public:

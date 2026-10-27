@@ -37,7 +37,7 @@ PuzzleGrade OfflinePuzzleComposer::getGradeForSlot(uint8_t index, uint8_t totalC
 }
 
 bool OfflinePuzzleComposer::supportsExtreme(OfflinePuzzleType type) const {
-    return (type == PUZZLE_LIGHTS || type == PUZZLE_QUEENS || type == PUZZLE_KILLER || type == PUZZLE_TOWERS);
+    return (type == PUZZLE_LIGHTS || type == PUZZLE_QUEENS || type == PUZZLE_KILLER || type == PUZZLE_TOWERS || type == PUZZLE_MAZE);
 }
 
 void OfflinePuzzleComposer::printSinglePuzzle(EscPosPrinter& printer, OfflinePuzzleType type, bool useRaster, PuzzleGrade grade) {
@@ -308,6 +308,18 @@ void OfflinePuzzleComposer::printSinglePuzzle(EscPosPrinter& printer, OfflinePuz
             printPuzzleHeader(printer, "INEQUALITY", diffStr, inequalityInstr);
             if (!useRaster || !inequality.printRasterToReceipt(printer)) {
                 inequality.printToReceipt(printer);
+            }
+            break;
+        }
+        case PUZZLE_MAZE: {
+            MazeDifficulty diff = (grade == GRADE_EASY) ? MAZE_EASY : ((grade == GRADE_EXTREME) ? MAZE_EXTREME : ((grade == GRADE_HARD) ? MAZE_HARD : MAZE_MEDIUM));
+            const char* diffStr = (diff == MAZE_EASY) ? "EASY" : ((diff == MAZE_EXTREME) ? "EXTREME" : ((diff == MAZE_HARD) ? "HARD" : "MEDIUM"));
+            Serial.println("[COMPOSER] Generating Maze...");
+            MazeGen maze;
+            maze.generate(diff);
+            printPuzzleHeader(printer, "MAZE", diffStr, "Draw a path from the entrance to the exit without crossing any walls.");
+            if (!useRaster || !maze.printRasterToReceipt(printer, diff)) {
+                maze.printToReceipt(printer, diff);
             }
             break;
         }
@@ -744,6 +756,24 @@ void OfflinePuzzleComposer::renderGameGuideRaster(ThermalCanvas& canvas, uint8_t
             canvas.drawChar(rx0 + sz + 8, fy + 4, '<', 2);
             canvas.drawRect(rx0 + 2 * sz, fy, sz, sz, 2);
             canvas.drawChar(rx0 + 2 * sz + 8, fy + 4, '3', 2);
+            break;
+        }
+        case 18: { // MAZE
+            int16_t sz = 28;
+            int16_t lx0 = 144 - (3 * sz) / 2;
+            int16_t rx0 = 432 - (3 * sz) / 2;
+            int16_t fy = ly + 20;
+
+            // Valid move: open corridor with path line passing cleanly
+            canvas.drawHLine(lx0, fy, 3 * sz, 2, 1);
+            canvas.drawHLine(lx0, fy + sz, 3 * sz, 2, 1);
+            canvas.drawHLine(lx0 + 4, fy + sz / 2, 3 * sz - 8, 3, 1);
+
+            // Invalid move: vertical wall blocking corridor with path crossing through wall
+            canvas.drawHLine(rx0, fy, 3 * sz, 2, 1);
+            canvas.drawHLine(rx0, fy + sz, 3 * sz, 2, 1);
+            canvas.drawVLine(rx0 + sz + sz / 2, fy, sz, 4, 1);
+            canvas.drawHLine(rx0 + 4, fy + sz / 2, 3 * sz - 8, 3, 1);
             break;
         }
     }

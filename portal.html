@@ -1870,6 +1870,61 @@ const GAME_RULES = [
         "a": "No. Every digit must be unique within its row and within its column."
       }
     ]
+  },
+  {
+    "id": 18,
+    "key": "maze",
+    "title": "MAZE",
+    "instruction": "Draw a path from the entrance to the exit without crossing any walls.",
+    "objective": "Navigate from the entrance opening at the top-left to the exit opening at the bottom-right by finding the single continuous path without passing through any solid walls.",
+    "rules": [
+      "Start at the IN opening on the top-left of the maze.",
+      "Follow open passageways to reach the OUT opening on the bottom-right.",
+      "You cannot cross through or jump over black wall lines.",
+      "Avoid dead ends that lead to closed corridors."
+    ],
+    "valid_move": {
+      "caption": "Continuous path traveling through open corridors without crossing any walls.",
+      "highlight": [
+        0,
+        1
+      ],
+      "grid": [
+        [
+          "\u00b7",
+          "\u00b7",
+          "\u00b7"
+        ]
+      ]
+    },
+    "invalid_move": {
+      "caption": "Path crossing through a solid black wall line (wall collision violation).",
+      "highlight": [
+        0,
+        1
+      ],
+      "grid": [
+        [
+          "\u00b7",
+          "|",
+          "\u00b7"
+        ]
+      ]
+    },
+    "opening_anchors": [
+      "Trace backwards from the exit (OUT) towards the start (IN); dead-end false trails often branch forward and are easier to spot in reverse.",
+      "Look for corridor bottlenecks: narrow single passages that must be traversed to transition between quadrants."
+    ],
+    "faq": [
+      {
+        "q": "Is there always a unique solution path through the maze?",
+        "a": "Yes. Every procedural maze contains exactly one continuous open route connecting the entrance to the exit."
+      },
+      {
+        "q": "Do I ever need to retrace or loop back?",
+        "a": "No. The true solution path is a direct acyclic route without circular loops or backtracking."
+      }
+    ]
   }
 ];
 /* [[END_GAME_RULES_DATA]] */

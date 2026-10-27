@@ -26,7 +26,7 @@ struct GameRuleDef {
     uint8_t faqCount;
 };
 
-static const size_t TOTAL_GAME_RULES = 18;
+static const size_t TOTAL_GAME_RULES = 19;
 static const GameRuleDef GAME_RULES[TOTAL_GAME_RULES] PROGMEM = {
     {
         0,
@@ -296,6 +296,21 @@ static const GameRuleDef GAME_RULES[TOTAL_GAME_RULES] PROGMEM = {
         { "Look for chains of inequality signs: a chain of A < B < C < D on a 5x5 grid heavily restricts the possible values.", "The cell at the largest end of multiple inequality signs can never be 1; the smallest end can never be N." },
         2,
         { {"Do inequality signs apply to non-adjacent cells?", "No. They apply strictly to the two adjacent squares directly bordering the sign."}, {"Can digits repeat in the same row if they satisfy the inequality?", "No. Every digit must be unique within its row and within its column."} },
+        2
+    },
+    {
+        18,
+        "maze",
+        "MAZE",
+        "Draw a path from the entrance to the exit without crossing any walls.",
+        "Navigate from the entrance opening at the top-left to the exit opening at the bottom-right by finding the single continuous path without passing through any solid walls.",
+        { "Start at the IN opening on the top-left of the maze.", "Follow open passageways to reach the OUT opening on the bottom-right.", "You cannot cross through or jump over black wall lines.", "Avoid dead ends that lead to closed corridors." },
+        4,
+        "Continuous path traveling through open corridors without crossing any walls.",
+        "Path crossing through a solid black wall line (wall collision violation).",
+        { "Trace backwards from the exit (OUT) towards the start (IN); dead-end false trails often branch forward and are easier to spot in reverse.", "Look for corridor bottlenecks: narrow single passages that must be traversed to transition between quadrants." },
+        2,
+        { {"Is there always a unique solution path through the maze?", "Yes. Every procedural maze contains exactly one continuous open route connecting the entrance to the exit."}, {"Do I ever need to retrace or loop back?", "No. The true solution path is a direct acyclic route without circular loops or backtracking."} },
         2
     },
 };

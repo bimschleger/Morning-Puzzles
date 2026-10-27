@@ -41,11 +41,11 @@
   },
   "jumble": {
     "title": "JUMBLE",
-    "sha256": "81502e40351620443236fcb24c5f824860dfe037f9adfe3f68e8b1fde85ec975",
-    "byte_length": 81224,
+    "sha256": "dc6fb125d04daab2508794ca83b1f5cfdf94ee646da215305c06d2000c503ac5",
+    "byte_length": 89288,
     "width_dots": 576,
-    "height_dots": 1128,
-    "average_duty_cycle_pct": 5.22,
+    "height_dots": 1240,
+    "average_duty_cycle_pct": 5.11,
     "max_consecutive_dense_lines": 2,
     "is_safe": true
   },
@@ -81,47 +81,47 @@
   },
   "bridges": {
     "title": "BRIDGES",
-    "sha256": "75088f82e0695b6967d4cbf8610cf4d7ff11a3d996a15b40cbb15503c88b38a0",
+    "sha256": "9a2cd62a0a1a1cf3e9ca047193e491c27c26b40de54375277ca5b707fa742345",
     "byte_length": 41480,
     "width_dots": 576,
     "height_dots": 576,
-    "average_duty_cycle_pct": 1.73,
+    "average_duty_cycle_pct": 1.04,
     "max_consecutive_dense_lines": 0,
     "is_safe": true
   },
   "killer": {
     "title": "KILLER",
-    "sha256": "41606fe8ae2df97dfe3f2a2f21c9f92c6c7028e0517ccbfbf1952d54c3ac9b0e",
+    "sha256": "f1f6210684c613fa1e145c69f05e1ebb724f7fd8f08ba7aa4cbbe98c6b6c5869",
     "byte_length": 41480,
     "width_dots": 576,
     "height_dots": 576,
-    "average_duty_cycle_pct": 6.99,
+    "average_duty_cycle_pct": 6.83,
     "max_consecutive_dense_lines": 4,
     "is_safe": true
   },
   "cryptogram": {
     "title": "CRYPTOGRAM",
-    "sha256": "db19527a3c4cd16f7ff8eb69cb594c1b2f1bf25455c6214b748c7e3b31b70c87",
-    "byte_length": 47240,
+    "sha256": "b0c25beebae72c7695e2a2ffd0a4e4db8978ce38a815bbb03335961e6809e579",
+    "byte_length": 50696,
     "width_dots": 576,
-    "height_dots": 656,
-    "average_duty_cycle_pct": 3.58,
+    "height_dots": 704,
+    "average_duty_cycle_pct": 2.86,
     "max_consecutive_dense_lines": 0,
     "is_safe": true
   },
   "tango": {
     "title": "TANGO",
-    "sha256": "668fc2a616246e5a62615edc1e47e0816a20845aa18815d395948019e3a3ef29",
+    "sha256": "ae490126c1c87a6b448759d1ecce066184f1f60a9b8e1fcc053597e89a061c4f",
     "byte_length": 41480,
     "width_dots": 576,
     "height_dots": 576,
-    "average_duty_cycle_pct": 5.9,
+    "average_duty_cycle_pct": 4.41,
     "max_consecutive_dense_lines": 4,
     "is_safe": true
   },
   "ladder": {
     "title": "LADDER",
-    "sha256": "76002c7e8fd4e0cc575d78e86d48d19235b9eec31d740384220faf955b1b4a5d",
+    "sha256": "ea0ca59ed562f26750a661e80cecd791094359c8a5cfd9a2e1501101acd262d6",
     "byte_length": 37448,
     "width_dots": 576,
     "height_dots": 520,
@@ -177,6 +177,16 @@
     "height_dots": 400,
     "average_duty_cycle_pct": 3.57,
     "max_consecutive_dense_lines": 0,
+    "is_safe": true
+  },
+  "maze": {
+    "title": "MAZE",
+    "sha256": "fe387b6bbd67c8a777022d0d822b6ab395e79b65fbed84b33f33662365fad435",
+    "byte_length": 41480,
+    "width_dots": 576,
+    "height_dots": 576,
+    "average_duty_cycle_pct": 10.13,
+    "max_consecutive_dense_lines": 4,
     "is_safe": true
   }
 }

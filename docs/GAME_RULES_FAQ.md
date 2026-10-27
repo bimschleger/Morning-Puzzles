@@ -24,6 +24,7 @@ This authoritative guide contains complete rules, core objectives, opening deduc
 - [LOOP](#loop) - Draw a single continuous closed loop around numbers indicating surrounding line count.
 - [TOWERS](#towers) - Place building heights 1-5 so edge clues match how many towers are visible in that line.
 - [INEQUALITY](#inequality) - Fill grid with digits 1-5 so each digit appears once per line and inequality signs hold.
+- [MAZE](#maze) - Draw a path from the entrance to the exit without crossing any walls.
 
 ---
 
@@ -715,5 +716,42 @@ This authoritative guide contains complete rules, core objectives, opening deduc
   *A: No. They apply strictly to the two adjacent squares directly bordering the sign.*
 - **Q: Can digits repeat in the same row if they satisfy the inequality?**
   *A: No. Every digit must be unique within its row and within its column.*
+
+---
+
+<a name="maze"></a>
+## --- MAZE ---
+
+> **Instruction**: `Draw a path from the entrance to the exit without crossing any walls.`
+
+**Objective**: Navigate from the entrance opening at the top-left to the exit opening at the bottom-right by finding the single continuous path without passing through any solid walls.
+
+### Rules of Play
+- Start at the IN opening on the top-left of the maze.
+- Follow open passageways to reach the OUT opening on the bottom-right.
+- You cannot cross through or jump over black wall lines.
+- Avoid dead ends that lead to closed corridors.
+
+### Move Examples
+
+**Valid Move**: Continuous path traveling through open corridors without crossing any walls.
+```text
+  · · ·
+```
+
+**Invalid Move**: Path crossing through a solid black wall line (wall collision violation).
+```text
+  · | ·
+```
+
+### Where to Start (First Deductions)
+- **Tip**: Trace backwards from the exit (OUT) towards the start (IN); dead-end false trails often branch forward and are easier to spot in reverse.
+- **Tip**: Look for corridor bottlenecks: narrow single passages that must be traversed to transition between quadrants.
+
+### Frequently Asked Questions
+- **Q: Is there always a unique solution path through the maze?**
+  *A: Yes. Every procedural maze contains exactly one continuous open route connecting the entrance to the exit.*
+- **Q: Do I ever need to retrace or loop back?**
+  *A: No. The true solution path is a direct acyclic route without circular loops or backtracking.*
 
 ---
