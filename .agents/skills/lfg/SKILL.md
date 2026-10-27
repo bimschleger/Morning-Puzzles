@@ -1,43 +1,55 @@
 ---
 name: lfg
-description: Grabs the top backlog task from the 'Morning Puzzles' project in Todoist, moves it to 'In Progress', synthesizes the objective, and immediately launches an interactive /grill-me design interview. Trigger whenever the user types /lfg or asks to work on the next backlog task.
+description: Grabs the top task from the to-do column in Todoist ('Morning Puzzles'), immediately moves it to the doing column, generates an implementation plan from the task details, comments, and attachments, executes and verifies the work, and upon successful completion moves the task to the done column and marks it complete. Trigger whenever the user types /lfg or asks to work on the next backlog task.
 ---
 
-# LFG: Automated Todoist Backlog Ingestion & /grill-me Launch
+# LFG: Automated Todoist Task Ingestion, Planning & Lifecycle Execution
 
-This skill automates taking the next prioritised work item from your Todoist "Morning Puzzles" backlog, transitioning it to "In Progress", and immediately launching an interactive `/grill-me` design interview so you can pair-program the solution without manual copy-pasting.
+This skill manages the complete end-to-end task lifecycle for the **Morning Puzzles** project in Todoist:
+1. Identifying the top task in the **To-Do** column.
+2. **Immediately moving** that task over to the **Doing** column upon identification.
+3. Generating a comprehensive **implementation plan** utilizing all task context (title, short description, comments, and attachments).
+4. Executing and verifying the code changes across all targets.
+5. **Moving the task to the Done column** and **marking it complete** once work is successfully finished.
 
 ---
 
 ## Workflow Steps
 
-When the user types `/lfg` (or requests to pick up the next backlog task), execute this exact sequence:
+When the user types `/lfg` (or requests to pick up the next task), execute this exact sequence:
 
-### 1. Retrieve & Move Top Backlog Task
+### 1. Identify & Immediately Move Top Task from To-Do to Doing
 
 Check for available Todoist tools or use the local fallback helper:
 
 #### Path A: MCP Server Available
 If Todoist MCP tools are present in your environment:
 1. Search for project `Morning Puzzles` (or `Morning Games`, case-insensitive) using `find-projects`.
-2. Find the `Backlog` (or `Todo`) section using `find-sections` and fetch its tasks using `find-tasks`, sorted by display order (ascending).
-3. If no tasks exist in `Backlog`/`Todo`, report that the backlog is empty and stop.
-4. Select the top task (first in list).
-5. **Inspect Comments & Attachments**:
+2. Find the `To-Do` column using `find-sections` (matching aliases: `To Do`, `Todo`, `to-do`, or `Backlog`).
+3. Fetch tasks in the `To-Do` section using `find-tasks`, sorted by display order (ascending).
+4. If no tasks exist in `To-Do`, inform the user that the To-Do column is empty and stop.
+5. Select the top task (first in list).
+6. **Immediately Move to the Doing Column**:
+   - Locate the `Doing` column using `find-sections` (matching aliases: `Doing`, `In Progress`, or `in-progress`). If it does not exist, create it with `add-sections`.
+   - Call `update-tasks` with `tasks: [{"id": taskId, "sectionId": doingSectionId}]` to move the task to `Doing` right away.
+7. **Inspect Comments & Attachments**:
    - Call `find-comments` with `taskId`.
-   - If any comment has a `fileAttachment`:
+   - If any comment has a `fileAttachment` or `attachment`:
      - Extract `fileUrl` and call `view-attachment` with `fileUrl`.
-     - For images, inspect the visual reference using `view_file` on the saved image path or view the inline image directly.
-     - Note any additional notes or instructions in comment text.
-6. Locate the `In Progress` (or `Doing`) section (create it under the project if it does not already exist).
-7. Move the selected task to the `In Progress`/`Doing` section.
+     - For images or visual references, inspect them to understand visual specs, mockups, or bug reports.
+     - Note all additional requirements and context from comment text.
 
 #### Path B: Fallback via Helper Script (Zero-Restart)
 If Todoist MCP tools are not registered in the current session, run the project's helper script:
 ```bash
 python3 .agents/skills/lfg/scripts/todoist_helper.py pop-backlog --project "Morning Puzzles"
 ```
-The script will automatically fetch comments and attached file metadata into `task["attachments"]` and `task["comments"]`.
+The script automatically:
+- Finds the top task in `To-Do` / `Backlog`.
+- Immediately moves it to `Doing` / `In Progress`.
+- Retrieves all comments and attached file metadata into `task["attachments"]` and `task["comments"]`.
+
+---
 
 ### 2. Handle Execution Responses
 
@@ -47,39 +59,103 @@ The script will automatically fetch comments and attached file metadata into `ta
   - Inform them they can set it in their shell (`export TODOIST_API_KEY=...`), add it to `.env.local` in the project root, or add it to `~/.gemini/config/mcp_config.json`.
   - Stop execution.
 
-- **Empty Backlog**:
+- **Empty To-Do Column**:
   If response has `"status": "empty"`:
-  - Inform the user: *"The 'Backlog' section in Morning Puzzles has no tasks right now! 🎉"*
+  - Inform the user: *"The 'To-Do' column in Morning Puzzles has no tasks right now! 🎉"*
   - Stop execution.
 
 - **Success (`status: "popped"`)**:
   Extract the task attributes:
   - **Task Title / Content**: `task["content"]`
   - **Description & Details**: `task["description"]`
-  - **Attachments**: `task.get("attachments", [])` (or comments with `fileAttachment`)
+  - **Attachments**: `task.get("attachments", [])` (or comments with attachments)
   - **Comments**: `task.get("comments", [])`
-  - **Labels / Tags**: `task["labels"]`
-  - **Task ID & Link**: `task["url"]`
-  - **Moved Destination**: `In Progress`
+  - **Labels / Tags**: `task.get("labels", [])`
+  - **Task ID & Link**: `task.get("id")`, `task.get("url")`
+  - **Moved Destination**: `Doing` (or `In Progress`)
 
-### 3. Display Task Summary
+---
+
+### 3. Display Task Summary Card
 
 Print a clean summary card for the user:
 ```markdown
 ### 🎯 Active Task: [Task Title]
 - **Project**: Morning Puzzles
-- **Section**: Moved to `In Progress`
+- **Status**: Moved to `Doing`
 - **Description**: [Task Description or "(No description provided)"]
+- **Comments**: [Count of comments and highlights, or "(None)"]
 - **Attachments**: [List filenames/types, or "(None)"]
 - **Labels**: [Labels or None]
 ```
 
-### 4. Synthesize Goal Prompt & Immediately Launch `/grill-me`
+---
 
-1. Synthesize a clear, outcome-focused goal prompt combining the task title, description, attached reference images/documents, and context of the Morning Puzzles codebase:
-   `[Outcome Goal]: <Interpolated description of what needs to be built, fixed, or updated, referencing any attached visual artifacts or mockups>`
-2. **Immediate Grilling**: Do **NOT** stop and wait for the user to manually type `/grill-me`. Transition directly into the `/grill-me` interview:
-   - Factor in any visual details observed from attachments (e.g. alignment issues, unwanted borders, spacing discrepancies).
-   - Identify the primary architectural/design fork for this task.
-   - Formulate the first clarifying question with concrete options and a recommended answer.
-   - Immediately invoke the `ask_question` tool to present Question 1 to the user.
+### 4. Generate the Implementation Plan
+
+Synthesize all details from the task:
+- **Task Title & Short Description**: Core objective and user intent.
+- **Comments**: Implementation clarifications, design decisions, or constraints.
+- **Attachments**: Inspect visual assets (reference mockups, thermal print scans, alignment guides, diagrams).
+- **Codebase Context**: Check project architecture standards (`.agents/rules/puzzle_standards.md` Rules 1–17).
+
+Generate a structured plan covering:
+1. **User Goal & Problem Formulation**: Exact scope derived from the task title, description, comments, and attachments.
+2. **Tri-Target Architecture & Parity Requirements**:
+   - Python backend plugin (`server/app/puzzles/<game>.py`)
+   - ESP32 firmware generator (`esp32-firmware/src/generators/<Game>Gen.cpp`)
+   - Web Simulator emulation (`simulator/receipt_simulator.html`)
+   - Arduino sketch sync (`./scripts/sync_arduino_sketch.sh`)
+3. **Step-by-Step Implementation Tasks**: Specific file modifications and additions.
+4. **Verification & Testing Plan**: Automated test suites to run (`test_puzzle_standards.py`, `test_thermal_format.py`, `test_visual_consistency.py`, etc.).
+
+Present the plan to the user (as a plan artifact or structured walkthrough) before or during implementation.
+
+---
+
+### 5. Execute & Verify Work
+
+1. Carry out the planned modifications cleanly.
+2. Run automated validation suites:
+   ```bash
+   python3 server/test_puzzle_standards.py
+   python3 server/test_thermal_format.py
+   python3 server/test_visual_consistency.py
+   ```
+3. Run the Arduino IDE synchronization script if firmware was updated:
+   ```bash
+   ./scripts/sync_arduino_sketch.sh
+   ```
+4. Verify that all changes comply with Morning Puzzles Rules 1–17 and pass with zero warnings/errors.
+
+---
+
+### 6. Move Task to Done & Mark Complete
+
+Once the work is **successfully complete and verified**, transition and complete the task in Todoist:
+
+#### Path A: MCP Server Available
+1. Find or create the `Done` column:
+   - Use `find-sections` to locate the `Done` section (matching aliases `Done`, `Completed`).
+   - If not found, create it using `add-sections` with `{"projectId": projectId, "name": "Done"}`.
+2. Move the task from `Doing` to `Done`:
+   - Call `update-tasks` with `tasks: [{"id": taskId, "sectionId": doneSectionId}]`.
+3. Mark the task complete:
+   - Call `complete-tasks` with `ids: [taskId]`.
+
+#### Path B: Fallback via Helper Script
+Run the helper script's `finish-task` command:
+```bash
+python3 .agents/skills/lfg/scripts/todoist_helper.py finish-task --task-id <TASK_ID> --project "Morning Puzzles"
+```
+The script will:
+- Locate or create the `Done` section.
+- Move the task into `Done`.
+- Mark the task as completed in Todoist.
+
+Finally, inform the user:
+```markdown
+### ✅ Task Completed: [Task Title]
+- **Status**: Moved to `Done` and marked complete in Todoist.
+- **Verification**: All test suites passed successfully.
+```
