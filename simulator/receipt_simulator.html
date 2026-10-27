@@ -168,7 +168,7 @@
             Game Count:
           </label>
           <select id="select-game-count" class="w-full max-w-[210px] bg-slate-800 border border-amber-500/50 text-amber-400 font-semibold rounded-lg px-2.5 py-1.5 text-xs outline-none focus:border-amber-500 transition">
-            <option value="all" selected>All Games (18)</option>
+            <option value="all" selected>All Games (19)</option>
             <option value="3">Random 3 Games</option>
             <option value="5">Random 5 Games</option>
             <option value="7">Random 7 Games</option>
@@ -537,6 +537,25 @@
               <option value="medium" selected>Medium: 4x4 Grid</option>
               <option value="hard">Hard: 5x5 Grid</option>
               <option value="extreme">Extreme: 5x5 Grid</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 19. Maze Toggle -->
+        <div class="bg-slate-900 border border-slate-800/80 rounded-xl p-3.5 flex flex-col gap-2.5 transition hover:border-slate-700">
+          <div class="flex items-center justify-between">
+            <label class="flex items-center gap-2.5 cursor-pointer select-none">
+              <input type="checkbox" id="toggle-maze" checked class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
+              <span class="font-semibold text-sm text-slate-200">Maze</span>
+            </label>
+          </div>
+          <div class="flex items-center justify-between pl-6 text-xs text-slate-400">
+            <span>Difficulty:</span>
+            <select id="diff-maze" class="bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2 py-1 text-xs outline-none focus:border-amber-500">
+              <option value="easy">Easy: 10x10</option>
+              <option value="medium" selected>Medium: 20x20</option>
+              <option value="hard">Hard: 30x30</option>
+              <option value="extreme">Extreme: 40x40</option>
             </select>
           </div>
         </div>
@@ -4207,6 +4226,192 @@
       tc.renderToCanvas(canvas);
     }
 
+    function renderOfflineMaze(canvas, mData) {
+      const size = mData.size || 20;
+      const cellSize = mData.cellSize || 24;
+      const wallT = mData.wallThickness || 3;
+      const halfT = Math.floor(wallT / 2);
+      const outerT = 4;
+      const boardSize = 480;
+      const totalH = 576;
+
+      const tc = new ThermalCanvasSimulator(576, totalH);
+
+      const leftMargin = Math.floor((576 - boardSize) / 2); // 48
+      const topMargin = Math.floor((576 - boardSize) / 2);  // 48
+
+      // 1. Inner Walls (strictly clamped to board boundaries to prevent frame protrusion)
+      const wallsH = mData.wallsH || mData.walls_h || [];
+      const wallsV = mData.wallsV || mData.walls_v || [];
+
+      // Horizontal walls
+      for (let r = 0; r < size - 1; r++) {
+        const wy = topMargin + (r + 1) * cellSize - halfT;
+        for (let c = 0; c < size; c++) {
+          if (wallsH[r] && wallsH[r][c]) {
+            const wxStart = Math.max(leftMargin, leftMargin + c * cellSize - halfT);
+            const wxEnd = Math.min(leftMargin + boardSize, leftMargin + (c + 1) * cellSize + halfT + (wallT % 2));
+            tc.drawHLine(wxStart, wy, wxEnd - wxStart, wallT);
+          }
+        }
+      }
+
+      // Vertical walls
+      for (let r = 0; r < size; r++) {
+        const wyStart = Math.max(topMargin, topMargin + r * cellSize - halfT);
+        const wyEnd = Math.min(topMargin + boardSize, topMargin + (r + 1) * cellSize + halfT + (wallT % 2));
+        for (let c = 0; c < size - 1; c++) {
+          if (wallsV[r] && wallsV[r][c]) {
+            const wx = leftMargin + (c + 1) * cellSize - halfT;
+            tc.drawVLine(wx, wyStart, wyEnd - wyStart, wallT);
+          }
+        }
+      }
+
+      // 2. Outer Frame (thickness 4, rendered over inner walls for clean single-frame boundaries)
+      // Top wall (open at cell 0)
+      tc.drawHLine(leftMargin + cellSize, topMargin, boardSize - cellSize, outerT);
+      // Left wall (solid)
+      tc.drawVLine(leftMargin, topMargin, boardSize, outerT);
+      // Right wall (solid)
+      tc.drawVLine(leftMargin + boardSize - outerT, topMargin, boardSize, outerT);
+      // Bottom wall (open at cell size - 1)
+      tc.drawHLine(leftMargin, topMargin + boardSize - outerT, boardSize - cellSize, outerT);
+
+      // 3. Badges "IN" and "OUT"
+      const inCx = leftMargin + Math.floor(cellSize / 2);
+      tc.drawText(inCx - 11, 24, "IN", 2);
+
+      const outCx = leftMargin + boardSize - Math.floor(cellSize / 2);
+      tc.drawText(outCx - 17, topMargin + boardSize + 10, "OUT", 2);
+
+      tc.renderToCanvas(canvas);
+    }
+
+    class MazeSimulator {
+      generate(diff) {
+        let size = 20;
+        let cellSize = 24;
+        let wallThickness = 3;
+        let branchProb = 0.25;
+
+        if (diff === 'easy') {
+          size = 10;
+          cellSize = 48;
+          wallThickness = 4;
+          branchProb = 0.50;
+        } else if (diff === 'hard') {
+          size = 30;
+          cellSize = 16;
+          wallThickness = 2;
+          branchProb = 0.05;
+        } else if (diff === 'extreme') {
+          size = 40;
+          cellSize = 12;
+          wallThickness = 2;
+          branchProb = 0.00;
+        }
+
+        const wallsH = Array.from({ length: size - 1 }, () => Array(size).fill(1));
+        const wallsV = Array.from({ length: size }, () => Array(size - 1).fill(1));
+        const visited = Array.from({ length: size }, () => Array(size).fill(false));
+        const active = [[0, 0]];
+        visited[0][0] = true;
+
+        while (active.length > 0) {
+          const idx = Math.random() < branchProb ? Math.floor(Math.random() * active.length) : active.length - 1;
+          const [r, c] = active[idx];
+
+          const unvisited = [];
+          if (r > 0 && !visited[r - 1][c]) unvisited.push([r - 1, c, 'N']);
+          if (r < size - 1 && !visited[r + 1][c]) unvisited.push([r + 1, c, 'S']);
+          if (c > 0 && !visited[r][c - 1]) unvisited.push([r, c - 1, 'W']);
+          if (c < size - 1 && !visited[r][c + 1]) unvisited.push([r, c + 1, 'E']);
+
+          if (unvisited.length > 0) {
+            const [nr, nc, dir] = unvisited[Math.floor(Math.random() * unvisited.length)];
+            if (dir === 'N') wallsH[r - 1][c] = 0;
+            else if (dir === 'S') wallsH[r][c] = 0;
+            else if (dir === 'W') wallsV[r][c - 1] = 0;
+            else if (dir === 'E') wallsV[r][c] = 0;
+
+            visited[nr][nc] = true;
+            active.push([nr, nc]);
+          } else {
+            active.splice(idx, 1);
+          }
+        }
+
+        // BFS path solution
+        const parent = new Map();
+        const q = [[0, 0]];
+        const seen = new Set(['0,0']);
+        const targetKey = `${size - 1},${size - 1}`;
+
+        while (q.length > 0) {
+          const [cr, cc] = q.shift();
+          if (`${cr},${cc}` === targetKey) break;
+
+          if (cr > 0 && wallsH[cr - 1][cc] === 0 && !seen.has(`${cr - 1},${cc}`)) {
+            seen.add(`${cr - 1},${cc}`);
+            parent.set(`${cr - 1},${cc}`, [cr, cc]);
+            q.push([cr - 1, cc]);
+          }
+          if (cr < size - 1 && wallsH[cr][cc] === 0 && !seen.has(`${cr + 1},${cc}`)) {
+            seen.add(`${cr + 1},${cc}`);
+            parent.set(`${cr + 1},${cc}`, [cr, cc]);
+            q.push([cr + 1, cc]);
+          }
+          if (cc > 0 && wallsV[cr][cc - 1] === 0 && !seen.has(`${cr},${cc - 1}`)) {
+            seen.add(`${cr},${cc - 1}`);
+            parent.set(`${cr},${cc - 1}`, [cr, cc]);
+            q.push([cr, cc - 1]);
+          }
+          if (cc < size - 1 && wallsV[cr][cc] === 0 && !seen.has(`${cr},${cc + 1}`)) {
+            seen.add(`${cr},${cc + 1}`);
+            parent.set(`${cr},${cc + 1}`, [cr, cc]);
+            q.push([cr, cc + 1]);
+          }
+        }
+
+        const path = [[size - 1, size - 1]];
+        let curKey = targetKey;
+        while (curKey !== '0,0') {
+          const prev = parent.get(curKey);
+          if (!prev) break;
+          path.push(prev);
+          curKey = `${prev[0]},${prev[1]}`;
+        }
+        path.reverse();
+
+        const moves = [];
+        for (let i = 0; i < path.length - 1; i++) {
+          const [r1, c1] = path[i];
+          const [r2, c2] = path[i + 1];
+          let d = 'E';
+          if (r2 === r1 + 1) d = 'S';
+          else if (r2 === r1 - 1) d = 'N';
+          else if (c2 === c1 + 1) d = 'E';
+          else d = 'W';
+
+          if (moves.length > 0 && moves[moves.length - 1].dir === d) {
+            moves[moves.length - 1].cnt++;
+          } else {
+            moves.push({ dir: d, cnt: 1 });
+          }
+        }
+
+        return {
+          size,
+          cellSize,
+          wallThickness,
+          wallsH,
+          wallsV,
+          solutionMoves: moves.map(m => `${m.dir} ${m.cnt}`)
+        };
+      }
+    }
+
     // =========================================================================
     // 3. RECEIPT COMPOSER & RENDERER (Mixed Text + Dithered Canvas)
     // =========================================================================
@@ -4229,6 +4434,7 @@
     const wheelSim = new WheelSimulator();
     const towersSim = new TowersSimulator();
     const inequalitySim = new InequalitySimulator();
+    const mazeSim = new MazeSimulator();
 
     let rawReceiptLines = [];
 
@@ -5199,6 +5405,83 @@
         });
       };
 
+      // 19. MAZE
+      PUZZLE_RENDERERS['maze'] = () => {
+        const diff = document.getElementById('diff-maze').value;
+        const mData = mazeSim.generate(diff);
+        if (!mData) return;
+        const mazeDesc = 'Draw a path from the entrance to the exit without crossing any walls.';
+        addStandardPuzzleHeader(items, 'MAZE', diff, mazeDesc);
+
+        if (isRaster) {
+          items.push({
+            type: 'canvas',
+            render: (canvas) => renderOfflineMaze(canvas, mData)
+          });
+        } else {
+          // Monospaced ASCII Maze
+          const size = mData.size;
+          const wallsH = mData.wallsH;
+          const wallsV = mData.wallsV;
+          const indent = '      ';
+          if (size <= 12) {
+            let topStr = indent + '+   ';
+            for (let c = 1; c < size; c++) topStr += '+---';
+            items.push({ type: 'text', text: topStr + '+' });
+            for (let r = 0; r < size; r++) {
+              let rowStr = indent + '|';
+              for (let c = 0; c < size; c++) {
+                rowStr += '   ' + (c < size - 1 ? (wallsV[r][c] ? '|' : ' ') : '|');
+              }
+              items.push({ type: 'text', text: rowStr });
+              if (r < size - 1) {
+                let hStr = indent + '+';
+                for (let c = 0; c < size; c++) {
+                  hStr += (wallsH[r][c] ? '---' : '   ') + '+';
+                }
+                items.push({ type: 'text', text: hStr });
+              } else {
+                let botStr = indent;
+                for (let c = 0; c < size - 1; c++) botStr += '+---';
+                botStr += '+   +';
+                items.push({ type: 'text', text: botStr });
+              }
+            }
+          } else {
+            let topStr = indent + '+ ';
+            for (let c = 1; c < size; c++) topStr += '+-';
+            items.push({ type: 'text', text: topStr + '+' });
+            for (let r = 0; r < size; r++) {
+              let rowStr = indent + '|';
+              for (let c = 0; c < size; c++) {
+                rowStr += ' ' + (c < size - 1 ? (wallsV[r][c] ? '|' : ' ') : '|');
+              }
+              items.push({ type: 'text', text: rowStr });
+              if (r < size - 1) {
+                let hStr = indent + '+';
+                for (let c = 0; c < size; c++) {
+                  hStr += (wallsH[r][c] ? '-' : ' ') + '+';
+                }
+                items.push({ type: 'text', text: hStr });
+              } else {
+                let botStr = indent;
+                for (let c = 0; c < size - 1; c++) botStr += '+-';
+                botStr += '+ +';
+                items.push({ type: 'text', text: botStr });
+              }
+            }
+          }
+        }
+
+        items.push({ type: 'blank', text: '' });
+        items.push({ type: 'rule', text: '-'.repeat(COLS) });
+
+        solutionsContent.push({
+          name: 'Maze',
+          data: mData
+        });
+      };
+
       // Render active puzzles in progressive/configured order
       const renderOrder = [];
       activeGameOrder.forEach(id => {
@@ -5370,6 +5653,33 @@
               }
               items.push({ type: 'text', text: rowStr });
             }
+          } else if (item.name === 'Maze') {
+            const moves = item.data.solutionMoves || [];
+            const tokens = ["START ->"];
+            for (let i = 0; i < moves.length; i++) {
+              if (i === moves.length - 1) {
+                tokens.push(moves[i]);
+                tokens.push("-> EXIT");
+              } else {
+                tokens.push(moves[i] + ",");
+              }
+            }
+            let curr = [];
+            let currLen = 0;
+            for (const t of tokens) {
+              const addLen = curr.length === 0 ? t.length : t.length + 1;
+              if (curr.length > 0 && currLen + addLen > 40) {
+                items.push({ type: 'text', text: '      ' + curr.join(' ') });
+                curr = [t];
+                currLen = t.length;
+              } else {
+                curr.push(t);
+                currLen += addLen;
+              }
+            }
+            if (curr.length > 0) {
+              items.push({ type: 'text', text: '      ' + curr.join(' ') });
+            }
           }
 
           // Leave an empty line after displaying the answer
@@ -5484,7 +5794,8 @@
       'diff-loop': { easy: 'easy', medium: 'medium', hard: 'hard' },
       'diff-wheel': { easy: 'easy', medium: 'medium', hard: 'hard' },
       'diff-towers': { easy: 'easy', medium: 'medium', hard: 'hard', extreme: 'extreme' },
-      'diff-inequality': { easy: 'easy', medium: 'medium', hard: 'hard', extreme: 'extreme' }
+      'diff-inequality': { easy: 'easy', medium: 'medium', hard: 'hard', extreme: 'extreme' },
+      'diff-maze': { easy: 'easy', medium: 'medium', hard: 'hard', extreme: 'extreme' }
     };
 
     function applyGlobalDifficulty(diff) {
@@ -5551,11 +5862,11 @@
       }
     });
 
-    // All 18 puzzle IDs in canonical order
+    // All 19 puzzle IDs in canonical order
     const ALL_GAMES = [
       'queens', 'sudoku', 'wordsearch', 'nonogram', 'jumble',
       'binary', 'mines', 'tents', 'bridges', 'killer',
-      'cryptogram', 'tango', 'ladder', 'lights', 'loop', 'wheel', 'towers', 'inequality'
+      'cryptogram', 'tango', 'ladder', 'lights', 'loop', 'wheel', 'towers', 'inequality', 'maze'
     ];
 
     let activeGameOrder = [...ALL_GAMES];
@@ -5708,6 +6019,7 @@
       'toggle-wheel', 'diff-wheel',
       'toggle-towers', 'diff-towers',
       'toggle-inequality', 'diff-inequality',
+      'toggle-maze', 'diff-maze',
       'toggle-solutions'
     ];
     inputs.forEach(id => {
@@ -6895,6 +7207,61 @@
         "a": "No. Every digit must be unique within its row and within its column."
       }
     ]
+  },
+  {
+    "id": 18,
+    "key": "maze",
+    "title": "MAZE",
+    "instruction": "Draw a path from the entrance to the exit without crossing any walls.",
+    "objective": "Navigate from the entrance opening at the top-left to the exit opening at the bottom-right by finding the single continuous path without passing through any solid walls.",
+    "rules": [
+      "Start at the IN opening on the top-left of the maze.",
+      "Follow open passageways to reach the OUT opening on the bottom-right.",
+      "You cannot cross through or jump over black wall lines.",
+      "Avoid dead ends that lead to closed corridors."
+    ],
+    "valid_move": {
+      "caption": "Continuous path traveling through open corridors without crossing any walls.",
+      "highlight": [
+        0,
+        1
+      ],
+      "grid": [
+        [
+          "\u00b7",
+          "\u00b7",
+          "\u00b7"
+        ]
+      ]
+    },
+    "invalid_move": {
+      "caption": "Path crossing through a solid black wall line (wall collision violation).",
+      "highlight": [
+        0,
+        1
+      ],
+      "grid": [
+        [
+          "\u00b7",
+          "|",
+          "\u00b7"
+        ]
+      ]
+    },
+    "opening_anchors": [
+      "Trace backwards from the exit (OUT) towards the start (IN); dead-end false trails often branch forward and are easier to spot in reverse.",
+      "Look for corridor bottlenecks: narrow single passages that must be traversed to transition between quadrants."
+    ],
+    "faq": [
+      {
+        "q": "Is there always a unique solution path through the maze?",
+        "a": "Yes. Every procedural maze contains exactly one continuous open route connecting the entrance to the exit."
+      },
+      {
+        "q": "Do I ever need to retrace or loop back?",
+        "a": "No. The true solution path is a direct acyclic route without circular loops or backtracking."
+      }
+    ]
   }
 ];
     /* [[END_GAME_RULES_DATA]] */
@@ -7290,6 +7657,23 @@
           canvas.drawChar(rx0 + sz + 8, fy + 4, '<', 2);
           canvas.drawRect(rx0 + 2 * sz, fy, sz, sz, 2);
           canvas.drawChar(rx0 + 2 * sz + 8, fy + 4, '3', 2);
+          break;
+        }
+        case 18: { // MAZE
+          const sz = 28;
+          const lx0 = 144 - (3 * sz) / 2, rx0 = 432 - (3 * sz) / 2;
+          const fy = ly + 20;
+
+          // Valid move: open corridor with path line passing cleanly
+          canvas.drawHLine(lx0, fy, 3 * sz, 2);
+          canvas.drawHLine(lx0, fy + sz, 3 * sz, 2);
+          canvas.drawHLine(lx0 + 4, fy + Math.floor(sz / 2), 3 * sz - 8, 3);
+
+          // Invalid move: vertical wall blocking corridor with path crossing through wall
+          canvas.drawHLine(rx0, fy, 3 * sz, 2);
+          canvas.drawHLine(rx0, fy + sz, 3 * sz, 2);
+          canvas.drawVLine(rx0 + sz + Math.floor(sz / 2), fy, sz, 4);
+          canvas.drawHLine(rx0 + 4, fy + Math.floor(sz / 2), 3 * sz - 8, 3);
           break;
         }
       }

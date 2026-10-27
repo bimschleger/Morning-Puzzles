@@ -39,6 +39,7 @@ APPROVED_TITLES = [
     "LOOP",
     "TOWERS",
     "INEQUALITY",
+    "MAZE",
 ]
 
 FORBIDDEN_TITLE_PATTERNS = [
@@ -549,6 +550,32 @@ def test_generators_directory_removed():
     print("  -> Passed! server/app/generators/ does not exist.\n")
 
 
+def test_maze_boundary_cleanliness():
+    print("Test 11: Verifying Maze Boundary Cleanliness (Zero Outer Wall Protrusions)...")
+    maze_plugin = DEFAULT_REGISTRY.get("maze")
+    assert maze_plugin is not None, "Maze plugin must be registered"
+
+    for diff in ["easy", "medium", "hard", "extreme"]:
+        data = maze_plugin.generate(diff, seed=123)
+        raster = maze_plugin.render_raster(data)
+        raw_bitmap = raster[8:]  # Strip 8-byte ESC/POS header
+
+        # Verify zero pixels protrude outside [48, 528) x [48, 528) other than IN / OUT text badges
+        for y in range(576):
+            for x in range(576):
+                byte_idx = y * 72 + (x // 8)
+                bit = (raw_bitmap[byte_idx] >> (7 - (x % 8))) & 1
+                if bit:
+                    if 48 <= y < 528:
+                        assert 48 <= x < 528, f"Maze {diff}: Inner wall protruding horizontally at x={x}, y={y}"
+                    elif y < 48:
+                        assert 20 <= y <= 40, f"Maze {diff}: Line protruding above top boundary at x={x}, y={y}"
+                    else:
+                        assert 535 <= y <= 555, f"Maze {diff}: Line protruding below bottom boundary at x={x}, y={y}"
+
+    print("  -> Passed! Zero line protrusions detected beyond outer boundaries across all difficulty levels.\n")
+
+
 if __name__ == "__main__":
     print("==================================================================")
     print("RUNNING MORNING PUZZLES PRESENTATION & AUTHORING STANDARDS TESTS")
@@ -564,8 +591,9 @@ if __name__ == "__main__":
     test_playable_cells_cleanliness()
     test_jumble_difficulty_standards()
     test_generators_directory_removed()
+    test_maze_boundary_cleanliness()
 
     print("==================================================================")
-    print("ALL PRESENTATION & AUTHORING STANDARDS TESTS PASSED (10/10)!")
+    print("ALL PRESENTATION & AUTHORING STANDARDS TESTS PASSED (11/11)!")
     print("==================================================================")
 

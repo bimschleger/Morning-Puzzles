@@ -102,6 +102,9 @@ public:
 #include "../src/generators/InequalityGen.h"
 #include "../src/generators/InequalityGen.cpp"
 
+#include "../src/generators/MazeGen.h"
+#include "../src/generators/MazeGen.cpp"
+
 #include "../src/generators/OfflinePuzzleComposer.h"
 #include "../src/generators/OfflinePuzzleComposer.cpp"
 

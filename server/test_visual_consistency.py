@@ -225,6 +225,13 @@ def test_visual_consistency():
                 "solution": item["solution"],
                 "difficulty": item.get("difficulty", "medium"),
             }
+        elif p_name == "maze":
+            py_data = {
+                "size": item["size"],
+                "walls_h": item["walls_h"],
+                "walls_v": item["walls_v"],
+                "difficulty": item.get("difficulty", "medium"),
+            }
         else:
             print(f"Unknown puzzle {p_name}")
             continue

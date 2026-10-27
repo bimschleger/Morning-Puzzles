@@ -33,6 +33,7 @@ enum OfflinePuzzleType : uint8_t {
     PUZZLE_LOOP,
     PUZZLE_TOWERS,
     PUZZLE_INEQUALITY,
+    PUZZLE_MAZE,
     OFFLINE_PUZZLE_TOTAL
 };
 
