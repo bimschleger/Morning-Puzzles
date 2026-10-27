@@ -80,8 +80,6 @@ class PuzzleRegistry:
             if "master" in plugin.supported_difficulties:
                 return "master"
             target_tier = "hard"
-        if plugin.puzzle_id == "killer" and target_tier == "hard":
-            return "extreme"
         if plugin.puzzle_id == "nonogram":
             return "easy" if target_tier == "easy" else "medium"
         return target_tier

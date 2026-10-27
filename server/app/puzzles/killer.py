@@ -24,9 +24,9 @@ class KillerPuzzle(BasePuzzle):
     """Killer Sudoku puzzle plugin with guaranteed unique solutions."""
 
     DIFFICULTY_SETTINGS = {
-        "easy":    {"size": 4, "box_r": 2, "box_c": 2, "min_cage": 1, "max_cage": 2},
+        "easy":    {"size": 4, "box_r": 2, "box_c": 2, "min_cage": 2, "max_cage": 2},
         "medium":  {"size": 4, "box_r": 2, "box_c": 2, "min_cage": 2, "max_cage": 3},
-        "hard":    {"size": 6, "box_r": 2, "box_c": 3, "min_cage": 2, "max_cage": 4},
+        "hard":    {"size": 6, "box_r": 2, "box_c": 3, "min_cage": 2, "max_cage": 3},
         "extreme": {"size": 6, "box_r": 2, "box_c": 3, "min_cage": 2, "max_cage": 4},
     }
 
@@ -44,7 +44,7 @@ class KillerPuzzle(BasePuzzle):
 
     @property
     def supported_difficulties(self) -> List[str]:
-        return ["easy", "medium", "extreme"]
+        return ["easy", "medium", "hard", "extreme"]
 
     def generate(
         self,
@@ -57,7 +57,7 @@ class KillerPuzzle(BasePuzzle):
 
         diff_key = difficulty.lower()
         dataset = load_curated_dataset("killer_dataset.json")
-        tier_key = "extreme" if diff_key in ("extreme", "hard") else ("easy" if diff_key == "easy" else "medium")
+        tier_key = diff_key if (dataset and diff_key in dataset) else "medium"
 
         if dataset and tier_key in dataset and len(dataset[tier_key]) > 0:
             tier_puzzles = dataset[tier_key]

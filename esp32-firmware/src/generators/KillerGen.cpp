@@ -71,6 +71,23 @@ void KillerGen::generate(KillerDifficulty difficulty, uint32_t seed) {
             _cageSums[c] = pgm_read_byte(&entry->cage_sums[c]);
         }
         applyTransform(transform);
+    } else if (difficulty == KILLER_HARD) {
+        _size = 6;
+        _boxRows = 2;
+        _boxCols = 3;
+        // Box-preserving symmetries: 0 (identity), 2 (180 rot), 4 (h-flip), 6 (v-flip)
+        uint8_t transform = (seed % 4) * 2;
+
+        const Killer6x6Entry* entry = &KILLER_HARD_DATASET[puzzleIdx];
+        _numCages = pgm_read_byte(&entry->num_cages);
+        for (uint8_t i = 0; i < 36; i++) {
+            _cageMap[i / 6][i % 6] = mp_unpack_nibble_pgm(entry->cage_map, i);
+            _solution[i / 6][i % 6] = mp_unpack_nibble_pgm(entry->solution, i);
+        }
+        for (uint8_t c = 0; c < _numCages && c < MAX_CAGES; c++) {
+            _cageSums[c] = pgm_read_byte(&entry->cage_sums[c]);
+        }
+        applyTransform(transform);
     } else if (difficulty == KILLER_EXTREME) {
         _size = 6;
         _boxRows = 2;

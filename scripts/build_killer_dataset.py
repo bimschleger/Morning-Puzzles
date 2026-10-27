@@ -371,7 +371,7 @@ def curate_tier(tier_name: str, size: int, box_r: int, box_c: int, min_c: int, m
             k = len(cg["cells"])
             s = cg["sum"]
             if size == 4:
-                if (k == 2 and s in (3, 4, 7)) or (k == 3 and s in (6, 9)) or (k == 1):
+                if (k == 2 and s in (3, 4, 6, 7)) or (k == 3 and s in (6, 9)):
                     has_anchor = True
                     break
             else:
@@ -425,6 +425,7 @@ def export_cpp_header(dataset: Dict[str, List[Dict[str, Any]]]):
     lines.append("")
     lines.append("static const size_t NUM_KILLER_EASY = 100;")
     lines.append("static const size_t NUM_KILLER_MEDIUM = 100;")
+    lines.append("static const size_t NUM_KILLER_HARD = 100;")
     lines.append("static const size_t NUM_KILLER_EXTREME = 100;")
     lines.append("")
     lines.append("// Struct for 4x4 Killer Sudoku entry (33 bytes each)")
@@ -496,8 +497,34 @@ def export_cpp_header(dataset: Dict[str, List[Dict[str, Any]]]):
     lines.append("};")
     lines.append("")
 
+    # Emit HARD (6x6)
+    lines.append("// --- HARD (6x6, Digits 1-6, Zero Singles, 2-3 Cells) ---")
+    lines.append("static const Killer6x6Entry KILLER_HARD_DATASET[100] PROGMEM = {")
+    for p in dataset["hard"]:
+        size = 6
+        c_map = [0] * (size * size)
+        for cg in p["cages"]:
+            cid = cg["id"]
+            for cell in cg["cells"]:
+                r, c = cell[0], cell[1]
+                c_map[r * size + c] = cid
+        c_packed = pack_nibbles(c_map)
+
+        sol_flat = [p["solution"][r][c] for r in range(size) for c in range(size)]
+        sol_packed = pack_nibbles(sol_flat)
+
+        num_cages = len(p["cages"])
+        sums = [cg["sum"] for cg in p["cages"]] + [0] * (18 - num_cages)
+
+        c_str = "{" + ", ".join(str(x) for x in c_packed) + "}"
+        s_str = "{" + ", ".join(str(x) for x in sol_packed) + "}"
+        sums_str = "{" + ", ".join(str(x) for x in sums) + "}"
+        lines.append(f"    {{{c_str}, {s_str}, {num_cages}, {sums_str}}},")
+    lines.append("};")
+    lines.append("")
+
     # Emit EXTREME (6x6)
-    lines.append("// --- EXTREME (6x6, Digits 1-6, Zero Singles) ---")
+    lines.append("// --- EXTREME (6x6, Digits 1-6, Zero Singles, 2-4 Cells) ---")
     lines.append("static const Killer6x6Entry KILLER_EXTREME_DATASET[100] PROGMEM = {")
     for p in dataset["extreme"]:
         size = 6
@@ -531,13 +558,15 @@ def export_cpp_header(dataset: Dict[str, List[Dict[str, Any]]]):
 
 def main():
     random.seed(42)
-    easy_puzzles = curate_tier("easy", 4, 2, 2, 1, 2, allow_single=True, count=100)
+    easy_puzzles = curate_tier("easy", 4, 2, 2, 2, 2, allow_single=False, count=100)
     med_puzzles = curate_tier("medium", 4, 2, 2, 2, 3, allow_single=False, count=100)
+    hard_puzzles = curate_tier("hard", 6, 2, 3, 2, 3, allow_single=False, count=100)
     ext_puzzles = curate_tier("extreme", 6, 2, 3, 2, 4, allow_single=False, count=100)
 
     dataset = {
         "easy": easy_puzzles,
         "medium": med_puzzles,
+        "hard": hard_puzzles,
         "extreme": ext_puzzles
     }
 

@@ -5,9 +5,10 @@
 class EscPosPrinter;
 
 enum KillerDifficulty {
-    KILLER_EASY    = 0, // 4x4, digits 1-4
-    KILLER_MEDIUM  = 1, // 4x4, digits 1-4, zero singles
-    KILLER_EXTREME = 2  // 6x6, digits 1-6, zero singles
+    KILLER_EASY    = 0, // 4x4, digits 1-4, zero singles (pure 2-cell dominoes)
+    KILLER_MEDIUM  = 1, // 4x4, digits 1-4, zero singles (2-3 cell cages)
+    KILLER_HARD    = 2, // 6x6, digits 1-6, zero singles (2-3 cell cages)
+    KILLER_EXTREME = 3  // 6x6, digits 1-6, zero singles (2-4 cell cages)
 };
 
 class KillerGen {

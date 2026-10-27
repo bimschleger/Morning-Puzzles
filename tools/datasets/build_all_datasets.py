@@ -151,6 +151,7 @@ def build_killer_dataset() -> None:
         "",
         "static const size_t NUM_KILLER_EASY = 100;",
         "static const size_t NUM_KILLER_MEDIUM = 100;",
+        "static const size_t NUM_KILLER_HARD = 100;",
         "static const size_t NUM_KILLER_EXTREME = 100;",
         "",
         "struct Killer4x4Entry {",
@@ -167,7 +168,7 @@ def build_killer_dataset() -> None:
         "    uint8_t cage_sums[18];",
         "};",
         "",
-        "// --- EASY (4x4, Digits 1-4, With Opening Singles) ---",
+        "// --- EASY (4x4, Digits 1-4, Zero Singles, Pure Dominoes) ---",
         "static const Killer4x4Entry KILLER_EASY_DATASET[100] PROGMEM = {",
     ]
 
@@ -207,6 +208,29 @@ def build_killer_dataset() -> None:
         sol_packed = pack_nibbles(sol_flat)
         num_cages = len(p["cages"])
         sums = [cg["sum"] for cg in p["cages"]] + [0] * (16 - num_cages)
+
+        c_str = "{" + ", ".join(str(x) for x in c_packed) + "}"
+        s_str = "{" + ", ".join(str(x) for x in sol_packed) + "}"
+        sums_str = "{" + ", ".join(str(x) for x in sums) + "}"
+        lines.append(f"    {{{c_str}, {s_str}, {num_cages}, {sums_str}}},")
+    lines.append("};")
+    lines.append("")
+
+    lines.append("// --- HARD (6x6, Digits 1-6, Zero Singles, 2-3 Cells) ---")
+    lines.append("static const Killer6x6Entry KILLER_HARD_DATASET[100] PROGMEM = {")
+    for p in dataset["hard"]:
+        size = 6
+        c_map = [0] * (size * size)
+        for cg in p["cages"]:
+            cid = cg["id"]
+            for cell in cg["cells"]:
+                r, c = cell[0], cell[1]
+                c_map[r * size + c] = cid
+        c_packed = pack_nibbles(c_map)
+        sol_flat = [p["solution"][r][c] for r in range(size) for c in range(size)]
+        sol_packed = pack_nibbles(sol_flat)
+        num_cages = len(p["cages"])
+        sums = [cg["sum"] for cg in p["cages"]] + [0] * (18 - num_cages)
 
         c_str = "{" + ", ".join(str(x) for x in c_packed) + "}"
         s_str = "{" + ", ".join(str(x) for x in sol_packed) + "}"
