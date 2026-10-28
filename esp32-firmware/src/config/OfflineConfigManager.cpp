@@ -188,6 +188,7 @@ const char* OfflineConfigManager::getPuzzleName(OfflinePuzzleType type) const {
         case PUZZLE_LOOP:       return "Loop";
         case PUZZLE_TOWERS:     return "Towers";
         case PUZZLE_INEQUALITY: return "Inequality";
+        case PUZZLE_MAZE:       return "Maze";
         default:                return "Unknown Puzzle";
     }
 }
