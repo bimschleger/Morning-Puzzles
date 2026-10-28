@@ -7,6 +7,7 @@ Validates that any new game added to the Morning Puzzles inventory:
 2. Is fully integrated on the SoftAP Setup Portal (eligible games toggle, bitmask, guide modal, PortalHtml.h).
 3. Is documented in README.md with updated game counts.
 4. Ensures the game description on the setup portal matches the game description on the README page.
+5. Ensures every game has an explicit name in OfflineConfigManager::getPuzzleName() so initial setup receipts never display 'Unknown Puzzle'.
 """
 
 import gzip
@@ -278,6 +279,70 @@ def test_readme_inclusion_and_description_parity():
     print(f"  -> All {len(portal_games)} game descriptions on the setup portal perfectly match README.md.\n")
 
 
+def extract_puzzle_names_from_cpp(cpp_text: str) -> dict:
+    match = re.search(
+        r"const\s+char\*\s+OfflineConfigManager::getPuzzleName\s*\([^)]*\)\s*const\s*\{(.*?)\}",
+        cpp_text,
+        re.DOTALL,
+    )
+    assert match, "Could not find OfflineConfigManager::getPuzzleName definition in C++ source"
+    body = match.group(1)
+    case_matches = re.findall(r"case\s+([A-Za-z0-9_]+)\s*:\s*return\s*\"([^\"]+)\"\s*;", body)
+    return dict(case_matches)
+
+
+def test_setup_receipt_name_parity():
+    print("Test 5: Verifying Initial Setup Receipt & Offline Config name parity across firmware targets...")
+    plugins = DEFAULT_REGISTRY.get_all()
+    total_games = len(plugins)
+
+    # 1. Read OfflinePuzzleType enum from OfflineConfigManager.h
+    config_header = (ROOT_DIR / "esp32-firmware" / "src" / "config" / "OfflineConfigManager.h").read_text(encoding="utf-8")
+    enum_match = re.search(r"enum\s+OfflinePuzzleType\s*:\s*uint8_t\s*\{(.*?)\};", config_header, re.DOTALL)
+    assert enum_match, "Could not find OfflinePuzzleType enum in OfflineConfigManager.h"
+    enum_entries = [
+        line.split("=")[0].strip().rstrip(",")
+        for line in enum_match.group(1).split("\n")
+        if line.strip() and not line.strip().startswith("//")
+    ]
+    enum_entries = [e for e in enum_entries if e != "OFFLINE_PUZZLE_TOTAL"]
+    assert len(enum_entries) == total_games, (
+        f"OfflinePuzzleType has {len(enum_entries)} enum entries, expected {total_games}"
+    )
+
+    # 2. Check esp32-firmware and MorningPuzzles implementations
+    fw_cpp_path = ROOT_DIR / "esp32-firmware" / "src" / "config" / "OfflineConfigManager.cpp"
+    arduino_cpp_path = ROOT_DIR / "MorningPuzzles" / "OfflineConfigManager.cpp"
+
+    for cpp_path in [fw_cpp_path, arduino_cpp_path]:
+        assert cpp_path.exists(), f"Source file does not exist: {cpp_path}"
+        cpp_text = cpp_path.read_text(encoding="utf-8")
+        name_map = extract_puzzle_names_from_cpp(cpp_text)
+
+        # Check every enum entry has an explicit case
+        for idx, (plugin, enum_entry) in enumerate(zip(plugins, enum_entries)):
+            assert enum_entry in name_map, (
+                f"{cpp_path.name}: OfflineConfigManager::getPuzzleName() is missing case for '{enum_entry}'! "
+                f"This causes the initial setup receipt to print 'Unknown Puzzle'."
+            )
+            returned_name = name_map[enum_entry]
+            assert returned_name != "Unknown Puzzle", (
+                f"{cpp_path.name}: '{enum_entry}' returned 'Unknown Puzzle'!"
+            )
+            # Expect strict match to plugin.title.capitalize() (e.g. Sudoku, Maze, Stars, Search)
+            expected_name = plugin.title.capitalize()
+            assert returned_name == expected_name, (
+                f"{cpp_path.name}: Name mismatch for '{enum_entry}': "
+                f"got '{returned_name}', expected '{expected_name}'"
+            )
+
+        assert len(name_map) == total_games, (
+            f"{cpp_path.name}: getPuzzleName has {len(name_map)} cases, expected {total_games}"
+        )
+
+    print(f"  -> All {total_games} games have explicit, non-unknown names in OfflineConfigManager::getPuzzleName() for setup receipts.\n")
+
+
 def run_all_onboarding_checks() -> bool:
     print("=" * 70)
     print(">>> RUNNING GAME ONBOARDING, SETUP PORTAL & README VERIFICATION <<<")
@@ -287,6 +352,7 @@ def run_all_onboarding_checks() -> bool:
         test_how_to_play_details_present()
         test_setup_portal_inclusion()
         test_readme_inclusion_and_description_parity()
+        test_setup_receipt_name_parity()
         print("=" * 70)
         print(">>> ALL GAME ONBOARDING & PARITY VERIFICATION CHECKS PASSED! <<<")
         print("=" * 70)

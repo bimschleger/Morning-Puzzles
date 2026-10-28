@@ -182,5 +182,9 @@ Every game added to Morning Puzzles must complete the mandatory full-lifecycle o
   - Numbered list item formatted as: `N. **Title** *(Aliases)*: [Description]`.
 - **Tri-Target Game Description Parity**:
   - The game description displayed on the setup portal (`GAMES[i].desc`) must match the description on `README.md` bit-for-bit (normalized for markdown formatting/backticks).
+- **Initial Setup Receipt & Offline Config Name Parity**:
+  - Every game added to `OfflinePuzzleType` must be explicitly handled in `OfflineConfigManager::getPuzzleName()` across `esp32-firmware/` and `MorningPuzzles/`.
+  - Must return the canonical Title Case game name matching `DEFAULT_REGISTRY` and `portal.html` (e.g. `"Maze"`), never falling back to `default: return "Unknown Puzzle";`.
+  - Guarantees clean two-column listing on the initial setup ticket (`WELCOME TO PUZZLES`) and configuration summary receipts printed by `OfflineTimeManager`.
 - **Mandatory Pull Request Verification**:
   - All onboarding requirements are enforced by `python3 server/test_game_onboarding.py`, wired into GitHub Actions CI, `run_tests.py` standards tier, and `/pr` pre-flight checks.
