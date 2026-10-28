@@ -266,6 +266,7 @@
   .game-row.active { border-color: rgba(245, 158, 11, 0.4); }
   .game-left { display: flex; align-items: center; gap: 14px; }
   .game-title { font-weight: 600; font-size: 0.95rem; color: #f1f5f9; }
+  .game-desc { font-size: 0.78rem; color: #94a3b8; margin-top: 2px; line-height: 1.35; }
   .custom-checkbox {
     width: 22px;
     height: 22px;
@@ -541,7 +542,7 @@
     <div class="card">
       <div class="card-header">
         <div class="card-title">Daily Puzzle Count</div>
-        <div id="countSub" style="font-size:0.8rem; color:#94a3b8;">Max: 18</div>
+        <div id="countSub" style="font-size:0.8rem; color:#94a3b8;">Max: 19</div>
       </div>
       <div class="card-subtitle">Number of games to randomly draw and print per daily mix receipt.</div>
       <div class="stepper-row">
@@ -590,7 +591,7 @@
     <!-- Eligible Games -->
     <div class="card">
       <div class="card-header">
-        <div class="card-title">Eligible Games (<span id="enabledNum">18</span>/18)</div>
+        <div class="card-title">Eligible Games (<span id="enabledNum">19</span>/<span id="totalNum">19</span>)</div>
         <div class="quick-actions">
           <button class="btn-quick" onclick="selectAllGames(true)">All</button>
           <button class="btn-quick" onclick="selectAllGames(false)">None</button>
@@ -673,24 +674,101 @@
 
 <script>
 const GAMES = [
-  { id: 0,  name: "Sudoku" },
-  { id: 1,  name: "Search" },
-  { id: 2,  name: "Nonogram" },
-  { id: 3,  name: "Stars" },
-  { id: 4,  name: "Jumble" },
-  { id: 5,  name: "Binary" },
-  { id: 6,  name: "Mines" },
-  { id: 7,  name: "Tents" },
-  { id: 8,  name: "Bridges" },
-  { id: 9,  name: "Killer" },
-  { id: 10, name: "Cryptogram" },
-  { id: 11, name: "Tango" },
-  { id: 12, name: "Ladder" },
-  { id: 13, name: "Wheel" },
-  { id: 14, name: "Lights" },
-  { id: 15, name: "Loop" },
-  { id: 16, name: "Towers" },
-  { id: 17, name: "Inequality" }
+  {
+    id: 0,
+    name: "Sudoku",
+    desc: "9x9 grid with standard 3x3 block hierarchy, generated with a backtracking solver mathematically guaranteed to have exactly one unique solution."
+  },
+  {
+    id: 1,
+    name: "Search",
+    desc: "Dynamic letter matrix with randomized hidden words (horizontal, vertical, diagonal) across curated themes (Morning, Space, Animals, Nature, Tech), complete with checkbox tracking. Theme-driven with no difficulty line."
+  },
+  {
+    id: 2,
+    name: "Nonogram",
+    desc: "Deductive picture logic grids (5x5, 8x8, 10x10) with row and column clue numbers."
+  },
+  {
+    id: 3,
+    name: "Stars",
+    desc: "LinkedIn Queens & 2-Star Battle format with irregular contiguous region partitioning where no two stars touch, even diagonally."
+  },
+  {
+    id: 4,
+    name: "Jumble",
+    desc: "4 scrambled clue words with circled letter positions, ruled handwriting scratchpad lines, and a punchline riddle to solve."
+  },
+  {
+    id: 5,
+    name: "Binary",
+    desc: "0 and 1 logic puzzle with strict adjacency rules (no two consecutive identical symbols) and equal row/column parity."
+  },
+  {
+    id: 6,
+    name: "Mines",
+    desc: "100% deductive, guess-free minefield with adjacent mine count clues and total mine counter."
+  },
+  {
+    id: 7,
+    name: "Tents",
+    desc: "Bipartite matching puzzle where each tree is paired with a tent next to it, tents never touch even diagonally, and margin numbers indicate line totals."
+  },
+  {
+    id: 8,
+    name: "Bridges",
+    desc: "Connect numbered circular islands with horizontal and vertical single/double bridges to form a single continuous spanning network without crossings."
+  },
+  {
+    id: 9,
+    name: "Killer",
+    desc: "Cage-sum deduction puzzle (4x4 on Easy/Medium, 6x6 on Extreme) combining Latin-square non-repeating digits with dashed cage arithmetic sums."
+  },
+  {
+    id: 10,
+    name: "Cryptogram",
+    desc: "Monoalphabetic substitution cipher featuring famous quotes, riddles, and proverbs with letter hint scaffolding."
+  },
+  {
+    id: 11,
+    name: "Tango",
+    desc: "Sun and Moon parity logic grid with edge equality (=) and opposite (x) constraints."
+  },
+  {
+    id: 12,
+    name: "Ladder",
+    desc: "Deduce intermediate words linking a start word to a target word, changing exactly one letter per step."
+  },
+  {
+    id: 13,
+    name: "Wheel",
+    desc: "7-letter hexagonal honeycomb anagram challenge requiring words formed with a mandatory center letter and a 7-letter pangram."
+  },
+  {
+    id: 14,
+    name: "Lights",
+    desc: "Line-of-sight illumination puzzle placing light bulbs to light up all corridors without shining on one another or exceeding wall clue limits."
+  },
+  {
+    id: 15,
+    name: "Loop",
+    desc: "Loop deduction drawing a single continuous closed circuit where cell numbers indicate the exact number of surrounding loop segments."
+  },
+  {
+    id: 16,
+    name: "Towers",
+    desc: "Latin-square height deduction puzzle where outside grid numbers indicate how many visible skyscrapers can be seen along each row and column."
+  },
+  {
+    id: 17,
+    name: "Inequality",
+    desc: "Latin-square numerical deduction grid where empty cells must be filled with non-repeating digits satisfying placed greater-than (>) and less-than (<) inequality signs."
+  },
+  {
+    id: 18,
+    name: "Maze",
+    desc: "Labyrinth traversal puzzle generating a single continuous winding path from entrance to exit through procedural walled dead-ends."
+  }
 ];
 
 /* [[START_GAME_RULES_DATA]] */
@@ -1929,7 +2007,7 @@ const GAME_RULES = [
 ];
 /* [[END_GAME_RULES_DATA]] */
 
-let currentMask = 0x3FFFF;
+let currentMask = (1 << GAMES.length) - 1;
 let currentCount = 5;
 let currentGrade = 3;
 let currentSchedEnabled = true;
@@ -1970,7 +2048,10 @@ function renderGames() {
     row.innerHTML = `
       <div class="game-left">
         <div class="custom-checkbox"></div>
-        <div class="game-title">${g.name}</div>
+        <div>
+          <div class="game-title">${g.name}</div>
+          <div class="game-desc">${g.desc || ""}</div>
+        </div>
       </div>
       <button class="btn-info" onclick="event.stopPropagation(); openGameGuide(${g.id});" title="View Rules & FAQ">ℹ️</button>
     `;
@@ -1978,6 +2059,8 @@ function renderGames() {
   });
 
   document.getElementById("enabledNum").innerText = enabledTotal;
+  const totalEl = document.getElementById("totalNum");
+  if (totalEl) totalEl.innerText = GAMES.length;
   document.getElementById("countSub").innerText = "Max: " + enabledTotal;
   if (currentCount > enabledTotal) currentCount = Math.max(1, enabledTotal);
   document.getElementById("countDisplay").innerText = currentCount;
@@ -1985,19 +2068,21 @@ function renderGames() {
 
 function toggleGame(id) {
   const willDisable = (currentMask & (1 << id)) !== 0;
+  const allMask = (1 << GAMES.length) - 1;
   let newMask = willDisable ? (currentMask & ~(1 << id)) : (currentMask | (1 << id));
-  if ((newMask & 0x3FFFF) === 0) return;
+  if ((newMask & allMask) === 0) return;
   currentMask = newMask;
   renderGames();
 }
 
 function selectAllGames(selectAll) {
-  currentMask = selectAll ? 0x3FFFF : 0x0001;
+  const allMask = (1 << GAMES.length) - 1;
+  currentMask = selectAll ? allMask : 0x0001;
   renderGames();
 }
 
 function changeCount(delta) {
-  const maxAllowed = parseInt(document.getElementById("enabledNum").innerText, 10) || 18;
+  const maxAllowed = parseInt(document.getElementById("enabledNum").innerText, 10) || GAMES.length;
   let next = currentCount + delta;
   if (next < 1) next = 1;
   if (next > maxAllowed) next = maxAllowed;
@@ -2541,6 +2626,41 @@ function drawThermalGuideCanvas(gameId) {
       ctx.fillText("3", rx0 + 2 * sz + 14, fy + 20);
       break;
     }
+    case 18: { // MAZE
+      const sz = 28;
+      const lx0 = 144 - (3 * sz) / 2, rx0 = 432 - (3 * sz) / 2;
+      const fy = ly + 20;
+
+      // Valid move: open corridor with path line passing cleanly
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(lx0, fy); ctx.lineTo(lx0 + 3 * sz, fy);
+      ctx.moveTo(lx0, fy + sz); ctx.lineTo(lx0 + 3 * sz, fy + sz);
+      ctx.stroke();
+
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(lx0 + 4, fy + Math.floor(sz / 2)); ctx.lineTo(lx0 + 3 * sz - 4, fy + Math.floor(sz / 2));
+      ctx.stroke();
+
+      // Invalid move: vertical wall blocking corridor with path crossing through wall
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(rx0, fy); ctx.lineTo(rx0 + 3 * sz, fy);
+      ctx.moveTo(rx0, fy + sz); ctx.lineTo(rx0 + 3 * sz, fy + sz);
+      ctx.stroke();
+
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(rx0 + sz + Math.floor(sz / 2), fy); ctx.lineTo(rx0 + sz + Math.floor(sz / 2), fy + sz);
+      ctx.stroke();
+
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(rx0 + 4, fy + Math.floor(sz / 2)); ctx.lineTo(rx0 + 3 * sz - 4, fy + Math.floor(sz / 2));
+      ctx.stroke();
+      break;
+    }
   }
 }
 
@@ -2548,7 +2668,7 @@ function drawThermalGuideCanvas(gameId) {
 fetch("/api/config")
   .then(r => r.json())
   .then(d => {
-    currentMask = d.mask || 0x3FFFF;
+    currentMask = d.mask || ((1 << GAMES.length) - 1);
     currentCount = d.count || 5;
     currentGrade = (d.grade !== undefined) ? d.grade : 3;
     currentSchedEnabled = (d.schedEnabled !== undefined) ? d.schedEnabled : true;

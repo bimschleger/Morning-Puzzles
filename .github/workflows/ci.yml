@@ -29,6 +29,12 @@ jobs:
       - name: Verify Puzzle Presentation & Authoring Standards (Rules 1-4, 6)
         run: python3 server/test_puzzle_standards.py
 
+      - name: Verify Game Onboarding, Setup Portal & README Parity (Rule 18)
+        run: python3 server/test_game_onboarding.py
+
+      - name: Verify Game Rules, Guides & FAQs
+        run: python3 server/test_game_rules.py
+
       - name: Verify 80mm Thermal Receipt Format & Specifications (Rule 11)
         run: python3 server/test_thermal_format.py
 

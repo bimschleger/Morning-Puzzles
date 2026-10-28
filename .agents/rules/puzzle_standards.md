@@ -42,6 +42,8 @@ All agents and contributors working on Morning Puzzles must strictly follow thes
 All changes must pass the automated validation suite:
 ```bash
 python3 server/test_puzzle_standards.py
+python3 server/test_game_onboarding.py
+python3 server/test_game_rules.py
 python3 server/test_thermal_format.py
 python3 server/test_visual_consistency.py
 python3 server/test_stars_deduction.py
@@ -163,3 +165,22 @@ All games in Morning Puzzles must deliver identical, pixel-harmonized visual exp
   - Always resolve `PuzzleGrade` names via `OfflineConfigManager::getGradeName(grade)`.
 - **Dynamic Total Game Counts (`OFFLINE_PUZZLE_TOTAL`)**:
   - Never hardcode the total number of games in C++ log strings—always reference `OFFLINE_PUZZLE_TOTAL`. When adding a new game, update `OFFLINE_PUZZLE_TOTAL`, the range comment in `esp32-firmware/include/config.h`, and the `All Games (N)` label in `simulator/receipt_simulator.html`.
+
+## 18. Game Onboarding, Setup Portal, Documentation & Parity Standard
+Every game added to Morning Puzzles must complete the mandatory full-lifecycle onboarding contract before merge:
+- **Canonical How-to-Play Rules & Guide Dataset**:
+  - Registered in `server/data/game_rules.json` with strict single-word title, one-sentence imperative instruction ($\le 100$ characters, approved verb), objective, 3–4 rules of play, valid/invalid visual move examples with captions, 1–2 opening anchors, and 1–2 FAQs.
+  - Generates monospaced ASCII guide (`plugin.format_guide_ascii()`) and 576-dot 1-bit thermal raster guide (`plugin.render_guide_raster(576)`).
+  - Automatically compiled to `GameRulesDataset.h`, `docs/GAME_RULES_FAQ.md`, and injected into `portal.html` and `receipt_simulator.html` via `tools/datasets/build_game_rules.py`.
+- **SoftAP Setup Portal Inclusion**:
+  - Registered in `portal.html`'s `const GAMES = [...]` array with unique sequential `id`, display `name`, and non-empty `desc`.
+  - Eligible games checklist renders the game title alongside `.game-desc` and the ℹ️ guide button.
+  - Setup portal controls (enable/disable bitmask, "All", "None", and max count stepper) dynamically adapt to `(1 << GAMES.length) - 1`.
+  - SoftAP embedded header (`PortalHtml.h`) in `esp32-firmware/src/time/` and `MorningPuzzles/` must be synchronized without uncompiled changes.
+- **README.md Inclusion & Count Parity**:
+  - Featured in `README.md` under `## 🧩 Featured Games (All N Included)` with updated total count matching the game inventory.
+  - Numbered list item formatted as: `N. **Title** *(Aliases)*: [Description]`.
+- **Tri-Target Game Description Parity**:
+  - The game description displayed on the setup portal (`GAMES[i].desc`) must match the description on `README.md` bit-for-bit (normalized for markdown formatting/backticks).
+- **Mandatory Pull Request Verification**:
+  - All onboarding requirements are enforced by `python3 server/test_game_onboarding.py`, wired into GitHub Actions CI, `run_tests.py` standards tier, and `/pr` pre-flight checks.
