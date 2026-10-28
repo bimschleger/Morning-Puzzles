@@ -3,7 +3,7 @@
 Authoritative behavioral, formatting, and architecture rules are maintained in:
 👉 `.agents/rules/puzzle_standards.md`
 
-All agents must strictly comply with Rules 1 through 17 defined therein:
+All agents must strictly comply with Rules 1 through 18 defined therein:
 - Rules 1–4: Game Titles, Difficulty, Descriptions, Solution Keys
 - Rule 5: Automated Verification
 - Rule 6: Puzzle Plugin Architecture (`server/app/puzzles/base.py`)
@@ -18,3 +18,4 @@ All agents must strictly comply with Rules 1 through 17 defined therein:
 - Rule 15: Single Source of Truth for Curated Datasets
 - Rule 16: Web Simulator Hardware Emulation Standard
 - Rule 17: Shared Utilities, DRY Primitives & Dynamic Count Standard
+- Rule 18: Game Onboarding, Setup Portal, Documentation & Parity Standard

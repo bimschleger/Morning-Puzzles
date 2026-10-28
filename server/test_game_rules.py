@@ -41,6 +41,7 @@ APPROVED_TITLES = [
     "LOOP",
     "TOWERS",
     "INEQUALITY",
+    "MAZE",
 ]
 
 APPROVED_VERBS = [
@@ -61,7 +62,7 @@ def test_canonical_json():
     data = load_game_rules()
     assert "games" in data, "game_rules.json missing 'games' array"
     games = data["games"]
-    assert len(games) == 18, f"Expected 18 games, found {len(games)}"
+    assert len(games) == len(APPROVED_TITLES), f"Expected {len(APPROVED_TITLES)} games, found {len(games)}"
 
     seen_ids = set()
     seen_keys = set()
@@ -74,7 +75,7 @@ def test_canonical_json():
 
         # Unique ID (0-indexed to match ESP32 enum/index)
         gid = g["id"]
-        assert 0 <= gid < 18, f"Game ID {gid} out of range [0, 17]"
+        assert 0 <= gid < len(APPROVED_TITLES), f"Game ID {gid} out of range [0, {len(APPROVED_TITLES) - 1}]"
         assert gid not in seen_ids, f"Duplicate game ID: {gid}"
         seen_ids.add(gid)
 
@@ -124,7 +125,7 @@ def test_canonical_json():
 def test_python_api():
     print("Test 2: Validating rules lookup API (server/app/puzzles/rules.py)...")
     all_rules = get_all_game_rules()
-    assert len(all_rules) == 18, f"get_all_game_rules() returned {len(all_rules)} items, expected 18"
+    assert len(all_rules) == len(APPROVED_TITLES), f"get_all_game_rules() returned {len(all_rules)} items, expected {len(APPROVED_TITLES)}"
 
     for g in all_rules:
         by_id = get_game_rule(g["id"])
@@ -152,7 +153,7 @@ def test_python_api():
 def test_puzzle_plugin_guide_generation():
     print("Test 3: Validating BasePuzzle guide rendering (ASCII & Raster)...")
     plugins = DEFAULT_REGISTRY.get_all()
-    assert len(plugins) == 18, f"Expected 18 registered plugins, got {len(plugins)}"
+    assert len(plugins) == len(APPROVED_TITLES), f"Expected {len(APPROVED_TITLES)} registered plugins, got {len(plugins)}"
     for plugin in plugins:
         puzzle_id = plugin.puzzle_id
         # 1. ASCII guide
@@ -178,7 +179,7 @@ def test_compiled_artifacts():
     cpp_header = ROOT_DIR / "esp32-firmware" / "src" / "generators" / "GameRulesDataset.h"
     assert cpp_header.exists(), f"GameRulesDataset.h missing at {cpp_header}"
     cpp_text = cpp_header.read_text(encoding="utf-8")
-    assert "TOTAL_GAME_RULES = 18;" in cpp_text
+    assert f"TOTAL_GAME_RULES = {len(APPROVED_TITLES)};" in cpp_text
     for title in APPROVED_TITLES:
         assert f'"{title}"' in cpp_text, f"Missing title {title} in GameRulesDataset.h"
 

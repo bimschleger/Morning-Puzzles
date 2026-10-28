@@ -8,7 +8,7 @@ Runs **100% On-Device and Offline** on an **ESP32** in native C++ with zero clou
 
 ## 🌟 Key Features
 
-* **100% Standalone & Air-Gapped**: All 16 puzzle algorithms run locally on the ESP32 microcontroller in **<50 milliseconds**. No Wi-Fi, no cloud subscriptions, and no external servers required.
+* **100% Standalone & Air-Gapped**: All 19 puzzle algorithms run locally on the ESP32 microcontroller in **<50 milliseconds**. No Wi-Fi, no cloud subscriptions, and no external servers required.
 * **Zero-Button Power Gestures**: Completely eliminates the need for exposed buttons. Use standard power switches for all everyday actions:
   * **Setup Mode**: Leave printer ON, plug in ESP32 $\rightarrow$ Senses printer online, prints dual-QR setup slip, and opens web setup portal.
   * **On-Demand Print**: Flip printer switch OFF, wait 3s, then ON $\rightarrow$ Prints a fresh puzzle bundle immediately.
@@ -19,9 +19,9 @@ Runs **100% On-Device and Offline** on an **ESP32** in native C++ with zero clou
 
 ---
 
-## 🧩 Featured Games (All 16 Included)
+## 🧩 Featured Games (All 19 Included)
 
-Every print job generates a randomized, unique daily edition featuring all 16 open-source (Apache 2.0 / MIT) puzzle types conforming to strict presentation standards:
+Every print job generates a randomized, unique daily edition featuring all 19 open-source (Apache 2.0 / MIT) puzzle types conforming to strict presentation standards:
 
 1. **Sudoku**: 9x9 grid with standard 3x3 block hierarchy, generated with a backtracking solver mathematically guaranteed to have exactly one unique solution.
 2. **Search** *(Word Search)*: Dynamic letter matrix with randomized hidden words (horizontal, vertical, diagonal) across curated themes (Morning, Space, Animals, Nature, Tech), complete with checkbox tracking. Theme-driven with no difficulty line.
@@ -39,6 +39,9 @@ Every print job generates a randomized, unique daily edition featuring all 16 op
 14. **Wheel** *(Word Wheel / Target Anagram)*: 7-letter hexagonal honeycomb anagram challenge requiring words formed with a mandatory center letter and a 7-letter pangram.
 15. **Lights** *(Akari / Light Up)*: Line-of-sight illumination puzzle placing light bulbs to light up all corridors without shining on one another or exceeding wall clue limits.
 16. **Loop** *(Slitherlink / Fences)*: Loop deduction drawing a single continuous closed circuit where cell numbers indicate the exact number of surrounding loop segments.
+17. **Towers** *(Skyscrapers)*: Latin-square height deduction puzzle where outside grid numbers indicate how many visible skyscrapers can be seen along each row and column.
+18. **Inequality** *(Futoshiki)*: Latin-square numerical deduction grid where empty cells must be filled with non-repeating digits satisfying placed greater-than (>) and less-than (<) inequality signs.
+19. **Maze** *(Labyrinth)*: Labyrinth traversal puzzle generating a single continuous winding path from entrance to exit through procedural walled dead-ends.
 
 > [!NOTE]
 > All puzzle presentation formatting (single-word uppercase titles, $\le 100$-character one-sentence descriptions, centered difficulty placement, and 48-column ASCII solution keys) strictly adheres to [`docs/PUZZLE_HEADER_SPEC.md`](docs/PUZZLE_HEADER_SPEC.md), [`docs/PUZZLE_DESCRIPTION_GUIDELINES.md`](docs/PUZZLE_DESCRIPTION_GUIDELINES.md), and [`docs/PUZZLE_SOLUTION_KEY_SPEC.md`](docs/PUZZLE_SOLUTION_KEY_SPEC.md), verified by `python3 server/test_puzzle_standards.py`.

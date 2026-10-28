@@ -34,13 +34,17 @@ def run_standards_tier(puzzle_filter: str = None) -> bool:
     print("=" * 70)
     try:
         import test_puzzle_standards
+        import test_game_onboarding
+        import test_game_rules
         test_puzzle_standards.test_titles_and_forbidden_terms()
         test_puzzle_standards.test_difficulty_presentation_and_theme_rules()
         test_puzzle_standards.test_description_length_and_canonical_formula()
         test_puzzle_standards.test_solution_key_spec()
         test_puzzle_standards.test_simulator_consistency()
         test_puzzle_standards.test_plugin_contract_compliance()
-        print("[TIER 1 PASSED] All presentation and authoring standards verified.\n")
+        test_game_onboarding.run_all_onboarding_checks()
+        test_game_rules.main()
+        print("[TIER 1 PASSED] All presentation, authoring and onboarding standards verified.\n")
         return True
     except Exception as e:
         print(f"[TIER 1 FAILED] {e}\n")

@@ -60,6 +60,12 @@ Before committing, ensure repository integrity:
    python3 server/test_puzzle_standards.py
    ```
    If any standard test fails, halt and fix the issue before proceeding.
+3. **Game Onboarding, Setup Portal & Parity Standards (Rule 18)**:
+   ```bash
+   python3 server/test_game_onboarding.py
+   python3 server/test_game_rules.py
+   ```
+   If any onboarding or game rule verification fails, halt and resolve it before proceeding.
 
 ---
 
