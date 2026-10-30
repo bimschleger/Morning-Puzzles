@@ -383,21 +383,20 @@ void OfflineTimeManager::printSetupTicket(EscPosPrinter& printer, const OfflineC
     printer.setBold(false);
     printer.println("");
 
-    // Controls Section
+    // Footer
     printer.printHorizontalLine('-');
     printer.setAlign(ALIGN_CENTER);
-    printer.setBold(true);
-    printer.println("--- CONTROLS ---");
-    printer.setBold(false);
-    printer.println("Use these three modes to operate your printer:");
+    printer.println("Enjoy your day!");
     printer.println("");
-    printer.setAlign(ALIGN_LEFT);
-    printer.println("1. SCHEDULED: Runs every day if configured");
-    printer.println("   as long as the printer is powered on.");
-    printer.println("2. ON-DEMAND: Turn printer off and back on");
-    printer.println("   to print fresh puzzles immediately.");
-    printer.println("3. SETUP: Leave printer power switch ON,");
-    printer.println("   unplug the power strip, and plug it back in.");
+    printer.println("For more puzzles, toggle the power");
+    printer.println("on the front of the printer.");
+    printer.println("");
+    printer.println("To change settings, toggle the power");
+    printer.println("on the cable behind the printer.");
+    if (!config || !config->isDailyScheduleEnabled()) {
+        printer.println("");
+        printer.println("To schedule daily puzzles, go to settings.");
+    }
     printer.printHorizontalLine('-');
 
     printer.feed(4);
@@ -492,24 +491,21 @@ void OfflineTimeManager::printConfigSavedTicket(EscPosPrinter& printer, const Of
     printer.printKeyValue("Daily Schedule:", config.getDailyScheduleTimeString());
     printer.printKeyValue("Clock:", getFormattedTime("%I:%M %p"));
 
-    // Controls Section
+    // Footer
     printer.println("");
     printer.printHorizontalLine('-');
     printer.setAlign(ALIGN_CENTER);
     printer.println("Setup complete. Ready for printing!");
     printer.println("");
-    printer.setBold(true);
-    printer.println("--- CONTROLS ---");
-    printer.setBold(false);
-    printer.println("Use these three modes to operate your printer:");
+    printer.println("For more puzzles, toggle the power");
+    printer.println("on the front of the printer.");
     printer.println("");
-    printer.setAlign(ALIGN_LEFT);
-    printer.println("1. SCHEDULED: Runs every day if configured");
-    printer.println("   as long as the printer is powered on.");
-    printer.println("2. ON-DEMAND: Turn printer off and back on");
-    printer.println("   to print fresh puzzles immediately.");
-    printer.println("3. SETUP: Leave printer power switch ON,");
-    printer.println("   unplug the power strip, and plug it back in.");
+    printer.println("To change settings, toggle the power");
+    printer.println("on the cable behind the printer.");
+    if (!config.isDailyScheduleEnabled()) {
+        printer.println("");
+        printer.println("To schedule daily puzzles, go to settings.");
+    }
     printer.printHorizontalLine('-');
 
     printer.feed(4);
