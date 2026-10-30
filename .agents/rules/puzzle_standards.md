@@ -105,9 +105,10 @@ All games in Morning Puzzles must deliver identical, pixel-harmonized visual exp
   - Never require or display real-time clock (NTP/RTC) timestamps on receipts in offline mode.
 - **Clean Master Footer**:
   - Separated by single dashed rules (`------------------------------------------------`).
-  - Centered closing tagline: `Enjoy your day!`, followed by a blank line and centered instructions:
+  - Centered closing tagline: `Enjoy your day!`, followed by a blank line and centered instructions separated by a blank line:
     `For more puzzles, toggle the power`
     `on the front of the printer.`
+
     `To change settings, toggle the power`
     `on the cable behind the printer.`
   - Zero diagnostics or debug info: Never print hardware status, IP addresses, memory diagnostics, or paper cut debug statements on customer receipts.

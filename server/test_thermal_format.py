@@ -152,6 +152,7 @@ def test_text_receipt_format(bundle):
     assert "Enjoy your day!" in receipt_text, "Missing 'Enjoy your day!' in text receipt footer"
     assert "For more puzzles, toggle the power" in receipt_text, "Missing 'For more puzzles, toggle the power' in text receipt footer"
     assert "on the front of the printer." in receipt_text, "Missing 'on the front of the printer.' in text receipt footer"
+    assert "on the front of the printer.\n\nTo change settings, toggle the power" in receipt_text, "Missing blank line between footer instructions in text receipt"
     assert "To change settings, toggle the power" in receipt_text, "Missing 'To change settings, toggle the power' in text receipt footer"
     assert "on the cable behind the printer." in receipt_text, "Missing 'on the cable behind the printer.' in text receipt footer"
     assert "diagnostics" not in receipt_text.lower(), "Receipt must not contain diagnostics information"
