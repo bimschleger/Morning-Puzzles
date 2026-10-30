@@ -1,12 +1,12 @@
 # Candidate Puzzle Library: Evaluation & Implementation Reference
 
-This document provides the architectural survey, evaluation standards, and technical specifications for prospective puzzle candidates to expand the **Morning Puzzles** ecosystem.
+This document provides the architectural survey, evaluation standards, and technical specifications for prospective puzzle candidates to expand the **Pen and Paper Puzzles** ecosystem.
 
 ---
 
 ## 1. Implemented Games (Active Library)
 
-The following 16 puzzles have been implemented and currently comprise the core Morning Puzzles library across the Python backend (`server/app/puzzles/`), ESP32 firmware (`esp32-firmware/src/generators/`), and web simulator (`simulator/receipt_simulator.html`):
+The following 16 puzzles have been implemented and currently comprise the core Pen and Paper Puzzles library across the Python backend (`server/app/puzzles/`), ESP32 firmware (`esp32-firmware/src/generators/`), and web simulator (`simulator/receipt_simulator.html`):
 
 | Single-Word Title | Traditional / Common Name | Genre / Category | Implementation Stack | Difficulty Scaling | Solution Key Representation |
 | :--- | :--- | :--- | :--- | :--- | :--- |

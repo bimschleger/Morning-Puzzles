@@ -5,7 +5,7 @@ description: Inspects active code changes, runs pre-flight tests & Arduino sketc
 
 # PR: Automated Review, Test, Commit, Push & Pull Request Creation
 
-This skill automates the complete pull request workflow for **Morning Puzzles**:
+This skill automates the complete pull request workflow for **Pen and Paper Puzzles**:
 1. Inspecting active code modifications and diffs.
 2. Managing branch isolation (automatically branching if on `main`).
 3. Running local pre-flight tests (`test_puzzle_standards.py`) and Arduino sketch mirroring (`sync_arduino_sketch.sh`).
@@ -30,7 +30,7 @@ When the user runs `/pr` (or asks to create a pull request), execute this exact 
 
 ---
 
-### 2. Branch & Worktree Management
+## 2. Branch & Worktree Management
 1. Check current branch:
    ```bash
    git branch --show-current
@@ -54,7 +54,7 @@ Before committing, ensure repository integrity:
    chmod +x ./scripts/sync_arduino_sketch.sh
    ./scripts/sync_arduino_sketch.sh
    ```
-   If `MorningPuzzles/` files were updated by the sync script, ensure they are staged.
+   If `PenAndPaperPuzzles/` files were updated by the sync script, ensure they are staged.
 2. **Puzzle Presentation Standards (Rule 1–4, 6)**:
    ```bash
    python3 server/test_puzzle_standards.py
@@ -120,7 +120,7 @@ git push -u origin <branch-name>
 3. **If `gh` is unauthenticated or encounters an error**:
    - Display a direct GitHub web URL for one-click creation:
      ```text
-     https://github.com/bimschleger/Morning-Puzzles/compare/main...<branch-name>?expand=1
+     https://github.com/bimschleger/pen-and-paper-puzzles/compare/main...<branch-name>?expand=1
      ```
    - Remind the user:
      ```text

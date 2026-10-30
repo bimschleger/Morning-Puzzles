@@ -104,14 +104,14 @@ class TodoistClient:
         except urllib.error.URLError as e:
             raise RuntimeError(f"Network error connecting to Todoist API: {e.reason}")
 
-    PROJECT_ALIASES = ["morning puzzles", "morning games"]
+    PROJECT_ALIASES = ["pen and paper puzzles", "pen + paper puzzles", "morning puzzles", "morning games"]
     TODO_ALIASES = ["to-do", "todo", "to do", "backlog"]
     BACKLOG_ALIASES = TODO_ALIASES
     DOING_ALIASES = ["doing", "in progress", "in-progress"]
     IN_PROGRESS_ALIASES = DOING_ALIASES
     DONE_ALIASES = ["done", "completed"]
 
-    def find_project(self, project_name: str = "Morning Puzzles") -> dict:
+    def find_project(self, project_name: str = "Pen and Paper Puzzles") -> dict:
         projects = self._http_get("projects")
         target = project_name.strip().lower()
         candidates = [target]
@@ -236,7 +236,7 @@ class TodoistClient:
             err_body = e.read().decode("utf-8") if e.fp else ""
             raise RuntimeError(f"Todoist API close failed (HTTP {e.code}): {err_body}")
 
-    def finish_task(self, task_id: str, project_name: str = "Morning Puzzles", target_section: str = "Done") -> dict:
+    def finish_task(self, task_id: str, project_name: str = "Pen and Paper Puzzles", target_section: str = "Done") -> dict:
         """Moves a task to the Done column/section and marks it as complete."""
         project = self.find_project(project_name)
         project_id = project["id"]
@@ -262,7 +262,7 @@ class TodoistClient:
 
     def pop_backlog(
         self,
-        project_name: str = "Morning Puzzles",
+        project_name: str = "Pen and Paper Puzzles",
         move_to_in_progress: bool = True,
         move_to_doing: Optional[bool] = None,
         target_section: str = "Doing"
@@ -346,7 +346,7 @@ def main():
     import argparse
     parser = argparse.ArgumentParser(description="Todoist Helper for /lfg")
     parser.add_argument("command", choices=["status", "pop-backlog", "peek-backlog", "finish-task"], help="Command to run")
-    parser.add_argument("--project", default="Morning Puzzles", help="Project name (default: 'Morning Puzzles')")
+    parser.add_argument("--project", default="Pen and Paper Puzzles", help="Project name (default: 'Pen and Paper Puzzles')")
     parser.add_argument("--token", default="", help="Todoist API token (optional override)")
     parser.add_argument("--task-id", default="", help="Task ID (required for finish-task)")
     args = parser.parse_args()

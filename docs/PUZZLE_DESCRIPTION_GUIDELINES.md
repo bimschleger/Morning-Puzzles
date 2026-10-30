@@ -1,6 +1,6 @@
-# Morning Puzzles: Game Description & Header Authoring Guidelines
+# Pen and Paper Puzzles: Game Description & Header Authoring Guidelines
 
-This document serves as the permanent reference standard for authoring puzzle titles, difficulty indicators, and one-sentence gameplay descriptions across the **Morning Puzzles** ecosystem (Web Simulator, Python Backend, and ESP32 Firmware).
+This document serves as the permanent reference standard for authoring puzzle titles, difficulty indicators, and one-sentence gameplay descriptions across the **Pen and Paper Puzzles** ecosystem (Web Simulator, Python Backend, and ESP32 Firmware).
 
 All existing games—and any new puzzles added in the future—must strictly adhere to these rules.
 
@@ -8,7 +8,7 @@ All existing games—and any new puzzles added in the future—must strictly adh
 
 ## 1. Core Philosophy & Physical Constraints
 
-Morning Puzzles are designed to print on **80mm thermal receipt printers** running ESC/POS monospace text and 1-bit bitmap graphics:
+Pen and Paper Puzzles are designed to print on **80mm thermal receipt printers** running ESC/POS monospace text and 1-bit bitmap graphics:
 * **Horizontal Space**: Each physical line has a maximum printable width of **48 monospace characters** (or ~44 characters when styled with safe thermal padding).
 * **Vertical Space**: Physical receipt paper is finite. Verbose tutorials, multi-sentence essays, and complex rules crowd out the interactive puzzle board and waste paper.
 * **First-Time Solvers**: Players should understand the exact mechanical goal and rules within 3 seconds of reading the description.
@@ -87,7 +87,7 @@ Only describe what the generation engine guarantees:
 
 ## 4. Reference Implementations for Future Games
 
-Use these pre-tested reference examples when expanding Morning Puzzles with new puzzle types:
+Use these pre-tested reference examples when expanding Pen and Paper Puzzles with new puzzle types:
 
 | Puzzle | Proposed Header | Canonical Description Example | Length |
 | :--- | :--- | :--- | :---: |

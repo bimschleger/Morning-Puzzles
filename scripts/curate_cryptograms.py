@@ -401,7 +401,7 @@ def main():
         return s.replace('\\', '\\\\').replace('"', '\\"')
 
     lines = [
-        "// Morning Puzzles - Offline Cryptogram Dataset",
+        "// Pen and Paper Puzzles - Offline Cryptogram Dataset",
         "// 300 Curated Quotes (100 Easy, 100 Medium, 100 Hard) stored in PROGMEM flash.",
         "// Auto-generated from server/data/cryptograms.json",
         "#ifndef CRYPTOGRAM_DATASET_H",

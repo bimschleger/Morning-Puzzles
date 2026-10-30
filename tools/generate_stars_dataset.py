@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Morning Puzzles - Curated Stars (Queens / Star Battle) Dataset Generator
+Pen and Paper Puzzles - Curated Stars (Queens / Star Battle) Dataset Generator
 Generates and verifies 100 unique, opening-anchored puzzles per difficulty tier:
 - Easy: 5x5, 1 star, guaranteed size-1 or size-2 anchor
 - Medium: 8x8, 1 star, guaranteed size-1 or size-2 anchor

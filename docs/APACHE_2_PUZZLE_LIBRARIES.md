@@ -1,6 +1,6 @@
 # Apache 2.0 Open-Source Puzzle Generation Libraries
 
-This document provides a technical survey and implementation reference for the open-source puzzle generators used in **Morning Puzzles**, all licensed under or compatible with the **Apache 2.0** license.
+This document provides a technical survey and implementation reference for the open-source puzzle generators used in **Pen and Paper Puzzles**, all licensed under or compatible with the **Apache 2.0** license.
 
 ---
 

@@ -89,10 +89,10 @@ jobs:
 
       - name: Assert No Uncommitted Sketch Drift
         run: |
-          if [ -n "$(git status --porcelain MorningPuzzles/)" ]; then
-            echo "::error::MorningPuzzles/ Arduino IDE sketch is out of sync with esp32-firmware/!"
+          if [ -n "$(git status --porcelain PenAndPaperPuzzles/)" ]; then
+            echo "::error::PenAndPaperPuzzles/ Arduino IDE sketch is out of sync with esp32-firmware/!"
             echo "Run './scripts/sync_arduino_sketch.sh' locally and commit the mirrored files."
-            git status --porcelain MorningPuzzles/
+            git status --porcelain PenAndPaperPuzzles/
             exit 1
           fi
-          echo "MorningPuzzles Arduino IDE sketch is perfectly synchronized."
+          echo "PenAndPaperPuzzles Arduino IDE sketch is perfectly synchronized."

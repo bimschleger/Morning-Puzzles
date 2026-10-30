@@ -1,11 +1,11 @@
 ---
-description: Standards for Morning Puzzles game naming, difficulty representation, description authoring, and solution key layout
+description: Standards for Pen and Paper Puzzles game naming, difficulty representation, description authoring, and solution key layout
 trigger: always_on
 ---
 
-# Morning Puzzles: Game Naming, Description, Difficulty & Solution Key Standards
+# Pen and Paper Puzzles: Game Naming, Description, Difficulty & Solution Key Standards
 
-All agents and contributors working on Morning Puzzles must strictly follow these non-negotiable presentation and formatting standards across the Python backend, ESP32 firmware, and Web Simulator:
+All agents and contributors working on Pen and Paper Puzzles must strictly follow these non-negotiable presentation and formatting standards across the Python backend, ESP32 firmware, and Web Simulator:
 
 ## 1. Game Titles & Naming
 - **Strict One-Word Uppercase Title**: Every puzzle must have a single uppercase English word enclosed in triple dashes: `--- [TITLE] ---` (e.g., `--- STARS ---`, `--- SUDOKU ---`, `--- SEARCH ---`, `--- NONOGRAM ---`, `--- JUMBLE ---`, `--- BINARY ---`, `--- MINES ---`, `--- TENTS ---`, `--- BRIDGES ---`, `--- KILLER ---`, `--- CRYPTOGRAM ---`, `--- TANGO ---`).
@@ -52,7 +52,7 @@ python3 server/test_inequality_deduction.py
 ```
 
 ## 6. Puzzle Plugin Architecture & Extension Standards
-All games in Morning Puzzles must be implemented as modular, self-contained plugins adhering to the `BasePuzzle` contract (`server/app/puzzles/base.py`):
+All games in Pen and Paper Puzzles must be implemented as modular, self-contained plugins adhering to the `BasePuzzle` contract (`server/app/puzzles/base.py`):
 - **Single Source of Truth**: Each game resides in `server/app/puzzles/<puzzle_name>.py` and encapsulates:
   - Procedural generation returning `BasePuzzleResult` (dict-compatible dataclass envelope)
   - Gameplay instruction generation complying with Section 3 formula ($\le 100$ characters)
@@ -64,18 +64,18 @@ All games in Morning Puzzles must be implemented as modular, self-contained plug
 - **Exclusive `ThermalBitmap` Rendering (No Pillow/PIL in Plugins)**: Puzzle plugins must render 1-bit rasters exclusively through `ThermalBitmap` (`server/app/renderer/canvas.py`). Never import or branch on `HAS_PILLOW`, `PIL.ImageDraw`, `pil_to_escpos`, or `image_to_escpos_raster` inside `server/app/puzzles/*.py`. Raster graphics must be 576 dots wide, height aligned to 8 dots, with an average thermal duty cycle $\le 35\%$ and no more than 16 consecutive dense rows.
 
 ## 7. Arduino IDE Dual-Target Synchronization Standard
-Morning Puzzles supports both PlatformIO (`esp32-firmware/`) and native Arduino IDE (`MorningPuzzles/MorningPuzzles.ino`):
+Pen and Paper Puzzles supports both PlatformIO (`esp32-firmware/`) and native Arduino IDE (`PenAndPaperPuzzles/PenAndPaperPuzzles.ino`):
 - **Mandatory Mirroring**: Whenever any change, fix, generator, or configuration update is made to `esp32-firmware/` (including `include/config.h`, `src/generators/`, `src/printer/`, `src/time/`, or `src/main.cpp`), agents must immediately synchronize the Arduino sketch target so it compiles cleanly out of the box:
   ```bash
   ./scripts/sync_arduino_sketch.sh
   ```
-- **Single-Folder Flat Includes**: In `MorningPuzzles/`, all sibling headers must use local flat `#include "Header.h"` rather than directory traversal paths (`../printer/` or `generators/`). The sync script handles this transformation automatically.
+- **Single-Folder Flat Includes**: In `PenAndPaperPuzzles/`, all sibling headers must use local flat `#include "Header.h"` rather than directory traversal paths (`../printer/` or `generators/`). The sync script handles this transformation automatically.
 
 ## 8. On-Device vs. Off-Device Visual Consistency Standard
-All games in Morning Puzzles must deliver identical, pixel-harmonized visual experiences whether printed directly by the ESP32 microcontroller, served by the Python backend, or previewed in the Web Simulator:
+All games in Pen and Paper Puzzles must deliver identical, pixel-harmonized visual experiences whether printed directly by the ESP32 microcontroller, served by the Python backend, or previewed in the Web Simulator:
 - **Strict Tri-Target Parity**: Whenever a game with visual raster generation is created or updated, all three target environments must be implemented with identical geometry:
   1. Python server plugin (`server/app/puzzles/<game>.py`)
-  2. ESP32 firmware generator (`esp32-firmware/src/generators/<Game>Gen.cpp`, mirrored to `MorningPuzzles/`)
+  2. ESP32 firmware generator (`esp32-firmware/src/generators/<Game>Gen.cpp`, mirrored to `PenAndPaperPuzzles/`)
   3. Web Simulator hardware emulation (`simulator/receipt_simulator.html` via `renderOffline<Game>`)
 - **Exact Coordinate & Geometry Alignment**:
   - Canvas width must strictly be 576 dots; height must be aligned to a multiple of 8 dots.
@@ -169,7 +169,7 @@ All games in Morning Puzzles must deliver identical, pixel-harmonized visual exp
   - Never hardcode the total number of games in C++ log strings—always reference `OFFLINE_PUZZLE_TOTAL`. When adding a new game, update `OFFLINE_PUZZLE_TOTAL`, the range comment in `esp32-firmware/include/config.h`, and the `All Games (N)` label in `simulator/receipt_simulator.html`.
 
 ## 18. Game Onboarding, Setup Portal, Documentation & Parity Standard
-Every game added to Morning Puzzles must complete the mandatory full-lifecycle onboarding contract before merge:
+Every game added to Pen and Paper Puzzles must complete the mandatory full-lifecycle onboarding contract before merge:
 - **Canonical How-to-Play Rules & Guide Dataset**:
   - Registered in `server/data/game_rules.json` with strict single-word title, one-sentence imperative instruction ($\le 100$ characters, approved verb), objective, 3–4 rules of play, valid/invalid visual move examples with captions, 1–2 opening anchors, and 1–2 FAQs.
   - Generates monospaced ASCII guide (`plugin.format_guide_ascii()`) and 576-dot 1-bit thermal raster guide (`plugin.render_guide_raster(576)`).
@@ -178,14 +178,14 @@ Every game added to Morning Puzzles must complete the mandatory full-lifecycle o
   - Registered in `portal.html`'s `const GAMES = [...]` array with unique sequential `id`, display `name`, and non-empty `desc`.
   - Eligible games checklist renders the game title alongside `.game-desc` and the ℹ️ guide button.
   - Setup portal controls (enable/disable bitmask, "All", "None", and max count stepper) dynamically adapt to `(1 << GAMES.length) - 1`.
-  - SoftAP embedded header (`PortalHtml.h`) in `esp32-firmware/src/time/` and `MorningPuzzles/` must be synchronized without uncompiled changes.
+  - SoftAP embedded header (`PortalHtml.h`) in `esp32-firmware/src/time/` and `PenAndPaperPuzzles/` must be synchronized without uncompiled changes.
 - **README.md Inclusion & Count Parity**:
   - Featured in `README.md` under `## 🧩 Featured Games (All N Included)` with updated total count matching the game inventory.
   - Numbered list item formatted as: `N. **Title** *(Aliases)*: [Description]`.
 - **Tri-Target Game Description Parity**:
   - The game description displayed on the setup portal (`GAMES[i].desc`) must match the description on `README.md` bit-for-bit (normalized for markdown formatting/backticks).
 - **Initial Setup Receipt & Offline Config Name Parity**:
-  - Every game added to `OfflinePuzzleType` must be explicitly handled in `OfflineConfigManager::getPuzzleName()` across `esp32-firmware/` and `MorningPuzzles/`.
+  - Every game added to `OfflinePuzzleType` must be explicitly handled in `OfflineConfigManager::getPuzzleName()` across `esp32-firmware/` and `PenAndPaperPuzzles/`.
   - Must return the canonical Title Case game name matching `DEFAULT_REGISTRY` and `portal.html` (e.g. `"Maze"`), never falling back to `default: return "Unknown Puzzle";`.
   - Guarantees clean two-column listing on the initial setup ticket (`WELCOME TO PUZZLES`) and configuration summary receipts printed by `OfflineTimeManager`.
 - **Mandatory Pull Request Verification**:

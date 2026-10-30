@@ -310,9 +310,9 @@ def test_setup_receipt_name_parity():
         f"OfflinePuzzleType has {len(enum_entries)} enum entries, expected {total_games}"
     )
 
-    # 2. Check esp32-firmware and MorningPuzzles implementations
+    # 2. Check esp32-firmware and PenAndPaperPuzzles implementations
     fw_cpp_path = ROOT_DIR / "esp32-firmware" / "src" / "config" / "OfflineConfigManager.cpp"
-    arduino_cpp_path = ROOT_DIR / "MorningPuzzles" / "OfflineConfigManager.cpp"
+    arduino_cpp_path = ROOT_DIR / "PenAndPaperPuzzles" / "OfflineConfigManager.cpp"
 
     for cpp_path in [fw_cpp_path, arduino_cpp_path]:
         assert cpp_path.exists(), f"Source file does not exist: {cpp_path}"

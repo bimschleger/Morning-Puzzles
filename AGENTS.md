@@ -1,4 +1,4 @@
-# Morning Puzzles: Agent Behavioral & Formatting Standards
+# Pen and Paper Puzzles: Agent Behavioral & Formatting Standards
 
 Authoritative behavioral, formatting, and architecture rules are maintained in:
 👉 `.agents/rules/puzzle_standards.md`

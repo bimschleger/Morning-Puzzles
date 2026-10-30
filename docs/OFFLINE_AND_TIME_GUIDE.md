@@ -1,6 +1,6 @@
-# 100% Offline & Timekeeping Guide: Morning Puzzles
+# 100% Offline & Timekeeping Guide: Pen and Paper Puzzles
 
-This guide explains how **Morning Puzzles** operates completely **offline** on the **ESP32**, how to set the time without internet access, and how on-demand puzzle printing works.
+This guide explains how **Pen and Paper Puzzles** operates completely **offline** on the **ESP32**, how to set the time without internet access, and how on-demand puzzle printing works.
 
 ---
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Morning Puzzles - Word Ladder Dataset Generator & Curation Tool
+Pen and Paper Puzzles - Word Ladder Dataset Generator & Curation Tool
 Curates authentic, high-quality Lewis Carroll-style Word Ladder puzzles
 across 3 difficulty tiers using familiar, everyday English words.
 
@@ -26,7 +26,7 @@ from typing import List, Dict, Any, Tuple, Set
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 JSON_PATH = os.path.join(ROOT_DIR, "server", "data", "ladder_words.json")
 CPP_HEADER_PATH = os.path.join(ROOT_DIR, "esp32-firmware", "src", "generators", "LadderDataset.h")
-ARDUINO_HEADER_PATH = os.path.join(ROOT_DIR, "MorningPuzzles", "LadderDataset.h")
+ARDUINO_HEADER_PATH = os.path.join(ROOT_DIR, "PenAndPaperPuzzles", "LadderDataset.h")
 
 EXCLUDE_WORDS = {
     'AVE', 'LAS', 'LOS', 'SAN', 'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC',

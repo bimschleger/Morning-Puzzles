@@ -1,6 +1,6 @@
-# Morning Puzzles: ASCII Solution Key & Answer Presentation Specification
+# Pen and Paper Puzzles: ASCII Solution Key & Answer Presentation Specification
 
-This specification defines the structural rules, monospaced layout geometry, character column limits, glyph vocabulary, and presentation standards for rendering the optional **Solution Key** across the **Morning Puzzles** ecosystem (Web Simulator, Python Backend, and ESP32 Firmware).
+This specification defines the structural rules, monospaced layout geometry, character column limits, glyph vocabulary, and presentation standards for rendering the optional **Solution Key** across the **Pen and Paper Puzzles** ecosystem (Web Simulator, Python Backend, and ESP32 Firmware).
 
 ---
 

@@ -1,6 +1,6 @@
-# Morning Puzzles: Puzzle Plugin Architecture & Contributor Guide
+# Pen and Paper Puzzles: Puzzle Plugin Architecture & Contributor Guide
 
-This document defines the unified **Puzzle Plugin System** for Morning Puzzles. It explains how games are encapsulated, registered, validated, and rendered to commercial 80mm ESC/POS thermal receipt printers.
+This document defines the unified **Puzzle Plugin System** for Pen and Paper Puzzles. It explains how games are encapsulated, registered, validated, and rendered to commercial 80mm ESC/POS thermal receipt printers.
 
 ---
 

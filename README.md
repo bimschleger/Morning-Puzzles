@@ -1,4 +1,4 @@
-# Morning Puzzles 📰🧩
+# Pen and Paper Puzzles 📰🧩
 
 An automated physical morning puzzle dispenser that generates randomized, fresh puzzle editions and prints them to a commercial **80mm thermal receipt printer** with automatic paper cutting.
 
@@ -123,7 +123,7 @@ Open [`esp32-firmware/include/config.h`](esp32-firmware/include/config.h) on you
 2. Upload the firmware using **Arduino IDE** or **PlatformIO**:
    * **Using Arduino IDE (Recommended GUI)**:
      1. Open Arduino IDE and select **File $\rightarrow$ Open...**
-     2. Choose `MorningPuzzles/MorningPuzzles.ino`.
+     2. Choose `PenAndPaperPuzzles/PenAndPaperPuzzles.ino`.
      3. Select your board (**ESP32S3 Dev Module** for LilyGO T-ETH-Lite or **ESP32 Dev Module** for standard boards) and your USB port (`/dev/cu.usbmodem...` or `/dev/cu.usbserial-...`).
      4. Under **Tools $\rightarrow$ Partition Scheme**, select **"Huge APP (3MB No OTA / 1MB SPIFFS)"**.
      5. Click the **Upload** arrow button ($\rightarrow$).
@@ -163,7 +163,7 @@ Connect the devices directly together—no router, switch, or Wi-Fi network need
 
 ### Step 5: Everyday Controls & Daily Use (Zero-Button Gestures)
 
-Morning Puzzles is designed to be tucked away inside an enclosure behind or underneath your printer. You never need to touch the micro-sized `BOOT` button on the board:
+Pen and Paper Puzzles is designed to be tucked away inside an enclosure behind or underneath your printer. You never need to touch the micro-sized `BOOT` button on the board:
 
 1. **Initial Setup (or Re-Entering Setup Mode)**:
    * Leave the printer **ON**.
@@ -189,7 +189,7 @@ Morning Puzzles is designed to be tucked away inside an enclosure behind or unde
 ## 📁 Project Structure
 
 ```
-Morning-Puzzles/
+pen-and-paper-puzzles/
 ├── esp32-firmware/                 # 100% Offline C++ ESP32 Firmware
 │   ├── platformio.ini              # PlatformIO configuration
 │   ├── include/config.h            # Network, static IPs, pins, auto-print triggers

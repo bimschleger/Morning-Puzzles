@@ -2,14 +2,14 @@
 set -e
 
 # ==============================================================================
-# Synchronize esp32-firmware into Arduino IDE MorningPuzzles sketch folder
+# Synchronize esp32-firmware into Arduino IDE PenAndPaperPuzzles sketch folder
 # ==============================================================================
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-SKETCH_DIR="$ROOT_DIR/MorningPuzzles"
+SKETCH_DIR="$ROOT_DIR/PenAndPaperPuzzles"
 FW_DIR="$ROOT_DIR/esp32-firmware"
 
-echo "Syncing esp32-firmware -> MorningPuzzles Arduino sketch..."
+echo "Syncing esp32-firmware -> PenAndPaperPuzzles Arduino sketch..."
 mkdir -p "$SKETCH_DIR"
 
 # Copy config, drivers, generators, and main sketch
@@ -18,7 +18,7 @@ cp "$FW_DIR/src/config/"* "$SKETCH_DIR/"
 cp "$FW_DIR/src/printer/"* "$SKETCH_DIR/"
 cp "$FW_DIR/src/time/"* "$SKETCH_DIR/"
 cp "$FW_DIR/src/generators/"* "$SKETCH_DIR/"
-cp "$FW_DIR/src/main.cpp" "$SKETCH_DIR/MorningPuzzles.ino"
+cp "$FW_DIR/src/main.cpp" "$SKETCH_DIR/PenAndPaperPuzzles.ino"
 
 # Flatten relative include paths for Arduino IDE single-folder compilation
 if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -31,11 +31,11 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   sed -i '' 's|#include "../generators/OfflinePuzzleComposer.h"|#include "OfflinePuzzleComposer.h"|g' "$SKETCH_DIR"/*.h "$SKETCH_DIR"/*.cpp 2>/dev/null || true
   sed -i '' 's|#include "../config.h"|#include "config.h"|g' "$SKETCH_DIR"/*.h
   sed -i '' 's|#include "../config.h"|#include "config.h"|g' "$SKETCH_DIR"/*.cpp
-  sed -i '' 's|#include "printer/EscPosPrinter.h"|#include "EscPosPrinter.h"|g' "$SKETCH_DIR"/MorningPuzzles.ino
-  sed -i '' 's|#include "time/OfflineTimeManager.h"|#include "OfflineTimeManager.h"|g' "$SKETCH_DIR"/MorningPuzzles.ino
-  sed -i '' 's|#include "config/OfflineConfigManager.h"|#include "OfflineConfigManager.h"|g' "$SKETCH_DIR"/MorningPuzzles.ino
-  sed -i '' 's|#include "generators/OfflinePuzzleComposer.h"|#include "OfflinePuzzleComposer.h"|g' "$SKETCH_DIR"/MorningPuzzles.ino
-  sed -i '' 's|#include "time/PortalHtml.h"|#include "PortalHtml.h"|g' "$SKETCH_DIR"/*.cpp "$SKETCH_DIR"/*.h "$SKETCH_DIR"/MorningPuzzles.ino 2>/dev/null || true
+  sed -i '' 's|#include "printer/EscPosPrinter.h"|#include "EscPosPrinter.h"|g' "$SKETCH_DIR"/PenAndPaperPuzzles.ino
+  sed -i '' 's|#include "time/OfflineTimeManager.h"|#include "OfflineTimeManager.h"|g' "$SKETCH_DIR"/PenAndPaperPuzzles.ino
+  sed -i '' 's|#include "config/OfflineConfigManager.h"|#include "OfflineConfigManager.h"|g' "$SKETCH_DIR"/PenAndPaperPuzzles.ino
+  sed -i '' 's|#include "generators/OfflinePuzzleComposer.h"|#include "OfflinePuzzleComposer.h"|g' "$SKETCH_DIR"/PenAndPaperPuzzles.ino
+  sed -i '' 's|#include "time/PortalHtml.h"|#include "PortalHtml.h"|g' "$SKETCH_DIR"/*.cpp "$SKETCH_DIR"/*.h "$SKETCH_DIR"/PenAndPaperPuzzles.ino 2>/dev/null || true
   sed -i '' -E 's|#include "(\.\./)?(printer|time|config|generators)/([^"]+)"|#include "\3"|g' "$SKETCH_DIR"/*.h "$SKETCH_DIR"/*.cpp "$SKETCH_DIR"/*.ino 2>/dev/null || true
 else
   sed -i 's|#include "../printer/EscPosPrinter.h"|#include "EscPosPrinter.h"|g' "$SKETCH_DIR"/*.h
@@ -47,12 +47,12 @@ else
   sed -i 's|#include "../generators/OfflinePuzzleComposer.h"|#include "OfflinePuzzleComposer.h"|g' "$SKETCH_DIR"/*.h "$SKETCH_DIR"/*.cpp 2>/dev/null || true
   sed -i 's|#include "../config.h"|#include "config.h"|g' "$SKETCH_DIR"/*.h
   sed -i 's|#include "../config.h"|#include "config.h"|g' "$SKETCH_DIR"/*.cpp
-  sed -i 's|#include "printer/EscPosPrinter.h"|#include "EscPosPrinter.h"|g' "$SKETCH_DIR"/MorningPuzzles.ino
-  sed -i 's|#include "time/OfflineTimeManager.h"|#include "OfflineTimeManager.h"|g' "$SKETCH_DIR"/MorningPuzzles.ino
-  sed -i 's|#include "config/OfflineConfigManager.h"|#include "OfflineConfigManager.h"|g' "$SKETCH_DIR"/MorningPuzzles.ino
-  sed -i 's|#include "generators/OfflinePuzzleComposer.h"|#include "OfflinePuzzleComposer.h"|g' "$SKETCH_DIR"/MorningPuzzles.ino
-  sed -i 's|#include "time/PortalHtml.h"|#include "PortalHtml.h"|g' "$SKETCH_DIR"/*.cpp "$SKETCH_DIR"/*.h "$SKETCH_DIR"/MorningPuzzles.ino 2>/dev/null || true
+  sed -i 's|#include "printer/EscPosPrinter.h"|#include "EscPosPrinter.h"|g' "$SKETCH_DIR"/PenAndPaperPuzzles.ino
+  sed -i 's|#include "time/OfflineTimeManager.h"|#include "OfflineTimeManager.h"|g' "$SKETCH_DIR"/PenAndPaperPuzzles.ino
+  sed -i 's|#include "config/OfflineConfigManager.h"|#include "OfflineConfigManager.h"|g' "$SKETCH_DIR"/PenAndPaperPuzzles.ino
+  sed -i 's|#include "generators/OfflinePuzzleComposer.h"|#include "OfflinePuzzleComposer.h"|g' "$SKETCH_DIR"/PenAndPaperPuzzles.ino
+  sed -i 's|#include "time/PortalHtml.h"|#include "PortalHtml.h"|g' "$SKETCH_DIR"/*.cpp "$SKETCH_DIR"/*.h "$SKETCH_DIR"/PenAndPaperPuzzles.ino 2>/dev/null || true
   sed -i -E 's|#include "(\.\./)?(printer|time|config|generators)/([^"]+)"|#include "\3"|g' "$SKETCH_DIR"/*.h "$SKETCH_DIR"/*.cpp "$SKETCH_DIR"/*.ino 2>/dev/null || true
 fi
 
-echo "Successfully synchronized MorningPuzzles Arduino sketch!"
+echo "Successfully synchronized PenAndPaperPuzzles Arduino sketch!"
