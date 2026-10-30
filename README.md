@@ -23,25 +23,25 @@ Runs **100% On-Device and Offline** on an **ESP32** in native C++ with zero clou
 
 Every print job generates a randomized, unique daily edition featuring all 19 open-source (Apache 2.0 / MIT) puzzle types conforming to strict presentation standards:
 
-1. **Sudoku**: 9x9 grid with standard 3x3 block hierarchy, generated with a backtracking solver mathematically guaranteed to have exactly one unique solution.
-2. **Search** *(Word Search)*: Dynamic letter matrix with randomized hidden words (horizontal, vertical, diagonal) across curated themes (Morning, Space, Animals, Nature, Tech), complete with checkbox tracking. Theme-driven with no difficulty line.
-3. **Nonogram** *(Picross)*: Deductive picture logic grids (5x5, 8x8, 10x10) with row and column clue numbers.
-4. **Stars** *(Queens / Star Battle)*: LinkedIn Queens & 2-Star Battle format with irregular contiguous region partitioning where no two stars touch, even diagonally.
-5. **Jumble**: 4 scrambled clue words with circled letter positions, ruled handwriting scratchpad lines, and a punchline riddle to solve.
-6. **Binary** *(Takuzu / Binairo)*: 0 and 1 logic puzzle with strict adjacency rules (no two consecutive identical symbols) and equal row/column parity.
-7. **Mines** *(Minesweeper Deduction)*: 100% deductive, guess-free minefield with adjacent mine count clues and total mine counter.
-8. **Tents** *(Tents & Trees)*: Bipartite matching puzzle where each tree is paired with a tent next to it, tents never touch even diagonally, and margin numbers indicate line totals.
-9. **Bridges** *(Hashiwokakero)*: Connect numbered circular islands with horizontal and vertical single/double bridges to form a single continuous spanning network without crossings.
-10. **Killer** *(Killer Sudoku)*: Cage-sum deduction puzzle (4x4 on Easy/Medium, 6x6 on Extreme) combining Latin-square non-repeating digits with dashed cage arithmetic sums.
-11. **Cryptogram**: Monoalphabetic substitution cipher featuring famous quotes, riddles, and proverbs with letter hint scaffolding.
-12. **Tango**: Sun and Moon parity logic grid with edge equality (`=`) and opposite (`x`) constraints.
-13. **Ladder** *(Word Ladder / Doublets)*: Deduce intermediate words linking a start word to a target word, changing exactly one letter per step.
-14. **Wheel** *(Word Wheel / Target Anagram)*: 7-letter hexagonal honeycomb anagram challenge requiring words formed with a mandatory center letter and a 7-letter pangram.
-15. **Lights** *(Akari / Light Up)*: Line-of-sight illumination puzzle placing light bulbs to light up all corridors without shining on one another or exceeding wall clue limits.
-16. **Loop** *(Slitherlink / Fences)*: Loop deduction drawing a single continuous closed circuit where cell numbers indicate the exact number of surrounding loop segments.
-17. **Towers** *(Skyscrapers)*: Latin-square height deduction puzzle where outside grid numbers indicate how many visible skyscrapers can be seen along each row and column.
-18. **Inequality** *(Futoshiki)*: Latin-square numerical deduction grid where empty cells must be filled with non-repeating digits satisfying placed greater-than (>) and less-than (<) inequality signs.
-19. **Maze** *(Labyrinth)*: Labyrinth traversal puzzle generating a single continuous winding path from entrance to exit through procedural walled dead-ends.
+1. **Sudoku**: Fill every row, column, and 3x3 box with digits 1-9 without repeating.
+2. **Search** *(Word Search)*: Find all hidden words horizontally, vertically, or diagonally.
+3. **Nonogram** *(Picross)*: Shade cells to match row and column run counts with at least one blank between runs.
+4. **Stars** *(Queens / Star Battle)*: Place stars in every row, column, and outlined region without touching, even diagonally.
+5. **Jumble**: Unscramble each clue word, then use the circled letters to solve the final pun.
+6. **Binary** *(Takuzu / Binairo)*: Fill every cell with 0 or 1 so no more than two identical numbers are adjacent.
+7. **Mines** *(Minesweeper Deduction)*: Deduce all hidden mines using numbers showing how many adjacent cells contain mines.
+8. **Tents** *(Tents & Trees)*: Pitch tents beside trees; no tents may touch even diagonally, matching row/column quotas.
+9. **Bridges** *(Hashiwokakero)*: Connect islands with up to two orthogonal bridges matching numbers into one network.
+10. **Killer** *(Killer Sudoku)*: Fill the grid with digits so cages sum to their clue without repeating digits.
+11. **Cryptogram**: Deduce the hidden quotation where each letter is consistently substituted with another.
+12. **Tango**: Fill grid with 0s and 1s so equal symbols match and opposite symbols differ.
+13. **Ladder** *(Word Ladder / Doublets)*: Deduce words changing one letter at a time to transform start word into end word.
+14. **Wheel** *(Word Wheel / Target Anagram)*: Find words of 4+ letters using the wheel letters, always including the center letter.
+15. **Lights** *(Akari / Light Up)*: Place bulbs to illuminate corridors so numbered blocks match and no bulbs shine on each other.
+16. **Loop** *(Slitherlink / Fences)*: Draw a single continuous closed loop around numbers indicating surrounding line count.
+17. **Towers** *(Skyscrapers)*: Place building heights so edge clues match how many towers are visible in that line.
+18. **Inequality** *(Futoshiki)*: Fill grid with digits so each digit appears once per line and inequality signs hold.
+19. **Maze** *(Labyrinth)*: Draw a path from the entrance to the exit without crossing any walls.
 
 > [!NOTE]
 > All puzzle presentation formatting (single-word uppercase titles, $\le 100$-character one-sentence descriptions, centered difficulty placement, and 48-column ASCII solution keys) strictly adheres to [`docs/PUZZLE_HEADER_SPEC.md`](docs/PUZZLE_HEADER_SPEC.md), [`docs/PUZZLE_DESCRIPTION_GUIDELINES.md`](docs/PUZZLE_DESCRIPTION_GUIDELINES.md), and [`docs/PUZZLE_SOLUTION_KEY_SPEC.md`](docs/PUZZLE_SOLUTION_KEY_SPEC.md), verified by `python3 server/test_puzzle_standards.py`.
