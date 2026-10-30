@@ -301,7 +301,7 @@ class LightsPuzzle(BasePuzzle):
 
     def get_instruction(self, puzzle_data: Union[BasePuzzleResult, Dict[str, Any]]) -> str:
         total_bulbs = puzzle_data.get("total_bulbs", 10)
-        return f"Place {total_bulbs} bulbs to light all corridors without bulbs shining on each other or exceeding numbers."
+        return f"Place {total_bulbs} bulbs to light corridors without any shining together or exceeding numbers."
 
     def format_ascii_puzzle(self, puzzle_data: Union[BasePuzzleResult, Dict[str, Any]]) -> str:
         rows = puzzle_data.get("rows", 8)

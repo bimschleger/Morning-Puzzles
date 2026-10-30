@@ -49,8 +49,7 @@ void OfflinePuzzleComposer::printSinglePuzzle(EscPosPrinter& printer, OfflinePuz
             SudokuGen sudoku;
             sudoku.generate(diff);
             printPuzzleHeader(printer, "SUDOKU", diffStr, 
-                              "Fill every row, column, and 3x3 box with digits", 
-                              "1-9 without repeating.");
+                              "Fill every row, column, and 3x3 box with digits 1-9 without repeating.");
             if (!useRaster || !sudoku.printRasterToReceipt(printer, diff)) {
                 sudoku.printToReceipt(printer, diff);
             }
@@ -76,8 +75,7 @@ void OfflinePuzzleComposer::printSinglePuzzle(EscPosPrinter& printer, OfflinePuz
             NonogramGen nonogram;
             nonogram.generate(diff);
             printPuzzleHeader(printer, "NONOGRAM", diffStr, 
-                              "Shade blocks of cells matching each clue in", 
-                              "order, separated by at least one empty cell.");
+                              "Shade blocks of cells matching each clue in order, separated by at least one empty cell.");
             if (!useRaster || !nonogram.printRasterToReceipt(printer)) {
                 nonogram.printToReceipt(printer);
             }
@@ -105,8 +103,7 @@ void OfflinePuzzleComposer::printSinglePuzzle(EscPosPrinter& printer, OfflinePuz
             JumbleGen jumble;
             jumble.generate(diff);
             printPuzzleHeader(printer, "JUMBLE", diffStr,
-                              "Unscramble each word, then use the circled",
-                              "letters to solve the riddle.");
+                              "Unscramble each word, then use the circled letters to solve the riddle.");
             if (!useRaster || !jumble.printRasterToReceipt(printer)) {
                 jumble.printToReceipt(printer);
             }
@@ -165,8 +162,7 @@ void OfflinePuzzleComposer::printSinglePuzzle(EscPosPrinter& printer, OfflinePuz
             BridgesGen bridges;
             bridges.generate(diff);
             printPuzzleHeader(printer, "BRIDGES", diffStr, 
-                              "Connect all islands into one network using", 
-                              "1 or 2 lines matching each island's number.");
+                              "Connect all islands into one network using 1 or 2 lines matching each island's number.");
             if (!useRaster || !bridges.printRasterToReceipt(printer, diff)) {
                 bridges.printToReceipt(printer, diff);
             }
@@ -178,10 +174,10 @@ void OfflinePuzzleComposer::printSinglePuzzle(EscPosPrinter& printer, OfflinePuz
             Serial.println("[COMPOSER] Generating Tango...");
             TangoGen tango;
             tango.generate(diff);
-            const char* tangoInstr1 = (diff == TANGO_HARD)
-                ? "Fill each line with four 0s and four 1s"
-                : "Fill each line with three 0s and three 1s";
-            printPuzzleHeader(printer, "TANGO", diffStr, tangoInstr1, "without trios; = means same, x means opposite.");
+            const char* tangoInstr = (diff == TANGO_HARD)
+                ? "Fill each line with four 0s and four 1s without trios; = means same, x means opposite."
+                : "Fill each line with three 0s and three 1s without trios; = means same, x means opposite.";
+            printPuzzleHeader(printer, "TANGO", diffStr, tangoInstr);
             if (!useRaster || !tango.printRasterToReceipt(printer, diff)) {
                 tango.printToReceipt(printer, diff);
             }
@@ -208,9 +204,9 @@ void OfflinePuzzleComposer::printSinglePuzzle(EscPosPrinter& printer, OfflinePuz
             Serial.println("[COMPOSER] Generating Lights...");
             LightsGen lights;
             lights.generate(diff);
-            char lightsInstr[64];
-            snprintf(lightsInstr, sizeof(lightsInstr), "Place %d bulbs to light all corridors without", (int)lights.getTotalBulbs());
-            printPuzzleHeader(printer, "LIGHTS", diffStr, lightsInstr, "bulbs shining together or exceeding numbers.");
+            char lightsInstr[128];
+            snprintf(lightsInstr, sizeof(lightsInstr), "Place %d bulbs to light corridors without any shining together or exceeding numbers.", (int)lights.getTotalBulbs());
+            printPuzzleHeader(printer, "LIGHTS", diffStr, lightsInstr);
             if (!useRaster || !lights.printRasterToReceipt(printer, diff)) {
                 lights.printToReceipt(printer, diff);
             }
@@ -223,8 +219,7 @@ void OfflinePuzzleComposer::printSinglePuzzle(EscPosPrinter& printer, OfflinePuz
             LoopGen loop;
             loop.generate(diff);
             printPuzzleHeader(printer, "LOOP", diffStr, 
-                              "Draw a single continuous closed loop connecting dots", 
-                              "so each number matches its edge count.");
+                              "Draw a single continuous closed loop connecting dots so each number matches its edge count.");
             if (!useRaster || !loop.printRasterToReceipt(printer, diff)) {
                 loop.printToReceipt(printer, diff);
             }

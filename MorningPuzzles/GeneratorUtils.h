@@ -92,9 +92,14 @@ inline void printPuzzleHeader(EscPosPrinter& printer, const char* title, const c
         printer.println(diffStr);
     }
     if (instr1 && instr1[0] != '\0') {
-        printWrapped(printer, instr1, 44);
-    }
-    if (instr2 && instr2[0] != '\0') {
+        if (instr2 && instr2[0] != '\0') {
+            char combined[192];
+            snprintf(combined, sizeof(combined), "%s %s", instr1, instr2);
+            printWrapped(printer, combined, 44);
+        } else {
+            printWrapped(printer, instr1, 44);
+        }
+    } else if (instr2 && instr2[0] != '\0') {
         printWrapped(printer, instr2, 44);
     }
     printer.println("");
