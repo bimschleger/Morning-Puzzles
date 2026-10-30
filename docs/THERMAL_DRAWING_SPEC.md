@@ -1,6 +1,6 @@
-# Morning Puzzles: Thermal Drawing & Graphic Design Specification
+# Pen and Paper Puzzles: Thermal Drawing & Graphic Design Specification
 
-This specification defines the visual standards, geometric tokens, stroke hierarchies, typography formulas, and 1-bit thermal shading algorithms for rendering puzzle games across the **Morning Puzzles** ecosystem.
+This specification defines the visual standards, geometric tokens, stroke hierarchies, typography formulas, and 1-bit thermal shading algorithms for rendering puzzle games across the **Pen and Paper Puzzles** ecosystem.
 
 Whether rendered via HTML5 Canvas in the interactive simulator or converted to 1-bit ESC/POS raster bitmaps for physical 80mm thermal receipt printers, all game drawings must strictly adhere to these standards.
 

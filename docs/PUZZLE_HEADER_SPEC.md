@@ -1,8 +1,8 @@
-# Morning Puzzles: Header & Presentation Specification
+# Pen and Paper Puzzles: Header & Presentation Specification
 
-This document establishes the official visual and structural standard for representing game titles, difficulty ratings, and puzzle layouts across the **Morning Puzzles** ecosystem (Web Simulator, Python Backend, and ESP32 Firmware).
+This document establishes the official visual and structural standard for representing game titles, difficulty ratings, and puzzle layouts across the **Pen and Paper Puzzles** ecosystem (Web Simulator, Python Backend, and ESP32 Firmware).
 
-All existing games—and any future games added to Morning Puzzles—must strictly conform to this specification.
+All existing games—and any future games added to Pen and Paper Puzzles—must strictly conform to this specification.
 
 ---
 
@@ -90,7 +90,7 @@ Before committing any puzzle renderer or generator update, verify that **NONE** 
 
 ## 5. Specification for Adding New Games
 
-When adding a new puzzle type to Morning Puzzles:
+When adding a new puzzle type to Pen and Paper Puzzles:
 
 1. **Select Strict One-Word Title**: Choose a single uppercase English word (e.g., `--- CROSSWORD ---`, `--- TANGLE ---`, `--- KAKURO ---`, `--- BATTLESHIPS ---`, `--- NURIKABE ---`). Multi-word, hyphenated, or slash-separated names are strictly forbidden.
 2. **Define One-Sentence Instruction**: Author exactly one clear, concise sentence explaining the objective so new players understand how to play immediately. The instruction must strictly adhere to the $\le 100$-character limit, canonical formula, and dynamic parameterization rules detailed in [`docs/PUZZLE_DESCRIPTION_GUIDELINES.md`](PUZZLE_DESCRIPTION_GUIDELINES.md).

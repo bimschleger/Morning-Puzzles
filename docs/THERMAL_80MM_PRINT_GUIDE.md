@@ -1,6 +1,6 @@
 # 80mm Thermal Receipt Printer: Master Specification & Agentic Guide
 
-This document establishes the official technical specification, hardware constraints, protocol standards, and agentic design guidelines for generating print-ready output for **80mm commercial thermal receipt printers** across the Morning Puzzles ecosystem.
+This document establishes the official technical specification, hardware constraints, protocol standards, and agentic design guidelines for generating print-ready output for **80mm commercial thermal receipt printers** across the Pen and Paper Puzzles ecosystem.
 
 ---
 

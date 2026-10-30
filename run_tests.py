@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Morning Puzzles - Unified Automated Test Suite & Verification Harness
+Pen and Paper Puzzles - Unified Automated Test Suite & Verification Harness
 Run with:
     python3 run_tests.py                     # Runs all standard tiers (standards, logic, raster, firmware)
     python3 run_tests.py --tier standards    # Presentation, naming, <=100 char instructions, solution key
@@ -224,7 +224,7 @@ def update_golden_snapshots():
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Morning Puzzles Unified Automated Test Suite")
+    parser = argparse.ArgumentParser(description="Pen and Paper Puzzles Unified Automated Test Suite")
     parser.add_argument(
         "--tier",
         choices=["all", "standards", "logic", "raster", "firmware", "stress"],

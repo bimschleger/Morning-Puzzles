@@ -5,7 +5,7 @@ Validates:
 1. Generator Inventory Parity: Checks whether every puzzle in DEFAULT_REGISTRY has a corresponding
    C++ generator (.h and .cpp) in esp32-firmware/src/generators/.
 2. Arduino Sketch Synchronization: Verifies that scripts/sync_arduino_sketch.sh leaves zero drift
-   between esp32-firmware/ and MorningPuzzles/.
+   between esp32-firmware/ and PenAndPaperPuzzles/.
 3. Host C++ Syntax & Build Compilation: Compiles esp32-firmware/test/test_offline_generators.cpp
    using the host C++ compiler (clang++ or g++) to guarantee zero syntax or linkage regressions.
 """
@@ -24,7 +24,7 @@ from app.puzzles.registry import DEFAULT_REGISTRY
 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 FW_DIR = os.path.join(ROOT_DIR, "esp32-firmware")
-SKETCH_DIR = os.path.join(ROOT_DIR, "MorningPuzzles")
+SKETCH_DIR = os.path.join(ROOT_DIR, "PenAndPaperPuzzles")
 GEN_DIR = os.path.join(FW_DIR, "src", "generators")
 TEST_CPP = os.path.join(FW_DIR, "test", "test_offline_generators.cpp")
 
@@ -85,20 +85,20 @@ def test_arduino_sketch_sync():
     res = subprocess.run(["/bin/bash", sync_script], cwd=ROOT_DIR, capture_output=True, text=True)
     assert res.returncode == 0, f"sync_arduino_sketch.sh failed:\n{res.stderr}\n{res.stdout}"
 
-    # Verify key synced files exist in MorningPuzzles/
+    # Verify key synced files exist in PenAndPaperPuzzles/
     expected_files = [
         "config.h",
         "EscPosPrinter.h",
         "EscPosPrinter.cpp",
         "OfflinePuzzleComposer.h",
         "OfflinePuzzleComposer.cpp",
-        "MorningPuzzles.ino",
+        "PenAndPaperPuzzles.ino",
     ]
     for f in expected_files:
         path = os.path.join(SKETCH_DIR, f)
         assert os.path.exists(path), f"Missing synchronized sketch file: {path}"
 
-    print("  -> Passed! Arduino sketch directory MorningPuzzles/ is cleanly synchronized.")
+    print("  -> Passed! Arduino sketch directory PenAndPaperPuzzles/ is cleanly synchronized.")
 
 
 def test_host_cpp_compilation():
@@ -136,8 +136,8 @@ def test_host_cpp_compilation():
 
 
 def test_rule_7_flat_includes():
-    print("\nTest 4: Verifying Rule 7 (Zero Relative Include Paths in MorningPuzzles/)...")
-    assert os.path.exists(SKETCH_DIR), f"MorningPuzzles dir not found at {SKETCH_DIR}"
+    print("\nTest 4: Verifying Rule 7 (Zero Relative Include Paths in PenAndPaperPuzzles/)...")
+    assert os.path.exists(SKETCH_DIR), f"PenAndPaperPuzzles dir not found at {SKETCH_DIR}"
 
     relative_includes = []
     for root, _, files in os.walk(SKETCH_DIR):
@@ -150,9 +150,9 @@ def test_rule_7_flat_includes():
                             relative_includes.append(f"{f}:{line_num}: {line.strip()}")
 
     assert not relative_includes, (
-        f"Rule 7 Violation: Found relative include paths in MorningPuzzles/:\n" + "\n".join(relative_includes)
+        f"Rule 7 Violation: Found relative include paths in PenAndPaperPuzzles/:\n" + "\n".join(relative_includes)
     )
-    print("  -> Passed! Zero relative #include paths found in MorningPuzzles/ (100% flat includes).")
+    print("  -> Passed! Zero relative #include paths found in PenAndPaperPuzzles/ (100% flat includes).")
 
 
 def test_rule_14_offline_appliance_libraries():

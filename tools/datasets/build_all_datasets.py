@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-Morning Puzzles - Unified Curated Datasets Pipeline
+Pen and Paper Puzzles - Unified Curated Datasets Pipeline
 Reads canonical JSON datasets in server/data/*.json and:
 1. Compiles C++ PROGMEM headers in esp32-firmware/src/generators/
 2. Injects / updates datasets in simulator/receipt_simulator.html
-3. Synchronizes Arduino IDE sketch (MorningPuzzles/) via scripts/sync_arduino_sketch.sh
+3. Synchronizes Arduino IDE sketch (PenAndPaperPuzzles/) via scripts/sync_arduino_sketch.sh
 """
 
 import json

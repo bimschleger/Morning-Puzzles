@@ -1,5 +1,5 @@
 // ==============================================================================
-// Morning Puzzles - 100% Offline Standalone Daily Receipt Printer Firmware
+// Pen and Paper Puzzles - 100% Offline Standalone Daily Receipt Printer Firmware
 // 
 // Arduino IDE Configuration:
 //   Board: "ESP32 Dev Module" or "ESP32S3 Dev Module" (e.g. LilyGO T-ETH-Lite)

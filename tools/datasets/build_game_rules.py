@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Morning Puzzles - Unified Game Rules & Guide Compiler Pipeline
+Pen and Paper Puzzles - Unified Game Rules & Guide Compiler Pipeline
 Reads canonical JSON from server/data/game_rules.json and:
 1. Generates esp32-firmware/src/generators/GameRulesDataset.h
 2. Generates docs/GAME_RULES_FAQ.md
@@ -128,9 +128,9 @@ def generate_markdown_docs(data: dict) -> None:
     print(f"Generating Markdown Docs -> {DOCS_MD_PATH}...")
     games = data.get("games", [])
     lines = [
-        "# Morning Puzzles: Comprehensive Game Rules & How-to-Play Guide",
+        "# Pen and Paper Puzzles: Comprehensive Game Rules & How-to-Play Guide",
         "",
-        "This authoritative guide contains complete rules, core objectives, opening deduction anchors, and visual move specifications for all 18 games in Morning Puzzles.",
+        "This authoritative guide contains complete rules, core objectives, opening deduction anchors, and visual move specifications for all 18 games in Pen and Paper Puzzles.",
         "",
         "---",
         "",

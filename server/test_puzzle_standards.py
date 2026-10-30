@@ -399,7 +399,7 @@ def test_master_receipt_header_and_footer():
     assert "diagnostics" not in fw_src.lower(), "Firmware composer contains diagnostics"
 
     # 3. Arduino IDE Sketch OfflinePuzzleComposer.cpp
-    ino_composer = os.path.join(base_dir, "MorningPuzzles", "OfflinePuzzleComposer.cpp")
+    ino_composer = os.path.join(base_dir, "PenAndPaperPuzzles", "OfflinePuzzleComposer.cpp")
     with open(ino_composer, "r") as f:
         ino_src = f.read()
     assert '"PEN + PAPER PUZZLES"' in ino_src, "Arduino sketch missing PEN + PAPER PUZZLES"
@@ -434,9 +434,9 @@ def test_playable_cells_cleanliness():
         os.path.join(base_dir, "esp32-firmware", "src", "generators", "MinesGen.cpp"),
         os.path.join(base_dir, "esp32-firmware", "src", "generators", "NonogramGen.cpp"),
         os.path.join(base_dir, "esp32-firmware", "src", "generators", "TentsGen.cpp"),
-        os.path.join(base_dir, "MorningPuzzles", "MinesGen.cpp"),
-        os.path.join(base_dir, "MorningPuzzles", "NonogramGen.cpp"),
-        os.path.join(base_dir, "MorningPuzzles", "TentsGen.cpp"),
+        os.path.join(base_dir, "PenAndPaperPuzzles", "MinesGen.cpp"),
+        os.path.join(base_dir, "PenAndPaperPuzzles", "NonogramGen.cpp"),
+        os.path.join(base_dir, "PenAndPaperPuzzles", "TentsGen.cpp"),
         os.path.join(base_dir, "server", "app", "puzzles", "mines.py"),
         os.path.join(base_dir, "server", "app", "puzzles", "nonogram.py"),
     ]
@@ -524,7 +524,7 @@ def test_jumble_difficulty_standards():
 
     # Verify tri-target synchronization
     progmem_path = os.path.join(os.path.dirname(__file__), "..", "esp32-firmware", "src", "generators", "JumbleDataset.h")
-    arduino_path = os.path.join(os.path.dirname(__file__), "..", "MorningPuzzles", "JumbleDataset.h")
+    arduino_path = os.path.join(os.path.dirname(__file__), "..", "PenAndPaperPuzzles", "JumbleDataset.h")
     sim_path = os.path.join(os.path.dirname(__file__), "..", "simulator", "receipt_simulator.html")
 
     assert os.path.exists(progmem_path), f"ESP32 dataset missing: {progmem_path}"

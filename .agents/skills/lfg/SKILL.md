@@ -1,11 +1,11 @@
 ---
 name: lfg
-description: Grabs the top task from the to-do column in Todoist ('Morning Puzzles'), immediately moves it to the doing column, generates an implementation plan from the task details, comments, and attachments, executes and verifies the work, and upon successful completion moves the task to the done column and marks it complete. Trigger whenever the user types /lfg or asks to work on the next backlog task.
+description: Grabs the top task from the to-do column in Todoist ('Pen and Paper Puzzles' or 'Morning Puzzles'), immediately moves it to the doing column, generates an implementation plan from the task details, comments, and attachments, executes and verifies the work, and upon successful completion moves the task to the done column and marks it complete. Trigger whenever the user types /lfg or asks to work on the next backlog task.
 ---
 
 # LFG: Automated Todoist Task Ingestion, Planning & Lifecycle Execution
 
-This skill manages the complete end-to-end task lifecycle for the **Morning Puzzles** project in Todoist:
+This skill manages the complete end-to-end task lifecycle for the **Pen and Paper Puzzles** (formerly **Morning Puzzles**) project in Todoist:
 1. Identifying the top task in the **To-Do** column.
 2. **Immediately moving** that task over to the **Doing** column upon identification.
 3. Generating a comprehensive **implementation plan** utilizing all task context (title, short description, comments, and attachments).
