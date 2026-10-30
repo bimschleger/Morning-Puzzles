@@ -201,6 +201,7 @@ class DailyReceiptComposer:
         r.println()
         r.println("For more puzzles, toggle the power")
         r.println("on the front of the printer.")
+        r.println()
         r.println("To change settings, toggle the power")
         r.println("on the cable behind the printer.")
         r.horizontal_rule("-")

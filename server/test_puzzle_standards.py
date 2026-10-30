@@ -381,6 +381,7 @@ def test_master_receipt_header_and_footer():
     assert "Enjoy your day!" in receipt_text, "Python receipt missing 'Enjoy your day!' footer"
     assert "For more puzzles, toggle the power" in receipt_text, "Python receipt missing 'For more puzzles, toggle the power' in footer"
     assert "on the front of the printer." in receipt_text, "Python receipt missing 'on the front of the printer.' in footer"
+    assert "on the front of the printer.\n\nTo change settings, toggle the power" in receipt_text, "Python receipt missing blank line between footer instructions"
     assert "To change settings, toggle the power" in receipt_text, "Python receipt missing 'To change settings, toggle the power' in footer"
     assert "on the cable behind the printer." in receipt_text, "Python receipt missing 'on the cable behind the printer.' in footer"
     assert "diagnostics" not in receipt_text.lower(), "Python receipt contains forbidden diagnostics"
@@ -394,6 +395,7 @@ def test_master_receipt_header_and_footer():
     assert '"Enjoy your day!"' in fw_src, "Firmware missing 'Enjoy your day!'"
     assert '"For more puzzles, toggle the power"' in fw_src, "Firmware missing 'For more puzzles, toggle the power'"
     assert '"on the front of the printer."' in fw_src, "Firmware missing 'on the front of the printer.'"
+    assert 'printer.println("on the front of the printer.");\n    printer.println("");\n    printer.println("To change settings, toggle the power");' in fw_src, "Firmware missing blank line between footer instructions"
     assert '"To change settings, toggle the power"' in fw_src, "Firmware missing 'To change settings, toggle the power'"
     assert '"on the cable behind the printer."' in fw_src, "Firmware missing 'on the cable behind the printer.'"
     assert "diagnostics" not in fw_src.lower(), "Firmware composer contains diagnostics"
@@ -407,6 +409,7 @@ def test_master_receipt_header_and_footer():
     assert '"Enjoy your day!"' in ino_src, "Arduino sketch missing 'Enjoy your day!'"
     assert '"For more puzzles, toggle the power"' in ino_src, "Arduino sketch missing 'For more puzzles, toggle the power'"
     assert '"on the front of the printer."' in ino_src, "Arduino sketch missing 'on the front of the printer.'"
+    assert 'printer.println("on the front of the printer.");\n    printer.println("");\n    printer.println("To change settings, toggle the power");' in ino_src, "Arduino sketch missing blank line between footer instructions"
     assert '"To change settings, toggle the power"' in ino_src, "Arduino sketch missing 'To change settings, toggle the power'"
     assert '"on the cable behind the printer."' in ino_src, "Arduino sketch missing 'on the cable behind the printer.'"
 
@@ -419,6 +422,8 @@ def test_master_receipt_header_and_footer():
     assert "Enjoy your day!" in sim_src, "Simulator missing 'Enjoy your day!'"
     assert "For more puzzles, toggle the power" in sim_src, "Simulator missing 'For more puzzles, toggle the power'"
     assert "on the front of the printer." in sim_src, "Simulator missing 'on the front of the printer.'"
+    assert "items.push({ type: 'center', text: centerLine('on the front of the printer.', COLS) });\n      items.push({ type: 'blank', text: '' });\n      items.push({ type: 'center', text: centerLine('To change settings, toggle the power', COLS) });" in sim_src, "Simulator missing blank line between daily footer instructions"
+    assert "items.push({ type: 'text', text: centerLine('on the front of the printer.', COLS) });\n      items.push({ type: 'blank', text: '' });\n      items.push({ type: 'text', text: centerLine('To change settings, toggle the power', COLS) });" in sim_src, "Simulator missing blank line between guide footer instructions"
     assert "To change settings, toggle the power" in sim_src, "Simulator missing 'To change settings, toggle the power'"
     assert "on the cable behind the printer." in sim_src, "Simulator missing 'on the cable behind the printer.'"
 
