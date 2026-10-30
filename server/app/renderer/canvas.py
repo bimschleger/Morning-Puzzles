@@ -288,25 +288,25 @@ class ThermalBitmap:
                 if pat == 0:
                     is_burn = False
                 elif pat == 1:
-                    is_burn = ((px + py) % 6 == 0)
+                    is_burn = ((px + py) % 8 == 0)
                 elif pat == 2:
-                    is_burn = ((px - py + 1000) % 6 == 0)
+                    is_burn = ((px - py + 1000) % 8 == 0)
                 elif pat == 3:
-                    is_burn = (py % 6 == 0)
+                    is_burn = ((px + py) % 10 == 0 or (px - py + 1000) % 10 == 0)
                 elif pat == 4:
-                    is_burn = (px % 6 == 0)
+                    is_burn = (px % 8 == 0)
                 elif pat == 5:
-                    is_burn = (px % 3 == 0 and py % 3 == 0)
+                    is_burn = (px % 4 == 0 and py % 4 == 0)
                 elif pat == 6:
-                    is_burn = ((px + py) % 8 == 0 or (px - py + 1000) % 8 == 0)
+                    is_burn = ((px + py) % 8 == 0 and (px % 4 < 2))
                 elif pat == 7:
-                    is_burn = (px % 8 == 0 or py % 8 == 0)
+                    is_burn = ((px - py + 1000) % 8 == 0 and (px % 4 < 2))
                 elif pat == 8:
-                    rx = px % 6
-                    ry = py % 6
-                    is_burn = ((rx == 3 and abs(ry - 3) <= 1) or (ry == 3 and abs(rx - 3) <= 1))
+                    rx = px % 8
+                    ry = py % 8
+                    is_burn = ((rx == 4 and abs(ry - 4) <= 1) or (ry == 4 and abs(rx - 4) <= 1))
                 elif pat == 9:
-                    is_burn = ((px + py) % 6 == 0 and (px % 4 < 2))
+                    is_burn = ((px + py) % 6 == 0 and (px - py + 1000) % 6 == 0)
 
                 if is_burn:
                     self.set_pixel(px, py, 1)

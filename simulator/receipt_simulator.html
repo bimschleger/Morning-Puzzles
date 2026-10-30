@@ -2942,20 +2942,20 @@
             let isBurn = false;
             switch (pat) {
               case 0: isBurn = false; break;
-              case 1: isBurn = ((px + py) % 6 === 0); break;
-              case 2: isBurn = ((px - py + 1000) % 6 === 0); break;
-              case 3: isBurn = (py % 6 === 0); break;
-              case 4: isBurn = (px % 6 === 0); break;
-              case 5: isBurn = (px % 3 === 0 && py % 3 === 0); break;
-              case 6: isBurn = ((px + py) % 8 === 0 || (px - py + 1000) % 8 === 0); break;
-              case 7: isBurn = (px % 8 === 0 || py % 8 === 0); break;
+              case 1: isBurn = ((px + py) % 8 === 0); break;
+              case 2: isBurn = ((px - py + 1000) % 8 === 0); break;
+              case 3: isBurn = ((px + py) % 10 === 0 || (px - py + 1000) % 10 === 0); break;
+              case 4: isBurn = (px % 8 === 0); break;
+              case 5: isBurn = (px % 4 === 0 && py % 4 === 0); break;
+              case 6: isBurn = ((px + py) % 8 === 0 && (px % 4 < 2)); break;
+              case 7: isBurn = ((px - py + 1000) % 8 === 0 && (px % 4 < 2)); break;
               case 8: {
-                const rx = px % 6;
-                const ry = py % 6;
-                isBurn = ((rx === 3 && Math.abs(ry - 3) <= 1) || (ry === 3 && Math.abs(rx - 3) <= 1));
+                const rx = px % 8;
+                const ry = py % 8;
+                isBurn = ((rx === 4 && Math.abs(ry - 4) <= 1) || (ry === 4 && Math.abs(rx - 4) <= 1));
                 break;
               }
-              case 9: isBurn = ((px + py) % 6 === 0 && (px % 4 < 2)); break;
+              case 9: isBurn = ((px + py) % 6 === 0 && (px - py + 1000) % 6 === 0); break;
             }
             if (isBurn) this.setPixel(px, py, 1);
           }

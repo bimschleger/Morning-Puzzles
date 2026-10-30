@@ -367,14 +367,18 @@ void EscPosPrinter::printRasterBitmap(const uint8_t* bitmapData, uint16_t widthD
     
     // Stream data in chunks to prevent network socket / UART buffer overflow
     size_t totalBytes = (size_t)widthBytes * heightDots;
-    size_t chunkSize = 512;
+    size_t chunkSize = 2048;
     size_t sent = 0;
 
     while (sent < totalBytes) {
         size_t toSend = (chunkSize < totalBytes - sent) ? chunkSize : (totalBytes - sent);
         _outputStream->write(bitmapData + sent, toSend);
         sent += toSend;
-        delay(2); // Gentle flow-control pacing
+        if (_mode == PRINTER_MODE_SERIAL) {
+            delay(2); // Flow-control pacing for UART hardware buffer
+        } else {
+            delay(1); // Network socket pacing
+        }
     }
 
     feed(1);
