@@ -404,6 +404,7 @@ bool OfflinePuzzleComposer::generateAndPrintReceipt(EscPosPrinter& printer, cons
     printer.println("");
     printer.println("For more puzzles, toggle the power");
     printer.println("on the front of the printer.");
+    printer.println("");
     printer.println("To change settings, toggle the power");
     printer.println("on the cable behind the printer.");
     printer.printHorizontalLine('-');
@@ -873,6 +874,7 @@ bool OfflinePuzzleComposer::printGameGuide(EscPosPrinter& printer, uint8_t gameI
     printer.println("");
     printer.println("For more puzzles, toggle the power");
     printer.println("on the front of the printer.");
+    printer.println("");
     printer.println("To change settings, toggle the power");
     printer.println("on the cable behind the printer.");
     printer.printHorizontalLine('-');

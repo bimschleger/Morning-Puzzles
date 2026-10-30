@@ -182,6 +182,7 @@ For daily puzzle receipts, the optimal architecture is a **Hybrid ESC/POS Pipeli
 │                                                        │
 │        For more puzzles, toggle the power              │
 │            on the front of the printer.                │
+│                                                        │
 │        To change settings, toggle the power            │
 │          on the cable behind the printer.              │
 │  - - - - - - - - - - - - - - - - - - - - - - - - - -   │
