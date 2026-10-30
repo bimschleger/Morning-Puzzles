@@ -4465,7 +4465,7 @@
       'TANGO': 'Fill each line with three 0s and three 1s without trios; = means same, x means opposite.',
       'LADDER': 'Deduce 3 English words to link COLD to WARM, changing 1 letter each step.',
       'WHEEL': 'Find 25+ words using center letter (letters may repeat), including a 7-letter pangram.',
-      'LIGHTS': 'Place 8 bulbs to light all corridors without bulbs shining on each other or exceeding numbers.',
+      'LIGHTS': 'Place 8 bulbs to light corridors without any shining together or exceeding numbers.',
       'LOOP': 'Draw a single continuous closed loop connecting dots so each number matches its edge count.',
       'TOWERS': 'Place heights 1-5 per line so exterior numbers match the count of visible taller buildings.',
       'INEQUALITY': 'Fill digits 1-5 in every line while satisfying all inequality signs between adjacent cells.'
@@ -5164,7 +5164,7 @@
       PUZZLE_RENDERERS['lights'] = () => {
         const diff = document.getElementById('diff-lights').value;
         const lData = lightsSim.generate(diff);
-        const lDesc = `Place ${lData.totalBulbs} bulbs to light all corridors without bulbs shining on each other or exceeding numbers.`;
+        const lDesc = `Place ${lData.totalBulbs} bulbs to light corridors without any shining together or exceeding numbers.`;
         addStandardPuzzleHeader(items, 'LIGHTS', diff, lDesc);
 
         if (isRaster) {
