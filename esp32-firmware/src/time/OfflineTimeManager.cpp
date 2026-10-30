@@ -184,8 +184,8 @@ void OfflineTimeManager::startSetupPortal() {
     IPAddress gateway(192, 168, 4, 1);
     IPAddress subnet(255, 255, 255, 0);
     WiFi.softAPConfig(myIP, gateway, subnet);
-    WiFi.softAP("Morning-Puzzles-Setup", nullptr, 1, 0, 4);
-    Serial.printf("[PORTAL] Hotspot started! SSID: Morning-Puzzles-Setup (Open Network)\n");
+    WiFi.softAP("Pen-And-Paper-Puzzles", nullptr, 1, 0, 4);
+    Serial.printf("[PORTAL] Hotspot started! SSID: Pen-And-Paper-Puzzles (Open Network)\n");
     Serial.printf("[PORTAL] Connect phone and visit: http://%s\n", myIP.toString().c_str());
 
     // Captive portal DNS server (redirect all domains to 192.168.4.1)
@@ -247,7 +247,7 @@ void OfflineTimeManager::printSetupTicket(EscPosPrinter& printer, const OfflineC
     printer.setAlign(ALIGN_CENTER);
     printer.setBold(true);
     printer.setTextSize(2, 2);
-    printer.println("WELCOME TO PUZZLES");
+    printer.println("PEN + PAPER PUZZLES");
     printer.setTextSize(1, 1);
     printer.setBold(false);
     printer.printDoubleLine();
@@ -333,12 +333,12 @@ void OfflineTimeManager::printSetupTicket(EscPosPrinter& printer, const OfflineC
     ThermalCanvas canvas;
     if (canvas.begin(240)) {
         canvas.clear(0);
-        canvas.drawQrCode(288, 120, "WIFI:T:nopass;S:Morning-Puzzles-Setup;;", 6);
+        canvas.drawQrCode(288, 120, "WIFI:T:nopass;S:Pen-And-Paper-Puzzles;;", 6);
         canvas.printTo(printer);
         canvas.end();
     }
     printer.setAlign(ALIGN_CENTER);
-    printer.println("Network: Morning-Puzzles-Setup");
+    printer.println("Network: Pen-And-Paper-Puzzles");
     printer.println("(Open Network - No Password)");
     printer.println("");
 
@@ -419,9 +419,10 @@ void OfflineTimeManager::printConfigSavedTicket(EscPosPrinter& printer, const Of
     printer.setAlign(ALIGN_CENTER);
     printer.setBold(true);
     printer.setTextSize(2, 2);
-    printer.println("CONFIGURATION SAVED");
+    printer.println("PEN + PAPER PUZZLES");
     printer.setTextSize(1, 1);
     printer.setBold(false);
+    printer.println("Configuration Saved");
     printer.printDoubleLine();
     printer.println("");
 

@@ -101,14 +101,15 @@ All games in Morning Puzzles must deliver identical, pixel-harmonized visual exp
 
 ## 9. Master Receipt Header & Footer Offline Standards
 - **Offline-Safe Master Header**:
-  - Centered double rule (`================================================`), followed by bold double-size `MORNING PUZZLES`, followed by generic offline tagline `Enjoy your morning puzzles` (or custom subtitle), and closing double rule (`================================================`).
+  - Centered double rule (`================================================`), followed by bold double-size `PEN + PAPER PUZZLES`, followed by generic offline tagline `Enjoy Your Puzzles` (or custom subtitle), and closing double rule (`================================================`).
   - Never require or display real-time clock (NTP/RTC) timestamps on receipts in offline mode.
 - **Clean Master Footer**:
   - Separated by single dashed rules (`------------------------------------------------`).
-  - Centered closing tagline: `Enjoy your day!`, followed by a blank line and centered setup instructions:
-    `To modify settings:`
-    `Leave printer on and reset power`
-    `via the cable behind the printer.`
+  - Centered closing tagline: `Enjoy your day!`, followed by a blank line and centered instructions:
+    `For more puzzles, toggle the power`
+    `on the front of the printer.`
+    `To change settings, toggle the power`
+    `on the cable behind the printer.`
   - Zero diagnostics or debug info: Never print hardware status, IP addresses, memory diagnostics, or paper cut debug statements on customer receipts.
 - **Mandatory Tri-Target Parity**: Header and footer implementations must remain identical across Python (`DailyReceiptComposer`), ESP32 C++ firmware (`OfflinePuzzleComposer`), Arduino IDE sketch, and Web Simulator (`receipt_simulator.html`).
 
@@ -142,7 +143,7 @@ All games in Morning Puzzles must deliver identical, pixel-harmonized visual exp
 ## 14. Standalone Offline Appliance Standard
 - **100% Offline Operation**: The physical ESP32 printer appliance must operate 100% offline. Zero outbound runtime HTTP, NTP, or cloud API calls.
 - **Prohibited Client Libraries**: Outbound client libraries (`HTTPClient`, `WiFiClient`, `ArduinoJson`) are prohibited in offline builds.
-- **Constrained Wi-Fi Hardware**: Wi-Fi hardware is strictly reserved for local SoftAP captive portal setup (`Morning-Puzzles-Setup`) and local-subnet printer sockets (`PRINTER_MODE_WIFI_TCP`). Point-to-point Ethernet (`PRINTER_MODE_W5500_ETH`) and Serial (`PRINTER_MODE_SERIAL`) modes must compile with zero Wi-Fi dependencies or headers.
+- **Constrained Wi-Fi Hardware**: Wi-Fi hardware is strictly reserved for local SoftAP captive portal setup (`Pen-And-Paper-Puzzles`) and local-subnet printer sockets (`PRINTER_MODE_WIFI_TCP`). Point-to-point Ethernet (`PRINTER_MODE_W5500_ETH`) and Serial (`PRINTER_MODE_SERIAL`) modes must compile with zero Wi-Fi dependencies or headers.
 - **Trigger Mechanisms**: Receipts must print via local hardware button press, power toggle gesture, or on-device RTC daily cron.
 
 ## 15. Single Source of Truth for Curated Datasets

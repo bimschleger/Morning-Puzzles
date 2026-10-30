@@ -384,7 +384,7 @@ void EscPosPrinter::printSelfTest(const String& ipAddress, const String& current
     if (!connect()) return;
 
     init();
-    printHeader("MORNING PUZZLES", "Thermal Printer Diagnostic Test");
+    printHeader("PEN + PAPER PUZZLES", "Thermal Printer Diagnostic Test");
     
     println("");
     setBold(true);

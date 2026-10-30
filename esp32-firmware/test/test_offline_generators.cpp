@@ -192,7 +192,7 @@ int main() {
         std::cerr << "FAILED to allocate QR canvas" << std::endl;
         return 1;
     }
-    bool qr1 = qrCanvas.drawQrCode(288, 120, "WIFI:S:Morning-Puzzles-Setup;T:nopass;;", 6);
+    bool qr1 = qrCanvas.drawQrCode(288, 120, "WIFI:S:Pen-And-Paper-Puzzles;T:nopass;;", 6);
     if (!qr1) {
         std::cerr << "FAILED to render Wi-Fi QR code" << std::endl;
         return 1;

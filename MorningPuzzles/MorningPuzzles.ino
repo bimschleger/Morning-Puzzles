@@ -64,7 +64,7 @@ void executePrintJob(PuzzleGrade grade = (PuzzleGrade)-1) {
     // 100% Offline on-device generation from user-configured active games pool
     bool success = offlineComposer.generateAndPrintReceipt(
         printer, 
-        "Enjoy your morning puzzles",
+        "Enjoy Your Puzzles",
         grade,
         &configManager
     );
@@ -185,7 +185,7 @@ void handleSerialCommands() {
             } else {
                 Serial.println("Daily Cron:   Disabled (Manual / Power-on trigger only)");
             }
-            Serial.printf("Hotspot:      %s\n", timeManager.isPortalActive() ? "Active (Morning-Puzzles-Setup)" : "Inactive");
+            Serial.printf("Hotspot:      %s\n", timeManager.isPortalActive() ? "Active (Pen-And-Paper-Puzzles)" : "Inactive");
             Serial.println("Controls:     [P]rint | [W]i-Fi Setup | [S]tatus");
             Serial.println("-------------------------------\n");
         }

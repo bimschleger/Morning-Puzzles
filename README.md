@@ -168,7 +168,7 @@ Morning Puzzles is designed to be tucked away inside an enclosure behind or unde
 1. **Initial Setup (or Re-Entering Setup Mode)**:
    * Leave the printer **ON**.
    * Plug in (or unplug and replug) the ESP32 power cable.
-   * Because the printer is already online at boot, the ESP32 immediately launches the `Morning-Puzzles-Setup` Wi-Fi hotspot and prints the dual-QR setup slip.
+   * Because the printer is already online at boot, the ESP32 immediately launches the `Pen-And-Paper-Puzzles` Wi-Fi hotspot and prints the dual-QR setup slip.
    * Scan the QR code with your phone to choose your games, puzzle count, difficulty, and daily morning print time.
 2. **Daily Scheduled Morning Prints**:
    * Leave both the printer and ESP32 **ON**.
