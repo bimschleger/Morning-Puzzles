@@ -123,7 +123,7 @@ All games in Morning Puzzles must deliver identical, pixel-harmonized visual exp
 
 ## 11. Thermal Shading, High-Contrast Cell Badges & Hatching Discipline
 - **Prohibition of Solid Black Cells**: Puzzles must never render solid black fill on large grid cells or barrier blocks. Solid fills cause high thermal duty cycle, printhead overheating, and illegible text.
-- **Standard 1-Bit Geometric Hatch Shading**: Barrier blocks and shaded territories must use light geometric hatching (Pattern 1, 45° forward diagonal hatch, ~16% duty cycle).
+- **Standard 1-Bit Geometric Hatch Shading**: Barrier blocks and shaded territories must use light geometric hatching (Pattern 1, 45° forward diagonal hatch, ~12.5% duty cycle, 8-dot pitch).
 - **Circular White Badge Cutouts for Digits**: When a shaded or hatched cell contains a number (e.g. `LIGHTS`), render a circular white badge cutout (radius $\approx \frac{\text{cell\_size}}{2} - 3$) in the center of the cell and draw crisp black numerals (`scale=3`) inside the badge.
 - **Unnumbered Shaded Cells**: Cells without digits retain uniform diagonal hatching without cutouts, cleanly distinguishing them from white corridors.
 
