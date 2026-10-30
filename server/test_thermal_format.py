@@ -147,12 +147,13 @@ def test_text_receipt_format(bundle):
         assert title in receipt_text, f"Missing canonical title '{title}' in text receipt"
 
     # 5. Master Receipt Header & Footer Standards (Section 9)
-    assert "MORNING PUZZLES" in receipt_text, "Missing MORNING PUZZLES in text receipt header"
-    assert "Enjoy your morning puzzles" in receipt_text, "Missing offline tagline in text receipt header"
+    assert "PEN + PAPER PUZZLES" in receipt_text, "Missing PEN + PAPER PUZZLES in text receipt header"
+    assert "Enjoy Your Puzzles" in receipt_text, "Missing offline tagline in text receipt header"
     assert "Enjoy your day!" in receipt_text, "Missing 'Enjoy your day!' in text receipt footer"
-    assert "To modify settings:" in receipt_text, "Missing 'To modify settings:' in text receipt footer"
-    assert "Leave printer on and reset power" in receipt_text, "Missing 'Leave printer on and reset power' in text receipt footer"
-    assert "via the cable behind the printer." in receipt_text, "Missing 'via the cable behind the printer.' in text receipt footer"
+    assert "For more puzzles, toggle the power" in receipt_text, "Missing 'For more puzzles, toggle the power' in text receipt footer"
+    assert "on the front of the printer." in receipt_text, "Missing 'on the front of the printer.' in text receipt footer"
+    assert "To change settings, toggle the power" in receipt_text, "Missing 'To change settings, toggle the power' in text receipt footer"
+    assert "on the cable behind the printer." in receipt_text, "Missing 'on the cable behind the printer.' in text receipt footer"
     assert "diagnostics" not in receipt_text.lower(), "Receipt must not contain diagnostics information"
 
     print("  -> Passed! Text receipt contains all 16 canonical headers, offline header/footer, pre-cut feeds, and cutter commands.\n")

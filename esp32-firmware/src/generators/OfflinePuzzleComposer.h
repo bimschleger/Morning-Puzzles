@@ -30,7 +30,7 @@ public:
 
     // Generates a random selection of puzzles from enabled games pool and prints directly
     bool generateAndPrintReceipt(EscPosPrinter& printer, 
-                                 const String& subtitle = "Enjoy your morning puzzles", 
+                                 const String& subtitle = "Enjoy Your Puzzles", 
                                  PuzzleGrade grade = (PuzzleGrade)-1,
                                  const OfflineConfigManager* config = nullptr);
 

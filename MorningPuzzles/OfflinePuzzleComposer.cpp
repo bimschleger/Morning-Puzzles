@@ -372,8 +372,8 @@ bool OfflinePuzzleComposer::generateAndPrintReceipt(EscPosPrinter& printer, cons
     if (count < 1) count = 1;
 
     // 4. Receipt Header
-    String headerSubtitle = (subtitle.length() > 0) ? subtitle : "Enjoy your morning puzzles";
-    printer.printHeader("MORNING PUZZLES", headerSubtitle);
+    String headerSubtitle = (subtitle.length() > 0) ? subtitle : "Enjoy Your Puzzles";
+    printer.printHeader("PEN + PAPER PUZZLES", headerSubtitle);
     printer.setAlign(ALIGN_CENTER);
     char mixHeader[32];
     snprintf(mixHeader, sizeof(mixHeader), "DAILY %d-PUZZLE MIX", (int)count);
@@ -402,9 +402,10 @@ bool OfflinePuzzleComposer::generateAndPrintReceipt(EscPosPrinter& printer, cons
     printer.setAlign(ALIGN_CENTER);
     printer.println("Enjoy your day!");
     printer.println("");
-    printer.println("To modify settings:");
-    printer.println("Leave printer on and reset power");
-    printer.println("via the cable behind the printer.");
+    printer.println("For more puzzles, toggle the power");
+    printer.println("on the front of the printer.");
+    printer.println("To change settings, toggle the power");
+    printer.println("on the cable behind the printer.");
     printer.printHorizontalLine('-');
 
     printer.feed(4);
@@ -789,7 +790,7 @@ bool OfflinePuzzleComposer::printGameGuide(EscPosPrinter& printer, uint8_t gameI
     printer.init();
 
     // Master Header
-    printer.printHeader("MORNING PUZZLES", "GAME GUIDE & QUICK REFERENCE");
+    printer.printHeader("PEN + PAPER PUZZLES", "GAME GUIDE & QUICK REFERENCE");
     printer.println("");
 
     // Game Title
@@ -870,9 +871,10 @@ bool OfflinePuzzleComposer::printGameGuide(EscPosPrinter& printer, uint8_t gameI
     printer.printHorizontalLine('-');
     printer.println("Enjoy your day!");
     printer.println("");
-    printer.println("To modify settings:");
-    printer.println("Leave printer on and reset power");
-    printer.println("via the cable behind the printer.");
+    printer.println("For more puzzles, toggle the power");
+    printer.println("on the front of the printer.");
+    printer.println("To change settings, toggle the power");
+    printer.println("on the cable behind the printer.");
     printer.printHorizontalLine('-');
 
     printer.feed(4);

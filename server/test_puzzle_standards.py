@@ -376,47 +376,51 @@ def test_master_receipt_header_and_footer():
     bundle = generate_daily_bundle(difficulty="medium")
     receipt_bytes = build_daily_receipt_bytes(bundle)
     receipt_text = receipt_bytes.decode("latin-1")
-    assert "MORNING PUZZLES" in receipt_text, "Python receipt missing MORNING PUZZLES header"
-    assert "Enjoy your morning puzzles" in receipt_text, "Python receipt missing offline header tagline"
+    assert "PEN + PAPER PUZZLES" in receipt_text, "Python receipt missing PEN + PAPER PUZZLES header"
+    assert "Enjoy Your Puzzles" in receipt_text, "Python receipt missing offline header tagline"
     assert "Enjoy your day!" in receipt_text, "Python receipt missing 'Enjoy your day!' footer"
-    assert "To modify settings:" in receipt_text, "Python receipt missing 'To modify settings:' in footer"
-    assert "Leave printer on and reset power" in receipt_text, "Python receipt missing 'Leave printer on and reset power' in footer"
-    assert "via the cable behind the printer." in receipt_text, "Python receipt missing 'via the cable behind the printer.' in footer"
+    assert "For more puzzles, toggle the power" in receipt_text, "Python receipt missing 'For more puzzles, toggle the power' in footer"
+    assert "on the front of the printer." in receipt_text, "Python receipt missing 'on the front of the printer.' in footer"
+    assert "To change settings, toggle the power" in receipt_text, "Python receipt missing 'To change settings, toggle the power' in footer"
+    assert "on the cable behind the printer." in receipt_text, "Python receipt missing 'on the cable behind the printer.' in footer"
     assert "diagnostics" not in receipt_text.lower(), "Python receipt contains forbidden diagnostics"
 
     # 2. ESP32 Firmware OfflinePuzzleComposer.cpp
     fw_composer = os.path.join(base_dir, "esp32-firmware", "src", "generators", "OfflinePuzzleComposer.cpp")
     with open(fw_composer, "r") as f:
         fw_src = f.read()
-    assert '"MORNING PUZZLES"' in fw_src, "Firmware missing MORNING PUZZLES"
-    assert '"Enjoy your morning puzzles"' in fw_src, "Firmware missing 'Enjoy your morning puzzles'"
+    assert '"PEN + PAPER PUZZLES"' in fw_src, "Firmware missing PEN + PAPER PUZZLES"
+    assert '"Enjoy Your Puzzles"' in fw_src, "Firmware missing 'Enjoy Your Puzzles'"
     assert '"Enjoy your day!"' in fw_src, "Firmware missing 'Enjoy your day!'"
-    assert '"To modify settings:"' in fw_src, "Firmware missing 'To modify settings:'"
-    assert '"Leave printer on and reset power"' in fw_src, "Firmware missing 'Leave printer on and reset power'"
-    assert '"via the cable behind the printer."' in fw_src, "Firmware missing 'via the cable behind the printer.'"
+    assert '"For more puzzles, toggle the power"' in fw_src, "Firmware missing 'For more puzzles, toggle the power'"
+    assert '"on the front of the printer."' in fw_src, "Firmware missing 'on the front of the printer.'"
+    assert '"To change settings, toggle the power"' in fw_src, "Firmware missing 'To change settings, toggle the power'"
+    assert '"on the cable behind the printer."' in fw_src, "Firmware missing 'on the cable behind the printer.'"
     assert "diagnostics" not in fw_src.lower(), "Firmware composer contains diagnostics"
 
     # 3. Arduino IDE Sketch OfflinePuzzleComposer.cpp
     ino_composer = os.path.join(base_dir, "MorningPuzzles", "OfflinePuzzleComposer.cpp")
     with open(ino_composer, "r") as f:
         ino_src = f.read()
-    assert '"MORNING PUZZLES"' in ino_src, "Arduino sketch missing MORNING PUZZLES"
-    assert '"Enjoy your morning puzzles"' in ino_src, "Arduino sketch missing 'Enjoy your morning puzzles'"
+    assert '"PEN + PAPER PUZZLES"' in ino_src, "Arduino sketch missing PEN + PAPER PUZZLES"
+    assert '"Enjoy Your Puzzles"' in ino_src, "Arduino sketch missing 'Enjoy Your Puzzles'"
     assert '"Enjoy your day!"' in ino_src, "Arduino sketch missing 'Enjoy your day!'"
-    assert '"To modify settings:"' in ino_src, "Arduino sketch missing 'To modify settings:'"
-    assert '"Leave printer on and reset power"' in ino_src, "Arduino sketch missing 'Leave printer on and reset power'"
-    assert '"via the cable behind the printer."' in ino_src, "Arduino sketch missing 'via the cable behind the printer.'"
+    assert '"For more puzzles, toggle the power"' in ino_src, "Arduino sketch missing 'For more puzzles, toggle the power'"
+    assert '"on the front of the printer."' in ino_src, "Arduino sketch missing 'on the front of the printer.'"
+    assert '"To change settings, toggle the power"' in ino_src, "Arduino sketch missing 'To change settings, toggle the power'"
+    assert '"on the cable behind the printer."' in ino_src, "Arduino sketch missing 'on the cable behind the printer.'"
 
     # 4. Web Simulator receipt_simulator.html
     sim_path = os.path.join(base_dir, "simulator", "receipt_simulator.html")
     with open(sim_path, "r") as f:
         sim_src = f.read()
-    assert "'MORNING PUZZLES'" in sim_src or '"MORNING PUZZLES"' in sim_src, "Simulator missing MORNING PUZZLES"
-    assert "Enjoy your morning puzzles" in sim_src, "Simulator missing 'Enjoy your morning puzzles'"
+    assert "'PEN + PAPER PUZZLES'" in sim_src or '"PEN + PAPER PUZZLES"' in sim_src, "Simulator missing PEN + PAPER PUZZLES"
+    assert "Enjoy Your Puzzles" in sim_src, "Simulator missing 'Enjoy Your Puzzles'"
     assert "Enjoy your day!" in sim_src, "Simulator missing 'Enjoy your day!'"
-    assert "To modify settings:" in sim_src, "Simulator missing 'To modify settings:'"
-    assert "Leave printer on and reset power" in sim_src, "Simulator missing 'Leave printer on and reset power'"
-    assert "via the cable behind the printer." in sim_src, "Simulator missing 'via the cable behind the printer.'"
+    assert "For more puzzles, toggle the power" in sim_src, "Simulator missing 'For more puzzles, toggle the power'"
+    assert "on the front of the printer." in sim_src, "Simulator missing 'on the front of the printer.'"
+    assert "To change settings, toggle the power" in sim_src, "Simulator missing 'To change settings, toggle the power'"
+    assert "on the cable behind the printer." in sim_src, "Simulator missing 'on the cable behind the printer.'"
 
     print("  -> Passed! Master receipt header and footer strictly adhere to offline standards across all 4 targets.\n")
 

@@ -161,8 +161,8 @@ For daily puzzle receipts, the optimal architecture is a **Hybrid ESC/POS Pipeli
 │  [ESC @] Initialize Printer                            │
 │  [ESC a 1] Center                                      │
 │  ================================================      │ <-- ESC/POS Monospace Text Header
-│                  MORNING PUZZLES                       │
-│             Enjoy your morning puzzles                 │
+│                  PEN + PAPER PUZZLES                   │
+│                 Enjoy Your Puzzles                     │
 │  ================================================      │
 │                                                        │
 │  --- SUDOKU ---                                        │ <-- Standard Text Title (PUZZLE_HEADER_SPEC)
@@ -180,9 +180,10 @@ For daily puzzle receipts, the optimal architecture is a **Hybrid ESC/POS Pipeli
 │  - - - - - - - - - - - - - - - - - - - - - - - - - -   │ <-- Footer Bounded by Dashed Dividers
 │                  Enjoy your day!                       │
 │                                                        │
-│                To modify settings:                     │
-│          Leave printer on and reset power              │
-│         via the cable behind the printer.              │
+│        For more puzzles, toggle the power              │
+│            on the front of the printer.                │
+│        To change settings, toggle the power            │
+│          on the cable behind the printer.              │
 │  - - - - - - - - - - - - - - - - - - - - - - - - - -   │
 │  [LF x 4] Pre-Cut Feed (15-25mm)                       │
 │  [GS V 66 3] Partial Paper Cut                         │

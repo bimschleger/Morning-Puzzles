@@ -83,7 +83,7 @@
 // -----------------------------------------------------------------------------
 // 1. SETUP MODE: Turn printer ON first, then plug in ESP32.
 //    ESP32 detects printer is already online at boot (<500ms probe) and launches
-//    the SoftAP configuration portal ('Morning-Puzzles-Setup') and prints the QR setup ticket.
+//    the SoftAP configuration portal ('Pen-And-Paper-Puzzles') and prints the QR setup ticket.
 // 2. ON-DEMAND PRINT: While ESP32 is running, flip printer switch OFF, wait 1-2s, then ON.
 //    ESP32 detects the printer power-on transition and prints a fresh puzzle bundle.
 // 3. SCHEDULED CRON: Leave both ON. Operates quietly until daily scheduled print time.
@@ -117,7 +117,7 @@
 // -----------------------------------------------------------------------------
 // Built-in BOOT button on standard ESP32 boards (GPIO 0, active LOW)
 //   - Short press (< 2.5s): Instantly generates and prints active configured puzzle mix!
-//   - Long press (>= 2.5s): Launches SoftAP setup portal ("Morning-Puzzles-Setup") + prints QR slip
+//   - Long press (>= 2.5s): Launches SoftAP setup portal ("Pen-And-Paper-Puzzles") + prints QR slip
 #define BUTTON_TRIGGER_PIN      0
 #define BUTTON_LONG_PRESS_MS    2500    // Hold >= 2.5s to enter Wi-Fi Setup Mode
 #define BUTTON_DEBOUNCE_MS      50      // 50ms button debounce
