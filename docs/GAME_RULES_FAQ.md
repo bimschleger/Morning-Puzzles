@@ -9,21 +9,21 @@ This authoritative guide contains complete rules, core objectives, opening deduc
 - [SUDOKU](#sudoku) - Fill every row, column, and 3x3 box with digits 1-9 without repeating.
 - [SEARCH](#search) - Find all hidden words horizontally, vertically, or diagonally.
 - [NONOGRAM](#nonogram) - Shade cells to match row and column run counts with at least one blank between runs.
-- [STARS](#stars) - Place 2 stars in every row, column, and outlined region without touching, even diagonally.
+- [STARS](#stars) - Place stars in every row, column, and outlined region without touching, even diagonally.
 - [JUMBLE](#jumble) - Unscramble each clue word, then use the circled letters to solve the final pun.
 - [BINARY](#binary) - Fill every cell with 0 or 1 so no more than two identical numbers are adjacent.
 - [MINES](#mines) - Deduce all hidden mines using numbers showing how many adjacent cells contain mines.
 - [TENTS](#tents) - Pitch tents beside trees; no tents may touch even diagonally, matching row/column quotas.
 - [BRIDGES](#bridges) - Connect islands with up to two orthogonal bridges matching numbers into one network.
-- [KILLER](#killer) - Fill the grid with digits 1-9 so cages sum to their clue without repeating digits.
+- [KILLER](#killer) - Fill the grid with digits so cages sum to their clue without repeating digits.
 - [CRYPTOGRAM](#cryptogram) - Deduce the hidden quotation where each letter is consistently substituted with another.
-- [TANGO](#tango) - Fill grid with suns and moons so equal symbols match and opposite symbols differ.
+- [TANGO](#tango) - Fill grid with 0s and 1s so equal symbols match and opposite symbols differ.
 - [LADDER](#ladder) - Deduce words changing one letter at a time to transform start word into end word.
 - [WHEEL](#wheel) - Find words of 4+ letters using the wheel letters, always including the center letter.
 - [LIGHTS](#lights) - Place bulbs to illuminate corridors so numbered blocks match and no bulbs shine on each other.
 - [LOOP](#loop) - Draw a single continuous closed loop around numbers indicating surrounding line count.
-- [TOWERS](#towers) - Place building heights 1-5 so edge clues match how many towers are visible in that line.
-- [INEQUALITY](#inequality) - Fill grid with digits 1-5 so each digit appears once per line and inequality signs hold.
+- [TOWERS](#towers) - Place building heights so edge clues match how many towers are visible in that line.
+- [INEQUALITY](#inequality) - Fill grid with digits so each digit appears once per line and inequality signs hold.
 - [MAZE](#maze) - Draw a path from the entrance to the exit without crossing any walls.
 
 ---
@@ -150,7 +150,7 @@ This authoritative guide contains complete rules, core objectives, opening deduc
 <a name="stars"></a>
 ## --- STARS ---
 
-> **Instruction**: `Place 2 stars in every row, column, and outlined region without touching, even diagonally.`
+> **Instruction**: `Place stars in every row, column, and outlined region without touching, even diagonally.`
 
 **Objective**: Position stars on the board so that every row, column, and outlined region has the required star count with no adjacent stars.
 
@@ -380,7 +380,7 @@ This authoritative guide contains complete rules, core objectives, opening deduc
 <a name="killer"></a>
 ## --- KILLER ---
 
-> **Instruction**: `Fill the grid with digits 1-9 so cages sum to their clue without repeating digits.`
+> **Instruction**: `Fill the grid with digits so cages sum to their clue without repeating digits.`
 
 **Objective**: Solve the Sudoku grid while satisfying all dotted cage boundary sums with non-repeating digits.
 
@@ -456,13 +456,13 @@ This authoritative guide contains complete rules, core objectives, opening deduc
 <a name="tango"></a>
 ## --- TANGO ---
 
-> **Instruction**: `Fill grid with suns and moons so equal symbols match and opposite symbols differ.`
+> **Instruction**: `Fill grid with 0s and 1s so equal symbols match and opposite symbols differ.`
 
-**Objective**: Place suns (☀️) and moons (🌙) so that no three identical symbols touch, lines balance, and relational cues are satisfied.
+**Objective**: Place 0s and 1s so that no three identical symbols touch, lines balance, and relational cues are satisfied.
 
 ### Rules of Play
 - No more than two identical symbols may be adjacent horizontally or vertically.
-- Each row and column must contain an equal number of suns and moons.
+- Each row and column must contain an equal number of 0s and 1s.
 - Cells separated by '=' must contain the exact same symbol.
 - Cells separated by 'x' must contain opposite symbols.
 
@@ -648,7 +648,7 @@ This authoritative guide contains complete rules, core objectives, opening deduc
 <a name="towers"></a>
 ## --- TOWERS ---
 
-> **Instruction**: `Place building heights 1-5 so edge clues match how many towers are visible in that line.`
+> **Instruction**: `Place building heights so edge clues match how many towers are visible in that line.`
 
 **Objective**: Fill each row and column with skyscrapers of heights 1 to N such that outside clues match visible towers from that vantage point.
 
@@ -685,7 +685,7 @@ This authoritative guide contains complete rules, core objectives, opening deduc
 <a name="inequality"></a>
 ## --- INEQUALITY ---
 
-> **Instruction**: `Fill grid with digits 1-5 so each digit appears once per line and inequality signs hold.`
+> **Instruction**: `Fill grid with digits so each digit appears once per line and inequality signs hold.`
 
 **Objective**: Fill the grid with numbers 1 to N so no digit repeats in any row or column and all '<' and '>' signs are honored.
 
