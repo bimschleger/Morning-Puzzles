@@ -635,10 +635,14 @@
             <div class="font-extrabold text-base text-slate-100 tracking-wide" id="sim-guide-title">--- SUDOKU ---</div>
             <div class="text-amber-400 text-xs font-medium mt-1 leading-relaxed" id="sim-guide-instruction"></div>
           </div>
-          <button onclick="printSimGuideTape()" class="shrink-0 bg-amber-500 hover:bg-amber-400 active:scale-95 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-2 transition shadow">
-            <span>🖨️</span>
-            <span>Print Cheat Sheet to Tape</span>
-          </button>
+          <div class="flex flex-wrap items-center gap-2 shrink-0">
+            <button onclick="printSimGuideTape()" class="bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-400 font-bold px-3 py-1.5 rounded-lg text-xs transition active:scale-95">
+              Print the rules
+            </button>
+            <button onclick="printSimSampleTape(activeSimGuideGameId)" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-xs transition active:scale-95 shadow">
+              Print a sample
+            </button>
+          </div>
         </div>
 
         <!-- Objective & Rules -->
@@ -2840,7 +2844,7 @@
       }
     }
 
-    function renderReceipt() {
+    function renderReceipt(sampleGameKey = null) {
       const box = document.getElementById('receipt-box');
       box.classList.remove('animate-feed');
       void box.offsetWidth;
@@ -2849,25 +2853,32 @@
       const items = [];
       const COLS = 48;
 
-      // Header
-      const activeCount = ALL_GAMES.filter(g => {
-        const cb = document.getElementById(`toggle-${g}`);
-        return cb && cb.checked;
-      }).length;
-      const subtitleText = (activeCount > 0 && activeCount < ALL_GAMES.length)
-        ? `DAILY ${activeCount}-PUZZLE MIX`
-        : 'Daily Physical Edition - 80mm Strip';
+      if (sampleGameKey) {
+        const rule = GAME_RULES.find(r => r.key === sampleGameKey);
+        const title = rule ? rule.title : sampleGameKey.toUpperCase();
+        items.push({ type: 'title', text: centerLine(`--- ${title} TEST PRINT ---`, COLS) });
+        items.push({ type: 'blank', text: '' });
+      } else {
+        // Header
+        const activeCount = ALL_GAMES.filter(g => {
+          const cb = document.getElementById(`toggle-${g}`);
+          return cb && cb.checked;
+        }).length;
+        const subtitleText = (activeCount > 0 && activeCount < ALL_GAMES.length)
+          ? `DAILY ${activeCount}-PUZZLE MIX`
+          : 'Daily Physical Edition - 80mm Strip';
 
-      // Barcode Header decoration
-      items.push({ type: 'center', text: '||| | ||||| || |||||| | |||| ||| ||||| ||' });
-      items.push({ type: 'rule-double', text: '='.repeat(COLS) });
-      items.push({ type: 'title', text: centerLine('PEN + PAPER PUZZLES', COLS) });
-      items.push({ type: 'text', text: centerLine('Enjoy Your Puzzles', COLS) });
-      items.push({ type: 'rule-double', text: '='.repeat(COLS) });
-      if (subtitleText) {
-        items.push({ type: 'subtitle', text: centerLine(subtitleText, COLS) });
+        // Barcode Header decoration
+        items.push({ type: 'center', text: '||| | ||||| || |||||| | |||| ||| ||||| ||' });
+        items.push({ type: 'rule-double', text: '='.repeat(COLS) });
+        items.push({ type: 'title', text: centerLine('PEN + PAPER PUZZLES', COLS) });
+        items.push({ type: 'text', text: centerLine('Enjoy Your Puzzles', COLS) });
+        items.push({ type: 'rule-double', text: '='.repeat(COLS) });
+        if (subtitleText) {
+          items.push({ type: 'subtitle', text: centerLine(subtitleText, COLS) });
+        }
+        items.push({ type: 'blank', text: '' });
       }
-      items.push({ type: 'blank', text: '' });
 
       const globalStyle = (document.getElementById('global-render-style') ? document.getElementById('global-render-style').value : 'offline_raster');
       const isRaster = (globalStyle === 'offline_raster');
@@ -3848,25 +3859,42 @@
         solutionsContent.push({ name: 'Sudokito', solution: sData.solution });
       };
 
-      // Render active puzzles in progressive/configured order
-      const renderOrder = [];
-      activeGameOrder.forEach(id => {
-        const el = document.getElementById(`toggle-${id}`);
-        if (el && el.checked) renderOrder.push(id);
-      });
-      ALL_GAMES.forEach(id => {
-        const el = document.getElementById(`toggle-${id}`);
-        if (el && el.checked && !renderOrder.includes(id)) {
-          renderOrder.push(id);
+      if (sampleGameKey) {
+        const diffEl = document.getElementById(`diff-${sampleGameKey}`);
+        const origVal = diffEl ? diffEl.value : null;
+        const extremeSupported = ['queens', 'lights', 'killer', 'towers', 'maze'].includes(sampleGameKey);
+        const tiers = sampleGameKey === 'queens'
+          ? (extremeSupported ? ['5x5_1star', '8x8_1star', '9x9_2star', '10x10_2star'] : ['5x5_1star', '8x8_1star', '9x9_2star'])
+          : (extremeSupported ? ['easy', 'medium', 'hard', 'extreme'] : ['easy', 'medium', 'hard']);
+
+        for (const t of tiers) {
+          if (diffEl) diffEl.value = t;
+          if (PUZZLE_RENDERERS[sampleGameKey]) {
+            PUZZLE_RENDERERS[sampleGameKey]();
+          }
         }
-      });
+        if (diffEl && origVal !== null) diffEl.value = origVal;
+      } else {
+        // Render active puzzles in progressive/configured order
+        const renderOrder = [];
+        activeGameOrder.forEach(id => {
+          const el = document.getElementById(`toggle-${id}`);
+          if (el && el.checked) renderOrder.push(id);
+        });
+        ALL_GAMES.forEach(id => {
+          const el = document.getElementById(`toggle-${id}`);
+          if (el && el.checked && !renderOrder.includes(id)) {
+            renderOrder.push(id);
+          }
+        });
 
-      renderOrder.forEach(id => {
-        if (PUZZLE_RENDERERS[id]) PUZZLE_RENDERERS[id]();
-      });
+        renderOrder.forEach(id => {
+          if (PUZZLE_RENDERERS[id]) PUZZLE_RENDERERS[id]();
+        });
+      }
 
-      // Optional Solutions Key
-      if (document.getElementById('toggle-solutions').checked && solutionsContent.length > 0) {
+      // Optional Solutions Key (omitted in test sample print)
+      if (!sampleGameKey && document.getElementById('toggle-solutions').checked && solutionsContent.length > 0) {
         items.push({ type: 'rule', text: '-'.repeat(COLS) });
         items.push({ type: 'header', text: centerLine('[ SOLUTION KEY ]', COLS) });
         items.push({ type: 'blank', text: '' });
@@ -5773,6 +5801,17 @@
     function printSimGuideTape() {
       closeSimGuideModal();
       renderGuideReceipt(activeSimGuideGameId);
+      const box = document.getElementById('receipt-box');
+      if (box) {
+        box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    function printSimSampleTape(gameId) {
+      closeSimGuideModal();
+      const rule = GAME_RULES.find(r => r.id === gameId);
+      if (!rule) return;
+      renderReceipt(rule.key);
       const box = document.getElementById('receipt-box');
       if (box) {
         box.scrollIntoView({ behavior: 'smooth', block: 'start' });

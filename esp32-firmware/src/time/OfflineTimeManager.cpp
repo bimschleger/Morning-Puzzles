@@ -644,6 +644,23 @@ void OfflineTimeManager::setupWebRoutes() {
         }
     });
 
+    _server.on("/api/print-sample", HTTP_GET, [this]() {
+        if (_server.hasArg("game")) {
+            uint8_t gameId = (uint8_t)_server.arg("game").toInt();
+            if (_printer) {
+                OfflinePuzzleComposer composer;
+                bool success = composer.printGameSampler(*_printer, gameId);
+                if (success) {
+                    _server.send(200, "application/json", "{\"status\":\"ok\",\"game\":" + String(gameId) + "}");
+                    return;
+                }
+            }
+            _server.send(500, "application/json", "{\"status\":\"error\",\"message\":\"Printing failed\"}");
+        } else {
+            _server.send(400, "application/json", "{\"status\":\"error\",\"message\":\"Missing game parameter\"}");
+        }
+    });
+
     _server.on("/api/exit", HTTP_GET, [this]() {
         _server.send(200, "text/html", "<body style='background:#0f172a;color:#f8fafc;font-family:sans-serif;padding:30px;text-align:center;'><h2>Setup portal closing.</h2><p>Ready for morning puzzles!</p></body>");
         _pendingExit = true;
