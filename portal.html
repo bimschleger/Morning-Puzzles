@@ -747,7 +747,7 @@ const GAMES = [
   {
     id: 14,
     name: "Lights",
-    desc: "Place bulbs to illuminate corridors so numbered blocks match and no bulbs shine on each other."
+    desc: "Place bulbs to light corridors without facing each other; numbers show how many bulbs share an edge."
   },
   {
     id: 15,
@@ -1702,13 +1702,13 @@ const GAME_RULES = [
     "id": 14,
     "key": "lights",
     "title": "LIGHTS",
-    "instruction": "Place bulbs to illuminate corridors so numbered blocks match and no bulbs shine on each other.",
+    "instruction": "Place bulbs to light corridors without facing each other; numbers show how many bulbs share an edge.",
     "objective": "Place lightbulbs in corridors so every white cell is illuminated without any two bulbs facing each other.",
     "rules": [
       "Bulbs emit beams of light horizontally and vertically along corridors until blocked by black barrier blocks.",
       "Every white grid square must be illuminated by at least one lightbulb.",
       "No two lightbulbs can illuminate or shine upon each other (no shared line of sight).",
-      "Numbers on black blocks specify how many bulbs must touch that block orthogonally."
+      "Numbers on black blocks specify how many bulbs must share an edge with that block (horizontally or vertically, not diagonally)."
     ],
     "valid_move": {
       "caption": "Two lightbulbs placed on opposite sides of a barrier block (line of sight is blocked).",

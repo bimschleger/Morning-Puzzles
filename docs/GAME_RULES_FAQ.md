@@ -20,7 +20,7 @@ This authoritative guide contains complete rules, core objectives, opening deduc
 - [TANGO](#tango) - Fill grid with 0s and 1s so equal symbols match and opposite symbols differ.
 - [LADDER](#ladder) - Deduce words changing one letter at a time to transform start word into end word.
 - [WHEEL](#wheel) - Find words of 4+ letters using the wheel letters, always including the center letter.
-- [LIGHTS](#lights) - Place bulbs to illuminate corridors so numbered blocks match and no bulbs shine on each other.
+- [LIGHTS](#lights) - Place bulbs to light corridors without facing each other; numbers show how many bulbs share an edge.
 - [LOOP](#loop) - Draw a single continuous closed loop around numbers indicating surrounding line count.
 - [TOWERS](#towers) - Place building heights so edge clues match how many towers are visible in that line.
 - [INEQUALITY](#inequality) - Fill grid with digits so each digit appears once per line and inequality signs hold.
@@ -571,7 +571,7 @@ This authoritative guide contains complete rules, core objectives, opening deduc
 <a name="lights"></a>
 ## --- LIGHTS ---
 
-> **Instruction**: `Place bulbs to illuminate corridors so numbered blocks match and no bulbs shine on each other.`
+> **Instruction**: `Place bulbs to light corridors without facing each other; numbers show how many bulbs share an edge.`
 
 **Objective**: Place lightbulbs in corridors so every white cell is illuminated without any two bulbs facing each other.
 
@@ -579,7 +579,7 @@ This authoritative guide contains complete rules, core objectives, opening deduc
 - Bulbs emit beams of light horizontally and vertically along corridors until blocked by black barrier blocks.
 - Every white grid square must be illuminated by at least one lightbulb.
 - No two lightbulbs can illuminate or shine upon each other (no shared line of sight).
-- Numbers on black blocks specify how many bulbs must touch that block orthogonally.
+- Numbers on black blocks specify how many bulbs must share an edge with that block (horizontally or vertically, not diagonally).
 
 ### Move Examples
 
