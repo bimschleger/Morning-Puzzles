@@ -105,6 +105,9 @@ public:
 #include "../src/generators/MazeGen.h"
 #include "../src/generators/MazeGen.cpp"
 
+#include "../src/generators/SudokitoGen.h"
+#include "../src/generators/SudokitoGen.cpp"
+
 #include "../src/generators/OfflinePuzzleComposer.h"
 #include "../src/generators/OfflinePuzzleComposer.cpp"
 

@@ -81,6 +81,9 @@
 #include "../esp32-firmware/src/generators/MazeGen.h"
 #include "../esp32-firmware/src/generators/MazeGen.cpp"
 
+#include "../esp32-firmware/src/generators/SudokitoGen.h"
+#include "../esp32-firmware/src/generators/SudokitoGen.cpp"
+
 class CapturePrinter : public EscPosPrinter {
 public:
     std::vector<uint8_t> lastBitmap;
@@ -924,6 +927,33 @@ int main(int argc, char** argv) {
             for (uint8_t c = 0; c < mazeGen.getSize() - 1; c++) {
                 if (c > 0) std::cout << ", ";
                 std::cout << (int)mazeGen.getWallV(r, c);
+            }
+            std::cout << "]";
+        }
+        std::cout << "],\n";
+        std::cout << "    \"raster_hex\": \"" << toHex(printer->lastBitmap) << "\"\n";
+        std::cout << "  }";
+    }
+
+    // SUDOKITO
+    {
+        SudokitoGen skGen;
+        skGen.generate(SUDOKITO_MEDIUM);
+        printer->lastBitmap.clear();
+        skGen.printRasterToReceipt(*printer, SUDOKITO_MEDIUM);
+
+        printSep();
+        std::cout << "  {\n";
+        std::cout << "    \"puzzle\": \"sudokito\",\n";
+        std::cout << "    \"width\": " << printer->lastWidth << ",\n";
+        std::cout << "    \"height\": " << printer->lastHeight << ",\n";
+        std::cout << "    \"grid\": [";
+        for (uint8_t r = 0; r < 6; r++) {
+            if (r > 0) std::cout << ", ";
+            std::cout << "[";
+            for (uint8_t c = 0; c < 6; c++) {
+                if (c > 0) std::cout << ", ";
+                std::cout << (int)skGen.getCell(r, c);
             }
             std::cout << "]";
         }

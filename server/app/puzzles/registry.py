@@ -27,6 +27,7 @@ from .loop import LoopPuzzle
 from .towers import TowersPuzzle
 from .inequality import InequalityPuzzle
 from .maze import MazePuzzle
+from .sudokito import SudokitoPuzzle
 
 
 class PuzzleRegistry:
@@ -148,4 +149,5 @@ DEFAULT_REGISTRY = PuzzleRegistry([
     TowersPuzzle(),
     InequalityPuzzle(),
     MazePuzzle(),
+    SudokitoPuzzle(),
 ])
