@@ -376,23 +376,30 @@
     margin-top: 4px;
     line-height: 1.4;
   }
-  .btn-print-guide {
+  .guide-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 6px;
+  }
+  .btn-guide-action, .btn-print-guide {
     background: rgba(245, 158, 11, 0.12);
     border: 1px solid rgba(245, 158, 11, 0.4);
     color: #f59e0b;
     font-weight: 700;
-    padding: 12px 16px;
-    border-radius: 12px;
+    padding: 10px 16px;
+    border-radius: 10px;
     cursor: pointer;
-    font-size: 0.9rem;
-    display: flex;
+    font-size: 0.88rem;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    transition: background 0.15s, transform 0.1s;
+    transition: background 0.15s, transform 0.1s, opacity 0.15s;
     user-select: none;
   }
-  .btn-print-guide:active { background: rgba(245, 158, 11, 0.25); transform: scale(0.98); }
+  .btn-guide-action:hover, .btn-print-guide:hover { background: rgba(245, 158, 11, 0.2); }
+  .btn-guide-action:active, .btn-print-guide:active { background: rgba(245, 158, 11, 0.25); transform: scale(0.98); }
+  .btn-guide-action:disabled, .btn-print-guide:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
   .guide-objective {
     font-size: 0.85rem;
@@ -621,10 +628,10 @@
           <div class="guide-title" id="guideTitle">--- SUDOKU ---</div>
           <div class="guide-instruction" id="guideInstruction"></div>
         </div>
-        <button class="btn-print-guide" onclick="printCurrentGuide()">
-          <span>🖨️</span>
-          <span>Print Receipt Cheat Sheet</span>
-        </button>
+        <div class="guide-actions">
+          <button class="btn-guide-action" id="btnPrintRules" onclick="printCurrentGuide()">Print the rules</button>
+          <button class="btn-guide-action" id="btnPrintSample" onclick="printCurrentSample()">Print a sample</button>
+        </div>
       </div>
     </div>
 
@@ -2283,14 +2290,48 @@ function selectGuideGame(id) {
 }
 
 function printCurrentGuide() {
-  showToast("Sending cheat sheet to printer...");
+  const btn = document.getElementById("btnPrintRules");
+  if (btn) {
+    btn.disabled = true;
+    btn.innerText = "Printing rules...";
+  }
+  showToast("Sending rules to printer...");
   fetch("/api/print-guide?game=" + activeGuideGameId)
     .then(r => r.json())
     .then(d => {
-      showToast("Printing cheat sheet on printer!");
+      showToast("Printing rules on printer!");
     })
     .catch(() => {
-      showToast("Printed cheat sheet command issued.");
+      showToast("Printed rules command issued.");
+    })
+    .finally(() => {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerText = "Print the rules";
+      }
+    });
+}
+
+function printCurrentSample() {
+  const btn = document.getElementById("btnPrintSample");
+  if (btn) {
+    btn.disabled = true;
+    btn.innerText = "Printing sample...";
+  }
+  showToast("Sending difficulty sampler to printer...");
+  fetch("/api/print-sample?game=" + activeGuideGameId)
+    .then(r => r.json())
+    .then(d => {
+      showToast("Printing difficulty sampler on printer!");
+    })
+    .catch(() => {
+      showToast("Printed sampler command issued.");
+    })
+    .finally(() => {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerText = "Print a sample";
+      }
     });
 }
 

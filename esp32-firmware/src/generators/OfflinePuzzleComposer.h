@@ -44,6 +44,9 @@ public:
     bool printGameGuide(EscPosPrinter& printer, uint8_t gameId);
     static void renderGameGuideRaster(class ThermalCanvas& canvas, uint8_t gameId);
 
+    // Prints an on-demand difficulty sampler receipt for a single game (Easy, Med, Hard, [Extreme])
+    bool printGameSampler(EscPosPrinter& printer, uint8_t gameId);
+
     PuzzleGrade getGradeForSlot(uint8_t index, uint8_t totalCount) const;
     bool supportsExtreme(OfflinePuzzleType type) const;
 

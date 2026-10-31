@@ -925,3 +925,68 @@ bool OfflinePuzzleComposer::printGameGuide(EscPosPrinter& printer, uint8_t gameI
     return true;
 }
 
+bool OfflinePuzzleComposer::printGameSampler(EscPosPrinter& printer, uint8_t gameId) {
+    if (gameId >= OFFLINE_PUZZLE_TOTAL) {
+        Serial.printf("[COMPOSER] Game ID %d out of range for sampler!\n", gameId);
+        return false;
+    }
+
+    const GameRuleDef* def = getGameRuleDefById(gameId);
+    if (!def) {
+        Serial.printf("[COMPOSER] Game rule for ID %d not found!\n", gameId);
+        return false;
+    }
+
+    if (!printer.connect()) {
+        Serial.println("[COMPOSER] Printer connection failed for game sampler!");
+        return false;
+    }
+
+    printer.init();
+
+    // Minimal header: --- [TITLE] TEST PRINT ---
+    printer.setAlign(ALIGN_CENTER);
+    printer.setBold(true);
+    printer.print("--- ");
+    printer.print(def->title);
+    printer.println(" TEST PRINT ---");
+    printer.setBold(false);
+    printer.println("");
+
+#if (OFFLINE_PRINT_STYLE == STYLE_HYBRID)
+    bool useRaster = true;
+#else
+    bool useRaster = false;
+#endif
+
+    OfflinePuzzleType type = (OfflinePuzzleType)gameId;
+
+    // Difficulty tiers: Easy, Medium, Hard, and Extreme (if supported)
+    PuzzleGrade tiers[4] = { GRADE_EASY, GRADE_MEDIUM, GRADE_HARD, GRADE_EXTREME };
+    uint8_t tierCount = supportsExtreme(type) ? 4 : 3;
+
+    for (uint8_t i = 0; i < tierCount; i++) {
+        printSinglePuzzle(printer, type, useRaster, tiers[i]);
+        printer.printHorizontalLine('-');
+    }
+
+    // Standard Daily Footer
+    printer.setAlign(ALIGN_CENTER);
+    printer.println("Enjoy your day!");
+    printer.println("");
+    printer.println("For more puzzles, toggle the power");
+    printer.println("on the front of the printer.");
+    printer.println("");
+    printer.println("To change settings, toggle the power");
+    printer.println("on the cable behind the printer.");
+    printer.printHorizontalLine('-');
+
+    printer.feed(4);
+    printer.cut(false);
+    printer.disconnect();
+
+    Serial.printf("[COMPOSER] Printed Game Sampler for %s (ID %d)!\n", def->title, gameId);
+    return true;
+}
+
+
