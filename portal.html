@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Morning Puzzles Setup</title>
+<title>Pen + Paper Puzzles Setup</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   body {
@@ -27,14 +27,40 @@
     padding-bottom: 28px;
   }
   .header {
+    position: relative;
     background: #020617;
     border: 1px solid #1e293b;
     border-radius: 16px;
-    padding: 18px;
+    padding: 16px 18px;
     display: flex;
     justify-content: center;
     align-items: center;
     box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    min-height: 64px;
+  }
+  .btn-back {
+    position: absolute;
+    left: 14px;
+    background: none;
+    border: none;
+    color: #f59e0b;
+    width: 36px;
+    height: 36px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+    user-select: none;
+    -webkit-user-select: none;
+    padding: 0;
+  }
+  .btn-back:hover {
+    opacity: 0.85;
+  }
+  .btn-back:active {
+    transform: scale(0.92);
+    opacity: 0.7;
   }
   .header-title {
     font-size: 1.35rem;
@@ -42,34 +68,6 @@
     color: #f8fafc;
     letter-spacing: 0.03em;
     text-align: center;
-  }
-
-  /* Segmented Tab Bar */
-  .tab-bar {
-    display: flex;
-    background: #020617;
-    border: 1px solid #1e293b;
-    border-radius: 14px;
-    padding: 4px;
-    gap: 6px;
-  }
-  .tab-btn {
-    flex: 1;
-    padding: 11px 12px;
-    border-radius: 10px;
-    border: none;
-    background: transparent;
-    color: #94a3b8;
-    font-size: 0.9rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.15s;
-    text-align: center;
-  }
-  .tab-btn.active {
-    background: #f59e0b;
-    color: #020617;
-    box-shadow: 0 2px 10px rgba(245, 158, 11, 0.25);
   }
 
   .tab-view {
@@ -97,6 +95,10 @@
     font-weight: 700;
     color: #f1f5f9;
     letter-spacing: 0.01em;
+    margin-bottom: 14px;
+  }
+  .card-header .card-title {
+    margin-bottom: 0;
   }
   .card-subtitle {
     font-size: 0.8rem;
@@ -215,7 +217,7 @@
     padding: 12px 14px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 14px;
     cursor: pointer;
     transition: border 0.15s, background 0.15s;
   }
@@ -226,16 +228,31 @@
   .diff-name { font-weight: 600; font-size: 0.9rem; color: #f8fafc; }
   .diff-desc { font-size: 0.75rem; color: #94a3b8; }
   .diff-radio {
-    width: 18px;
-    height: 18px;
+    width: 22px;
+    height: 22px;
     border-radius: 50%;
     border: 2px solid #475569;
     position: relative;
     flex-shrink: 0;
+    transition: all 0.15s;
   }
   .diff-option.active .diff-radio {
     border-color: #f59e0b;
     background: #f59e0b;
+  }
+  .diff-radio::after {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #020617;
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    display: none;
+  }
+  .diff-option.active .diff-radio::after {
+    display: block;
   }
 
   /* Game Selection List */
@@ -295,22 +312,26 @@
   .game-row.active .custom-checkbox::after { display: block; }
 
   .btn-info {
-    background: rgba(245, 158, 11, 0.12);
-    border: 1px solid rgba(245, 158, 11, 0.35);
+    background: none;
+    border: none;
     color: #f59e0b;
     width: 32px;
     height: 32px;
-    border-radius: 8px;
-    font-size: 0.85rem;
-    font-weight: bold;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: background 0.15s, transform 0.1s;
+    transition: opacity 0.15s, transform 0.1s;
     flex-shrink: 0;
+    padding: 0;
   }
-  .btn-info:active { transform: scale(0.92); background: rgba(245, 158, 11, 0.25); }
+  .btn-info:hover {
+    opacity: 0.85;
+  }
+  .btn-info:active {
+    transform: scale(0.92);
+    opacity: 0.7;
+  }
 
   /* Big Chunky Primary Buttons */
   .btn-primary {
@@ -503,13 +524,12 @@
   
   <!-- Header -->
   <div class="header">
-    <div class="header-title">Morning Puzzles</div>
-  </div>
-
-  <!-- Top Segmented Tab Bar -->
-  <div class="tab-bar">
-    <button class="tab-btn active" id="tabBtnSettings" onclick="switchTab('settings')">⚙️ Settings</button>
-    <button class="tab-btn" id="tabBtnGuide" onclick="switchTab('guide')">📖 Game Guide & FAQ</button>
+    <button class="btn-back" id="btnBack" onclick="navigateHome()" aria-label="Back to settings">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"></polyline>
+      </svg>
+    </button>
+    <div class="header-title">Pen + Paper Puzzles</div>
   </div>
 
   <!-- TAB 1: DEVICE SETTINGS -->
@@ -524,7 +544,7 @@
           <span class="slider"></span>
         </label>
       </div>
-      <div class="card-subtitle">Automatically generate and print a fresh puzzle receipt every morning.</div>
+      <div class="card-subtitle">Print puzzles every day at a specific time.</div>
       <div id="schedTimeContainer" class="sched-time-container">
         <div class="sched-time-label">Print Time</div>
         <div class="stepper-row">
@@ -551,7 +571,7 @@
         <div class="card-title">Daily Puzzle Count</div>
         <div id="countSub" style="font-size:0.8rem; color:#94a3b8;">Max: 19</div>
       </div>
-      <div class="card-subtitle">Number of games to randomly draw and print per daily mix receipt.</div>
+      <div class="card-subtitle">Number of games to print. Games are randomly chosen from selected games below.</div>
       <div class="stepper-row">
         <button class="btn-step" onclick="changeCount(-1)">-</button>
         <div class="count-display" id="countDisplay">5</div>
@@ -565,32 +585,32 @@
       <div class="card-subtitle">Select progression curve or uniform difficulty for all selected puzzles.</div>
       <div class="diff-grid">
         <div class="diff-option active" id="diff-opt-3" onclick="setDiff(3)">
+          <div class="diff-radio"></div>
           <div>
             <div class="diff-name">Escalating (Easy &rarr; Hard)</div>
-            <div class="diff-desc">Starts easy, scales progressively, ending with hard/extreme</div>
+            <div class="diff-desc">Printed games start easy and become more difficult.</div>
           </div>
-          <div class="diff-radio"></div>
         </div>
         <div class="diff-option" id="diff-opt-0" onclick="setDiff(0)">
+          <div class="diff-radio"></div>
           <div>
             <div class="diff-name">Easy</div>
-            <div class="diff-desc">All selected games generated at Easy difficulty</div>
+            <div class="diff-desc">All games printed with Easy difficulty</div>
           </div>
-          <div class="diff-radio"></div>
         </div>
         <div class="diff-option" id="diff-opt-1" onclick="setDiff(1)">
+          <div class="diff-radio"></div>
           <div>
             <div class="diff-name">Medium</div>
-            <div class="diff-desc">All selected games generated at Medium difficulty</div>
+            <div class="diff-desc">All games printed with Medium difficulty</div>
           </div>
-          <div class="diff-radio"></div>
         </div>
         <div class="diff-option" id="diff-opt-2" onclick="setDiff(2)">
+          <div class="diff-radio"></div>
           <div>
             <div class="diff-name">Hard</div>
-            <div class="diff-desc">All selected games generated at Hard difficulty</div>
+            <div class="diff-desc">All games printed with Hard difficulty</div>
           </div>
-          <div class="diff-radio"></div>
         </div>
       </div>
     </div>
@@ -604,7 +624,7 @@
           <button class="btn-quick" onclick="selectAllGames(false)">None</button>
         </div>
       </div>
-      <div class="card-subtitle">Uncheck games to disable them from the daily receipt draw. Tap ℹ️ to view rules.</div>
+      <div class="card-subtitle">Select games to include in your prints. Tap &gt; to view rules, FAQs, and print a sample.</div>
       <div class="games-list" id="gamesList"></div>
     </div>
 
@@ -615,17 +635,11 @@
   <!-- TAB 2: GAME GUIDE & FAQ -->
   <div id="viewGuide" class="tab-view" style="display:none;">
     
-    <!-- Game Selector Pills -->
-    <div class="card" style="padding: 12px 14px;">
-      <div class="card-subtitle" style="margin-bottom: 8px;">Select a game to view instructions & valid moves:</div>
-      <div class="pills-scroll" id="guidePills"></div>
-    </div>
-
     <!-- Header & Action Card -->
     <div class="card">
       <div class="guide-header">
         <div>
-          <div class="guide-title" id="guideTitle">--- SUDOKU ---</div>
+          <div class="guide-title" id="guideTitle">SUDOKU</div>
           <div class="guide-instruction" id="guideInstruction"></div>
         </div>
         <div class="guide-actions">
@@ -646,18 +660,21 @@
     <div class="card">
       <div class="card-title">Visual Move Examples</div>
       <div class="card-subtitle">Authentic 1-bit thermal printhead replica showing legal vs illegal moves.</div>
-      <div class="thermal-canvas-box">
-        <canvas id="guideCanvas" width="576" height="216"></canvas>
+      
+      <div class="move-example-block">
+        <span class="badge valid">✓ VALID MOVE</span>
+        <div class="thermal-canvas-box">
+          <canvas id="guideCanvasValid" width="576" height="216"></canvas>
+        </div>
+        <div class="caption-item" id="guideValidCaption"></div>
       </div>
-      <div class="guide-captions">
-        <div class="caption-item">
-          <span class="badge valid">✓ VALID MOVE</span>
-          <div id="guideValidCaption"></div>
+
+      <div class="move-example-block" style="margin-top: 14px;">
+        <span class="badge invalid">✗ INVALID MOVE</span>
+        <div class="thermal-canvas-box">
+          <canvas id="guideCanvasInvalid" width="576" height="216"></canvas>
         </div>
-        <div class="caption-item">
-          <span class="badge invalid">✗ INVALID MOVE</span>
-          <div id="guideInvalidCaption"></div>
-        </div>
+        <div class="caption-item" id="guideInvalidCaption"></div>
       </div>
     </div>
 
@@ -2092,22 +2109,30 @@ let currentSchedHour = 7;
 let currentSchedMinute = 0;
 let activeGuideGameId = 0;
 
-// TAB SWITCHING
-function switchTab(tab) {
-  const isSettings = (tab === 'settings');
-  document.getElementById("viewSettings").style.display = isSettings ? "flex" : "none";
-  document.getElementById("viewGuide").style.display = isSettings ? "none" : "flex";
-  document.getElementById("tabBtnSettings").className = "tab-btn" + (isSettings ? " active" : "");
-  document.getElementById("tabBtnGuide").className = "tab-btn" + (!isSettings ? " active" : "");
-  if (!isSettings) {
-    selectGuideGame(activeGuideGameId);
-  }
+// PAGE NAVIGATION
+function openGameGuide(id) {
+  selectGuideGame(id);
+  document.getElementById("viewSettings").style.display = "none";
+  document.getElementById("viewGuide").style.display = "flex";
+  const btnBack = document.getElementById("btnBack");
+  if (btnBack) btnBack.style.display = "flex";
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-function openGameGuide(id) {
-  switchTab('guide');
-  selectGuideGame(id);
+function navigateHome() {
+  document.getElementById("viewGuide").style.display = "none";
+  document.getElementById("viewSettings").style.display = "flex";
+  const btnBack = document.getElementById("btnBack");
+  if (btnBack) btnBack.style.display = "none";
   window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function switchTab(tab) {
+  if (tab === 'settings') {
+    navigateHome();
+  } else {
+    openGameGuide(activeGuideGameId);
+  }
 }
 
 function renderGames() {
@@ -2130,7 +2155,11 @@ function renderGames() {
           <div class="game-desc">${g.desc || ""}</div>
         </div>
       </div>
-      <button class="btn-info" onclick="event.stopPropagation(); openGameGuide(${g.id});" title="View Rules & FAQ">ℹ️</button>
+      <button class="btn-info" onclick="event.stopPropagation(); openGameGuide(${g.id});" title="View Rules & Sample" aria-label="View ${g.name} rules and sample">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </button>
     `;
     list.appendChild(row);
   });
@@ -2241,31 +2270,15 @@ function saveAndExit() {
 }
 
 // GUIDE SYSTEM FUNCTIONS
-function initGuidePills() {
-  const container = document.getElementById("guidePills");
-  if (!container) return;
-  container.innerHTML = "";
-  GAMES.forEach(g => {
-    const pill = document.createElement("button");
-    pill.className = "pill" + (g.id === activeGuideGameId ? " active" : "");
-    pill.id = "guide-pill-" + g.id;
-    pill.innerText = g.name;
-    pill.onclick = () => selectGuideGame(g.id);
-    container.appendChild(pill);
-  });
-}
+function initGuidePills() {}
 
 function selectGuideGame(id) {
   activeGuideGameId = id;
-  GAMES.forEach(g => {
-    const p = document.getElementById("guide-pill-" + g.id);
-    if (p) p.className = "pill" + (g.id === id ? " active" : "");
-  });
 
   const rule = (typeof GAME_RULES !== "undefined") ? GAME_RULES.find(r => r.id === id) : null;
   if (!rule) return;
 
-  document.getElementById("guideTitle").innerText = `--- ${rule.title} ---`;
+  document.getElementById("guideTitle").innerText = rule.title.toUpperCase();
   document.getElementById("guideInstruction").innerText = rule.instruction;
   document.getElementById("guideObjective").innerText = rule.objective;
 
@@ -2337,41 +2350,36 @@ function printCurrentSample() {
 
 // 1-BIT THERMAL CANVAS RENDERER IN JAVASCRIPT
 function drawThermalGuideCanvas(gameId) {
-  const canvas = document.getElementById("guideCanvas");
-  if (!canvas) return;
-  const ctx = canvas.getContext("2d");
-  const w = canvas.width;
-  const h = canvas.height;
-  const midX = w / 2;
+  const canvasV = document.getElementById("guideCanvasValid");
+  const canvasI = document.getElementById("guideCanvasInvalid");
+  if (!canvasV || !canvasI) return;
+  const ctxV = canvasV.getContext("2d");
+  const ctxI = canvasI.getContext("2d");
+  const w = canvasV.width;
+  const h = canvasV.height;
 
-  ctx.fillStyle = "#ffffff";
-  ctx.fillRect(0, 0, w, h);
-
-  ctx.strokeStyle = "#000000";
-  ctx.fillStyle = "#000000";
-  ctx.lineWidth = 2;
-
-  // Outer border
-  ctx.strokeRect(10, 8, w - 20, h - 16);
-
-  // Center dashed divider
-  ctx.setLineDash([4, 4]);
-  ctx.beginPath();
-  ctx.moveTo(midX, 10);
-  ctx.lineTo(midX, h - 10);
-  ctx.stroke();
-  ctx.setLineDash([]);
+  [ctxV, ctxI].forEach(ctx => {
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, w, h);
+    ctx.strokeStyle = "#000000";
+    ctx.fillStyle = "#000000";
+    ctx.lineWidth = 2;
+    ctx.setLineDash([]);
+    ctx.strokeRect(10, 8, w - 20, h - 16);
+  });
 
   // Headers
-  ctx.font = "bold 15px monospace";
-  ctx.textAlign = "center";
-  ctx.fillText("VALID MOVE", 144, 28);
-  ctx.fillText("INVALID MOVE", 432, 28);
+  ctxV.font = "bold 15px monospace";
+  ctxV.textAlign = "center";
+  ctxV.fillText("VALID MOVE", 288, 28);
+  ctxV.font = "bold 14px monospace";
+  ctxV.fillText("[ OK ]", 288, h - 26);
 
-  // Bottom labels
-  ctx.font = "bold 14px monospace";
-  ctx.fillText("[ OK ]", 144, h - 26);
-  ctx.fillText("[ ERROR ]", 432, h - 26);
+  ctxI.font = "bold 15px monospace";
+  ctxI.textAlign = "center";
+  ctxI.fillText("INVALID MOVE", 288, 28);
+  ctxI.font = "bold 14px monospace";
+  ctxI.fillText("[ ERROR ]", 288, h - 26);
 
   const ly = 46;
   const ry = 46;
@@ -2379,425 +2387,536 @@ function drawThermalGuideCanvas(gameId) {
   switch (gameId) {
     case 0: { // SUDOKU
       const sz = 32;
-      const lx0 = 144 - (3 * sz) / 2, rx0 = 432 - (3 * sz) / 2;
-      ctx.strokeRect(lx0, ly, 3 * sz, 3 * sz);
-      ctx.strokeRect(rx0, ry, 3 * sz, 3 * sz);
-      ctx.lineWidth = 1;
+      const vx0 = 288 - (3 * sz) / 2;
+      ctxV.strokeRect(vx0, ly, 3 * sz, 3 * sz);
+      ctxV.lineWidth = 1;
       for (let i = 1; i < 3; i++) {
-        ctx.beginPath();
-        ctx.moveTo(lx0, ly + i * sz); ctx.lineTo(lx0 + 3 * sz, ly + i * sz);
-        ctx.moveTo(lx0 + i * sz, ly); ctx.lineTo(lx0 + i * sz, ly + 3 * sz);
-        ctx.moveTo(rx0, ry + i * sz); ctx.lineTo(rx0 + 3 * sz, ry + i * sz);
-        ctx.moveTo(rx0 + i * sz, ry); ctx.lineTo(rx0 + i * sz, ry + 3 * sz);
-        ctx.stroke();
+        ctxV.beginPath();
+        ctxV.moveTo(vx0, ly + i * sz); ctxV.lineTo(vx0 + 3 * sz, ly + i * sz);
+        ctxV.moveTo(vx0 + i * sz, ly); ctxV.lineTo(vx0 + i * sz, ly + 3 * sz);
+        ctxV.stroke();
       }
-      ctx.font = "bold 20px monospace";
-      ctx.fillText("5", lx0 + sz + sz / 2, ly + sz + 23);
-      ctx.fillText("5", rx0 + sz / 2, ry + 23);
-      ctx.fillText("5", rx0 + sz + sz / 2, ry + sz + 23);
+      ctxV.font = "bold 20px monospace";
+      ctxV.fillText("5", vx0 + sz + sz / 2, ly + sz + 23);
+
+      const ix0 = 288 - (3 * sz) / 2;
+      ctxI.strokeRect(ix0, ry, 3 * sz, 3 * sz);
+      ctxI.lineWidth = 1;
+      for (let i = 1; i < 3; i++) {
+        ctxI.beginPath();
+        ctxI.moveTo(ix0, ry + i * sz); ctxI.lineTo(ix0 + 3 * sz, ry + i * sz);
+        ctxI.moveTo(ix0 + i * sz, ry); ctxI.lineTo(ix0 + i * sz, ry + 3 * sz);
+        ctxI.stroke();
+      }
+      ctxI.font = "bold 20px monospace";
+      ctxI.fillText("5", ix0 + sz / 2, ry + 23);
+      ctxI.fillText("5", ix0 + sz + sz / 2, ry + sz + 23);
       break;
     }
     case 1: { // SEARCH
       const sz = 28;
-      const lx0 = 144 - (3 * sz) / 2, rx0 = 432 - (3 * sz) / 2;
-      ctx.strokeRect(lx0, ly, 3 * sz, 3 * sz);
-      ctx.strokeRect(rx0, ry, 3 * sz, 3 * sz);
-      ctx.lineWidth = 1;
+      const vx0 = 288 - (3 * sz) / 2;
+      ctxV.strokeRect(vx0, ly, 3 * sz, 3 * sz);
+      ctxV.lineWidth = 1;
       for (let i = 1; i < 3; i++) {
-        ctx.beginPath();
-        ctx.moveTo(lx0, ly + i * sz); ctx.lineTo(lx0 + 3 * sz, ly + i * sz);
-        ctx.moveTo(lx0 + i * sz, ly); ctx.lineTo(lx0 + i * sz, ly + 3 * sz);
-        ctx.moveTo(rx0, ry + i * sz); ctx.lineTo(rx0 + 3 * sz, ry + i * sz);
-        ctx.moveTo(rx0 + i * sz, ry); ctx.lineTo(rx0 + i * sz, ry + 3 * sz);
-        ctx.stroke();
+        ctxV.beginPath();
+        ctxV.moveTo(vx0, ly + i * sz); ctxV.lineTo(vx0 + 3 * sz, ly + i * sz);
+        ctxV.moveTo(vx0 + i * sz, ly); ctxV.lineTo(vx0 + i * sz, ly + 3 * sz);
+        ctxV.stroke();
       }
-      ctx.font = "bold 18px monospace";
-      ctx.fillText("C", lx0 + 14, ly + 20);
-      ctx.fillText("A", lx0 + sz + 14, ly + sz + 20);
-      ctx.fillText("T", lx0 + 2 * sz + 14, ly + 2 * sz + 20);
-      ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.moveTo(lx0 + 6, ly + 6); ctx.lineTo(lx0 + 3 * sz - 6, ly + 3 * sz - 6); ctx.stroke();
-      ctx.fillText("C", rx0 + 14, ry + 20);
-      ctx.fillText("A", rx0 + sz + 14, ry + 20);
-      ctx.fillText("T", rx0 + sz + 14, ry + sz + 20);
-      ctx.beginPath(); ctx.moveTo(rx0 + 6, ry + 14); ctx.lineTo(rx0 + sz + 14, ry + 14); ctx.lineTo(rx0 + sz + 14, ry + sz + 20); ctx.stroke();
+      ctxV.font = "bold 18px monospace";
+      ctxV.fillText("C", vx0 + 14, ly + 20);
+      ctxV.fillText("A", vx0 + sz + 14, ly + sz + 20);
+      ctxV.fillText("T", vx0 + 2 * sz + 14, ly + 2 * sz + 20);
+      ctxV.lineWidth = 2;
+      ctxV.beginPath(); ctxV.moveTo(vx0 + 6, ly + 6); ctxV.lineTo(vx0 + 3 * sz - 6, ly + 3 * sz - 6); ctxV.stroke();
+
+      const ix0 = 288 - (3 * sz) / 2;
+      ctxI.strokeRect(ix0, ry, 3 * sz, 3 * sz);
+      ctxI.lineWidth = 1;
+      for (let i = 1; i < 3; i++) {
+        ctxI.beginPath();
+        ctxI.moveTo(ix0, ry + i * sz); ctxI.lineTo(ix0 + 3 * sz, ry + i * sz);
+        ctxI.moveTo(ix0 + i * sz, ry); ctxI.lineTo(ix0 + i * sz, ry + 3 * sz);
+        ctxI.stroke();
+      }
+      ctxI.font = "bold 18px monospace";
+      ctxI.fillText("C", ix0 + 14, ry + 20);
+      ctxI.fillText("A", ix0 + sz + 14, ry + 20);
+      ctxI.fillText("T", ix0 + sz + 14, ry + sz + 20);
+      ctxI.beginPath(); ctxI.moveTo(ix0 + 6, ry + 14); ctxI.lineTo(ix0 + sz + 14, ry + 14); ctxI.lineTo(ix0 + sz + 14, ry + sz + 20); ctxI.stroke();
       break;
     }
     case 2: { // NONOGRAM
       const sz = 24;
-      const lx0 = 144 - (4 * sz) / 2, rx0 = 432 - (4 * sz) / 2;
+      const vx0 = 288 - (4 * sz) / 2;
       const ny = ly + 24;
-      ctx.strokeRect(lx0, ny, 4 * sz, sz);
-      ctx.strokeRect(rx0, ny, 4 * sz, sz);
-      ctx.lineWidth = 1;
+      ctxV.strokeRect(vx0, ny, 4 * sz, sz);
+      ctxV.lineWidth = 1;
       for (let i = 1; i < 4; i++) {
-        ctx.beginPath();
-        ctx.moveTo(lx0 + i * sz, ny); ctx.lineTo(lx0 + i * sz, ny + sz);
-        ctx.moveTo(rx0 + i * sz, ny); ctx.lineTo(rx0 + i * sz, ny + sz);
-        ctx.stroke();
+        ctxV.beginPath();
+        ctxV.moveTo(vx0 + i * sz, ny); ctxV.lineTo(vx0 + i * sz, ny + sz);
+        ctxV.stroke();
       }
-      ctx.fillRect(lx0 + 2, ny + 2, sz - 4, sz - 4);
-      ctx.fillRect(lx0 + 2 * sz + 2, ny + 2, sz - 4, sz - 4);
-      ctx.fillRect(rx0 + 2, ny + 2, 2 * sz - 4, sz - 4);
-      ctx.font = "bold 14px monospace";
-      ctx.fillText("1 1", lx0 - 18, ny + 17);
-      ctx.fillText("1 1", rx0 - 18, ny + 17);
+      ctxV.fillRect(vx0 + 2, ny + 2, sz - 4, sz - 4);
+      ctxV.fillRect(vx0 + 2 * sz + 2, ny + 2, sz - 4, sz - 4);
+      ctxV.font = "bold 14px monospace";
+      ctxV.fillText("1 1", vx0 - 18, ny + 17);
+
+      const ix0 = 288 - (4 * sz) / 2;
+      ctxI.strokeRect(ix0, ny, 4 * sz, sz);
+      ctxI.lineWidth = 1;
+      for (let i = 1; i < 4; i++) {
+        ctxI.beginPath();
+        ctxI.moveTo(ix0 + i * sz, ny); ctxI.lineTo(ix0 + i * sz, ny + sz);
+        ctxI.stroke();
+      }
+      ctxI.fillRect(ix0 + 2, ny + 2, 2 * sz - 4, sz - 4);
+      ctxI.font = "bold 14px monospace";
+      ctxI.fillText("1 1", ix0 - 18, ny + 17);
       break;
     }
     case 3: { // STARS
       const sz = 32;
-      const lx0 = 144 - (3 * sz) / 2, rx0 = 432 - (3 * sz) / 2;
-      ctx.strokeRect(lx0, ly, 3 * sz, 3 * sz);
-      ctx.strokeRect(rx0, ry, 3 * sz, 3 * sz);
-      ctx.lineWidth = 1;
+      const vx0 = 288 - (3 * sz) / 2;
+      ctxV.strokeRect(vx0, ly, 3 * sz, 3 * sz);
+      ctxV.lineWidth = 1;
       for (let i = 1; i < 3; i++) {
-        ctx.beginPath();
-        ctx.moveTo(lx0, ly + i * sz); ctx.lineTo(lx0 + 3 * sz, ly + i * sz);
-        ctx.moveTo(lx0 + i * sz, ly); ctx.lineTo(lx0 + i * sz, ly + 3 * sz);
-        ctx.moveTo(rx0, ry + i * sz); ctx.lineTo(rx0 + 3 * sz, ry + i * sz);
-        ctx.moveTo(rx0 + i * sz, ry); ctx.lineTo(rx0 + i * sz, ry + 3 * sz);
-        ctx.stroke();
+        ctxV.beginPath();
+        ctxV.moveTo(vx0, ly + i * sz); ctxV.lineTo(vx0 + 3 * sz, ly + i * sz);
+        ctxV.moveTo(vx0 + i * sz, ly); ctxV.lineTo(vx0 + i * sz, ly + 3 * sz);
+        ctxV.stroke();
       }
-      ctx.font = "bold 22px monospace";
-      ctx.fillText("★", lx0 + sz / 2, ly + 24);
-      ctx.fillText("★", lx0 + 2 * sz + sz / 2, ly + sz + 24);
-      ctx.fillText("★", rx0 + sz / 2, ry + 24);
-      ctx.fillText("★", rx0 + sz + sz / 2, ry + sz + 24);
-      ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.moveTo(rx0 + sz - 6, ry + sz - 6); ctx.lineTo(rx0 + sz + 6, ry + sz + 6); ctx.stroke();
+      ctxV.font = "bold 22px monospace";
+      ctxV.fillText("★", vx0 + sz / 2, ly + 24);
+      ctxV.fillText("★", vx0 + 2 * sz + sz / 2, ly + sz + 24);
+
+      const ix0 = 288 - (3 * sz) / 2;
+      ctxI.strokeRect(ix0, ry, 3 * sz, 3 * sz);
+      ctxI.lineWidth = 1;
+      for (let i = 1; i < 3; i++) {
+        ctxI.beginPath();
+        ctxI.moveTo(ix0, ry + i * sz); ctxI.lineTo(ix0 + 3 * sz, ry + i * sz);
+        ctxI.moveTo(ix0 + i * sz, ry); ctxI.lineTo(ix0 + i * sz, ry + 3 * sz);
+        ctxI.stroke();
+      }
+      ctxI.font = "bold 22px monospace";
+      ctxI.fillText("★", ix0 + sz / 2, ry + 24);
+      ctxI.fillText("★", ix0 + sz + sz / 2, ry + sz + 24);
+      ctxI.lineWidth = 2;
+      ctxI.beginPath(); ctxI.moveTo(ix0 + sz - 6, ry + sz - 6); ctxI.lineTo(ix0 + sz + 6, ry + sz + 6); ctxI.stroke();
       break;
     }
     case 4: { // JUMBLE
       const sz = 24;
-      const lx0 = 144 - (4 * sz) / 2, rx0 = 432 - (4 * sz) / 2;
+      const vx0 = 288 - (4 * sz) / 2;
       const jy = ly + 24;
-      ctx.strokeRect(lx0, jy, 4 * sz, sz);
-      ctx.strokeRect(rx0, jy, 4 * sz, sz);
-      ctx.lineWidth = 1;
+      ctxV.strokeRect(vx0, jy, 4 * sz, sz);
+      ctxV.lineWidth = 1;
       for (let i = 1; i < 4; i++) {
-        ctx.beginPath();
-        ctx.moveTo(lx0 + i * sz, jy); ctx.lineTo(lx0 + i * sz, jy + sz);
-        ctx.moveTo(rx0 + i * sz, jy); ctx.lineTo(rx0 + i * sz, jy + sz);
-        ctx.stroke();
+        ctxV.beginPath();
+        ctxV.moveTo(vx0 + i * sz, jy); ctxV.lineTo(vx0 + i * sz, jy + sz);
+        ctxV.stroke();
       }
-      ctx.font = "bold 16px monospace";
-      ctx.fillText("B", lx0 + 12, jy + 17);
-      ctx.fillText("O", lx0 + sz + 12, jy + 17);
-      ctx.beginPath(); ctx.arc(lx0 + sz + 12, jy + 12, 10, 0, Math.PI * 2); ctx.stroke();
-      ctx.fillText("A", lx0 + 2 * sz + 12, jy + 17);
-      ctx.fillText("T", lx0 + 3 * sz + 12, jy + 17);
-      ctx.fillText("B", rx0 + 12, jy + 17);
-      ctx.fillText("T", rx0 + sz + 12, jy + 17);
-      ctx.fillText("O", rx0 + 2 * sz + 12, jy + 17);
-      ctx.fillText("A", rx0 + 3 * sz + 12, jy + 17);
+      ctxV.font = "bold 16px monospace";
+      ctxV.fillText("B", vx0 + 12, jy + 17);
+      ctxV.fillText("O", vx0 + sz + 12, jy + 17);
+      ctxV.beginPath(); ctxV.arc(vx0 + sz + 12, jy + 12, 10, 0, Math.PI * 2); ctxV.stroke();
+      ctxV.fillText("A", vx0 + 2 * sz + 12, jy + 17);
+      ctxV.fillText("T", vx0 + 3 * sz + 12, jy + 17);
+
+      const ix0 = 288 - (4 * sz) / 2;
+      ctxI.strokeRect(ix0, jy, 4 * sz, sz);
+      ctxI.lineWidth = 1;
+      for (let i = 1; i < 4; i++) {
+        ctxI.beginPath();
+        ctxI.moveTo(ix0 + i * sz, jy); ctxI.lineTo(ix0 + i * sz, jy + sz);
+        ctxI.stroke();
+      }
+      ctxI.font = "bold 16px monospace";
+      ctxI.fillText("B", ix0 + 12, jy + 17);
+      ctxI.fillText("T", ix0 + sz + 12, jy + 17);
+      ctxI.fillText("O", ix0 + 2 * sz + 12, jy + 17);
+      ctxI.fillText("A", ix0 + 3 * sz + 12, jy + 17);
       break;
     }
     case 5: { // BINARY
       const sz = 26;
-      const lx0 = 144 - (4 * sz) / 2, rx0 = 432 - (4 * sz) / 2;
+      const vx0 = 288 - (4 * sz) / 2;
       const by = ly + 24;
-      ctx.strokeRect(lx0, by, 4 * sz, sz);
-      ctx.strokeRect(rx0, by, 4 * sz, sz);
-      ctx.lineWidth = 1;
+      ctxV.strokeRect(vx0, by, 4 * sz, sz);
+      ctxV.lineWidth = 1;
       for (let i = 1; i < 4; i++) {
-        ctx.beginPath();
-        ctx.moveTo(lx0 + i * sz, by); ctx.lineTo(lx0 + i * sz, by + sz);
-        ctx.moveTo(rx0 + i * sz, by); ctx.lineTo(rx0 + i * sz, by + sz);
-        ctx.stroke();
+        ctxV.beginPath();
+        ctxV.moveTo(vx0 + i * sz, by); ctxV.lineTo(vx0 + i * sz, by + sz);
+        ctxV.stroke();
       }
-      ctx.font = "bold 16px monospace";
-      ["1", "0", "1", "0"].forEach((d, i) => ctx.fillText(d, lx0 + i * sz + 13, by + 18));
-      ["0", "1", "1", "1"].forEach((d, i) => ctx.fillText(d, rx0 + i * sz + 13, by + 18));
+      ctxV.font = "bold 16px monospace";
+      ["1", "0", "1", "0"].forEach((d, i) => ctxV.fillText(d, vx0 + i * sz + 13, by + 18));
+
+      const ix0 = 288 - (4 * sz) / 2;
+      ctxI.strokeRect(ix0, by, 4 * sz, sz);
+      ctxI.lineWidth = 1;
+      for (let i = 1; i < 4; i++) {
+        ctxI.beginPath();
+        ctxI.moveTo(ix0 + i * sz, by); ctxI.lineTo(ix0 + i * sz, by + sz);
+        ctxI.stroke();
+      }
+      ctxI.font = "bold 16px monospace";
+      ["0", "1", "1", "1"].forEach((d, i) => ctxI.fillText(d, ix0 + i * sz + 13, by + 18));
       break;
     }
     case 6: { // MINES
       const sz = 34;
-      const lx0 = 144 - sz, rx0 = 432 - sz;
+      const vx0 = 288 - sz;
       const my = ly + 14;
-      ctx.strokeRect(lx0, my, 2 * sz, 2 * sz);
-      ctx.strokeRect(rx0, my, 2 * sz, 2 * sz);
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(lx0, my + sz); ctx.lineTo(lx0 + 2 * sz, my + sz);
-      ctx.moveTo(lx0 + sz, my); ctx.lineTo(lx0 + sz, my + 2 * sz);
-      ctx.moveTo(rx0, my + sz); ctx.lineTo(rx0 + 2 * sz, my + sz);
-      ctx.moveTo(rx0 + sz, my); ctx.lineTo(rx0 + sz, my + 2 * sz);
-      ctx.stroke();
-      ctx.font = "bold 20px monospace";
-      ctx.fillText("1", lx0 + 17, my + sz + 24);
-      ctx.fillText("💣", lx0 + 17, my + 25);
-      ctx.fillText("1", rx0 + 17, my + sz + 24);
-      ctx.fillText("💣", rx0 + 17, my + 25);
-      ctx.fillText("💣", rx0 + sz + 17, my + 25);
+      ctxV.strokeRect(vx0, my, 2 * sz, 2 * sz);
+      ctxV.lineWidth = 1;
+      ctxV.beginPath();
+      ctxV.moveTo(vx0, my + sz); ctxV.lineTo(vx0 + 2 * sz, my + sz);
+      ctxV.moveTo(vx0 + sz, my); ctxV.lineTo(vx0 + sz, my + 2 * sz);
+      ctxV.stroke();
+      ctxV.font = "bold 20px monospace";
+      ctxV.fillText("1", vx0 + 17, my + sz + 24);
+      ctxV.fillText("💣", vx0 + 17, my + 25);
+
+      const ix0 = 288 - sz;
+      ctxI.strokeRect(ix0, my, 2 * sz, 2 * sz);
+      ctxI.lineWidth = 1;
+      ctxI.beginPath();
+      ctxI.moveTo(ix0, my + sz); ctxI.lineTo(ix0 + 2 * sz, my + sz);
+      ctxI.moveTo(ix0 + sz, my); ctxI.lineTo(ix0 + sz, my + 2 * sz);
+      ctxI.stroke();
+      ctxI.font = "bold 20px monospace";
+      ctxI.fillText("1", ix0 + 17, my + sz + 24);
+      ctxI.fillText("💣", ix0 + 17, my + 25);
+      ctxI.fillText("💣", ix0 + sz + 17, my + 25);
       break;
     }
     case 7: { // TENTS
       const sz = 32;
-      const lx0 = 144 - (3 * sz) / 2, rx0 = 432 - (3 * sz) / 2;
+      const vx0 = 288 - (3 * sz) / 2;
       const ty = ly + 14;
-      ctx.strokeRect(lx0, ty, 3 * sz, 2 * sz);
-      ctx.strokeRect(rx0, ty, 3 * sz, 2 * sz);
-      ctx.lineWidth = 1;
+      ctxV.strokeRect(vx0, ty, 3 * sz, 2 * sz);
+      ctxV.lineWidth = 1;
       for (let i = 1; i < 3; i++) {
-        ctx.beginPath();
-        ctx.moveTo(lx0 + i * sz, ty); ctx.lineTo(lx0 + i * sz, ty + 2 * sz);
-        ctx.moveTo(rx0 + i * sz, ty); ctx.lineTo(rx0 + i * sz, ty + 2 * sz);
-        ctx.stroke();
+        ctxV.beginPath();
+        ctxV.moveTo(vx0 + i * sz, ty); ctxV.lineTo(vx0 + i * sz, ty + 2 * sz);
+        ctxV.stroke();
       }
-      ctx.beginPath();
-      ctx.moveTo(lx0, ty + sz); ctx.lineTo(lx0 + 3 * sz, ty + sz);
-      ctx.moveTo(rx0, ty + sz); ctx.lineTo(rx0 + 3 * sz, ty + sz);
-      ctx.stroke();
-      ctx.font = "bold 20px monospace";
-      ctx.fillText("🌲", lx0 + 16, ty + 23);
-      ctx.fillText("⛺", lx0 + sz + 16, ty + 23);
-      ctx.fillText("🌲", rx0 + 16, ty + 23);
-      ctx.fillText("⛺", rx0 + sz + 16, ty + 23);
-      ctx.fillText("⛺", rx0 + 2 * sz + 16, ty + sz + 23);
+      ctxV.beginPath();
+      ctxV.moveTo(vx0, ty + sz); ctxV.lineTo(vx0 + 3 * sz, ty + sz);
+      ctxV.stroke();
+      ctxV.font = "bold 20px monospace";
+      ctxV.fillText("🌲", vx0 + 16, ty + 23);
+      ctxV.fillText("⛺", vx0 + sz + 16, ty + 23);
+
+      const ix0 = 288 - (3 * sz) / 2;
+      ctxI.strokeRect(ix0, ty, 3 * sz, 2 * sz);
+      ctxI.lineWidth = 1;
+      for (let i = 1; i < 3; i++) {
+        ctxI.beginPath();
+        ctxI.moveTo(ix0 + i * sz, ty); ctxI.lineTo(ix0 + i * sz, ty + 2 * sz);
+        ctxI.stroke();
+      }
+      ctxI.beginPath();
+      ctxI.moveTo(ix0, ty + sz); ctxI.lineTo(ix0 + 3 * sz, ty + sz);
+      ctxI.stroke();
+      ctxI.font = "bold 20px monospace";
+      ctxI.fillText("🌲", ix0 + 16, ty + 23);
+      ctxI.fillText("⛺", ix0 + sz + 16, ty + 23);
+      ctxI.fillText("⛺", ix0 + 2 * sz + 16, ty + sz + 23);
       break;
     }
     case 8: { // BRIDGES
-      const lx1 = 100, lx2 = 188, rx1 = 388, rx2 = 476;
+      const vx1 = 288 - 44, vx2 = 288 + 44;
       const by = ly + 36;
-      ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.arc(lx1, by, 16, 0, Math.PI * 2); ctx.stroke();
-      ctx.beginPath(); ctx.arc(lx2, by, 16, 0, Math.PI * 2); ctx.stroke();
-      ctx.font = "bold 16px monospace";
-      ctx.fillText("3", lx1, by + 5);
-      ctx.fillText("2", lx2, by + 5);
-      ctx.beginPath();
-      ctx.moveTo(lx1 + 16, by - 4); ctx.lineTo(lx2 - 16, by - 4);
-      ctx.moveTo(lx1 + 16, by + 4); ctx.lineTo(lx2 - 16, by + 4);
-      ctx.stroke();
-      ctx.beginPath(); ctx.arc(rx1, by, 16, 0, Math.PI * 2); ctx.stroke();
-      ctx.beginPath(); ctx.arc(rx2, by, 16, 0, Math.PI * 2); ctx.stroke();
-      ctx.fillText("4", rx1, by + 5);
-      ctx.fillText("3", rx2, by + 5);
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(rx1 + 16, by - 6); ctx.lineTo(rx2 - 16, by - 6);
-      ctx.moveTo(rx1 + 16, by); ctx.lineTo(rx2 - 16, by);
-      ctx.moveTo(rx1 + 16, by + 6); ctx.lineTo(rx2 - 16, by + 6);
-      ctx.stroke();
+      ctxV.lineWidth = 2;
+      ctxV.beginPath(); ctxV.arc(vx1, by, 16, 0, Math.PI * 2); ctxV.stroke();
+      ctxV.beginPath(); ctxV.arc(vx2, by, 16, 0, Math.PI * 2); ctxV.stroke();
+      ctxV.font = "bold 16px monospace";
+      ctxV.fillText("3", vx1, by + 5);
+      ctxV.fillText("2", vx2, by + 5);
+      ctxV.beginPath();
+      ctxV.moveTo(vx1 + 16, by - 4); ctxV.lineTo(vx2 - 16, by - 4);
+      ctxV.moveTo(vx1 + 16, by + 4); ctxV.lineTo(vx2 - 16, by + 4);
+      ctxV.stroke();
+
+      const ix1 = 288 - 44, ix2 = 288 + 44;
+      ctxI.lineWidth = 2;
+      ctxI.beginPath(); ctxI.arc(ix1, by, 16, 0, Math.PI * 2); ctxI.stroke();
+      ctxI.beginPath(); ctxI.arc(ix2, by, 16, 0, Math.PI * 2); ctxI.stroke();
+      ctxI.font = "bold 16px monospace";
+      ctxI.fillText("4", ix1, by + 5);
+      ctxI.fillText("3", ix2, by + 5);
+      ctxI.lineWidth = 1;
+      ctxI.beginPath();
+      ctxI.moveTo(ix1 + 16, by - 6); ctxI.lineTo(ix2 - 16, by - 6);
+      ctxI.moveTo(ix1 + 16, by); ctxI.lineTo(ix2 - 16, by);
+      ctxI.moveTo(ix1 + 16, by + 6); ctxI.lineTo(ix2 - 16, by + 6);
+      ctxI.stroke();
       break;
     }
     case 9: { // KILLER
       const sz = 34;
-      const lx0 = 144 - sz, rx0 = 432 - sz;
+      const vx0 = 288 - sz;
       const ky = ly + 14;
-      ctx.setLineDash([4, 3]);
-      ctx.lineWidth = 2;
-      ctx.strokeRect(lx0, ky, 2 * sz, sz);
-      ctx.strokeRect(rx0, ky, 2 * sz, sz);
-      ctx.setLineDash([]);
-      ctx.font = "bold 11px monospace";
-      ctx.fillText("3", lx0 + 8, ky + 12);
-      ctx.fillText("4", rx0 + 8, ky + 12);
-      ctx.font = "bold 18px monospace";
-      ctx.fillText("1", lx0 + 17, ky + 25);
-      ctx.fillText("2", lx0 + sz + 17, ky + 25);
-      ctx.fillText("2", rx0 + 17, ky + 25);
-      ctx.fillText("2", rx0 + sz + 17, ky + 25);
+      ctxV.setLineDash([4, 3]);
+      ctxV.lineWidth = 2;
+      ctxV.strokeRect(vx0, ky, 2 * sz, sz);
+      ctxV.setLineDash([]);
+      ctxV.font = "bold 11px monospace";
+      ctxV.fillText("3", vx0 + 8, ky + 12);
+      ctxV.font = "bold 18px monospace";
+      ctxV.fillText("1", vx0 + 17, ky + 25);
+      ctxV.fillText("2", vx0 + sz + 17, ky + 25);
+
+      const ix0 = 288 - sz;
+      ctxI.setLineDash([4, 3]);
+      ctxI.lineWidth = 2;
+      ctxI.strokeRect(ix0, ky, 2 * sz, sz);
+      ctxI.setLineDash([]);
+      ctxI.font = "bold 11px monospace";
+      ctxI.fillText("4", ix0 + 8, ky + 12);
+      ctxI.font = "bold 18px monospace";
+      ctxI.fillText("2", ix0 + 17, ky + 25);
+      ctxI.fillText("2", ix0 + sz + 17, ky + 25);
       break;
     }
     case 10: { // CRYPTOGRAM
       const cy = ly + 20;
-      ctx.font = "bold 16px monospace";
-      ctx.fillText("T  H  E", 144, cy + 10);
-      ctx.fillText("W  Z  K", 144, cy + 34);
-      ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(96, cy + 18); ctx.lineTo(192, cy + 18); ctx.stroke();
-      ctx.fillText("T  O", 432, cy + 10);
-      ctx.fillText("W  K", 432, cy + 34);
-      ctx.beginPath(); ctx.moveTo(384, cy + 18); ctx.lineTo(480, cy + 18); ctx.stroke();
+      ctxV.font = "bold 16px monospace";
+      ctxV.fillText("T  H  E", 288, cy + 10);
+      ctxV.fillText("W  Z  K", 288, cy + 34);
+      ctxV.lineWidth = 1;
+      ctxV.beginPath(); ctxV.moveTo(240, cy + 18); ctxV.lineTo(336, cy + 18); ctxV.stroke();
+
+      ctxI.font = "bold 16px monospace";
+      ctxI.fillText("T  O", 288, cy + 10);
+      ctxI.fillText("W  K", 288, cy + 34);
+      ctxI.lineWidth = 1;
+      ctxI.beginPath(); ctxI.moveTo(240, cy + 18); ctxI.lineTo(336, cy + 18); ctxI.stroke();
       break;
     }
     case 11: { // TANGO
       const sz = 28;
-      const lx0 = 144 - (3 * sz) / 2, rx0 = 432 - (3 * sz) / 2;
+      const vx0 = 288 - (3 * sz) / 2;
       const ty2 = ly + 20;
-      ctx.strokeRect(lx0, ty2, sz, sz);
-      ctx.strokeRect(lx0 + 2 * sz, ty2, sz, sz);
-      ctx.font = "bold 18px monospace";
-      ctx.fillText("☀️", lx0 + 14, ty2 + 20);
-      ctx.fillText("=", lx0 + sz + 14, ty2 + 20);
-      ctx.fillText("☀️", lx0 + 2 * sz + 14, ty2 + 20);
-      ctx.strokeRect(rx0, ty2, 3 * sz, sz);
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(rx0 + sz, ty2); ctx.lineTo(rx0 + sz, ty2 + sz);
-      ctx.moveTo(rx0 + 2 * sz, ty2); ctx.lineTo(rx0 + 2 * sz, ty2 + sz);
-      ctx.stroke();
-      ctx.fillText("☀️", rx0 + 14, ty2 + 20);
-      ctx.fillText("☀️", rx0 + sz + 14, ty2 + 20);
-      ctx.fillText("☀️", rx0 + 2 * sz + 14, ty2 + 20);
+      ctxV.strokeRect(vx0, ty2, sz, sz);
+      ctxV.strokeRect(vx0 + 2 * sz, ty2, sz, sz);
+      ctxV.font = "bold 18px monospace";
+      ctxV.fillText("☀️", vx0 + 14, ty2 + 20);
+      ctxV.fillText("=", vx0 + sz + 14, ty2 + 20);
+      ctxV.fillText("☀️", vx0 + 2 * sz + 14, ty2 + 20);
+
+      const ix0 = 288 - (3 * sz) / 2;
+      ctxI.strokeRect(ix0, ty2, 3 * sz, sz);
+      ctxI.lineWidth = 1;
+      ctxI.beginPath();
+      ctxI.moveTo(ix0 + sz, ty2); ctxI.lineTo(ix0 + sz, ty2 + sz);
+      ctxI.moveTo(ix0 + 2 * sz, ty2); ctxI.lineTo(ix0 + 2 * sz, ty2 + sz);
+      ctxI.stroke();
+      ctxI.font = "bold 18px monospace";
+      ctxI.fillText("☀️", ix0 + 14, ty2 + 20);
+      ctxI.fillText("☀️", ix0 + sz + 14, ty2 + 20);
+      ctxI.fillText("☀️", ix0 + 2 * sz + 14, ty2 + 20);
       break;
     }
     case 12: { // LADDER
       const dy = ly + 16;
-      ctx.font = "bold 17px monospace";
-      ctx.fillText("C A R T", 144, dy + 10);
-      ctx.fillText("|", 144, dy + 24);
-      ctx.fillText("D A R T", 144, dy + 38);
-      ctx.fillText("C A R T", 432, dy + 10);
-      ctx.fillText("|", 432, dy + 24);
-      ctx.fillText("D A R K", 432, dy + 38);
+      ctxV.font = "bold 17px monospace";
+      ctxV.fillText("C A R T", 288, dy + 10);
+      ctxV.fillText("|", 288, dy + 24);
+      ctxV.fillText("D A R T", 288, dy + 38);
+
+      ctxI.font = "bold 17px monospace";
+      ctxI.fillText("C A R T", 288, dy + 10);
+      ctxI.fillText("|", 288, dy + 24);
+      ctxI.fillText("D A R K", 288, dy + 38);
       break;
     }
     case 13: { // WHEEL
       const wy = ly + 36;
-      ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.arc(144, wy, 28, 0, Math.PI * 2); ctx.stroke();
-      ctx.beginPath(); ctx.arc(144, wy, 12, 0, Math.PI * 2); ctx.stroke();
-      ctx.font = "bold 16px monospace";
-      ctx.fillText("O", 144, wy + 6);
-      ctx.font = "bold 11px monospace";
-      ctx.fillText("GLOW (USES O)", 144, wy + 42);
-      ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.arc(432, wy, 28, 0, Math.PI * 2); ctx.stroke();
-      ctx.beginPath(); ctx.arc(432, wy, 12, 0, Math.PI * 2); ctx.stroke();
-      ctx.font = "bold 16px monospace";
-      ctx.fillText("O", 432, wy + 6);
-      ctx.font = "bold 11px monospace";
-      ctx.fillText("WING (NO O)", 432, wy + 42);
+      ctxV.lineWidth = 2;
+      ctxV.beginPath(); ctxV.arc(288, wy, 28, 0, Math.PI * 2); ctxV.stroke();
+      ctxV.beginPath(); ctxV.arc(288, wy, 12, 0, Math.PI * 2); ctxV.stroke();
+      ctxV.font = "bold 16px monospace";
+      ctxV.fillText("O", 288, wy + 6);
+      ctxV.font = "bold 11px monospace";
+      ctxV.fillText("GLOW (USES O)", 288, wy + 42);
+
+      ctxI.lineWidth = 2;
+      ctxI.beginPath(); ctxI.arc(288, wy, 28, 0, Math.PI * 2); ctxI.stroke();
+      ctxI.beginPath(); ctxI.arc(288, wy, 12, 0, Math.PI * 2); ctxI.stroke();
+      ctxI.font = "bold 16px monospace";
+      ctxI.fillText("O", 288, wy + 6);
+      ctxI.font = "bold 11px monospace";
+      ctxI.fillText("WING (NO O)", 288, wy + 42);
       break;
     }
     case 14: { // LIGHTS
       const sz = 28;
-      const lx0 = 144 - (3 * sz) / 2, rx0 = 432 - (3 * sz) / 2;
+      const vx0 = 288 - (3 * sz) / 2;
       const lty = ly + 20;
-      ctx.strokeRect(lx0, lty, 3 * sz, sz);
-      ctx.fillRect(lx0 + sz, lty, sz, sz);
-      ctx.font = "bold 18px monospace";
-      ctx.fillText("💡", lx0 + 14, lty + 20);
-      ctx.fillText("💡", lx0 + 2 * sz + 14, lty + 20);
-      ctx.strokeRect(rx0, lty, 3 * sz, sz);
-      ctx.fillText("💡", rx0 + 14, lty + 20);
-      ctx.fillText("💡", rx0 + 2 * sz + 14, lty + 20);
-      ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(rx0 + 24, lty + 14); ctx.lineTo(rx0 + 2 * sz + 4, lty + 14); ctx.stroke();
+      ctxV.strokeRect(vx0, lty, 3 * sz, sz);
+      ctxV.fillRect(vx0 + sz, lty, sz, sz);
+      ctxV.font = "bold 18px monospace";
+      ctxV.fillText("💡", vx0 + 14, lty + 20);
+      ctxV.fillText("💡", vx0 + 2 * sz + 14, lty + 20);
+
+      const ix0 = 288 - (3 * sz) / 2;
+      ctxI.strokeRect(ix0, lty, 3 * sz, sz);
+      ctxI.font = "bold 18px monospace";
+      ctxI.fillText("💡", ix0 + 14, lty + 20);
+      ctxI.fillText("💡", ix0 + 2 * sz + 14, lty + 20);
+      ctxI.lineWidth = 1;
+      ctxI.beginPath(); ctxI.moveTo(ix0 + 24, lty + 14); ctxI.lineTo(ix0 + 2 * sz + 4, lty + 14); ctxI.stroke();
       break;
     }
     case 15: { // LOOP
       const sz = 34;
-      const lx0 = 144 - sz / 2, rx0 = 432 - sz / 2;
+      const vx0 = 288 - sz / 2;
       const lpy = ly + 20;
-      ctx.font = "bold 22px monospace";
-      ctx.fillText("3", 144, lpy + 25);
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.moveTo(lx0, lpy); ctx.lineTo(lx0 + sz, lpy);
-      ctx.moveTo(lx0, lpy); ctx.lineTo(lx0, lpy + sz);
-      ctx.moveTo(lx0, lpy + sz); ctx.lineTo(lx0 + sz, lpy + sz);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(rx0 - 10, lpy + sz / 2); ctx.lineTo(rx0 + sz + 10, lpy + sz / 2);
-      ctx.moveTo(rx0 + sz / 2, lpy - 10); ctx.lineTo(rx0 + sz / 2, lpy + sz + 10);
-      ctx.stroke();
+      ctxV.font = "bold 22px monospace";
+      ctxV.fillText("3", 288, lpy + 25);
+      ctxV.lineWidth = 3;
+      ctxV.beginPath();
+      ctxV.moveTo(vx0, lpy); ctxV.lineTo(vx0 + sz, lpy);
+      ctxV.moveTo(vx0, lpy); ctxV.lineTo(vx0, lpy + sz);
+      ctxV.moveTo(vx0, lpy + sz); ctxV.lineTo(vx0 + sz, lpy + sz);
+      ctxV.stroke();
+
+      const ix0 = 288 - sz / 2;
+      ctxI.lineWidth = 3;
+      ctxI.beginPath();
+      ctxI.moveTo(ix0 - 10, lpy + sz / 2); ctxI.lineTo(ix0 + sz + 10, lpy + sz / 2);
+      ctxI.moveTo(ix0 + sz / 2, lpy - 10); ctxI.lineTo(ix0 + sz / 2, lpy + sz + 10);
+      ctxI.stroke();
       break;
     }
     case 16: { // TOWERS
       const sz = 24;
-      const lx0 = 144 - (3 * sz) / 2, rx0 = 432 - (3 * sz) / 2;
+      const vx0 = 288 - (3 * sz) / 2;
       const twy = ly + 24;
-      ctx.strokeRect(lx0, twy, 3 * sz, sz);
-      ctx.strokeRect(rx0, twy, 3 * sz, sz);
-      ctx.lineWidth = 1;
+      ctxV.strokeRect(vx0, twy, 3 * sz, sz);
+      ctxV.lineWidth = 1;
       for (let i = 1; i < 3; i++) {
-        ctx.beginPath();
-        ctx.moveTo(lx0 + i * sz, twy); ctx.lineTo(lx0 + i * sz, twy + sz);
-        ctx.moveTo(rx0 + i * sz, twy); ctx.lineTo(rx0 + i * sz, twy + sz);
-        ctx.stroke();
+        ctxV.beginPath();
+        ctxV.moveTo(vx0 + i * sz, twy); ctxV.lineTo(vx0 + i * sz, twy + sz);
+        ctxV.stroke();
       }
-      ctx.font = "bold 15px monospace";
-      ctx.fillText("[1]", lx0 - 18, twy + 17);
-      ctx.fillText("5", lx0 + 12, twy + 17);
-      ctx.fillText("4", lx0 + sz + 12, twy + 17);
-      ctx.fillText("3", lx0 + 2 * sz + 12, twy + 17);
-      ctx.fillText("[1]", rx0 - 18, twy + 17);
-      ctx.fillText("2", rx0 + 12, twy + 17);
-      ctx.fillText("5", rx0 + sz + 12, twy + 17);
-      ctx.fillText("1", rx0 + 2 * sz + 12, twy + 17);
+      ctxV.font = "bold 15px monospace";
+      ctxV.fillText("[1]", vx0 - 18, twy + 17);
+      ctxV.fillText("5", vx0 + 12, twy + 17);
+      ctxV.fillText("4", vx0 + sz + 12, twy + 17);
+      ctxV.fillText("3", vx0 + 2 * sz + 12, twy + 17);
+
+      const ix0 = 288 - (3 * sz) / 2;
+      ctxI.strokeRect(ix0, twy, 3 * sz, sz);
+      ctxI.lineWidth = 1;
+      for (let i = 1; i < 3; i++) {
+        ctxI.beginPath();
+        ctxI.moveTo(ix0 + i * sz, twy); ctxI.lineTo(ix0 + i * sz, twy + sz);
+        ctxI.stroke();
+      }
+      ctxI.font = "bold 15px monospace";
+      ctxI.fillText("[1]", ix0 - 18, twy + 17);
+      ctxI.fillText("2", ix0 + 12, twy + 17);
+      ctxI.fillText("5", ix0 + sz + 12, twy + 17);
+      ctxI.fillText("1", ix0 + 2 * sz + 12, twy + 17);
       break;
     }
     case 17: { // INEQUALITY
       const sz = 28;
-      const lx0 = 144 - (3 * sz) / 2, rx0 = 432 - (3 * sz) / 2;
+      const vx0 = 288 - (3 * sz) / 2;
       const fy = ly + 20;
-      ctx.strokeRect(lx0, fy, sz, sz);
-      ctx.strokeRect(lx0 + 2 * sz, fy, sz, sz);
-      ctx.font = "bold 18px monospace";
-      ctx.fillText("2", lx0 + 14, fy + 20);
-      ctx.fillText("<", lx0 + sz + 14, fy + 20);
-      ctx.fillText("4", lx0 + 2 * sz + 14, fy + 20);
-      ctx.strokeRect(rx0, fy, sz, sz);
-      ctx.strokeRect(rx0 + 2 * sz, fy, sz, sz);
-      ctx.fillText("5", rx0 + 14, fy + 20);
-      ctx.fillText("<", rx0 + sz + 14, fy + 20);
-      ctx.fillText("3", rx0 + 2 * sz + 14, fy + 20);
+      ctxV.strokeRect(vx0, fy, sz, sz);
+      ctxV.strokeRect(vx0 + 2 * sz, fy, sz, sz);
+      ctxV.font = "bold 18px monospace";
+      ctxV.fillText("2", vx0 + 14, fy + 20);
+      ctxV.fillText("<", vx0 + sz + 14, fy + 20);
+      ctxV.fillText("4", vx0 + 2 * sz + 14, fy + 20);
+
+      const ix0 = 288 - (3 * sz) / 2;
+      ctxI.strokeRect(ix0, fy, sz, sz);
+      ctxI.strokeRect(ix0 + 2 * sz, fy, sz, sz);
+      ctxI.font = "bold 18px monospace";
+      ctxI.fillText("5", ix0 + 14, fy + 20);
+      ctxI.fillText("<", ix0 + sz + 14, fy + 20);
+      ctxI.fillText("3", ix0 + 2 * sz + 14, fy + 20);
       break;
     }
     case 18: { // MAZE
       const sz = 28;
-      const lx0 = 144 - (3 * sz) / 2, rx0 = 432 - (3 * sz) / 2;
+      const vx0 = 288 - (3 * sz) / 2;
       const fy = ly + 20;
 
       // Valid move: open corridor with path line passing cleanly
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(lx0, fy); ctx.lineTo(lx0 + 3 * sz, fy);
-      ctx.moveTo(lx0, fy + sz); ctx.lineTo(lx0 + 3 * sz, fy + sz);
-      ctx.stroke();
+      ctxV.lineWidth = 2;
+      ctxV.beginPath();
+      ctxV.moveTo(vx0, fy); ctxV.lineTo(vx0 + 3 * sz, fy);
+      ctxV.moveTo(vx0, fy + sz); ctxV.lineTo(vx0 + 3 * sz, fy + sz);
+      ctxV.stroke();
 
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.moveTo(lx0 + 4, fy + Math.floor(sz / 2)); ctx.lineTo(lx0 + 3 * sz - 4, fy + Math.floor(sz / 2));
-      ctx.stroke();
+      ctxV.lineWidth = 3;
+      ctxV.beginPath();
+      ctxV.moveTo(vx0 + 4, fy + Math.floor(sz / 2)); ctxV.lineTo(vx0 + 3 * sz - 4, fy + Math.floor(sz / 2));
+      ctxV.stroke();
 
+      const ix0 = 288 - (3 * sz) / 2;
       // Invalid move: vertical wall blocking corridor with path crossing through wall
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(rx0, fy); ctx.lineTo(rx0 + 3 * sz, fy);
-      ctx.moveTo(rx0, fy + sz); ctx.lineTo(rx0 + 3 * sz, fy + sz);
-      ctx.stroke();
+      ctxI.lineWidth = 2;
+      ctxI.beginPath();
+      ctxI.moveTo(ix0, fy); ctxI.lineTo(ix0 + 3 * sz, fy);
+      ctxI.moveTo(ix0, fy + sz); ctxI.lineTo(ix0 + 3 * sz, fy + sz);
+      ctxI.stroke();
 
-      ctx.lineWidth = 4;
-      ctx.beginPath();
-      ctx.moveTo(rx0 + sz + Math.floor(sz / 2), fy); ctx.lineTo(rx0 + sz + Math.floor(sz / 2), fy + sz);
-      ctx.stroke();
+      ctxI.lineWidth = 4;
+      ctxI.beginPath();
+      ctxI.moveTo(ix0 + sz + Math.floor(sz / 2), fy); ctxI.lineTo(ix0 + sz + Math.floor(sz / 2), fy + sz);
+      ctxI.stroke();
 
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.moveTo(rx0 + 4, fy + Math.floor(sz / 2)); ctx.lineTo(rx0 + 3 * sz - 4, fy + Math.floor(sz / 2));
-      ctx.stroke();
+      ctxI.lineWidth = 3;
+      ctxI.beginPath();
+      ctxI.moveTo(ix0 + 4, fy + Math.floor(sz / 2)); ctxI.lineTo(ix0 + 3 * sz - 4, fy + Math.floor(sz / 2));
+      ctxI.stroke();
       break;
     }
     case 19: { // SUDOKITO
       const sz = 32;
-      const lx0 = 144 - (3 * sz) / 2, rx0 = 432 - (3 * sz) / 2;
+      const vx0 = 288 - (3 * sz) / 2;
       const gy = ly + 16;
-      ctx.lineWidth = 2;
-      ctx.strokeRect(lx0, gy, 3 * sz, 2 * sz);
-      ctx.strokeRect(rx0, gy, 3 * sz, 2 * sz);
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(lx0, gy + sz); ctx.lineTo(lx0 + 3 * sz, gy + sz);
-      ctx.moveTo(rx0, gy + sz); ctx.lineTo(rx0 + 3 * sz, gy + sz);
+      ctxV.lineWidth = 2;
+      ctxV.strokeRect(vx0, gy, 3 * sz, 2 * sz);
+      ctxV.lineWidth = 1;
+      ctxV.beginPath();
+      ctxV.moveTo(vx0, gy + sz); ctxV.lineTo(vx0 + 3 * sz, gy + sz);
       for (let i = 1; i < 3; i++) {
-        ctx.moveTo(lx0 + i * sz, gy); ctx.lineTo(lx0 + i * sz, gy + 2 * sz);
-        ctx.moveTo(rx0 + i * sz, gy); ctx.lineTo(rx0 + i * sz, gy + 2 * sz);
+        ctxV.moveTo(vx0 + i * sz, gy); ctxV.lineTo(vx0 + i * sz, gy + 2 * sz);
       }
-      ctx.stroke();
-      ctx.font = "bold 20px monospace";
+      ctxV.stroke();
+      ctxV.font = "bold 20px monospace";
       // Valid: 1, 2 top row; 3 bottom row
-      ctx.fillText("1", lx0 + sz / 2, gy + 23);
-      ctx.fillText("2", lx0 + 2 * sz + sz / 2, gy + 23);
-      ctx.fillText("3", lx0 + sz + sz / 2, gy + sz + 23);
+      ctxV.fillText("1", vx0 + sz / 2, gy + 23);
+      ctxV.fillText("2", vx0 + 2 * sz + sz / 2, gy + 23);
+      ctxV.fillText("3", vx0 + sz + sz / 2, gy + sz + 23);
+
+      const ix0 = 288 - (3 * sz) / 2;
+      ctxI.lineWidth = 2;
+      ctxI.strokeRect(ix0, gy, 3 * sz, 2 * sz);
+      ctxI.lineWidth = 1;
+      ctxI.beginPath();
+      ctxI.moveTo(ix0, gy + sz); ctxI.lineTo(ix0 + 3 * sz, gy + sz);
+      for (let i = 1; i < 3; i++) {
+        ctxI.moveTo(ix0 + i * sz, gy); ctxI.lineTo(ix0 + i * sz, gy + 2 * sz);
+      }
+      ctxI.stroke();
+      ctxI.font = "bold 20px monospace";
       // Invalid: 1, 3, 2 top row; duplicate 3 bottom row
-      ctx.fillText("1", rx0 + sz / 2, gy + 23);
-      ctx.fillText("3", rx0 + sz + sz / 2, gy + 23);
-      ctx.fillText("2", rx0 + 2 * sz + sz / 2, gy + 23);
-      ctx.fillText("3", rx0 + sz + sz / 2, gy + sz + 23);
+      ctxI.fillText("1", ix0 + sz / 2, gy + 23);
+      ctxI.fillText("3", ix0 + sz + sz / 2, gy + 23);
+      ctxI.fillText("2", ix0 + 2 * sz + sz / 2, gy + 23);
+      ctxI.fillText("3", ix0 + sz + sz / 2, gy + sz + 23);
       break;
     }
   }
