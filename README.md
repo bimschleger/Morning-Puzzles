@@ -37,7 +37,7 @@ Every print job generates a randomized, unique daily edition featuring all 20 op
 12. **Tango**: Fill grid with 0s and 1s so equal symbols match and opposite symbols differ.
 13. **Ladder** *(Word Ladder / Doublets)*: Deduce words changing one letter at a time to transform start word into end word.
 14. **Wheel** *(Word Wheel / Target Anagram)*: Find words of 4+ letters using the wheel letters, always including the center letter.
-15. **Lights** *(Akari / Light Up)*: Place bulbs to illuminate corridors so numbered blocks match and no bulbs shine on each other.
+15. **Lights** *(Akari / Light Up)*: Place bulbs to light corridors without facing each other; numbers show how many bulbs share an edge.
 16. **Loop** *(Slitherlink / Fences)*: Draw a single continuous closed loop around numbers indicating surrounding line count.
 17. **Towers** *(Skyscrapers)*: Place building heights so edge clues match how many towers are visible in that line.
 18. **Inequality** *(Futoshiki)*: Fill grid with digits so each digit appears once per line and inequality signs hold.

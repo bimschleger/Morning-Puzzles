@@ -205,7 +205,7 @@ void OfflinePuzzleComposer::printSinglePuzzle(EscPosPrinter& printer, OfflinePuz
             LightsGen lights;
             lights.generate(diff);
             char lightsInstr[128];
-            snprintf(lightsInstr, sizeof(lightsInstr), "Place %d bulbs to light corridors without any shining together or exceeding numbers.", (int)lights.getTotalBulbs());
+            snprintf(lightsInstr, sizeof(lightsInstr), "Place %d bulbs to light corridors; none can face each other; numbers show bulbs sharing an edge.", (int)lights.getTotalBulbs());
             printPuzzleHeader(printer, "LIGHTS", diffStr, lightsInstr);
             if (!useRaster || !lights.printRasterToReceipt(printer, diff)) {
                 lights.printToReceipt(printer, diff);
