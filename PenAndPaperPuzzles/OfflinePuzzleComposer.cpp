@@ -57,12 +57,13 @@ void OfflinePuzzleComposer::printSinglePuzzle(EscPosPrinter& printer, OfflinePuz
         }
         case PUZZLE_WORDSEARCH: {
             WordSearchDifficulty diff = (grade == GRADE_EASY) ? WS_EASY : ((grade == GRADE_HARD || grade == GRADE_EXTREME) ? WS_HARD : WS_MEDIUM);
+            const char* diffStr = (diff == WS_EASY) ? "EASY" : ((diff == WS_HARD) ? "HARD" : "MEDIUM");
             Serial.println("[COMPOSER] Generating Word Search...");
             WordSearchGen wordSearch;
             wordSearch.generate(diff);
             char wsInstr[64];
             snprintf(wsInstr, sizeof(wsInstr), "Find all %d hidden words listed below.", (int)wordSearch.getWordCount());
-            printPuzzleHeader(printer, "SEARCH", nullptr, wsInstr);
+            printPuzzleHeader(printer, "SEARCH", diffStr, wsInstr);
             if (!useRaster || !wordSearch.printRasterToReceipt(printer)) {
                 wordSearch.printToReceipt(printer);
             }

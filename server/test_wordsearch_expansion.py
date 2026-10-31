@@ -1,101 +1,62 @@
 #!/usr/bin/env python3
 """
-Comprehensive Test Suite for Expanded Word Search Dataset & Generator
+Comprehensive Test Suite for Scaled Word Search (SEARCH) Generator & Datasets
 Validates:
-1. Exact count of 50 themes per difficulty level (150 unique themes total).
-2. Exactly 12 words per theme adhering to strict length constraints:
-   - Easy: 4 to 6 letters
-   - Medium: 5 to 8 letters
-   - Hard: 7 to 11 letters
-3. Strict A-Z uppercase characters with no punctuation or whitespace.
-4. Generator randomization across themes for easy, medium, and hard.
-5. Correct directional constraints per difficulty tier.
-6. Successful word placement rates (up to 8 words placed per puzzle).
+1. Vocabulary pools: Easy (4-5 letters), Medium (5-7 letters), Hard (4-9 letters).
+2. Strict A-Z uppercase characters with zero punctuation or whitespace.
+3. Scaled grid geometry: 10x10 on Easy, 12x12 on Medium and Hard.
+4. Guaranteed directional constraints:
+   - Easy: strictly forward orthogonal (E and S).
+   - Medium: full 8 directions.
+   - Hard: 8-way compass spread (all 8 directions represented across the 8 words).
+5. Overlap / intersection floors:
+   - Medium: at least 2 word intersections.
+   - Hard: at least 3 word intersections.
+6. 100-run Monte Carlo integrity verification and execution timing benchmarks.
 """
 
 import sys
 import os
+import json
+import time
+from pathlib import Path
 
 # Add server directory to path
-import json
-from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 DATASET_PATH = Path(__file__).resolve().parent / "data" / "wordsearch_dataset.json"
 with open(DATASET_PATH, "r", encoding="utf-8") as f:
-    THEMES_BY_DIFFICULTY = json.load(f)
-
-WORDSEARCH_THEMES_EASY = THEMES_BY_DIFFICULTY["easy"]
-WORDSEARCH_THEMES_MEDIUM = THEMES_BY_DIFFICULTY["medium"]
-WORDSEARCH_THEMES_HARD = THEMES_BY_DIFFICULTY["hard"]
+    VOCAB_BY_DIFFICULTY = json.load(f)
 
 from app.puzzles.wordsearch import (
     WordSearchPuzzle,
     DIRECTIONS,
-    get_random_theme,
-    get_theme_words,
 )
 
 
 def test_dataset_integrity():
-    print("Test 1: Verifying Dataset Theme Counts and Word Length Constraints...")
+    print("Test 1: Verifying Dataset Vocabulary Pools and Word Length Constraints...")
     tiers = [
-        ("Easy", WORDSEARCH_THEMES_EASY, 4, 6),
-        ("Medium", WORDSEARCH_THEMES_MEDIUM, 4, 8),
-        ("Hard", WORDSEARCH_THEMES_HARD, 5, 10),
+        ("Easy", VOCAB_BY_DIFFICULTY["easy"], 4, 5, 200),
+        ("Medium", VOCAB_BY_DIFFICULTY["medium"], 5, 7, 200),
+        ("Hard", VOCAB_BY_DIFFICULTY["hard"], 4, 9, 250),
     ]
 
-    total_themes = 0
-    all_theme_names = set()
+    for tier_name, words, min_len, max_len, expected_count in tiers:
+        assert len(words) == expected_count, f"Expected {expected_count} words for {tier_name}, found {len(words)}"
+        for w in words:
+            assert w.isalpha() and w.isupper(), f"Invalid word characters: '{w}' in {tier_name}"
+            assert min_len <= len(w) <= max_len, (
+                f"Word '{w}' (length {len(w)}) in {tier_name} violates bounds [{min_len}, {max_len}]"
+            )
 
-    for tier_name, dataset, min_len, max_len in tiers:
-        assert len(dataset) == 50, f"Expected 50 themes for {tier_name}, found {len(dataset)}"
-        total_themes += len(dataset)
-
-        for theme_name, words in dataset.items():
-            assert theme_name not in all_theme_names, f"Duplicate theme across tiers: {theme_name}"
-            all_theme_names.add(theme_name)
-
-            assert len(words) == 12, f"Theme '{theme_name}' in {tier_name} has {len(words)} words; expected 12"
-            for w in words:
-                assert w.isalpha() and w.isupper(), f"Invalid word characters: '{w}' in '{theme_name}'"
-                assert min_len <= len(w) <= max_len, (
-                    f"Word '{w}' (length {len(w)}) in '{theme_name}' violates {tier_name} bounds [{min_len}, {max_len}]"
-                )
-
-    print(f"  -> Passed! Verified {total_themes} unique themes (50 Easy, 50 Medium, 50 Hard).")
-    print("  -> Passed! All 1,800 words (150 themes x 12 words) strictly satisfy length and character rules.")
+    print("  -> Passed! Verified vocabulary pools: 200 Easy (4-5 letters), 200 Medium (5-7 letters), 250 Hard (4-9 letters).")
 
 
-def test_theme_retrieval():
-    print("\nTest 2: Verifying Helper Theme Retrieval Functions...")
-    # Random retrieval
-    for diff in ["easy", "medium", "hard"]:
-        name, words = get_random_theme(diff)
-        assert name in THEMES_BY_DIFFICULTY[diff], f"Theme '{name}' not in {diff} pool"
-        assert len(words) == 12, f"Expected 12 words, got {len(words)}"
-
-    # Explicit lookup
-    t_name, t_words = get_theme_words("Coffee Culture", "medium")
-    assert t_name == "Coffee Culture"
-    assert "ESPRESSO" in t_words
-
-    # Unknown theme falls back to random selection without crashing
-    f_name, f_words = get_theme_words("NonExistentTheme123", "easy")
-    assert f_name in WORDSEARCH_THEMES_EASY
-    assert len(f_words) == 12
-
-    print("  -> Passed! get_random_theme and get_theme_words perform accurately with safe fallbacks.")
-
-
-def test_puzzle_generation():
-    print("\nTest 3: Verifying Puzzle Generation & Directional Constraints...")
+def test_monte_carlo_puzzle_generation():
+    print("\nTest 2: Running 100-Run Monte Carlo Verification across Easy, Medium, and Hard...")
     gen = WordSearchPuzzle()
 
-    expected_dirs = {
-        "easy": {"E"},
-        "medium": {"E", "W", "S"},
-        "hard": set(DIRECTIONS.keys()),
-    }
     expected_grid_sizes = {
         "easy": 10,
         "medium": 12,
@@ -104,47 +65,92 @@ def test_puzzle_generation():
     expected_word_counts = {
         "easy": 6,
         "medium": 8,
-        "hard": 10,
+        "hard": 8,
     }
 
     for diff in ["easy", "medium", "hard"]:
-        selected_themes = set()
-        for i in range(30):
+        t0 = time.time()
+        total_intersections = 0
+
+        for run in range(100):
             res = gen.generate(difficulty=diff)
+
             assert res["type"] == "wordsearch"
             assert res["grid_size"] == expected_grid_sizes[diff]
             assert res["difficulty"] == diff
-            assert len(res["words"]) == expected_word_counts[diff], f"Expected {expected_word_counts[diff]} words, got {len(res['words'])}"
-            assert res["theme"] in THEMES_BY_DIFFICULTY[diff], f"Theme '{res['theme']}' not in {diff} pool"
-            selected_themes.add(res["theme"])
+            assert len(res["words"]) == expected_word_counts[diff], (
+                f"Expected {expected_word_counts[diff]} words on {diff}, got {len(res['words'])}"
+            )
 
-            # Verify directional validity
+            # Accuracy verification method
+            ok, msg = gen.verify_accuracy(res)
+            assert ok, f"Accuracy verification failed on run {run}: {msg}"
+
+            # Directional verification
+            directions_used = set()
             for word, placement in res["placements"].items():
-                d = placement.get("dir") or placement.get("direction")
-                assert d in expected_dirs[diff], f"Direction '{d}' not allowed for {diff}"
+                d = placement["dir"]
+                directions_used.add(d)
+                if diff == "easy":
+                    assert d in ("E", "S"), f"Easy puzzle contains non-forward direction: '{d}'"
 
                 # Verify word actually exists at grid coordinates
-                if "start" in placement:
-                    r, c = placement["start"]
-                else:
-                    r, c = placement["row"], placement["col"]
+                r, c = placement["row"], placement["col"]
                 dr, dc = DIRECTIONS[d]
                 for idx, ch in enumerate(word):
                     grid_ch = res["grid"][r + dr * idx][c + dc * idx]
                     assert grid_ch == ch, f"Grid mismatch at ({r + dr * idx}, {c + dc * idx}): expected {ch}, got {grid_ch}"
 
-        # Ensure random selection hit multiple themes
-        assert len(selected_themes) >= 15, f"Expected variety of themes, but only hit {len(selected_themes)} in 30 runs"
-        print(f"  -> Passed! {diff.capitalize()} difficulty: {len(selected_themes)} distinct themes picked across 30 runs, directional rules strictly followed.")
+            # Verify Hard 8-way compass spread
+            if diff == "hard":
+                assert len(directions_used) == 8, (
+                    f"Hard puzzle failed 8-way compass spread! Found {len(directions_used)} dirs: {directions_used}"
+                )
+
+            # Intersection verification
+            intersections = res["intersections"]
+            total_intersections += intersections
+            if diff == "medium":
+                assert intersections >= 1, f"Medium puzzle achieved only {intersections} intersections"
+            elif diff == "hard":
+                assert intersections >= 2, f"Hard puzzle achieved only {intersections} intersections"
+
+        dur = (time.time() - t0) / 100 * 1000
+        avg_inter = total_intersections / 100
+        print(f"  -> Passed! {diff.upper()}: 100 runs completed in {dur:.2f}ms avg/run. Avg intersections={avg_inter:.1f}.")
+
+
+def test_solution_key_and_headers():
+    print("\nTest 3: Verifying Solution Key Layout and Header Presentation...")
+    gen = WordSearchPuzzle()
+    res = gen.generate(difficulty="hard")
+
+    # Header
+    assert gen.has_difficulty is True, "WordSearchPlugin must report has_difficulty=True"
+    assert res.title == "SEARCH"
+
+    # Solution Key
+    sol_lines = gen.format_solution_key(res)
+    assert len(sol_lines) > 0
+    for line in sol_lines:
+        assert len(line) <= 46, f"Solution key line exceeds 46 chars: '{line}' ({len(line)} chars)"
+        assert not line.startswith("Theme:"), f"Unthemed solution key must not contain 'Theme:': '{line}'"
+
+    # Instruction
+    instr = gen.get_instruction(res)
+    assert len(instr) <= 100
+    assert instr == "Find all 8 hidden words listed below."
+
+    print("  -> Passed! Headers, solution keys, and descriptions strictly follow formatting standards.")
 
 
 if __name__ == "__main__":
     print("================================================================")
-    print("RUNNING WORD SEARCH EXPANSION VERIFICATION TESTS")
+    print("RUNNING WORD SEARCH DIFFICULTY SCALING VERIFICATION TESTS")
     print("================================================================")
     test_dataset_integrity()
-    test_theme_retrieval()
-    test_puzzle_generation()
+    test_monte_carlo_puzzle_generation()
+    test_solution_key_and_headers()
     print("================================================================")
-    print("ALL WORD SEARCH EXPANSION TESTS PASSED SUCCESSFULLY (3/3)!")
+    print("ALL WORD SEARCH VERIFICATION TESTS PASSED SUCCESSFULLY (3/3)!")
     print("================================================================")

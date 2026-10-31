@@ -331,6 +331,10 @@ def build_wordsearch_dataset() -> None:
     with open(json_path, "r", encoding="utf-8") as f:
         dataset = json.load(f)
 
+    easy_words = dataset["easy"]
+    medium_words = dataset["medium"]
+    hard_words = dataset["hard"]
+
     lines = [
         "// Automatically generated from server/data/wordsearch_dataset.json by tools/datasets/build_all_datasets.py",
         "// Do not edit directly!",
@@ -340,37 +344,35 @@ def build_wordsearch_dataset() -> None:
         "#include <Arduino.h>",
         '#include "WordSearchGen.h"',
         "",
-        "struct ThemeDef {",
-        "    const char* name;",
-        "    const char* words;",
-        "};",
-        "",
-        "static const size_t NUM_WS_THEMES_PER_DIFF = 50;",
+        f"static const size_t NUM_WS_EASY_WORDS = {len(easy_words)};",
+        f"static const size_t NUM_WS_MEDIUM_WORDS = {len(medium_words)};",
+        f"static const size_t NUM_WS_HARD_WORDS = {len(hard_words)};",
         "",
     ]
 
-    for tier, var_name in [("easy", "EASY_THEMES"), ("medium", "MEDIUM_THEMES"), ("hard", "HARD_THEMES")]:
-        themes = dataset[tier]
-        lines.append(f"static const ThemeDef {var_name}[NUM_WS_THEMES_PER_DIFF] PROGMEM = {{")
-        for name, words in themes.items():
-            words_str = " ".join(words)
-            lines.append("    {")
-            lines.append(f'        "{name}",')
-            lines.append(f'        "{words_str}"')
-            lines.append("    },")
+    for tier, words, var_name, count_var in [
+        ("easy", easy_words, "WS_EASY_WORDS", "NUM_WS_EASY_WORDS"),
+        ("medium", medium_words, "WS_MEDIUM_WORDS", "NUM_WS_MEDIUM_WORDS"),
+        ("hard", hard_words, "WS_HARD_WORDS", "NUM_WS_HARD_WORDS"),
+    ]:
+        lines.append(f"static const char* const {var_name}[{count_var}] PROGMEM = {{")
+        for w in words:
+            lines.append(f'    "{w}",')
         lines.append("};")
         lines.append("")
 
-    lines.append("inline const ThemeDef* getWordSearchPool(WordSearchDifficulty diff, size_t& outCount) {")
-    lines.append("    outCount = NUM_WS_THEMES_PER_DIFF;")
+    lines.append("inline const char* const* getWordSearchPool(WordSearchDifficulty diff, size_t& outCount) {")
     lines.append("    switch (diff) {")
     lines.append("        case WS_EASY:")
-    lines.append("            return EASY_THEMES;")
+    lines.append("            outCount = NUM_WS_EASY_WORDS;")
+    lines.append("            return WS_EASY_WORDS;")
     lines.append("        case WS_HARD:")
-    lines.append("            return HARD_THEMES;")
+    lines.append("            outCount = NUM_WS_HARD_WORDS;")
+    lines.append("            return WS_HARD_WORDS;")
     lines.append("        case WS_MEDIUM:")
     lines.append("        default:")
-    lines.append("            return MEDIUM_THEMES;")
+    lines.append("            outCount = NUM_WS_MEDIUM_WORDS;")
+    lines.append("            return WS_MEDIUM_WORDS;")
     lines.append("    }")
     lines.append("}")
     lines.append("")
@@ -381,13 +383,23 @@ def build_wordsearch_dataset() -> None:
     # Update simulator
     if SIMULATOR_HTML.exists():
         content = SIMULATOR_HTML.read_text(encoding="utf-8")
-        for tier, var_name in [("easy", "WORD_SEARCH_THEMES_EASY"), ("medium", "WORD_SEARCH_THEMES_MEDIUM"), ("hard", "WORD_SEARCH_THEMES_HARD")]:
+        for tier, var_name in [
+            ("easy", "WORD_SEARCH_WORDS_EASY"),
+            ("medium", "WORD_SEARCH_WORDS_MEDIUM"),
+            ("hard", "WORD_SEARCH_WORDS_HARD"),
+        ]:
             js_code = f"    const {var_name} = " + json.dumps(dataset[tier], separators=(",", ":")) + ";"
-            pattern = rf"    const {var_name} = \{{.*?\}};"
+            pattern = rf"    const {var_name} = \[.*?\];"
             if re.search(pattern, content, re.DOTALL):
                 content = re.sub(pattern, lambda m, code=js_code: code, content, flags=re.DOTALL)
+            else:
+                # Replace old WORD_SEARCH_THEMES pattern if present
+                old_var = f"WORD_SEARCH_THEMES_{tier.upper()}"
+                old_pattern = rf"    const {old_var} = \{{.*?\}};"
+                if re.search(old_pattern, content, re.DOTALL):
+                    content = re.sub(old_pattern, lambda m, code=js_code: code, content, flags=re.DOTALL)
         SIMULATOR_HTML.write_text(content, encoding="utf-8")
-        print(f"  -> Updated WORD_SEARCH_THEMES in {SIMULATOR_HTML}")
+        print(f"  -> Updated WORD_SEARCH_WORDS in {SIMULATOR_HTML}")
 
 
 # =============================================================================
