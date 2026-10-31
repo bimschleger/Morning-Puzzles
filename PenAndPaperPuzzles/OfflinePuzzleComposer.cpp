@@ -318,6 +318,19 @@ void OfflinePuzzleComposer::printSinglePuzzle(EscPosPrinter& printer, OfflinePuz
             }
             break;
         }
+        case PUZZLE_SUDOKITO: {
+            SudokitoDifficulty diff = (grade == GRADE_EASY) ? SUDOKITO_EASY : ((grade == GRADE_HARD || grade == GRADE_EXTREME) ? SUDOKITO_HARD : SUDOKITO_MEDIUM);
+            const char* diffStr = (diff == SUDOKITO_EASY) ? "EASY" : ((diff == SUDOKITO_HARD) ? "HARD" : "MEDIUM");
+            Serial.println("[COMPOSER] Generating Sudokito...");
+            SudokitoGen sudokito;
+            sudokito.generate(diff);
+            printPuzzleHeader(printer, "SUDOKITO", diffStr, 
+                              "Fill every row, column, and 2x3 box with digits 1-6 without repeating.");
+            if (!useRaster || !sudokito.printRasterToReceipt(printer, diff)) {
+                sudokito.printToReceipt(printer, diff);
+            }
+            break;
+        }
         default:
             break;
     }
@@ -771,6 +784,30 @@ void OfflinePuzzleComposer::renderGameGuideRaster(ThermalCanvas& canvas, uint8_t
             canvas.drawHLine(rx0, fy + sz, 3 * sz, 2, 1);
             canvas.drawVLine(rx0 + sz + sz / 2, fy, sz, 4, 1);
             canvas.drawHLine(rx0 + 4, fy + sz / 2, 3 * sz - 8, 3, 1);
+            break;
+        }
+        case 19: { // SUDOKITO
+            int16_t sz = 32;
+            int16_t lx0 = 144 - (3 * sz) / 2;
+            int16_t rx0 = 432 - (3 * sz) / 2;
+            int16_t gy = ly + 16;
+            canvas.drawRect(lx0, gy, 3 * sz, 2 * sz, 2);
+            canvas.drawRect(rx0, gy, 3 * sz, 2 * sz, 2);
+            canvas.drawHLine(lx0, gy + sz, 3 * sz, 1);
+            canvas.drawHLine(rx0, gy + sz, 3 * sz, 1);
+            for (int i = 1; i < 3; i++) {
+                canvas.drawVLine(lx0 + i * sz, gy, 2 * sz, 1);
+                canvas.drawVLine(rx0 + i * sz, gy, 2 * sz, 1);
+            }
+            // Valid: 1, 2 on top row; 3 placed in center bottom row
+            canvas.drawChar(lx0 + 10, gy + 6, '1', 3);
+            canvas.drawChar(lx0 + 2 * sz + 10, gy + 6, '2', 3);
+            canvas.drawChar(lx0 + sz + 10, gy + sz + 6, '3', 3);
+            // Invalid: 1, 3, 2 on top row; duplicate 3 placed in center bottom row
+            canvas.drawChar(rx0 + 10, gy + 6, '1', 3);
+            canvas.drawChar(rx0 + sz + 10, gy + 6, '3', 3);
+            canvas.drawChar(rx0 + 2 * sz + 10, gy + 6, '2', 3);
+            canvas.drawChar(rx0 + sz + 10, gy + sz + 6, '3', 3);
             break;
         }
     }

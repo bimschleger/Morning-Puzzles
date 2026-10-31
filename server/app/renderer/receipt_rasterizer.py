@@ -94,3 +94,8 @@ def render_maze_raster(maze_data: Dict[str, Any], target_width: int = THERMAL_WI
     return DEFAULT_REGISTRY.get("maze").render_raster(maze_data, target_width=target_width)
 
 
+def render_sudokito_raster(sudokito_data: Dict[str, Any], target_width: int = THERMAL_WIDTH_DOTS) -> bytes:
+    return DEFAULT_REGISTRY.get("sudokito").render_raster(sudokito_data, target_width=target_width)
+
+
+

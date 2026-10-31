@@ -25,6 +25,7 @@ This authoritative guide contains complete rules, core objectives, opening deduc
 - [TOWERS](#towers) - Place building heights so edge clues match how many towers are visible in that line.
 - [INEQUALITY](#inequality) - Fill grid with digits so each digit appears once per line and inequality signs hold.
 - [MAZE](#maze) - Draw a path from the entrance to the exit without crossing any walls.
+- [SUDOKITO](#sudokito) - Fill every row, column, and 2x3 box with digits 1-6 without repeating.
 
 ---
 
@@ -753,5 +754,44 @@ This authoritative guide contains complete rules, core objectives, opening deduc
   *A: Yes. Every procedural maze contains exactly one continuous open route connecting the entrance to the exit.*
 - **Q: Do I ever need to retrace or loop back?**
   *A: No. The true solution path is a direct acyclic route without circular loops or backtracking.*
+
+---
+
+<a name="sudokito"></a>
+## --- SUDOKITO ---
+
+> **Instruction**: `Fill every row, column, and 2x3 box with digits 1-6 without repeating.`
+
+**Objective**: Complete the 6x6 grid with digits 1 through 6 so that no number is repeated within any horizontal row, vertical column, or outlined 2x3 box.
+
+### Rules of Play
+- Every row must contain digits 1-6 exactly once.
+- Every column must contain digits 1-6 exactly once.
+- Every 2x3 bold box must contain digits 1-6 exactly once.
+- Given clues are permanent and cannot be altered or moved.
+
+### Move Examples
+
+**Valid Move**: Digit 3 placed in an empty square where 3 does not exist in its row, column, or 2x3 box.
+```text
+  1 · 2
+  · 3 ·
+```
+
+**Invalid Move**: Digit 3 placed in a 2x3 box that already contains another 3 (duplicate violation).
+```text
+  1 3 2
+  · 3 ·
+```
+
+### Where to Start (First Deductions)
+- **Tip**: Scan 2x3 boxes that already contain 4 or 5 given numbers; only 1 or 2 candidate digits remain.
+- **Tip**: Use cross-hatching: trace a known digit across adjacent boxes and rows to pinpoint its only valid location in an unfilled 2x3 region.
+
+### Frequently Asked Questions
+- **Q: How does Sudokito differ from classic Sudoku?**
+  *A: Sudokito uses a smaller 6x6 grid with digits 1-6 and six 2x3 rectangular regions instead of 9x9 with 3x3 squares, offering faster, punchy gameplay.*
+- **Q: Does every Sudokito puzzle have a guaranteed unique solution?**
+  *A: Yes. Each generated puzzle is verified by a uniqueness solver to ensure exactly one logical solution exists without guessing.*
 
 ---

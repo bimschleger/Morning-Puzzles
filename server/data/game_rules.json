@@ -16,20 +16,50 @@
       ],
       "valid_move": {
         "caption": "Digit 5 placed in an empty square where 5 does not exist in its row, column, or 3x3 box.",
-        "highlight": [1, 1],
+        "highlight": [
+          1,
+          1
+        ],
         "grid": [
-          ["·", "·", "·"],
-          ["·", "5", "·"],
-          ["·", "·", "·"]
+          [
+            "·",
+            "·",
+            "·"
+          ],
+          [
+            "·",
+            "5",
+            "·"
+          ],
+          [
+            "·",
+            "·",
+            "·"
+          ]
         ]
       },
       "invalid_move": {
         "caption": "Digit 5 placed in a row or box that already contains another 5 (duplicate violation).",
-        "highlight": [1, 1],
+        "highlight": [
+          1,
+          1
+        ],
         "grid": [
-          ["5", "·", "·"],
-          ["·", "5", "·"],
-          ["·", "·", "·"]
+          [
+            "5",
+            "·",
+            "·"
+          ],
+          [
+            "·",
+            "5",
+            "·"
+          ],
+          [
+            "·",
+            "·",
+            "·"
+          ]
         ]
       },
       "opening_anchors": [
@@ -61,20 +91,70 @@
       ],
       "valid_move": {
         "caption": "Straight diagonal line tracing the word C-A-T forwards.",
-        "highlight": [[0, 0], [1, 1], [2, 2]],
+        "highlight": [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            2,
+            2
+          ]
+        ],
         "grid": [
-          ["C", "·", "·"],
-          ["·", "A", "·"],
-          ["·", "·", "T"]
+          [
+            "C",
+            "·",
+            "·"
+          ],
+          [
+            "·",
+            "A",
+            "·"
+          ],
+          [
+            "·",
+            "·",
+            "T"
+          ]
         ]
       },
       "invalid_move": {
         "caption": "Bent or zig-zag line tracing C-A-T around a corner (words must be straight).",
-        "highlight": [[0, 0], [0, 1], [1, 1]],
+        "highlight": [
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            1,
+            1
+          ]
+        ],
         "grid": [
-          ["C", "A", "·"],
-          ["·", "T", "·"],
-          ["·", "·", "·"]
+          [
+            "C",
+            "A",
+            "·"
+          ],
+          [
+            "·",
+            "T",
+            "·"
+          ],
+          [
+            "·",
+            "·",
+            "·"
+          ]
         ]
       },
       "opening_anchors": [
@@ -106,16 +186,30 @@
       ],
       "valid_move": {
         "caption": "Clue '1 1' with one shaded cell, a white blank space, and a second shaded cell.",
-        "highlight": [0, 2],
+        "highlight": [
+          0,
+          2
+        ],
         "grid": [
-          ["█", "·", "█"]
+          [
+            "█",
+            "·",
+            "█"
+          ]
         ]
       },
       "invalid_move": {
         "caption": "Clue '1 1' drawn as two touching shaded cells, forming an illegal block of 2.",
-        "highlight": [0, 1],
+        "highlight": [
+          0,
+          1
+        ],
         "grid": [
-          ["█", "█", "·"]
+          [
+            "█",
+            "█",
+            "·"
+          ]
         ]
       },
       "opening_anchors": [
@@ -147,20 +241,62 @@
       ],
       "valid_move": {
         "caption": "Stars placed with a gap of at least one empty square between them in all directions.",
-        "highlight": [[0, 0], [1, 2]],
+        "highlight": [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            2
+          ]
+        ],
         "grid": [
-          ["★", "·", "·"],
-          ["·", "·", "★"],
-          ["·", "·", "·"]
+          [
+            "★",
+            "·",
+            "·"
+          ],
+          [
+            "·",
+            "·",
+            "★"
+          ],
+          [
+            "·",
+            "·",
+            "·"
+          ]
         ]
       },
       "invalid_move": {
         "caption": "Two stars touching at their diagonal corners (stars can never touch diagonally).",
-        "highlight": [[0, 0], [1, 1]],
+        "highlight": [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            1
+          ]
+        ],
         "grid": [
-          ["★", "·", "·"],
-          ["·", "★", "·"],
-          ["·", "·", "·"]
+          [
+            "★",
+            "·",
+            "·"
+          ],
+          [
+            "·",
+            "★",
+            "·"
+          ],
+          [
+            "·",
+            "·",
+            "·"
+          ]
         ]
       },
       "opening_anchors": [
@@ -192,16 +328,33 @@
       ],
       "valid_move": {
         "caption": "Unscrambled clue word 'BRAIN' with circled letters correctly placed into clue boxes.",
-        "highlight": [1, 4],
+        "highlight": [
+          1,
+          4
+        ],
         "grid": [
-          ["B", "Ⓡ", "A", "I", "Ⓝ"]
+          [
+            "B",
+            "Ⓡ",
+            "A",
+            "I",
+            "Ⓝ"
+          ]
         ]
       },
       "invalid_move": {
         "caption": "Misspelled or incorrect anagram that leaves circled letters unusable for the riddle.",
-        "highlight": [0],
+        "highlight": [
+          0
+        ],
         "grid": [
-          ["X", "·", "·", "·", "·"]
+          [
+            "X",
+            "·",
+            "·",
+            "·",
+            "·"
+          ]
         ]
       },
       "opening_anchors": [
@@ -233,16 +386,35 @@
       ],
       "valid_move": {
         "caption": "Alternating sequence '1 0 1 0' with no three identical digits in a row.",
-        "highlight": [0, 1, 2, 3],
+        "highlight": [
+          0,
+          1,
+          2,
+          3
+        ],
         "grid": [
-          ["1", "0", "1", "0"]
+          [
+            "1",
+            "0",
+            "1",
+            "0"
+          ]
         ]
       },
       "invalid_move": {
         "caption": "Three identical numbers in a row '1 1 1' (maximum allowed adjacent is two).",
-        "highlight": [1, 2, 3],
+        "highlight": [
+          1,
+          2,
+          3
+        ],
         "grid": [
-          ["0", "1", "1", "1"]
+          [
+            "0",
+            "1",
+            "1",
+            "1"
+          ]
         ]
       },
       "opening_anchors": [
@@ -274,18 +446,42 @@
       ],
       "valid_move": {
         "caption": "Cell with clue '1' having exactly one flagged mine neighbor.",
-        "highlight": [0, 0],
+        "highlight": [
+          0,
+          0
+        ],
         "grid": [
-          ["💣", "·"],
-          ["1", "·"]
+          [
+            "💣",
+            "·"
+          ],
+          [
+            "1",
+            "·"
+          ]
         ]
       },
       "invalid_move": {
         "caption": "Cell with clue '1' having two flagged mine neighbors (overloaded clue).",
-        "highlight": [[0, 0], [0, 1]],
+        "highlight": [
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            1
+          ]
+        ],
         "grid": [
-          ["💣", "💣"],
-          ["1", "·"]
+          [
+            "💣",
+            "💣"
+          ],
+          [
+            "1",
+            "·"
+          ]
         ]
       },
       "opening_anchors": [
@@ -317,18 +513,46 @@
       ],
       "valid_move": {
         "caption": "Tent pitched orthogonally adjacent to a tree with an empty buffer around the tent.",
-        "highlight": [0, 1],
+        "highlight": [
+          0,
+          1
+        ],
         "grid": [
-          ["🌲", "⛺", "·"],
-          ["·", "·", "·"]
+          [
+            "🌲",
+            "⛺",
+            "·"
+          ],
+          [
+            "·",
+            "·",
+            "·"
+          ]
         ]
       },
       "invalid_move": {
         "caption": "Two tents touching diagonally (tents can never touch even at corners).",
-        "highlight": [[0, 1], [1, 2]],
+        "highlight": [
+          [
+            0,
+            1
+          ],
+          [
+            1,
+            2
+          ]
+        ],
         "grid": [
-          ["🌲", "⛺", "·"],
-          ["·", "·", "⛺"]
+          [
+            "🌲",
+            "⛺",
+            "·"
+          ],
+          [
+            "·",
+            "·",
+            "⛺"
+          ]
         ]
       },
       "opening_anchors": [
@@ -360,16 +584,30 @@
       ],
       "valid_move": {
         "caption": "Two parallel orthogonal bridges connecting island 3 to island 2.",
-        "highlight": [0, 1],
+        "highlight": [
+          0,
+          1
+        ],
         "grid": [
-          ["③", "══", "②"]
+          [
+            "③",
+            "══",
+            "②"
+          ]
         ]
       },
       "invalid_move": {
         "caption": "Three bridges connecting two islands (maximum allowed between two islands is two).",
-        "highlight": [0, 1],
+        "highlight": [
+          0,
+          1
+        ],
         "grid": [
-          ["④", "≡≡", "③"]
+          [
+            "④",
+            "≡≡",
+            "③"
+          ]
         ]
       },
       "opening_anchors": [
@@ -401,16 +639,28 @@
       ],
       "valid_move": {
         "caption": "Cage of size 2 with sum '3' filled with digits 1 and 2 (1 + 2 = 3).",
-        "highlight": [0, 1],
+        "highlight": [
+          0,
+          1
+        ],
         "grid": [
-          ["¹", "²"]
+          [
+            "¹",
+            "²"
+          ]
         ]
       },
       "invalid_move": {
         "caption": "Cage with sum '4' filled with repeating digits 2 and 2 (digits cannot repeat in a cage).",
-        "highlight": [0, 1],
+        "highlight": [
+          0,
+          1
+        ],
         "grid": [
-          ["²", "²"]
+          [
+            "²",
+            "²"
+          ]
         ]
       },
       "opening_anchors": [
@@ -442,18 +692,38 @@
       ],
       "valid_move": {
         "caption": "Consistent substitution: every ciphertext 'K' is decoded as plaintext 'E'.",
-        "highlight": [0, 2],
+        "highlight": [
+          0,
+          2
+        ],
         "grid": [
-          ["T", "H", "E"],
-          ["W", "Z", "K"]
+          [
+            "T",
+            "H",
+            "E"
+          ],
+          [
+            "W",
+            "Z",
+            "K"
+          ]
         ]
       },
       "invalid_move": {
         "caption": "Inconsistent substitution: decoding ciphertext 'K' as 'E' in one word and 'O' in another.",
-        "highlight": [1, 2],
+        "highlight": [
+          1,
+          2
+        ],
         "grid": [
-          ["T", "O"],
-          ["W", "K"]
+          [
+            "T",
+            "O"
+          ],
+          [
+            "W",
+            "K"
+          ]
         ]
       },
       "opening_anchors": [
@@ -485,16 +755,31 @@
       ],
       "valid_move": {
         "caption": "Cells with '=' clue filled with identical symbols (two suns).",
-        "highlight": [0, 1],
+        "highlight": [
+          0,
+          1
+        ],
         "grid": [
-          ["☀️", "=", "☀️"]
+          [
+            "☀️",
+            "=",
+            "☀️"
+          ]
         ]
       },
       "invalid_move": {
         "caption": "Three identical symbols in a row '☀️ ☀️ ☀️' (maximum allowed adjacent is two).",
-        "highlight": [0, 1, 2],
+        "highlight": [
+          0,
+          1,
+          2
+        ],
         "grid": [
-          ["☀️", "☀️", "☀️"]
+          [
+            "☀️",
+            "☀️",
+            "☀️"
+          ]
         ]
       },
       "opening_anchors": [
@@ -526,18 +811,43 @@
       ],
       "valid_move": {
         "caption": "Single letter change from C-A-R-T to D-A-R-T (valid English word).",
-        "highlight": [0],
+        "highlight": [
+          0
+        ],
         "grid": [
-          ["C", "A", "R", "T"],
-          ["D", "A", "R", "T"]
+          [
+            "C",
+            "A",
+            "R",
+            "T"
+          ],
+          [
+            "D",
+            "A",
+            "R",
+            "T"
+          ]
         ]
       },
       "invalid_move": {
         "caption": "Changing two letters at once from C-A-R-T to D-A-R-K (only one letter change allowed).",
-        "highlight": [0, 3],
+        "highlight": [
+          0,
+          3
+        ],
         "grid": [
-          ["C", "A", "R", "T"],
-          ["D", "A", "R", "K"]
+          [
+            "C",
+            "A",
+            "R",
+            "T"
+          ],
+          [
+            "D",
+            "A",
+            "R",
+            "K"
+          ]
         ]
       },
       "opening_anchors": [
@@ -569,17 +879,32 @@
       ],
       "valid_move": {
         "caption": "Word 'GLOW' uses letters from the wheel and contains the required center letter 'O'.",
-        "highlight": [1],
+        "highlight": [
+          1
+        ],
         "grid": [
-          ["G", "L", "W"],
-          ["·", "O", "·"]
+          [
+            "G",
+            "L",
+            "W"
+          ],
+          [
+            "·",
+            "O",
+            "·"
+          ]
         ]
       },
       "invalid_move": {
         "caption": "Word 'WING' spelled without using the required central hub letter 'O'.",
         "highlight": [],
         "grid": [
-          ["W", "I", "N", "G"]
+          [
+            "W",
+            "I",
+            "N",
+            "G"
+          ]
         ]
       },
       "opening_anchors": [
@@ -611,16 +936,42 @@
       ],
       "valid_move": {
         "caption": "Two lightbulbs placed on opposite sides of a barrier block (line of sight is blocked).",
-        "highlight": [[0, 0], [0, 2]],
+        "highlight": [
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            2
+          ]
+        ],
         "grid": [
-          ["💡", "■", "💡"]
+          [
+            "💡",
+            "■",
+            "💡"
+          ]
         ]
       },
       "invalid_move": {
         "caption": "Two lightbulbs in direct open line of sight of each other along a corridor.",
-        "highlight": [[0, 0], [0, 2]],
+        "highlight": [
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            2
+          ]
+        ],
         "grid": [
-          ["💡", "·", "💡"]
+          [
+            "💡",
+            "·",
+            "💡"
+          ]
         ]
       },
       "opening_anchors": [
@@ -652,20 +1003,50 @@
       ],
       "valid_move": {
         "caption": "Cell with clue '3' having exactly three connected boundary edges drawn around it.",
-        "highlight": [0, 0],
+        "highlight": [
+          0,
+          0
+        ],
         "grid": [
-          ["┌", "─", "┐"],
-          ["│", "3", " "],
-          ["└", "─", "┘"]
+          [
+            "┌",
+            "─",
+            "┐"
+          ],
+          [
+            "│",
+            "3",
+            " "
+          ],
+          [
+            "└",
+            "─",
+            "┘"
+          ]
         ]
       },
       "invalid_move": {
         "caption": "Fork or branch in the line (loop must be a single path without intersections).",
-        "highlight": [1, 1],
+        "highlight": [
+          1,
+          1
+        ],
         "grid": [
-          [" ", "│", " "],
-          ["─", "┼", "─"],
-          [" ", "│", " "]
+          [
+            " ",
+            "│",
+            " "
+          ],
+          [
+            "─",
+            "┼",
+            "─"
+          ],
+          [
+            " ",
+            "│",
+            " "
+          ]
         ]
       },
       "opening_anchors": [
@@ -697,16 +1078,34 @@
       ],
       "valid_move": {
         "caption": "Line with clue '1' seeing tallest building (5) first, hiding all others behind it.",
-        "highlight": [0],
+        "highlight": [
+          0
+        ],
         "grid": [
-          ["[1]", "5", "4", "3", "2", "1"]
+          [
+            "[1]",
+            "5",
+            "4",
+            "3",
+            "2",
+            "1"
+          ]
         ]
       },
       "invalid_move": {
         "caption": "Line with clue '1' placed with shorter building (2) in front (at least two towers would be seen).",
-        "highlight": [0],
+        "highlight": [
+          0
+        ],
         "grid": [
-          ["[1]", "2", "5", "1", "3", "4"]
+          [
+            "[1]",
+            "2",
+            "5",
+            "1",
+            "3",
+            "4"
+          ]
         ]
       },
       "opening_anchors": [
@@ -738,16 +1137,30 @@
       ],
       "valid_move": {
         "caption": "Digits satisfying inequality: 2 < 4 correctly placed in adjacent cells.",
-        "highlight": [0, 2],
+        "highlight": [
+          0,
+          2
+        ],
         "grid": [
-          ["2", "<", "4"]
+          [
+            "2",
+            "<",
+            "4"
+          ]
         ]
       },
       "invalid_move": {
         "caption": "Violation of inequality: placing 5 < 3 (5 is greater than 3).",
-        "highlight": [0, 2],
+        "highlight": [
+          0,
+          2
+        ],
         "grid": [
-          ["5", "<", "3"]
+          [
+            "5",
+            "<",
+            "3"
+          ]
         ]
       },
       "opening_anchors": [
@@ -779,16 +1192,30 @@
       ],
       "valid_move": {
         "caption": "Continuous path traveling through open corridors without crossing any walls.",
-        "highlight": [0, 1],
+        "highlight": [
+          0,
+          1
+        ],
         "grid": [
-          ["·", "·", "·"]
+          [
+            "·",
+            "·",
+            "·"
+          ]
         ]
       },
       "invalid_move": {
         "caption": "Path crossing through a solid black wall line (wall collision violation).",
-        "highlight": [0, 1],
+        "highlight": [
+          0,
+          1
+        ],
         "grid": [
-          ["·", "|", "·"]
+          [
+            "·",
+            "|",
+            "·"
+          ]
         ]
       },
       "opening_anchors": [
@@ -803,6 +1230,71 @@
         {
           "q": "Do I ever need to retrace or loop back?",
           "a": "No. The true solution path is a direct acyclic route without circular loops or backtracking."
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "key": "sudokito",
+      "title": "SUDOKITO",
+      "instruction": "Fill every row, column, and 2x3 box with digits 1-6 without repeating.",
+      "objective": "Complete the 6x6 grid with digits 1 through 6 so that no number is repeated within any horizontal row, vertical column, or outlined 2x3 box.",
+      "rules": [
+        "Every row must contain digits 1-6 exactly once.",
+        "Every column must contain digits 1-6 exactly once.",
+        "Every 2x3 bold box must contain digits 1-6 exactly once.",
+        "Given clues are permanent and cannot be altered or moved."
+      ],
+      "valid_move": {
+        "caption": "Digit 3 placed in an empty square where 3 does not exist in its row, column, or 2x3 box.",
+        "highlight": [
+          1,
+          1
+        ],
+        "grid": [
+          [
+            "1",
+            "·",
+            "2"
+          ],
+          [
+            "·",
+            "3",
+            "·"
+          ]
+        ]
+      },
+      "invalid_move": {
+        "caption": "Digit 3 placed in a 2x3 box that already contains another 3 (duplicate violation).",
+        "highlight": [
+          1,
+          1
+        ],
+        "grid": [
+          [
+            "1",
+            "3",
+            "2"
+          ],
+          [
+            "·",
+            "3",
+            "·"
+          ]
+        ]
+      },
+      "opening_anchors": [
+        "Scan 2x3 boxes that already contain 4 or 5 given numbers; only 1 or 2 candidate digits remain.",
+        "Use cross-hatching: trace a known digit across adjacent boxes and rows to pinpoint its only valid location in an unfilled 2x3 region."
+      ],
+      "faq": [
+        {
+          "q": "How does Sudokito differ from classic Sudoku?",
+          "a": "Sudokito uses a smaller 6x6 grid with digits 1-6 and six 2x3 rectangular regions instead of 9x9 with 3x3 squares, offering faster, punchy gameplay."
+        },
+        {
+          "q": "Does every Sudokito puzzle have a guaranteed unique solution?",
+          "a": "Yes. Each generated puzzle is verified by a uniqueness solver to ensure exactly one logical solution exists without guessing."
         }
       ]
     }

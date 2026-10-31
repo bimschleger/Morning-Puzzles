@@ -343,8 +343,8 @@ class JumblePuzzle(BasePuzzle):
         diff = str(puzzle_data.get("difficulty", "")).lower()
         tier_lens = {
             "easy": (4, 5),
-            "medium": (5, 6),
-            "hard": (6, 7, 8),
+            "medium": (4, 5),
+            "hard": (5,),
         }.get(diff)
 
         # 1. Verify anagrams, difficulty bounds, and circle constraints

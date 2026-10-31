@@ -26,7 +26,7 @@ struct GameRuleDef {
     uint8_t faqCount;
 };
 
-static const size_t TOTAL_GAME_RULES = 19;
+static const size_t TOTAL_GAME_RULES = 20;
 static const GameRuleDef GAME_RULES[TOTAL_GAME_RULES] PROGMEM = {
     {
         0,
@@ -311,6 +311,21 @@ static const GameRuleDef GAME_RULES[TOTAL_GAME_RULES] PROGMEM = {
         { "Trace backwards from the exit (OUT) towards the start (IN); dead-end false trails often branch forward and are easier to spot in reverse.", "Look for corridor bottlenecks: narrow single passages that must be traversed to transition between quadrants." },
         2,
         { {"Is there always a unique solution path through the maze?", "Yes. Every procedural maze contains exactly one continuous open route connecting the entrance to the exit."}, {"Do I ever need to retrace or loop back?", "No. The true solution path is a direct acyclic route without circular loops or backtracking."} },
+        2
+    },
+    {
+        19,
+        "sudokito",
+        "SUDOKITO",
+        "Fill every row, column, and 2x3 box with digits 1-6 without repeating.",
+        "Complete the 6x6 grid with digits 1 through 6 so that no number is repeated within any horizontal row, vertical column, or outlined 2x3 box.",
+        { "Every row must contain digits 1-6 exactly once.", "Every column must contain digits 1-6 exactly once.", "Every 2x3 bold box must contain digits 1-6 exactly once.", "Given clues are permanent and cannot be altered or moved." },
+        4,
+        "Digit 3 placed in an empty square where 3 does not exist in its row, column, or 2x3 box.",
+        "Digit 3 placed in a 2x3 box that already contains another 3 (duplicate violation).",
+        { "Scan 2x3 boxes that already contain 4 or 5 given numbers; only 1 or 2 candidate digits remain.", "Use cross-hatching: trace a known digit across adjacent boxes and rows to pinpoint its only valid location in an unfilled 2x3 region." },
+        2,
+        { {"How does Sudokito differ from classic Sudoku?", "Sudokito uses a smaller 6x6 grid with digits 1-6 and six 2x3 rectangular regions instead of 9x9 with 3x3 squares, offering faster, punchy gameplay."}, {"Does every Sudokito puzzle have a guaranteed unique solution?", "Yes. Each generated puzzle is verified by a uniqueness solver to ensure exactly one logical solution exists without guessing."} },
         2
     },
 };

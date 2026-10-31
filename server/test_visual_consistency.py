@@ -146,7 +146,7 @@ def test_visual_consistency():
                 "words": item["words"],
                 "theme": item["theme"]
             }
-        elif p_name == "sudoku":
+        elif p_name in ("sudoku", "sudokito"):
             py_data = {
                 "puzzle": item["grid"]
             }

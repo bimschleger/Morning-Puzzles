@@ -8,7 +8,7 @@ Runs **100% On-Device and Offline** on an **ESP32** in native C++ with zero clou
 
 ## 🌟 Key Features
 
-* **100% Standalone & Air-Gapped**: All 19 puzzle algorithms run locally on the ESP32 microcontroller in **<50 milliseconds**. No Wi-Fi, no cloud subscriptions, and no external servers required.
+* **100% Standalone & Air-Gapped**: All 20 puzzle algorithms run locally on the ESP32 microcontroller in **<50 milliseconds**. No Wi-Fi, no cloud subscriptions, and no external servers required.
 * **Zero-Button Power Gestures**: Completely eliminates the need for exposed buttons. Use standard power switches for all everyday actions:
   * **Setup Mode**: Leave printer ON, plug in ESP32 $\rightarrow$ Senses printer online, prints dual-QR setup slip, and opens web setup portal.
   * **On-Demand Print**: Flip printer switch OFF, wait 3s, then ON $\rightarrow$ Prints a fresh puzzle bundle immediately.
@@ -19,9 +19,9 @@ Runs **100% On-Device and Offline** on an **ESP32** in native C++ with zero clou
 
 ---
 
-## 🧩 Featured Games (All 19 Included)
+## 🧩 Featured Games (All 20 Included)
 
-Every print job generates a randomized, unique daily edition featuring all 19 open-source (Apache 2.0 / MIT) puzzle types conforming to strict presentation standards:
+Every print job generates a randomized, unique daily edition featuring all 20 open-source (Apache 2.0 / MIT) puzzle types conforming to strict presentation standards:
 
 1. **Sudoku**: Fill every row, column, and 3x3 box with digits 1-9 without repeating.
 2. **Search** *(Word Search)*: Find all hidden words horizontally, vertically, or diagonally.
@@ -42,6 +42,7 @@ Every print job generates a randomized, unique daily edition featuring all 19 op
 17. **Towers** *(Skyscrapers)*: Place building heights so edge clues match how many towers are visible in that line.
 18. **Inequality** *(Futoshiki)*: Fill grid with digits so each digit appears once per line and inequality signs hold.
 19. **Maze** *(Labyrinth)*: Draw a path from the entrance to the exit without crossing any walls.
+20. **Sudokito** *(Mini Sudoku)*: Fill every row, column, and 2x3 box with digits 1-6 without repeating.
 
 > [!NOTE]
 > All puzzle presentation formatting (single-word uppercase titles, $\le 100$-character one-sentence descriptions, centered difficulty placement, and 48-column ASCII solution keys) strictly adheres to [`docs/PUZZLE_HEADER_SPEC.md`](docs/PUZZLE_HEADER_SPEC.md), [`docs/PUZZLE_DESCRIPTION_GUIDELINES.md`](docs/PUZZLE_DESCRIPTION_GUIDELINES.md), and [`docs/PUZZLE_SOLUTION_KEY_SPEC.md`](docs/PUZZLE_SOLUTION_KEY_SPEC.md), verified by `python3 server/test_puzzle_standards.py`.

@@ -34,6 +34,7 @@ enum OfflinePuzzleType : uint8_t {
     PUZZLE_TOWERS,
     PUZZLE_INEQUALITY,
     PUZZLE_MAZE,
+    PUZZLE_SUDOKITO,
     OFFLINE_PUZZLE_TOTAL
 };
 

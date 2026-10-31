@@ -42,6 +42,7 @@ APPROVED_TITLES = [
     "TOWERS",
     "INEQUALITY",
     "MAZE",
+    "SUDOKITO",
 ]
 
 APPROVED_VERBS = [
