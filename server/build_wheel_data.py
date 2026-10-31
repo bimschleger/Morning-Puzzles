@@ -19,12 +19,18 @@ def collect_project_words() -> Set[str]:
     if os.path.exists(ws_path):
         with open(ws_path, "r", encoding="utf-8") as f:
             ws_data = json.load(f)
-            for tier_dict in ws_data.values():
-                for theme, wlist in tier_dict.items():
-                    for w in wlist:
+            for tier_val in ws_data.values():
+                if isinstance(tier_val, list):
+                    for w in tier_val:
                         w_clean = w.strip().upper()
                         if len(w_clean) >= 4 and w_clean.isalpha():
                             words.add(w_clean)
+                elif isinstance(tier_val, dict):
+                    for theme, wlist in tier_val.items():
+                        for w in wlist:
+                            w_clean = w.strip().upper()
+                            if len(w_clean) >= 4 and w_clean.isalpha():
+                                words.add(w_clean)
 
     jumbles_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "jumbles.json")
     if os.path.exists(jumbles_path):

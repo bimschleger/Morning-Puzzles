@@ -3,152 +3,256 @@
 #include "../printer/EscPosPrinter.h"
 #include "../printer/ThermalCanvas.h"
 
-WordSearchGen::WordSearchGen() : _gridSize(12), _numPlacedWords(0), _currentTheme("General") {
+#ifndef pgm_read_ptr
+#define pgm_read_ptr(addr) (*(const void* const*)(addr))
+#endif
+
+static const int8_t WS_ALL_DIRS[8][2] = {
+    {0, 1},   // E  (0)
+    {0, -1},  // W  (1)
+    {1, 0},   // S  (2)
+    {-1, 0},  // N  (3)
+    {1, 1},   // SE (4)
+    {-1, 1},  // NE (5)
+    {1, -1},  // SW (6)
+    {-1, -1}  // NW (7)
+};
+
+WordSearchGen::WordSearchGen() : _gridSize(12), _numPlacedWords(0), _currentTheme("") {
     memset(_grid, ' ', sizeof(_grid));
-    _wordsBuf[0] = '\0';
 }
 
-bool WordSearchGen::tryPlaceWord(const char* word, const int8_t dirs[][2], uint8_t numDirs) {
-    uint8_t len = strlen(word);
-    if (len > _gridSize) return false;
-
-    for (int attempts = 0; attempts < 150; attempts++) {
-        uint8_t dIdx = random(numDirs);
-        int8_t dr = dirs[dIdx][0];
-        int8_t dc = dirs[dIdx][1];
-
-        int rStart = random(_gridSize);
-        int cStart = random(_gridSize);
-
-        int rEnd = rStart + dr * (len - 1);
-        int cEnd = cStart + dc * (len - 1);
-
-        if (rEnd >= 0 && rEnd < _gridSize && cEnd >= 0 && cEnd < _gridSize) {
-            bool fits = true;
-            for (int i = 0; i < len; i++) {
-                char current = _grid[rStart + dr * i][cStart + dc * i];
-                if (current != ' ' && current != word[i]) {
-                    fits = false;
-                    break;
-                }
-            }
-
-            if (fits) {
-                for (int i = 0; i < len; i++) {
-                    _grid[rStart + dr * i][cStart + dc * i] = word[i];
-                }
-                if (_numPlacedWords < 12) {
-                    _placedWords[_numPlacedWords++] = word;
-                }
-                return true;
-            }
-        }
+void WordSearchGen::generate(WordSearchDifficulty difficulty, int seed) {
+    if (seed >= 0) {
+        randomSeed(seed);
     }
-    return false;
-}
 
-void WordSearchGen::generate(WordSearchDifficulty difficulty, int themeIndex) {
     _gridSize = (difficulty == WS_EASY) ? 10 : 12;
-    memset(_grid, ' ', sizeof(_grid));
-    _numPlacedWords = 0;
+    uint8_t targetCount = (difficulty == WS_EASY) ? 6 : 8;
+    uint8_t minIntersections = (difficulty == WS_EASY) ? 0 : ((difficulty == WS_MEDIUM) ? 2 : 3);
+    _currentTheme = "";
 
     size_t poolCount = 0;
-    const ThemeDef* pool = getWordSearchPool(difficulty, poolCount);
-
-    if (themeIndex < 0 || themeIndex >= (int)poolCount) {
-        themeIndex = random(poolCount);
-    }
-    const ThemeDef& chosenTheme = pool[themeIndex];
-    _currentTheme = chosenTheme.name;
-
-    int8_t dirs[8][2];
-    uint8_t numDirs = 0;
-    uint8_t targetWords = 8;
-
-    if (difficulty == WS_EASY) {
-        // Left-to-Right only (E)
-        dirs[0][0] = 0; dirs[0][1] = 1;
-        numDirs = 1;
-        targetWords = 6;
-    } else if (difficulty == WS_HARD) {
-        // All 8 directions
-        int8_t allDirs[8][2] = {
-            {0, 1},   // E
-            {0, -1},  // W
-            {1, 0},   // S
-            {-1, 0},  // N
-            {1, 1},   // SE
-            {-1, 1},  // NE
-            {1, -1},  // SW
-            {-1, -1}  // NW
-        };
-        memcpy(dirs, allDirs, sizeof(allDirs));
-        numDirs = 8;
-        targetWords = 10;
-    } else {
-        // WS_MEDIUM: E, W, S
-        int8_t medDirs[3][2] = {
-            {0, 1},   // E
-            {0, -1},  // W
-            {1, 0}    // S
-        };
-        memcpy(dirs, medDirs, sizeof(medDirs));
-        numDirs = 3;
-        targetWords = 8;
-    }
-
-    // Tokenize chosenTheme.words into _wordsBuf
-    strncpy(_wordsBuf, chosenTheme.words, sizeof(_wordsBuf));
-    _wordsBuf[sizeof(_wordsBuf) - 1] = '\0';
-
-    const char* sortedWords[12];
-    char* p = _wordsBuf;
-    for (int i = 0; i < 12; i++) {
-        while (*p == ' ') p++;
-        sortedWords[i] = p;
-        while (*p != ' ' && *p != '\0') p++;
-        if (*p == ' ') {
-            *p = '\0';
-            p++;
-        }
-    }
-
-    // Insertion sort descending by length (matches std::sort stability)
-    for (uint8_t i = 1; i < 12; i++) {
-        const char* key = sortedWords[i];
-        int8_t j = i - 1;
-        while (j >= 0 && strlen(sortedWords[j]) < strlen(key)) {
-            sortedWords[j + 1] = sortedWords[j];
-            j--;
-        }
-        sortedWords[j + 1] = key;
+    const char* const* pool = getWordSearchPool(difficulty, poolCount);
+    if (!pool || poolCount == 0) {
+        return;
     }
 
     char bestGrid[MAX_GRID_SIZE][MAX_GRID_SIZE];
     const char* bestPlaced[12];
     uint8_t bestCount = 0;
+    int16_t bestIntersections = -1;
 
-    for (int retry = 0; retry < 5; retry++) {
-        memset(_grid, ' ', sizeof(_grid));
-        _numPlacedWords = 0;
+    struct CandidatePos {
+        int8_t r;
+        int8_t c;
+        int8_t dIdx;
+    };
 
-        for (int i = 0; i < 12; i++) {
-            if (_numPlacedWords >= targetWords) break;
-            tryPlaceWord(sortedWords[i], dirs, numDirs);
+    struct WordPlacement {
+        int8_t r;
+        int8_t c;
+        int8_t dIdx;
+        uint8_t len;
+    };
+
+    WordPlacement bestPlacements[12];
+
+    for (uint8_t restart = 0; restart < 8; restart++) {
+        // Pick (targetCount + 4) words without replacement
+        const uint8_t sampleSize = targetCount + 4;
+        const char* sampledWords[16];
+        uint16_t chosenIndices[16];
+        uint8_t picked = 0;
+
+        while (picked < sampleSize) {
+            uint16_t idx = random(poolCount);
+            bool dup = false;
+            for (uint8_t j = 0; j < picked; j++) {
+                if (chosenIndices[j] == idx) {
+                    dup = true;
+                    break;
+                }
+            }
+            if (!dup) {
+                chosenIndices[picked] = idx;
+                sampledWords[picked] = (const char*)pgm_read_ptr(&pool[idx]);
+                picked++;
+            }
         }
 
-        if (_numPlacedWords > bestCount) {
-            memcpy(bestGrid, _grid, sizeof(_grid));
-            memcpy(bestPlaced, _placedWords, _numPlacedWords * sizeof(const char*));
-            bestCount = _numPlacedWords;
+        // Sort descending by length
+        for (uint8_t i = 1; i < sampleSize; i++) {
+            const char* key = sampledWords[i];
+            int8_t j = i - 1;
+            while (j >= 0 && strlen(sampledWords[j]) < strlen(key)) {
+                sampledWords[j + 1] = sampledWords[j];
+                j--;
+            }
+            sampledWords[j + 1] = key;
         }
 
-        if (bestCount >= targetWords) break;
+        // Prepare directional assignment
+        uint8_t hardDirs[8] = {0, 1, 2, 3, 4, 5, 6, 7};
+        if (difficulty == WS_HARD) {
+            for (int i = 7; i > 0; i--) {
+                int j = random(i + 1);
+                uint8_t tmp = hardDirs[i];
+                hardDirs[i] = hardDirs[j];
+                hardDirs[j] = tmp;
+            }
+        }
+
+        char tempGrid[MAX_GRID_SIZE][MAX_GRID_SIZE];
+        memset(tempGrid, ' ', sizeof(tempGrid));
+
+        const char* currentPlaced[12];
+        WordPlacement currentPlacements[12];
+        uint8_t currentCount = 0;
+
+        for (uint8_t wIdx = 0; wIdx < sampleSize && currentCount < targetCount; wIdx++) {
+            const char* word = sampledWords[wIdx];
+            uint8_t len = strlen(word);
+            if (len > _gridSize) continue;
+
+            uint8_t allowedDirs[8];
+            uint8_t numAllowed = 0;
+
+            if (difficulty == WS_HARD) {
+                allowedDirs[0] = hardDirs[currentCount];
+                numAllowed = 1;
+            } else if (difficulty == WS_EASY) {
+                allowedDirs[0] = 0; // E
+                allowedDirs[1] = 2; // S
+                numAllowed = 2;
+                if (random(2) == 1) {
+                    allowedDirs[0] = 2;
+                    allowedDirs[1] = 0;
+                }
+            } else { // WS_MEDIUM
+                for (uint8_t d = 0; d < 8; d++) allowedDirs[d] = d;
+                numAllowed = 8;
+                for (int i = 7; i > 0; i--) {
+                    int j = random(i + 1);
+                    uint8_t tmp = allowedDirs[i];
+                    allowedDirs[i] = allowedDirs[j];
+                    allowedDirs[j] = tmp;
+                }
+            }
+
+            int16_t bestScore = -1000;
+            CandidatePos bestCands[16];
+            uint8_t numBestCands = 0;
+
+            for (uint8_t d = 0; d < numAllowed; d++) {
+                uint8_t dIdx = allowedDirs[d];
+                int8_t dr = WS_ALL_DIRS[dIdx][0];
+                int8_t dc = WS_ALL_DIRS[dIdx][1];
+
+                for (uint8_t r = 0; r < _gridSize; r++) {
+                    for (uint8_t c = 0; c < _gridSize; c++) {
+                        int rEnd = r + dr * (len - 1);
+                        int cEnd = c + dc * (len - 1);
+                        if (rEnd < 0 || rEnd >= _gridSize || cEnd < 0 || cEnd >= _gridSize) continue;
+
+                        bool fits = true;
+                        int overlaps = 0;
+                        for (uint8_t i = 0; i < len; i++) {
+                            char cur = tempGrid[r + dr * i][c + dc * i];
+                            if (cur != ' ') {
+                                if (cur == word[i]) {
+                                    overlaps++;
+                                } else {
+                                    fits = false;
+                                    break;
+                                }
+                            }
+                        }
+                        if (!fits) continue;
+
+                        int16_t score = 0;
+                        if (currentCount == 0) {
+                            int midR = r + dr * (len / 2);
+                            int midC = c + dc * (len / 2);
+                            score = 20 - (abs(midR - _gridSize / 2) + abs(midC - _gridSize / 2));
+                        } else {
+                            score = overlaps * 10;
+                        }
+
+                        if (score > bestScore) {
+                            bestScore = score;
+                            bestCands[0] = {(int8_t)r, (int8_t)c, (int8_t)dIdx};
+                            numBestCands = 1;
+                        } else if (score == bestScore && numBestCands < 16) {
+                            bestCands[numBestCands++] = {(int8_t)r, (int8_t)c, (int8_t)dIdx};
+                        }
+                    }
+                }
+            }
+
+            if (numBestCands > 0) {
+                uint8_t chosenCand = random(numBestCands);
+                int8_t r = bestCands[chosenCand].r;
+                int8_t c = bestCands[chosenCand].c;
+                int8_t dIdx = bestCands[chosenCand].dIdx;
+                int8_t dr = WS_ALL_DIRS[dIdx][0];
+                int8_t dc = WS_ALL_DIRS[dIdx][1];
+
+                for (uint8_t i = 0; i < len; i++) {
+                    tempGrid[r + dr * i][c + dc * i] = word[i];
+                }
+
+                currentPlacements[currentCount] = {r, c, dIdx, len};
+                currentPlaced[currentCount] = word;
+                currentCount++;
+            }
+        }
+
+        // Count cell intersections
+        uint8_t cellUsage[MAX_GRID_SIZE][MAX_GRID_SIZE];
+        memset(cellUsage, 0, sizeof(cellUsage));
+        for (uint8_t p = 0; p < currentCount; p++) {
+            int8_t r = currentPlacements[p].r;
+            int8_t c = currentPlacements[p].c;
+            int8_t dIdx = currentPlacements[p].dIdx;
+            uint8_t len = currentPlacements[p].len;
+            int8_t dr = WS_ALL_DIRS[dIdx][0];
+            int8_t dc = WS_ALL_DIRS[dIdx][1];
+            for (uint8_t i = 0; i < len; i++) {
+                cellUsage[r + dr * i][c + dc * i]++;
+            }
+        }
+
+        int16_t intersections = 0;
+        for (uint8_t r = 0; r < _gridSize; r++) {
+            for (uint8_t c = 0; c < _gridSize; c++) {
+                if (cellUsage[r][c] >= 2) {
+                    intersections++;
+                }
+            }
+        }
+
+        if (currentCount == targetCount) {
+            if (intersections > bestIntersections) {
+                bestIntersections = intersections;
+                memcpy(bestGrid, tempGrid, sizeof(bestGrid));
+                memcpy(bestPlaced, currentPlaced, sizeof(bestPlaced));
+                memcpy(bestPlacements, currentPlacements, sizeof(bestPlacements));
+                bestCount = currentCount;
+            }
+            if (intersections >= minIntersections) {
+                break;
+            }
+        }
     }
 
-    memcpy(_grid, bestGrid, sizeof(_grid));
-    memcpy(_placedWords, bestPlaced, bestCount * sizeof(const char*));
-    _numPlacedWords = bestCount;
+    if (bestCount > 0) {
+        memcpy(_grid, bestGrid, sizeof(_grid));
+        memcpy(_placedWords, bestPlaced, sizeof(_placedWords));
+        _numPlacedWords = bestCount;
+    } else {
+        _numPlacedWords = 0;
+    }
 
     // Fill remaining blank cells with random uppercase letters
     for (uint8_t r = 0; r < _gridSize; r++) {
@@ -172,7 +276,10 @@ void WordSearchGen::printToReceipt(EscPosPrinter& printer) {
     }
 
     printer.println("");
-    printer.println(String("Theme: ") + _currentTheme);
+    if (_currentTheme && _currentTheme[0] != '\0') {
+        printer.println(String("Theme: ") + _currentTheme);
+    }
+    printer.println("Words to find:");
 
     // Print word list in 2 columns
     for (size_t i = 0; i < _numPlacedWords; i += 2) {
@@ -224,10 +331,13 @@ bool WordSearchGen::printRasterToReceipt(EscPosPrinter& printer) {
     canvas.drawHLine(padding, curY, innerWidth, 2);
     curY += 18;
 
-    // Theme banner
-    String themeStr = String("THEME: ") + _currentTheme;
-    themeStr.toUpperCase();
-    canvas.drawText(padding, curY, themeStr.c_str(), 2);
+    if (_currentTheme && _currentTheme[0] != '\0') {
+        String themeStr = String("THEME: ") + _currentTheme;
+        themeStr.toUpperCase();
+        canvas.drawText(padding, curY, themeStr.c_str(), 2);
+    } else {
+        canvas.drawText(padding, curY, "WORDS TO FIND:", 2);
+    }
     curY += 28;
 
     // Word checklist

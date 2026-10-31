@@ -1,7 +1,7 @@
 """
 Morning Puzzles - Search (Word Search) Plugin
-Theme-driven word search puzzle generator conforming to docs/PUZZLE_HEADER_SPEC.md.
-Completely omits the difficulty line as it is theme-driven.
+Procedural multi-directional word search puzzle generator conforming to docs/PUZZLE_HEADER_SPEC.md.
+Provides difficulty-scaled grids, orientations, and letter intersections.
 """
 
 import random
@@ -16,36 +16,32 @@ from ..renderer.canvas import (
 )
 
 
-def _get_wordsearch_dataset() -> Dict[str, Dict[str, List[str]]]:
+def _get_wordsearch_dataset() -> Dict[str, List[str]]:
     return load_curated_dataset("wordsearch_dataset.json") or {}
 
 
-def get_random_theme(difficulty: str = "medium") -> Tuple[str, List[str]]:
+def get_random_words(difficulty: str = "medium", count: int = 8) -> List[str]:
     data = _get_wordsearch_dataset()
     diff_key = difficulty.lower()
-    theme_pool = data.get(diff_key, data.get("medium", {}))
-    theme_name = random.choice(list(theme_pool.keys()))
-    return theme_name, list(theme_pool[theme_name])
+    pool = data.get(diff_key, data.get("medium", []))
+    if isinstance(pool, dict):
+        # Fallback if old format dictionary
+        words = []
+        for wlist in pool.values():
+            words.extend(wlist)
+        pool = words
+    if not pool:
+        pool = ["SEARCH", "PUZZLE", "FIND", "WORD", "LETTER", "HIDDEN", "DISCOVER", "SOLVE"]
+    return random.sample(pool, min(len(pool), count))
 
-
-def get_theme_words(theme_name: str, difficulty: str = "medium") -> Tuple[str, List[str]]:
-    data = _get_wordsearch_dataset()
-    diff_key = difficulty.lower()
-    theme_pool = data.get(diff_key, data.get("medium", {}))
-    if theme_name and theme_name in theme_pool:
-        return theme_name, list(theme_pool[theme_name])
-    for pool in data.values():
-        if theme_name in pool:
-            return theme_name, list(pool[theme_name])
-    return get_random_theme(difficulty)
 
 DIRECTIONS = {
     "E":  (0, 1),    # Horizontal forward
+    "W":  (0, -1),   # Horizontal backwards
     "S":  (1, 0),    # Vertical downward
+    "N":  (-1, 0),   # Vertical upward
     "SE": (1, 1),    # Diagonal downward right
     "NE": (-1, 1),   # Diagonal upward right
-    "W":  (0, -1),   # Horizontal backwards
-    "N":  (-1, 0),   # Vertical upward
     "SW": (1, -1),   # Diagonal downward left
     "NW": (-1, -1),  # Diagonal upward left
 }
@@ -64,8 +60,7 @@ class WordSearchPuzzle(BasePuzzle):
 
     @property
     def has_difficulty(self) -> bool:
-        # Theme-driven: strictly omits difficulty header line
-        return False
+        return True
 
     def generate(
         self,
@@ -81,68 +76,133 @@ class WordSearchPuzzle(BasePuzzle):
 
         difficulty = difficulty.lower()
         if difficulty == "easy":
-            allowed_dirs = ["E"]
             target_words = 6
             if grid_size is None:
                 grid_size = 10
-        elif difficulty == "hard":
-            allowed_dirs = list(DIRECTIONS.keys())
-            target_words = 10
-            if grid_size is None:
-                grid_size = 12
-        else:
-            allowed_dirs = ["E", "W", "S"]
+            min_intersections = 0
+        elif difficulty == "hard" or difficulty == "extreme":
             target_words = 8
             if grid_size is None:
                 grid_size = 12
-
-        if not words:
-            if theme:
-                theme_name, words = get_theme_words(theme, difficulty=difficulty)
-            else:
-                theme_name, words = get_random_theme(difficulty=difficulty)
+            min_intersections = 3
         else:
-            theme_name = theme or "Custom"
+            target_words = 8
+            if grid_size is None:
+                grid_size = 12
+            min_intersections = 2
 
-        raw_words = [w.strip().upper() for w in words if len(w.strip()) <= grid_size]
+        dataset = _get_wordsearch_dataset()
+        pool = dataset.get(difficulty, dataset.get("medium", []))
+        if isinstance(pool, dict):
+            flattened = []
+            for wlist in pool.values():
+                flattened.extend(wlist)
+            pool = flattened
+
         best_grid = None
         best_placed = []
         best_placements = {}
+        best_intersections = -1
 
-        for retry in range(5):
-            clean_words = list(raw_words)
-            random.shuffle(clean_words)
-            clean_words.sort(key=len, reverse=True)
+        for restart in range(8):
+            if words:
+                raw_words = [w.strip().upper() for w in words if len(w.strip()) <= grid_size]
+            else:
+                sample_count = min(len(pool), target_words + 8)
+                raw_words = [w.strip().upper() for w in random.sample(pool, sample_count) if len(w.strip()) <= grid_size]
+
+            raw_words.sort(key=len, reverse=True)
+
+            if difficulty in ("hard", "extreme"):
+                dir_assignment = list(DIRECTIONS.keys())
+                random.shuffle(dir_assignment)
+            elif difficulty == "easy":
+                dir_assignment = ["E", "S"]
+            else:
+                dir_assignment = list(DIRECTIONS.keys())
 
             grid = [[" " for _ in range(grid_size)] for _ in range(grid_size)]
             placed_words = []
             placements = {}
 
-            for word in clean_words:
+            for word in raw_words:
                 if len(placed_words) >= target_words:
                     break
-                shuffled_dirs = list(allowed_dirs)
-                random.shuffle(shuffled_dirs)
+
+                if difficulty in ("hard", "extreme"):
+                    d_name = dir_assignment[len(placed_words)]
+                    allowed = [d_name]
+                elif difficulty == "easy":
+                    allowed = ["E", "S"]
+                    random.shuffle(allowed)
+                else:
+                    allowed = list(DIRECTIONS.keys())
+                    random.shuffle(allowed)
+
                 placed = False
-                for d_name in shuffled_dirs:
-                    dr, dc = DIRECTIONS[d_name]
-                    positions = [(r, c) for r in range(grid_size) for c in range(grid_size)]
-                    random.shuffle(positions)
-                    for r, c in positions:
-                        if self._can_place(grid, word, r, c, dr, dc, grid_size):
-                            self._place_word(grid, word, r, c, dr, dc)
-                            placed_words.append(word)
-                            placements[word] = {"row": r, "col": c, "dir": d_name}
-                            placed = True
-                            break
-                    if placed:
+                for d in allowed:
+                    dr, dc = DIRECTIONS[d]
+                    L = len(word)
+                    candidates = []
+
+                    for r in range(grid_size):
+                        for c in range(grid_size):
+                            end_r = r + dr * (L - 1)
+                            end_c = c + dc * (L - 1)
+                            if not (0 <= end_r < grid_size and 0 <= end_c < grid_size):
+                                continue
+
+                            can_place = True
+                            overlaps = 0
+                            for i in range(L):
+                                cr = r + dr * i
+                                cc = c + dc * i
+                                ch = grid[cr][cc]
+                                if ch != " ":
+                                    if ch == word[i]:
+                                        overlaps += 1
+                                    else:
+                                        can_place = False
+                                        break
+                            if can_place:
+                                if len(placed_words) == 0:
+                                    mid_r = r + dr * (L // 2)
+                                    mid_c = c + dc * (L // 2)
+                                    dist = abs(mid_r - grid_size // 2) + abs(mid_c - grid_size // 2)
+                                    score = 20 - dist
+                                else:
+                                    score = overlaps * 10
+                                candidates.append((score, r, c, d))
+
+                    if candidates:
+                        candidates.sort(key=lambda x: x[0], reverse=True)
+                        top_score = candidates[0][0]
+                        top_tier = [c_cand for c_cand in candidates if c_cand[0] == top_score]
+                        score, r, c, d = random.choice(top_tier)
+
+                        for i, ch in enumerate(word):
+                            grid[r + dr * i][c + dc * i] = ch
+                        placed_words.append(word)
+                        placements[word] = {"row": r, "col": c, "dir": d}
+                        placed = True
                         break
 
-            if len(placed_words) > len(best_placed):
-                best_placed = placed_words
-                best_grid = [row[:] for row in grid]
-                best_placements = placements
-                if len(best_placed) >= target_words:
+            # Count cell intersections (shared letters)
+            cell_usage = [[0 for _ in range(grid_size)] for _ in range(grid_size)]
+            for w, p in placements.items():
+                r, c, d = p["row"], p["col"], p["dir"]
+                dr, dc = DIRECTIONS[d]
+                for i in range(len(w)):
+                    cell_usage[r + dr * i][c + dc * i] += 1
+            intersections = sum(1 for r in range(grid_size) for c in range(grid_size) if cell_usage[r][c] >= 2)
+
+            if len(placed_words) == target_words:
+                if intersections > best_intersections:
+                    best_intersections = intersections
+                    best_grid = [row[:] for row in grid]
+                    best_placed = list(placed_words)
+                    best_placements = dict(placements)
+                if intersections >= min_intersections:
                     break
 
         grid = best_grid or [[" " for _ in range(grid_size)] for _ in range(grid_size)]
@@ -152,7 +212,7 @@ class WordSearchPuzzle(BasePuzzle):
         # Solution snapshot before filling empty cells
         solution_grid = [row[:] for row in grid]
 
-        # Fill empty cells with random letters
+        # Fill empty cells with random uppercase letters
         for r in range(grid_size):
             for c in range(grid_size):
                 if grid[r][c] == " ":
@@ -160,7 +220,6 @@ class WordSearchPuzzle(BasePuzzle):
 
         raw_data = {
             "type": "wordsearch",
-            "theme": theme_name,
             "grid": grid,
             "solution": solution_grid,
             "words": placed_words,
@@ -168,6 +227,7 @@ class WordSearchPuzzle(BasePuzzle):
             "placements": placements,
             "grid_size": grid_size,
             "difficulty": difficulty,
+            "intersections": best_intersections,
         }
         ascii_text = self.format_ascii_puzzle(raw_data)
         raw_data["text"] = ascii_text
@@ -190,14 +250,11 @@ class WordSearchPuzzle(BasePuzzle):
     def format_ascii_puzzle(self, puzzle_data: Union[BasePuzzleResult, Dict[str, Any]]) -> str:
         grid = puzzle_data.get("grid", [])
         words = puzzle_data.get("words", [])
-        theme = puzzle_data.get("theme", "")
 
         lines = []
         for row in grid:
             lines.append("   " + " ".join(row))
         lines.append("")
-        if theme:
-            lines.append(f"Theme: {theme}")
         lines.append("Words to find:")
         for i in range(0, len(words), 2):
             w1 = f"[ ] {words[i]}"
@@ -207,11 +264,8 @@ class WordSearchPuzzle(BasePuzzle):
 
     def format_solution_key(self, puzzle_data: Union[BasePuzzleResult, Dict[str, Any]]) -> List[str]:
         words = puzzle_data.get("words", [])
-        theme = puzzle_data.get("theme", "")
-        lines = []
-        if theme:
-            lines.append(f"Theme: {theme}")
         words_str = "Words: " + ", ".join(words)
+        lines = []
         for line in textwrap.wrap(words_str, 46):
             lines.append(line)
         return lines
@@ -223,7 +277,6 @@ class WordSearchPuzzle(BasePuzzle):
     ) -> bytes:
         grid = puzzle_data.get("grid", [])
         words = puzzle_data.get("words", [])
-        theme = puzzle_data.get("theme", "General")
 
         rows = len(grid)
         cols = len(grid[0]) if rows > 0 else 12
@@ -255,7 +308,7 @@ class WordSearchPuzzle(BasePuzzle):
         cur_y = grid_y + grid_h + 16
         tb.draw_hline(padding, cur_y, inner_width, thickness=2)
         cur_y += 18
-        tb.draw_text(padding, cur_y, f"THEME: {theme.upper()}", scale=2)
+        tb.draw_text(padding, cur_y, "WORDS TO FIND:", scale=2)
         cur_y += 28
 
         col_w = inner_width // 2
@@ -268,22 +321,6 @@ class WordSearchPuzzle(BasePuzzle):
             tb.draw_text(ix + 24, iy + 2, word.upper(), scale=2)
 
         return tb.to_escpos()
-
-    def _can_place(self, grid, word, r, c, dr, dc, grid_size):
-        end_r = r + dr * (len(word) - 1)
-        end_c = c + dc * (len(word) - 1)
-        if not (0 <= end_r < grid_size and 0 <= end_c < grid_size):
-            return False
-        for i, ch in enumerate(word):
-            curr_r = r + dr * i
-            curr_c = c + dc * i
-            if grid[curr_r][curr_c] not in (" ", ch):
-                return False
-        return True
-
-    def _place_word(self, grid, word, r, c, dr, dc):
-        for i, ch in enumerate(word):
-            grid[r + dr * i][c + dc * i] = ch
 
     def verify_accuracy(
         self,
@@ -306,7 +343,6 @@ class WordSearchPuzzle(BasePuzzle):
             return False, f"WordSearch has too few placed words: {len(placed_words)}"
 
         placements = puzzle_data.get("placements") or {}
-        # If placements dict is provided, verify every word's coordinate and spelling
         for word in placed_words:
             if word in placements:
                 info = placements[word]

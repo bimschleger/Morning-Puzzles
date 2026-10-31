@@ -112,19 +112,10 @@ def test_difficulty_presentation_and_theme_rules():
     bundle = generate_daily_bundle(difficulty="medium")
     receipt_bytes = build_daily_receipt_bytes(bundle)
     receipt_text = receipt_bytes.decode("latin-1")
-
-    # 1. SEARCH must NEVER display a difficulty line
     lines = receipt_text.split("\n")
-    for i, line in enumerate(lines):
-        if "--- SEARCH ---" in line:
-            # Check the next 3 lines
-            surrounding = "\n".join(lines[i : i + 4])
-            assert "DIFFICULTY:" not in surrounding, (
-                f"SEARCH header must omit difficulty line! Found:\n{surrounding}"
-            )
 
-    # 2. Puzzles with difficulty must have DIFFICULTY: [LEVEL] directly below title
-    difficulty_puzzles = ["SUDOKU", "NONOGRAM", "STARS", "JUMBLE", "BINARY", "MINES", "TENTS", "BRIDGES", "KILLER", "CRYPTOGRAM", "TANGO", "LADDER", "WHEEL", "TOWERS", "INEQUALITY"]
+    # All puzzles with difficulty must have DIFFICULTY: [LEVEL] directly below title
+    difficulty_puzzles = ["SUDOKU", "SEARCH", "NONOGRAM", "STARS", "JUMBLE", "BINARY", "MINES", "TENTS", "BRIDGES", "KILLER", "CRYPTOGRAM", "TANGO", "LADDER", "WHEEL", "TOWERS", "INEQUALITY"]
     for title in difficulty_puzzles:
         header_str = f"--- {title} ---"
         assert header_str in receipt_text, f"Missing header {header_str}"
@@ -135,7 +126,7 @@ def test_difficulty_presentation_and_theme_rules():
                     f"{title}: Expected 'DIFFICULTY: [LEVEL]' immediately beneath title line. Got: '{diff_line}'"
                 )
 
-    print(f"  -> Passed! Difficulty rules verified: SEARCH omits difficulty, other {len(difficulty_puzzles)} puzzles correctly display DIFFICULTY: [LEVEL].\n")
+    print(f"  -> Passed! Difficulty rules verified: all {len(difficulty_puzzles)} puzzles correctly display DIFFICULTY: [LEVEL].\n")
 
 
 def test_description_length_and_canonical_formula():
@@ -299,13 +290,12 @@ def test_simulator_consistency():
     with open(sim_path, "r", encoding="utf-8") as f:
         sim_content = f.read()
 
-    # 1. Search header call must NOT pass difficulty in simulator
-    # Correct: addStandardPuzzleHeader(items, 'SEARCH', null, searchDesc) or without wsDiff
+    # 1. Search header call must pass difficulty in simulator
     search_call_match = re.search(r"addStandardPuzzleHeader\s*\(\s*items\s*,\s*['\"]SEARCH['\"]\s*,\s*([^,)]+)", sim_content)
     assert search_call_match, "Could not find addStandardPuzzleHeader call for SEARCH in simulator"
     diff_arg = search_call_match.group(1).strip()
-    assert diff_arg in ("null", "undefined", "None", "false"), (
-        f"Simulator must NOT pass difficulty to SEARCH header! Found '{diff_arg}'. SEARCH is theme-driven."
+    assert diff_arg not in ("null", "undefined", "None", "false"), (
+        f"Simulator must pass difficulty to SEARCH header! Found '{diff_arg}'."
     )
 
     # 2. Check PUZZLE_INSTRUCTIONS table lengths
